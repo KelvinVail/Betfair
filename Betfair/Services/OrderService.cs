@@ -28,18 +28,24 @@
         }
 
         /// <inheritdoc/>
-        public async Task<OrderBookResult> PlaceOrdersAsync(OrderBook orderBook)
+        public async Task PlaceOrdersAsync(OrderBook orderBook)
         {
             var placeResponse = await this.betfairApiClient.PlaceOrders(orderBook.PlaceOrdersRequest());
 
             if (placeResponse.Result.Status != ExecutionReportStatus.SUCCESS)
             {
                 var failed = placeResponse.Result.ErrorCode.ToString();
+                return;
             }
 
-            if (!orderBook.OrdersBelowMinimum)
+            if (!orderBook.HasOrdersBelowMinimum)
             {
-                return new OrderBookResult();
+                foreach (var order in orderBook.Orders)
+                {
+                    order.Placed = true;
+                }
+
+                return;
             }
 
             var cancelRequest = GetCancelOrdersRequest(placeResponse, orderBook);
@@ -58,7 +64,7 @@
 
             var result = GetPlaceInstructionReports(placeResponse, replaceResponse);
 
-            return new OrderBookResult();
+            return;
         }
 
         /// <summary>

@@ -16,8 +16,8 @@
         /// The order book.
         /// </param>
         /// <returns>
-        /// The <see cref="Task{OrderBookResult}"/>.
+        /// The <see cref="Task"/>.
         /// </returns>
-        Task<OrderBookResult> PlaceOrdersAsync(OrderBook orderBook);
+        Task PlaceOrdersAsync(OrderBook orderBook);
     }
 }

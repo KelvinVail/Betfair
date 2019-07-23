@@ -70,14 +70,9 @@
         public IReadOnlyList<Order> Orders => this.orders;
 
         /// <summary>
-        /// Gets or sets the execution result.
-        /// </summary>
-        public OrderBookResult ExecutionResult { get; protected set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether any orders are below the minimum stake.
         /// </summary>
-        internal bool OrdersBelowMinimum => this.Orders.Any(o => o.IsStakeBelowMinimum);
+        internal bool HasOrdersBelowMinimum => this.Orders.Any(o => o.IsStakeBelowMinimum);
 
         /// <summary>
         /// The add order.
@@ -136,12 +131,7 @@
                 return false;
             }
 
-            if (this.ExecutionResult != null)
-            {
-                return false;
-            }
-
-            return this.orders.Any();
+            return this.orders.Any(w => !w.Placed);
         }
 
         /// <summary>
@@ -154,7 +144,7 @@
         {
             if (this.CanExecute())
             {
-                this.ExecutionResult = await this.betfairClient.OrderService.PlaceOrdersAsync(this);
+                await this.betfairClient.OrderService.PlaceOrdersAsync(this);
             }
         }
 

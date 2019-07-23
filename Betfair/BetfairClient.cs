@@ -1,4 +1,8 @@
-﻿namespace Betfair
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Betfair.Tests")]
+
+namespace Betfair
 {
     using Betfair.Services;
 

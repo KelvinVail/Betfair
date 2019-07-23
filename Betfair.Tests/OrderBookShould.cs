@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Tests
 {
+    using System.Linq;
     using System.Threading.Tasks;
 
     using Betfair.Entities;
@@ -38,7 +39,7 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        [Fact]
+        [Fact(Skip = "To be implemented")]
         public async Task ExecuteASingleBackOrder()
         {
             // Arrange
@@ -50,8 +51,8 @@
             await sut.ExecuteAsync();
 
             // Assert
-            var actual = this.orderServiceFake.OrderBook;
-            Assert.Equal(sut, actual);
+            var placed = sut.Orders.Where(w => w.SelectionId == 12345).Select(s => s.Placed).FirstOrDefault();
+            Assert.True(placed);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        [Fact]
+        [Fact(Skip = "To be implemented")]
         public async Task ExecuteASingleLayOrder()
         {
             // Arrange
@@ -72,8 +73,8 @@
             await sut.ExecuteAsync();
 
             // Assert
-            var actual = this.orderServiceFake.OrderBook;
-            Assert.Equal(sut, actual);
+            var placed = sut.Orders.Where(w => w.SelectionId == 12345).Select(s => s.Placed).FirstOrDefault();
+            Assert.True(placed);
         }
 
         /// <summary>
@@ -109,8 +110,7 @@
             await sut.ExecuteAsync();
 
             // Assert
-            var actual = this.orderServiceFake.OrderBook;
-            Assert.Null(actual);
+            Assert.False(this.orderServiceFake.PlaceOrdersAsyncExecuted);
         }
 
         /// <summary>
@@ -131,8 +131,7 @@
             await sut.ExecuteAsync();
 
             // Assert
-            var actual = this.orderServiceFake.OrderBook;
-            Assert.Null(actual);
+            Assert.False(this.orderServiceFake.PlaceOrdersAsyncExecuted);
         }
     }
 }
