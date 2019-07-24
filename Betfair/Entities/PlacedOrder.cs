@@ -43,14 +43,14 @@
         public double SizeMatched { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether this placed order is executable.
-        /// </summary>
-        public bool IsExecutable { get; internal set; }
-
-        /// <summary>
         /// Gets a value indicating whether this placed order has been replaced or cancelled.
         /// </summary>
         public bool IsReplacedOrCancelled { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether execution failed.
+        /// </summary>
+        public bool ExecutionFailed { get; internal set; }
 
         /// <summary>
         /// Gets the date and time the place was confirmed confirmation.

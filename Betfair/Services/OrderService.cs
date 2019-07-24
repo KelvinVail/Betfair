@@ -6,6 +6,7 @@
 
     using Betfair.Entities;
     using Betfair.Services.BetfairApi;
+    using Betfair.Services.BetfairApi.Enums;
     using Betfair.Services.BetfairApi.Orders.PlaceOrders.Response;
 
     /// <inheritdoc/>
@@ -20,7 +21,7 @@
         /// Initializes a new instance of the <see cref="OrderService"/> class.
         /// </summary>
         /// <param name="betfairApiClient">
-        /// The betfair api client.
+        /// The betfair API client.
         /// </param>
         internal OrderService(IBetfairApiClient betfairApiClient)
         {
@@ -31,40 +32,48 @@
         public async Task PlaceOrdersAsync(OrderBook orderBook)
         {
             var placeResponse = await this.betfairApiClient.PlaceOrders(orderBook.PlaceOrdersRequest());
-
-            if (placeResponse.Result.Status != ExecutionReportStatus.SUCCESS)
-            {
-                var failed = placeResponse.Result.ErrorCode.ToString();
-                return;
-            }
-
             if (!orderBook.HasOrdersBelowMinimum)
             {
-                foreach (var order in orderBook.Orders)
-                {
-                    order.Placed = true;
-                }
-
+                UpdateOrderBook(orderBook, placeResponse.Result.InstructionReports.ToList());
                 return;
             }
 
             var cancelRequest = GetCancelOrdersRequest(placeResponse, orderBook);
-            var cancelResponse = await this.betfairApiClient.CancelOrders(cancelRequest);
-            if (cancelResponse.Result.Status != ExecutionReportStatus.SUCCESS)
-            {
-                var cancelFail = cancelResponse.Result.ErrorCode.ToString();
-            }
+            await this.betfairApiClient.CancelOrders(cancelRequest);
 
             var replaceRequest = GetReplaceOrdersRequest(placeResponse, orderBook);
             var replaceResponse = await this.betfairApiClient.ReplaceOrders(replaceRequest);
-            if (replaceResponse.Result.Status != ExecutionReportStatus.SUCCESS)
-            {
-                var replaceFail = replaceResponse.Result.ErrorCode.ToString();
-            }
 
             var result = GetPlaceInstructionReports(placeResponse, replaceResponse);
+            UpdateOrderBook(orderBook, result);
+        }
 
-            return;
+        /// <summary>
+        /// The update order book.
+        /// </summary>
+        /// <param name="orderBook">
+        /// The order book.
+        /// </param>
+        /// <param name="reports">
+        /// The reports.
+        /// </param>
+        private static void UpdateOrderBook(OrderBook orderBook, List<PlaceInstructionReport> reports)
+        {
+            foreach (var order in orderBook.Orders)
+            {
+                var report = reports.First(w => w.Instruction.SelectionId == order.SelectionId);
+                order.Placed = true;
+                order.IsFullyMatched = report.OrderStatus == OrderStatus.EXECUTION_COMPLETE;
+                order.PlacedOrder = new PlacedOrder()
+                                        {
+                                            BetId = report.BetId,
+                                            AveragePriceMatched = report.AveragePriceMatched ?? 0,
+                                            SizeMatched = report.SizeMatched ?? 0,
+                                            PriceRequested = order.Price,
+                                            SizeRequested = order.Size,
+                                            ExecutionFailed = report.Status != InstructionReportStatus.SUCCESS
+                                        };
+            }
         }
 
         /// <summary>

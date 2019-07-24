@@ -1,11 +1,24 @@
 ﻿namespace Betfair.Tests
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
+    using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Betfair.Entities;
+    using Betfair.Services;
+    using Betfair.Services.BetfairApi;
     using Betfair.Services.BetfairApi.Enums;
+    using Betfair.Services.BetfairApi.Orders.PlaceOrders.Response;
     using Betfair.Tests.Mocks;
+
+    using Moq;
+    using Moq.Protected;
+
+    using Newtonsoft.Json;
 
     using Xunit;
 
@@ -14,6 +27,11 @@
     /// </summary>
     public class OrderBookShould
     {
+        /// <summary>
+        /// The http message handler mock.
+        /// </summary>
+        private readonly Mock<HttpMessageHandler> httpMessageHandlerMock = new Mock<HttpMessageHandler>();
+
         /// <summary>
         /// The betfair client fake.
         /// </summary>
@@ -39,15 +57,30 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        [Fact(Skip = "To be implemented")]
+        [Fact]
         public async Task ExecuteASingleBackOrder()
         {
             // Arrange
-            var sut = new OrderBook(this.betfairClientFake, "fakeMarketId");
+            const string MarketId = "fakeMarketId";
             var order = new Order(12345, Side.BACK, 1.01, 2);
-            sut.AddOrder(order);
+            var orders = new List<Order> { order };
+            var response = this.FullMatchedOrderResponse(orders, MarketId);
+
+            this.httpMessageHandlerMock.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()).ReturnsAsync(
+                    new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = response });
+
+            var httpClient = new HttpClient(this.httpMessageHandlerMock.Object);
 
             // Act
+            var betfairApiClientMock = new BetfairApiClient("fakeKey", "fakeSession", httpClient);
+            var orderService = new OrderService(betfairApiClientMock);
+            var betfairClientMock = new BetfairClientFake(orderService);
+            var sut = new OrderBook(betfairClientMock, MarketId);
+            sut.AddOrder(order);
             await sut.ExecuteAsync();
 
             // Assert
@@ -132,6 +165,52 @@
 
             // Assert
             Assert.False(this.orderServiceFake.PlaceOrdersAsyncExecuted);
+        }
+
+        /// <summary>
+        /// The full matched order response.
+        /// </summary>
+        /// <param name="orders">
+        /// The orders.
+        /// </param>
+        /// <param name="marketId">
+        /// The market Id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="PlaceOrdersResponse"/>.
+        /// </returns>
+        private StringContent FullMatchedOrderResponse(List<Order> orders, string marketId)
+        {
+            var betCount = 0;
+            var instructionReports = orders.Where(w => !w.Placed)
+                .Select(
+                    order => new PlaceInstructionReport
+                                 {
+                                     AveragePriceMatched = order.Price,
+                                     BetId = (betCount++).ToString(),
+                                     ErrorCode = InstructionReportErrorCode.SUCCESS,
+                                     PlacedDate = DateTime.UtcNow,
+                                     Instruction = order.PlaceInstruction(),
+                                     OrderStatus = OrderStatus.EXECUTION_COMPLETE,
+                                     SizeMatched = order.Size,
+                                     Status = InstructionReportStatus.SUCCESS
+                                 })
+                .ToList();
+
+            var placeResponse = new PlaceOrdersResponse
+                       {
+                           Id = 1,
+                           Jsonrpc = "1",
+                           Result = new PlaceExecutionReport
+                                        {
+                                            CustomerRef = null,
+                                            ErrorCode = ExecutionReportErrorCode.SUCCESS,
+                                            MarketId = marketId,
+                                            Status = ExecutionReportStatus.SUCCESS,
+                                            InstructionReports = instructionReports
+                                        }
+                       };
+            return new StringContent(JsonConvert.SerializeObject(placeResponse));
         }
     }
 }

@@ -92,7 +92,7 @@
         /// <summary>
         /// Gets or sets a value indicating whether this order is fully matched.
         /// </summary>
-        public bool IsFullyMatched { get; protected set; }
+        public bool IsFullyMatched { get; internal set; }
 
         /// <summary>
         /// Is stake below the minimum?
