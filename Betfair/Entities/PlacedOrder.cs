@@ -18,6 +18,11 @@
         }
 
         /// <summary>
+        /// Gets the selection id.
+        /// </summary>
+        public long SelectionId { get; internal set; }
+
+        /// <summary>
         /// Gets the bet id.
         /// </summary>
         public string BetId { get; internal set; }
@@ -41,6 +46,11 @@
         /// Gets the size matched.
         /// </summary>
         public double SizeMatched { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this order is fully matched.
+        /// </summary>
+        public bool IsFullyMatched { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether this placed order has been replaced or cancelled.

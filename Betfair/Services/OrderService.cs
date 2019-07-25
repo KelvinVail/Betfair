@@ -29,13 +29,12 @@
         }
 
         /// <inheritdoc/>
-        public async Task PlaceOrdersAsync(OrderBook orderBook)
+        public async Task<List<PlacedOrder>> PlaceOrdersAsync(OrderBook orderBook)
         {
             var placeResponse = await this.betfairApiClient.PlaceOrders(orderBook.PlaceOrdersRequest());
             if (!orderBook.HasOrdersBelowMinimum)
             {
-                UpdateOrderBook(orderBook, placeResponse.Result.InstructionReports.ToList());
-                return;
+                return ToPlaceOrder(placeResponse.Result.InstructionReports.ToList());
             }
 
             var cancelRequest = GetCancelOrdersRequest(placeResponse, orderBook);
@@ -45,35 +44,31 @@
             var replaceResponse = await this.betfairApiClient.ReplaceOrders(replaceRequest);
 
             var result = GetPlaceInstructionReports(placeResponse, replaceResponse);
-            UpdateOrderBook(orderBook, result);
+            return ToPlaceOrder(result);
         }
 
         /// <summary>
         /// The update order book.
         /// </summary>
-        /// <param name="orderBook">
-        /// The order book.
-        /// </param>
         /// <param name="reports">
         /// The reports.
         /// </param>
-        private static void UpdateOrderBook(OrderBook orderBook, List<PlaceInstructionReport> reports)
+        /// <returns>
+        /// The <see cref="List{PlaceOrder}"/>.
+        /// </returns>
+        private static List<PlacedOrder> ToPlaceOrder(List<PlaceInstructionReport> reports)
         {
-            foreach (var order in orderBook.Orders)
+            return reports.Select(report => new PlacedOrder()
             {
-                var report = reports.First(w => w.Instruction.SelectionId == order.SelectionId);
-                order.Placed = true;
-                order.IsFullyMatched = report.OrderStatus == OrderStatus.EXECUTION_COMPLETE;
-                order.PlacedOrder = new PlacedOrder()
-                                        {
-                                            BetId = report.BetId,
-                                            AveragePriceMatched = report.AveragePriceMatched ?? 0,
-                                            SizeMatched = report.SizeMatched ?? 0,
-                                            PriceRequested = order.Price,
-                                            SizeRequested = order.Size,
-                                            ExecutionFailed = report.Status != InstructionReportStatus.SUCCESS
-                                        };
-            }
+                SelectionId = report.Instruction.SelectionId,
+                BetId = report.BetId,
+                AveragePriceMatched = report.AveragePriceMatched ?? 0,
+                SizeMatched = report.SizeMatched ?? 0,
+                PriceRequested = report.Instruction.LimitOrder.Price,
+                SizeRequested = report.Instruction.LimitOrder.Size,
+                ExecutionFailed = report.Status != InstructionReportStatus.SUCCESS,
+                IsFullyMatched = report.OrderStatus == OrderStatus.EXECUTION_COMPLETE
+            }).ToList();
         }
 
         /// <summary>

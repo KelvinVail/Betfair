@@ -144,7 +144,18 @@
         {
             if (this.CanExecute())
             {
-                await this.betfairClient.OrderService.PlaceOrdersAsync(this);
+                var reports = await this.betfairClient.OrderService.PlaceOrdersAsync(this);
+                foreach (var order in this.orders)
+                {
+                    var report = reports.FirstOrDefault(w => w.SelectionId == order.SelectionId);
+                    if (report == null)
+                    {
+                        continue;
+                    }
+
+                    order.PlacedOrder = report;
+                    order.Placed = !report.ExecutionFailed;
+                }
             }
         }
 
