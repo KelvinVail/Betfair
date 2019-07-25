@@ -28,27 +28,22 @@
     public class OrderBookShould
     {
         /// <summary>
-        /// The http message handler mock.
-        /// </summary>
-        private readonly Mock<HttpMessageHandler> httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-
-        /// <summary>
         /// The betfair client fake.
         /// </summary>
         private readonly BetfairClientFake betfairClientFake;
 
         /// <summary>
-        /// The order service fake.
+        /// The betfair API fake.
         /// </summary>
-        private readonly OrderServiceFake orderServiceFake = new OrderServiceFake();
+        private readonly BetfairApiFake betfairApiFake = new BetfairApiFake();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderBookShould"/> class.
         /// </summary>
         public OrderBookShould()
         {
-            this.orderServiceFake = new OrderServiceFake();
-            this.betfairClientFake = new BetfairClientFake(this.orderServiceFake);
+            var orderService = new OrderService(this.betfairApiFake);
+            this.betfairClientFake = new BetfairClientFake(orderService);
         }
 
         /// <summary>
@@ -63,24 +58,10 @@
             // Arrange
             const string MarketId = "fakeMarketId";
             var order = new Order(12345, Side.BACK, 1.01, 2);
-            var orders = new List<Order> { order };
-            var response = this.FullMatchedOrderResponse(orders, MarketId);
-
-            this.httpMessageHandlerMock.Protected()
-                .Setup<Task<HttpResponseMessage>>(
-                    "SendAsync",
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>()).ReturnsAsync(
-                    new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = response });
-
-            var httpClient = new HttpClient(this.httpMessageHandlerMock.Object);
+            var sut = new OrderBook(this.betfairClientFake, MarketId);
+            sut.AddOrder(order);
 
             // Act
-            var betfairApiClientMock = new BetfairApiClient("fakeKey", "fakeSession", httpClient);
-            var orderService = new OrderService(betfairApiClientMock);
-            var betfairClientMock = new BetfairClientFake(orderService);
-            var sut = new OrderBook(betfairClientMock, MarketId);
-            sut.AddOrder(order);
             await sut.ExecuteAsync();
 
             // Assert
@@ -94,7 +75,7 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        [Fact(Skip = "To be implemented")]
+        [Fact]
         public async Task ExecuteASingleLayOrder()
         {
             // Arrange
@@ -143,7 +124,8 @@
             await sut.ExecuteAsync();
 
             // Assert
-            Assert.False(this.orderServiceFake.PlaceOrdersAsyncExecuted);
+            var actual = this.betfairApiFake.PlaceOrderCount;
+            Assert.Equal(0, actual);
         }
 
         /// <summary>
@@ -164,53 +146,8 @@
             await sut.ExecuteAsync();
 
             // Assert
-            Assert.False(this.orderServiceFake.PlaceOrdersAsyncExecuted);
-        }
-
-        /// <summary>
-        /// The full matched order response.
-        /// </summary>
-        /// <param name="orders">
-        /// The orders.
-        /// </param>
-        /// <param name="marketId">
-        /// The market Id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="PlaceOrdersResponse"/>.
-        /// </returns>
-        private StringContent FullMatchedOrderResponse(List<Order> orders, string marketId)
-        {
-            var betCount = 0;
-            var instructionReports = orders.Where(w => !w.Placed)
-                .Select(
-                    order => new PlaceInstructionReport
-                                 {
-                                     AveragePriceMatched = order.Price,
-                                     BetId = (betCount++).ToString(),
-                                     ErrorCode = InstructionReportErrorCode.SUCCESS,
-                                     PlacedDate = DateTime.UtcNow,
-                                     Instruction = order.PlaceInstruction(),
-                                     OrderStatus = OrderStatus.EXECUTION_COMPLETE,
-                                     SizeMatched = order.Size,
-                                     Status = InstructionReportStatus.SUCCESS
-                                 })
-                .ToList();
-
-            var placeResponse = new PlaceOrdersResponse
-                       {
-                           Id = 1,
-                           Jsonrpc = "1",
-                           Result = new PlaceExecutionReport
-                                        {
-                                            CustomerRef = null,
-                                            ErrorCode = ExecutionReportErrorCode.SUCCESS,
-                                            MarketId = marketId,
-                                            Status = ExecutionReportStatus.SUCCESS,
-                                            InstructionReports = instructionReports
-                                        }
-                       };
-            return new StringContent(JsonConvert.SerializeObject(placeResponse));
+            var actual = this.betfairApiFake.PlaceOrderCount;
+            Assert.Equal(0, actual);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Tests.Mocks
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using Betfair.Entities;
@@ -24,10 +25,10 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        public async Task PlaceOrdersAsync(OrderBook orderBook)
+        public async Task<List<PlacedOrder>> PlaceOrdersAsync(OrderBook orderBook)
         {
             this.PlaceOrdersAsyncExecuted = true;
-            return;
+            return await Task.Run(() => new List<PlacedOrder>());
         }
     }
 }
