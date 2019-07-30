@@ -1,24 +1,12 @@
 ﻿namespace Betfair.Tests
 {
-    using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
-    using System.Net.Http;
-    using System.Threading;
     using System.Threading.Tasks;
 
     using Betfair.Entities;
     using Betfair.Services;
-    using Betfair.Services.BetfairApi;
     using Betfair.Services.BetfairApi.Enums;
-    using Betfair.Services.BetfairApi.Orders.PlaceOrders.Response;
     using Betfair.Tests.Mocks;
-
-    using Moq;
-    using Moq.Protected;
-
-    using Newtonsoft.Json;
 
     using Xunit;
 

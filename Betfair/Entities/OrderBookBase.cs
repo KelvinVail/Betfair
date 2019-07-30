@@ -64,6 +64,11 @@
         public IReadOnlyList<TOrderBase> Orders => this.orders;
 
         /// <summary>
+        /// Gets or sets a value indicating whether any orders are below the minimum stake.
+        /// </summary>
+        internal bool HasOrdersBelowMinimum => this.Orders.Any(o => o.IsStakeBelowMinimum);
+
+        /// <summary>
         /// The add order.
         /// </summary>
         /// <param name="selectionId">

@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
 
     using Betfair.Entities;
-    using Betfair.Services.BetfairApi.Orders.PlaceOrders.Response;
 
     /// <summary>
     /// The OrderService interface.
@@ -14,12 +13,19 @@
         /// <summary>
         /// Place orders.
         /// </summary>
+        /// <typeparam name="TOrderBook">
+        /// The OrderBook type.
+        /// </typeparam>
+        /// <typeparam name="TOrder">
+        /// The Order type.
+        /// </typeparam>
         /// <param name="orderBook">
         /// The order book.
         /// </param>
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        Task<List<PlacedOrder>> PlaceOrdersAsync(OrderBook orderBook);
+        Task<List<PlacedOrder>> PlaceOrdersAsync<TOrderBook, TOrder>(TOrderBook orderBook)
+            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase;
     }
 }

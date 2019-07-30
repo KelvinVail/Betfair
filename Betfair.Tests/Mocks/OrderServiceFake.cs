@@ -16,16 +16,9 @@
         /// </summary>
         public bool PlaceOrdersAsyncExecuted { get; internal set; }
 
-        /// <summary>
-        /// The place orders async.
-        /// </summary>
-        /// <param name="orderBook">
-        /// The order book.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        public async Task<List<PlacedOrder>> PlaceOrdersAsync(OrderBook orderBook)
+        /// <inheritdoc/>
+        public async Task<List<PlacedOrder>> PlaceOrdersAsync<TOrderBook, TOrder>(TOrderBook orderBook)
+            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
         {
             this.PlaceOrdersAsyncExecuted = true;
             return await Task.Run(() => new List<PlacedOrder>());

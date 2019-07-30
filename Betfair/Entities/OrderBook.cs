@@ -32,11 +32,6 @@
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether any orders are below the minimum stake.
-        /// </summary>
-        internal bool HasOrdersBelowMinimum => this.Orders.Any(o => o.IsStakeBelowMinimum);
-
-        /// <summary>
         /// This order book can execute.
         /// </summary>
         /// <returns>
@@ -62,7 +57,7 @@
         {
             if (this.CanExecute())
             {
-                var reports = await this.betfairClient.OrderService.PlaceOrdersAsync(this);
+                var reports = await this.betfairClient.OrderService.PlaceOrdersAsync<OrderBook, Order>(this);
                 foreach (var order in this.Orders)
                 {
                     var report = reports.FirstOrDefault(w => w.SelectionId == order.SelectionId);

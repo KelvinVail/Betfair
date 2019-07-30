@@ -18,7 +18,7 @@
         private readonly IBetfairApiClient betfairApiClient;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OrderService"/> class.
+        /// Initializes a new instance of the <see cref="OrderService"/> class. 
         /// </summary>
         /// <param name="betfairApiClient">
         /// The betfair API client.
@@ -29,7 +29,8 @@
         }
 
         /// <inheritdoc/>
-        public async Task<List<PlacedOrder>> PlaceOrdersAsync(OrderBook orderBook)
+        public async Task<List<PlacedOrder>> PlaceOrdersAsync<TOrderBook, TOrder>(TOrderBook orderBook)
+            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
         {
             var placeResponse = await this.betfairApiClient.PlaceOrders(orderBook.PlaceOrdersRequest());
             if (!orderBook.HasOrdersBelowMinimum)
@@ -37,10 +38,10 @@
                 return ToPlaceOrder(placeResponse.Result.InstructionReports.ToList());
             }
 
-            var cancelRequest = GetCancelOrdersRequest(placeResponse, orderBook);
+            var cancelRequest = GetCancelOrdersRequest<TOrderBook, TOrder>(placeResponse, orderBook);
             await this.betfairApiClient.CancelOrders(cancelRequest);
 
-            var replaceRequest = GetReplaceOrdersRequest(placeResponse, orderBook);
+            var replaceRequest = GetReplaceOrdersRequest<TOrderBook, TOrder>(placeResponse, orderBook);
             var replaceResponse = await this.betfairApiClient.ReplaceOrders(replaceRequest);
 
             var result = GetPlaceInstructionReports(placeResponse, replaceResponse);
@@ -48,7 +49,7 @@
         }
 
         /// <summary>
-        /// The update order book.
+        /// Convert to the return type.
         /// </summary>
         /// <param name="reports">
         /// The reports.
@@ -74,6 +75,12 @@
         /// <summary>
         /// The cancel orders request.
         /// </summary>
+        /// <typeparam name="TOrderBook">
+        /// The OrderBook type.
+        /// </typeparam>
+        /// <typeparam name="TOrder">
+        /// The Order type.
+        /// </typeparam>
         /// <param name="placeResponse">
         /// The place response.
         /// </param>
@@ -83,7 +90,8 @@
         /// <returns>
         /// The <see cref="CancelOrdersRequest"/>.
         /// </returns>
-        private static CancelOrdersRequest GetCancelOrdersRequest(PlaceOrdersResponse placeResponse, OrderBook orderBook)
+        private static CancelOrdersRequest GetCancelOrdersRequest<TOrderBook, TOrder>(PlaceOrdersResponse placeResponse, TOrderBook orderBook)
+            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
         {
             var belowOrders = orderBook.Orders.Where(w => w.IsStakeBelowMinimum).ToList();
 
@@ -113,6 +121,12 @@
         /// <summary>
         /// The get replace orders request.
         /// </summary>
+        /// <typeparam name="TOrderBook">
+        /// The OrderBook type.
+        /// </typeparam>
+        /// <typeparam name="TOrder">
+        /// The Order type.
+        /// </typeparam>
         /// <param name="placeResponse">
         /// The place response.
         /// </param>
@@ -122,9 +136,10 @@
         /// <returns>
         /// The <see cref="ReplaceOrdersRequest"/>.
         /// </returns>
-        private static ReplaceOrdersRequest GetReplaceOrdersRequest(
+        private static ReplaceOrdersRequest GetReplaceOrdersRequest<TOrderBook, TOrder>(
             PlaceOrdersResponse placeResponse,
-            OrderBook orderBook)
+            TOrderBook orderBook)
+            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
         {
             var belowOrders = orderBook.Orders.Where(w => w.IsStakeBelowMinimum).ToList();
 
