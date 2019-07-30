@@ -4,15 +4,13 @@
     using System.Diagnostics;
 
     using Betfair.Services.BetfairApi.Enums;
-    using Betfair.Services.BetfairApi.Orders.PlaceOrders.Request;
-    using Betfair.Utils;
 
     using Side = Services.BetfairApi.Enums.Side;
 
     /// <summary>
     /// A single order.
     /// </summary>
-    public class Order
+    public class Order : OrderBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Order"/> class.
@@ -34,40 +32,11 @@
             Side side,
             double price,
             double size)
+            : base(selectionId, side, price, size)
         {
-            this.SelectionId = selectionId;
-            this.Side = side;
-            this.Price = price;
-            this.Size = size;
-            this.PersistenceType = PersistenceType.LAPSE;
             this.OrderCreatedUtc = DateTime.UtcNow;
             this.OrderCreatedTick = Stopwatch.GetTimestamp();
         }
-
-        /// <summary>
-        /// Gets the selection id.
-        /// </summary>
-        public long SelectionId { get; }
-
-        /// <summary>
-        /// Gets the side.
-        /// </summary>
-        public Side Side { get; }
-
-        /// <summary>
-        /// Gets the price.
-        /// </summary>
-        public double Price { get; }
-
-        /// <summary>
-        /// Gets the size.
-        /// </summary>
-        public double Size { get; }
-
-        /// <summary>
-        /// Gets or sets the persistence type.
-        /// </summary>
-        public PersistenceType PersistenceType { get; protected set; }
 
         /// <summary>
         /// Gets a value indicating whether this order has been placed.
@@ -90,14 +59,9 @@
         public long OrderCreatedTick { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this order is fully matched.
+        /// Gets a value indicating whether this order is fully matched.
         /// </summary>
         public bool IsFullyMatched { get; internal set; }
-
-        /// <summary>
-        /// Is stake below the minimum?
-        /// </summary>
-        internal bool IsStakeBelowMinimum => StakeHelper.IsStakeBelowMinimum(this.Size, this.Price);
 
         /// <summary>
         /// Sets this order to persist on market suspension.
@@ -105,44 +69,6 @@
         public void Persist()
         {
             this.PersistenceType = PersistenceType.PERSIST;
-        }
-
-        /// <summary>
-        /// The place instruction.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="PlaceInstruction"/>.
-        /// </returns>
-        internal PlaceInstruction PlaceInstruction()
-        {
-            if (this.IsStakeBelowMinimum)
-            {
-                return new PlaceInstruction()
-                           {
-                               SelectionId = this.SelectionId,
-                               Side = this.Side,
-                               OrderType = OrderType.LIMIT,
-                               LimitOrder = new LimitOrder()
-                                                {
-                                                    PersistenceType = this.PersistenceType,
-                                                    Price = this.Side == Side.BACK ? 1000 : 1.01,
-                                                    Size = 2.0
-                                                }
-                           };
-            }
-
-            return new PlaceInstruction()
-                       {
-                           SelectionId = this.SelectionId,
-                           Side = this.Side,
-                           OrderType = OrderType.LIMIT,
-                           LimitOrder = new LimitOrder()
-                                            {
-                                                PersistenceType = this.PersistenceType,
-                                                Price = this.Price,
-                                                Size = this.Size
-                                            }
-                       };
         }
     }
 }

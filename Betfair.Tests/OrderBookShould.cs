@@ -92,10 +92,10 @@
         }
 
         /// <summary>
-        /// ... not except an order if the price is invalid.
+        /// ... not accept an order if the price is invalid.
         /// </summary>
         [Fact]
-        public void NotExceptAnOrderIfThePriceIsInvalid()
+        public void NotAcceptAnOrderIfThePriceIsInvalid()
         {
             // Arrange
             var sut = new OrderBook(this.betfairClientFake, "fakeMarketId");
