@@ -18,7 +18,7 @@
 
         /// <inheritdoc/>
         public async Task<List<PlacedOrder>> PlaceOrdersAsync<TOrderBook, TOrder>(TOrderBook orderBook)
-            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
+            where TOrderBook : MarketOrders<TOrder> where TOrder : Order
         {
             this.PlaceOrdersAsyncExecuted = true;
             return await Task.Run(() => new List<PlacedOrder>());

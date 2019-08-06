@@ -11,13 +11,13 @@
     using CSharpFunctionalExtensions;
 
     /// <summary>
-    /// The order book base.
+    /// Market Orders.
     /// </summary>
     /// <typeparam name="TOrderBase">
-    /// The OrderBase type.
+    /// The Order type.
     /// </typeparam>
-    public class OrderBookBase<TOrderBase>
-        where TOrderBase : OrderBase
+    public class MarketOrders<TOrderBase>
+        where TOrderBase : Order
     {
         /// <summary>
         /// The orders.
@@ -25,7 +25,7 @@
         private readonly List<TOrderBase> orders;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OrderBookBase{TOrderBase}"/> class. 
+        /// Initializes a new instance of the <see cref="MarketOrders{TOrderBase}"/> class. 
         /// </summary>
         /// <param name="marketId">
         /// The market id.
@@ -33,7 +33,7 @@
         /// <param name="customerStrategyRef">
         /// The customer strategy ref.
         /// </param>
-        public OrderBookBase(string marketId, string customerStrategyRef = null)
+        public MarketOrders(string marketId, string customerStrategyRef = null)
         {
             this.MarketId = marketId;
             this.CustomerStrategyRef = customerStrategyRef;
@@ -41,9 +41,9 @@
         }
 
         /// <summary>
-        /// The order book id.
+        /// A unique id for this set of orders.
         /// </summary>
-        public string OrderBookId => Guid.NewGuid().ToString();
+        public string Id => Guid.NewGuid().ToString();
 
         /// <summary>
         /// Gets the market id.
@@ -88,7 +88,7 @@
         /// </returns>
         public Result AddOrder(long selectionId, Side side, double price, double size)
         {
-            var order = new OrderBase(selectionId, side, price, Math.Round(size, 2)) as TOrderBase;
+            var order = new Order(selectionId, side, price, Math.Round(size, 2)) as TOrderBase;
             return this.AddOrder(order);
         }
 

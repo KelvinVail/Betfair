@@ -18,49 +18,49 @@
         }
 
         /// <summary>
-        /// Gets the selection id.
+        /// Gets or sets the selection id.
         /// </summary>
-        public long SelectionId { get; internal set; }
+        public long SelectionId { get; set; }
 
         /// <summary>
-        /// Gets the bet id.
+        /// Gets or sets the bet id.
         /// </summary>
-        public string BetId { get; internal set; }
+        public string BetId { get; set; }
 
         /// <summary>
-        /// Gets the price requested.
+        /// Gets or sets the price requested.
         /// </summary>
-        public double PriceRequested { get; internal set; }
+        public double PriceRequested { get; set; }
 
         /// <summary>
-        /// Gets the average price matched.
+        /// Gets or sets the average price matched.
         /// </summary>
-        public double AveragePriceMatched { get; internal set; }
+        public double AveragePriceMatched { get; set; }
 
         /// <summary>
-        /// Gets the size requested.
+        /// Gets or sets the size requested.
         /// </summary>
-        public double SizeRequested { get; internal set; }
+        public double SizeRequested { get; set; }
 
         /// <summary>
-        /// Gets the size matched.
+        /// Gets or sets the size matched.
         /// </summary>
-        public double SizeMatched { get; internal set; }
+        public double SizeMatched { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether this order is fully matched.
+        /// Gets or sets a value indicating whether this order is fully matched.
         /// </summary>
-        public bool IsFullyMatched { get; internal set; }
+        public bool IsFullyMatched { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether this placed order has been replaced or cancelled.
+        /// Gets or sets a value indicating whether this placed order has been replaced or cancelled.
         /// </summary>
-        public bool IsReplacedOrCancelled { get; internal set; }
+        public bool IsReplacedOrCancelled { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether execution failed.
+        /// Gets or sets a value indicating whether execution failed.
         /// </summary>
-        public bool ExecutionFailed { get; internal set; }
+        public bool ExecutionFailed { get; set; }
 
         /// <summary>
         /// Gets the date and time the place was confirmed confirmation.

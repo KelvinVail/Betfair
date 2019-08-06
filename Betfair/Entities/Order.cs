@@ -1,19 +1,18 @@
 ﻿namespace Betfair.Entities
 {
-    using System;
-    using System.Diagnostics;
-
     using Betfair.Services.BetfairApi.Enums;
+    using Betfair.Services.BetfairApi.Orders.PlaceOrders.Request;
+    using Betfair.Utils;
 
     using Side = Services.BetfairApi.Enums.Side;
 
     /// <summary>
-    /// A single order.
+    /// The order base.
     /// </summary>
-    public class Order : OrderBase
+    public class Order
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Order"/> class.
+        /// Initializes a new instance of the <see cref="Order"/> class. 
         /// </summary>
         /// <param name="selectionId">
         /// The selection id.
@@ -32,43 +31,80 @@
             Side side,
             double price,
             double size)
-            : base(selectionId, side, price, size)
         {
-            this.OrderCreatedUtc = DateTime.UtcNow;
-            this.OrderCreatedTick = Stopwatch.GetTimestamp();
+            this.SelectionId = selectionId;
+            this.Side = side;
+            this.Price = price;
+            this.Size = size;
+            this.PersistenceType = PersistenceType.LAPSE;
         }
 
         /// <summary>
-        /// Gets a value indicating whether this order has been placed.
+        /// Gets the selection id.
         /// </summary>
-        public bool Placed { get; internal set; }
+        public long SelectionId { get; }
 
         /// <summary>
-        /// Gets the order status.
+        /// Gets the side.
         /// </summary>
-        public PlacedOrder PlacedOrder { get; internal set; }
+        public Side Side { get; }
 
         /// <summary>
-        /// Gets the date and time the order was created.
+        /// Gets the price.
         /// </summary>
-        public DateTime OrderCreatedUtc { get; }
+        public double Price { get; }
 
         /// <summary>
-        /// Gets the system timer tick at order created.
+        /// Gets the size.
         /// </summary>
-        public long OrderCreatedTick { get; }
+        public double Size { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this order is fully matched.
+        /// Gets or sets the persistence type.
         /// </summary>
-        public bool IsFullyMatched { get; internal set; }
+        public PersistenceType PersistenceType { get; protected set; }
 
         /// <summary>
-        /// Sets this order to persist on market suspension.
+        /// Is stake below the minimum?
         /// </summary>
-        public void Persist()
+        internal bool IsStakeBelowMinimum => StakeHelper.IsStakeBelowMinimum(this.Size, this.Price);
+
+        /// <summary>
+        /// The place instruction.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="PlaceInstruction"/>.
+        /// </returns>
+        internal PlaceInstruction PlaceInstruction()
         {
-            this.PersistenceType = PersistenceType.PERSIST;
+            if (this.IsStakeBelowMinimum)
+            {
+                return new PlaceInstruction()
+                           {
+                               SelectionId = this.SelectionId,
+                               Side = this.Side,
+                               OrderType = OrderType.LIMIT,
+                               LimitOrder = new LimitOrder()
+                                                {
+                                                    PersistenceType = this.PersistenceType,
+                                                    Price = this.Side == Side.BACK ? 1000 : 1.01,
+                                                    Size = 2.0
+                                                }
+                           };
+            }
+
+            return new PlaceInstruction()
+                       {
+                           SelectionId = this.SelectionId,
+                           Side = this.Side,
+                           OrderType = OrderType.LIMIT,
+                           LimitOrder = new LimitOrder()
+                                            {
+                                                PersistenceType = this.PersistenceType,
+                                                Price = this.Price,
+                                                Size = this.Size
+                                            }
+                       };
         }
     }
 }

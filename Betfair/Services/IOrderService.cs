@@ -26,6 +26,6 @@
         /// The <see cref="Task"/>.
         /// </returns>
         Task<List<PlacedOrder>> PlaceOrdersAsync<TOrderBook, TOrder>(TOrderBook orderBook)
-            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase;
+            where TOrderBook : MarketOrders<TOrder> where TOrder : Order;
     }
 }

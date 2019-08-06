@@ -30,7 +30,7 @@
 
         /// <inheritdoc/>
         public async Task<List<PlacedOrder>> PlaceOrdersAsync<TOrderBook, TOrder>(TOrderBook orderBook)
-            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
+            where TOrderBook : MarketOrders<TOrder> where TOrder : Order
         {
             var placeResponse = await this.betfairApiClient.PlaceOrders(orderBook.PlaceOrdersRequest());
             if (!orderBook.HasOrdersBelowMinimum)
@@ -91,7 +91,7 @@
         /// The <see cref="CancelOrdersRequest"/>.
         /// </returns>
         private static CancelOrdersRequest GetCancelOrdersRequest<TOrderBook, TOrder>(PlaceOrdersResponse placeResponse, TOrderBook orderBook)
-            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
+            where TOrderBook : MarketOrders<TOrder> where TOrder : Order
         {
             var belowOrders = orderBook.Orders.Where(w => w.IsStakeBelowMinimum).ToList();
 
@@ -139,7 +139,7 @@
         private static ReplaceOrdersRequest GetReplaceOrdersRequest<TOrderBook, TOrder>(
             PlaceOrdersResponse placeResponse,
             TOrderBook orderBook)
-            where TOrderBook : OrderBookBase<TOrder> where TOrder : OrderBase
+            where TOrderBook : MarketOrders<TOrder> where TOrder : Order
         {
             var belowOrders = orderBook.Orders.Where(w => w.IsStakeBelowMinimum).ToList();
 

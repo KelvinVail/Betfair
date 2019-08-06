@@ -1,12 +1,14 @@
-﻿namespace Betfair.Entities
+﻿namespace Betfair.Examples
 {
     using System.Linq;
     using System.Threading.Tasks;
 
+    using Betfair.Entities;
+
     /// <summary>
-    /// An order book.
+    /// An example of Bookmaking.
     /// </summary>
-    public class OrderBook : OrderBookBase<Order>
+    public class BookmakingExample : MarketOrders<OrderExtension>
     {
         /// <summary>
         /// The betfair betfairClient.
@@ -14,7 +16,7 @@
         private readonly IBetfairClient betfairClient;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OrderBook"/> class. 
+        /// Initializes a new instance of the <see cref="BookmakingExample"/> class. 
         /// </summary>
         /// <param name="betfairClient">
         /// The betfair BetfairClient.
@@ -25,7 +27,7 @@
         /// <param name="customerStrategyRef">
         /// The customer strategy ref.
         /// </param>
-        public OrderBook(IBetfairClient betfairClient, string marketId, string customerStrategyRef = null)
+        public BookmakingExample(IBetfairClient betfairClient, string marketId, string customerStrategyRef = null)
             : base(marketId, customerStrategyRef)
         {
             this.betfairClient = betfairClient;
@@ -57,7 +59,7 @@
         {
             if (this.CanExecute())
             {
-                var reports = await this.betfairClient.OrderService.PlaceOrdersAsync<OrderBook, Order>(this);
+                var reports = await this.betfairClient.OrderService.PlaceOrdersAsync<BookmakingExample, OrderExtension>(this);
                 foreach (var order in this.Orders)
                 {
                     var report = reports.FirstOrDefault(w => w.SelectionId == order.SelectionId);

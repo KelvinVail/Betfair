@@ -1,19 +1,19 @@
-﻿namespace Betfair.Tests
+﻿namespace Example.Tests
 {
     using System.Linq;
     using System.Threading.Tasks;
 
-    using Betfair.Entities;
-    using Betfair.Services;
+    using Betfair.Examples;
     using Betfair.Services.BetfairApi.Enums;
-    using Betfair.Tests.Mocks;
+
+    using Example.Tests.Mocks;
 
     using Xunit;
 
     /// <summary>
-    /// The order book should...
+    /// The bookmaking example should...
     /// </summary>
-    public class OrderBookShould
+    public class BookmakingExampleShould
     {
         /// <summary>
         /// The betfair client fake.
@@ -21,17 +21,16 @@
         private readonly BetfairClientFake betfairClientFake;
 
         /// <summary>
-        /// The betfair API fake.
+        /// The order service fake.
         /// </summary>
-        private readonly BetfairApiFake betfairApiFake = new BetfairApiFake();
+        private readonly OrderServiceFake orderServiceFake = new OrderServiceFake();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OrderBookShould"/> class.
+        /// Initializes a new instance of the <see cref="BookmakingExampleShould"/> class.
         /// </summary>
-        public OrderBookShould()
+        public BookmakingExampleShould()
         {
-            var orderService = new OrderService(this.betfairApiFake);
-            this.betfairClientFake = new BetfairClientFake(orderService);
+            this.betfairClientFake = new BetfairClientFake(this.orderServiceFake);
         }
 
         /// <summary>
@@ -45,8 +44,8 @@
         {
             // Arrange
             const string MarketId = "fakeMarketId";
-            var order = new Order(12345, Side.BACK, 1.01, 2);
-            var sut = new OrderBook(this.betfairClientFake, MarketId);
+            var order = new OrderExtension(12345, Side.BACK, 1.01, 2);
+            var sut = new BookmakingExample(this.betfairClientFake, MarketId);
             sut.AddOrder(order);
 
             // Act
@@ -67,8 +66,8 @@
         public async Task ExecuteASingleLayOrder()
         {
             // Arrange
-            var sut = new OrderBook(this.betfairClientFake, "fakeMarketId");
-            var order = new Order(12345, Side.LAY, 1.01, 2);
+            var sut = new BookmakingExample(this.betfairClientFake, "fakeMarketId");
+            var order = new OrderExtension(12345, Side.LAY, 1.01, 2);
             sut.AddOrder(order);
 
             // Act
@@ -86,8 +85,8 @@
         public void NotAcceptAnOrderIfThePriceIsInvalid()
         {
             // Arrange
-            var sut = new OrderBook(this.betfairClientFake, "fakeMarketId");
-            var order = new Order(12345, Side.LAY, 1001, 2);
+            var sut = new BookmakingExample(this.betfairClientFake, "fakeMarketId");
+            var order = new OrderExtension(12345, Side.LAY, 1001, 2);
 
             // Act
             var actual = sut.AddOrder(order);
@@ -106,14 +105,13 @@
         public async Task NotExecuteIfThereAreNoOrders()
         {
             // Arrange
-            var sut = new OrderBook(this.betfairClientFake, "fakeMarketId");
+            var sut = new BookmakingExample(this.betfairClientFake, "fakeMarketId");
 
             // Act
             await sut.ExecuteAsync();
 
             // Assert
-            var actual = this.betfairApiFake.PlaceOrderCount;
-            Assert.Equal(0, actual);
+            Assert.False(sut.CanExecute());
         }
 
         /// <summary>
@@ -126,16 +124,15 @@
         public async Task NotExecuteIfCustomerRefIsInvalid()
         {
             // Arrange
-            var sut = new OrderBook(this.betfairClientFake, "fakeMarketId", "0123456789012345");
-            var order = new Order(12345, Side.LAY, 1.01, 2);
+            var sut = new BookmakingExample(this.betfairClientFake, "fakeMarketId", "0123456789012345");
+            var order = new OrderExtension(12345, Side.LAY, 1.01, 2);
             sut.AddOrder(order);
 
             // Act
             await sut.ExecuteAsync();
 
             // Assert
-            var actual = this.betfairApiFake.PlaceOrderCount;
-            Assert.Equal(0, actual);
+            Assert.False(sut.CanExecute());
         }
     }
 }

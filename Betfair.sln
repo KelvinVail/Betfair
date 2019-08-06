@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair", "Betfair\Betfair.csproj", "{85386913-19B6-4228-9279-79F3E42B1BA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair", "Betfair\Betfair.csproj", "{85386913-19B6-4228-9279-79F3E42B1BA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Tests", "Betfair.Tests\Betfair.Tests.csproj", "{6C742749-F4C2-4643-AFF5-1DCD1AEA7EFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Tests", "Betfair.Tests\Betfair.Tests.csproj", "{6C742749-F4C2-4643-AFF5-1DCD1AEA7EFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Examples", "Betfair.Examples\Betfair.Examples.csproj", "{B7487B4D-73A2-43A1-A539-1D53FB719B51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.Tests", "Example.Tests\Example.Tests.csproj", "{018B31BD-4EEC-415D-A095-1662BDB9C525}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{6C742749-F4C2-4643-AFF5-1DCD1AEA7EFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C742749-F4C2-4643-AFF5-1DCD1AEA7EFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C742749-F4C2-4643-AFF5-1DCD1AEA7EFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7487B4D-73A2-43A1-A539-1D53FB719B51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7487B4D-73A2-43A1-A539-1D53FB719B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7487B4D-73A2-43A1-A539-1D53FB719B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7487B4D-73A2-43A1-A539-1D53FB719B51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{018B31BD-4EEC-415D-A095-1662BDB9C525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{018B31BD-4EEC-415D-A095-1662BDB9C525}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{018B31BD-4EEC-415D-A095-1662BDB9C525}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{018B31BD-4EEC-415D-A095-1662BDB9C525}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
