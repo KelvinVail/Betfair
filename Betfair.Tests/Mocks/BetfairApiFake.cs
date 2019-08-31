@@ -1,19 +1,14 @@
 ﻿namespace Betfair.Tests.Mocks
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Net.Http;
     using System.Threading.Tasks;
 
-    using Betfair.Entities;
     using Betfair.Services;
     using Betfair.Services.BetfairApi;
     using Betfair.Services.BetfairApi.Enums;
     using Betfair.Services.BetfairApi.Orders.PlaceOrders.Request;
     using Betfair.Services.BetfairApi.Orders.PlaceOrders.Response;
-
-    using Newtonsoft.Json;
 
     /// <summary>
     /// The betfair API fake.
