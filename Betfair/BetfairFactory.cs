@@ -12,8 +12,8 @@
 
         private readonly string password;
 
-        private readonly Uri identityUri = 
-            new Uri("https://identitysso-cert.betfair.com/");
+        private readonly Uri identityApiUri = 
+            new Uri("https://identitysso.betfair.com/");
 
         private HttpClient identityHttpClient;
 
@@ -25,8 +25,6 @@
             this.identityHttpClient = new HttpClient();
             this.SetIdentityHeaders();
         }
-
-        public Uri IdentityBaseAddress => this.identityHttpClient.BaseAddress;
 
         public int IdentityTimeout
         {
@@ -53,7 +51,7 @@
 
         private void SetIdentityHeaders()
         {
-            this.identityHttpClient.BaseAddress = this.identityUri;
+            this.identityHttpClient.BaseAddress = this.identityApiUri;
             this.identityHttpClient.Timeout = TimeSpan.FromSeconds(30);
             this.identityHttpClient.DefaultRequestHeaders.Accept
                 .Add(new MediaTypeWithQualityHeaderValue("application/json"));
