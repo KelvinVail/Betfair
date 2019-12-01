@@ -2,7 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using System.Net.Http;
+    using System.Security.Authentication;
+    using System.Threading.Tasks;
 
     using Betfair.Tests.TestDoubles;
 
@@ -16,6 +19,7 @@
 
         public BetfairClientTests()
         {
+            this.httpMessageHandler.WithReturnContent(new FakeApiLoginResponse());
             this.client = new HttpClient(this.httpMessageHandler.Build());
         }
 
@@ -27,19 +31,19 @@
         }
 
         [Fact]
-        public void LoginCallsCorrectUri()
+        public async Task LoginCallsApiUriIfNoCertProvided()
         {
-            this.GetBetfairClient().Login();
-            this.AssertIdentityUriIsCalled();
+            await this.GetBetfairClient().ApiLoginAsync();
+            this.AssertIdentityApiUriIsCalled();
         }
 
         [Theory]
         [InlineData("AppKey")]
         [InlineData("ABC")]
         [InlineData("12345")]
-        public void AppKeySetInLoginRequestHeader(string appKey)
+        public async Task AppKeySetInLoginRequestHeader(string appKey)
         {
-            this.LoginWithAppKey(appKey);
+            await this.LoginWithAppKey(appKey);
             this.AssertAppKeyInInHeader(appKey);
         }
 
@@ -47,9 +51,9 @@
         [InlineData("Username")]
         [InlineData("Kelvin")]
         [InlineData("Bob")]
-        public void UsernameSetInLoginContent(string username)
+        public async Task UsernameSetInLoginContent(string username)
         {
-            this.LoginWithUsername(username);
+            await this.LoginWithUsername(username);
             this.AssertUsernameInContent(username);
         }
 
@@ -57,10 +61,47 @@
         [InlineData("Password")]
         [InlineData("123456")]
         [InlineData("qwerty")]
-        public void PasswordSetInLoginContent(string password)
+        public async Task PasswordSetInLoginContent(string password)
         {
-            this.LoginWithPassword(password);
+            await this.LoginWithPassword(password);
             this.AssertPasswordInContent(password);
+        }
+
+        [Theory]
+        [InlineData("FAIL", "INVALID_USERNAME_OR_PASSWORD")]
+        [InlineData("FAIL", "INPUT_VALIDATION_ERROR")]
+        [InlineData("LIMITED_ACCESS", "PENDING_AUTH")]
+        public async Task ThrowsIfApiLoginFails(string status, string error)
+        {
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(() => this.LoginWithResponse(status, error));
+            Assert.Equal($"{status}: {error}", exception.Message);
+        }
+
+        [Theory]
+        [InlineData(HttpStatusCode.BadRequest)]
+        [InlineData(HttpStatusCode.RequestTimeout)]
+        [InlineData(HttpStatusCode.NotFound)]
+        public async Task ThrowIfApiLoginNotSuccess(HttpStatusCode statusCode)
+        {
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(() => this.LoginWithResponseCode(statusCode));
+            Assert.Equal($"{statusCode}", exception.Message);
+        }
+
+        [Theory]
+        [InlineData("SessionToken")]
+        [InlineData("ABCDEF")]
+        [InlineData("HIGKLM")]
+        public async Task SessionTokenIsSet(string sessionToken)
+        {
+            var betfair = this.GetBetfairClientSessionResponse(sessionToken);
+            await betfair.ApiLoginAsync();
+            Assert.Equal(sessionToken, betfair.SessionToken);
+        }
+
+        private static string ContentString(string username, string password)
+        {
+            var dict = new Dictionary<string, string> { { "username", username }, { "password", password } };
+            return new FormUrlEncodedContent(dict).ReadAsStringAsync().Result;
         }
 
         private BetfairClient GetBetfairClient()
@@ -70,28 +111,57 @@
                 .Build();
         }
 
-        private void LoginWithAppKey(string appKey)
+        private async Task LoginWithAppKey(string appKey)
         {
-            new BetfairFactory(appKey, "Username", "Password")
+            await new BetfairFactory(appKey, "Username", "Password")
                 .WithIdentityHttpClient(this.client)
                 .Build()
-                .Login();
+                .ApiLoginAsync();
         }
 
-        private void LoginWithUsername(string username)
+        private async Task LoginWithUsername(string username)
         {
-            new BetfairFactory("AppKey", username, "Password")
+            await new BetfairFactory("AppKey", username, "Password")
                 .WithIdentityHttpClient(this.client)
                 .Build()
-                .Login();
+                .ApiLoginAsync();
         }
 
-        private void LoginWithPassword(string password)
+        private async Task LoginWithPassword(string password)
         {
-            new BetfairFactory("AppKey", "Username", password)
+            await new BetfairFactory("AppKey", "Username", password)
                 .WithIdentityHttpClient(this.client)
                 .Build()
-                .Login();
+                .ApiLoginAsync();
+        }
+
+        private async Task LoginWithResponse(string status, string error)
+        {
+            this.httpMessageHandler.WithReturnContent(
+                new FakeApiLoginResponse().WithStatus(status).WithError(error));
+            var httpClient = new HttpClient(this.httpMessageHandler.Build());
+            await new BetfairFactory("AppKey", "Username", "Password")
+                .WithIdentityHttpClient(httpClient)
+                .Build()
+                .ApiLoginAsync();
+        }
+
+        private async Task LoginWithResponseCode(HttpStatusCode statusCode)
+        {
+            this.httpMessageHandler.WithStatusCode(statusCode);
+            var httpClient = new HttpClient(this.httpMessageHandler.Build());
+            await new BetfairFactory("AppKey", "Username", "Password")
+                .WithIdentityHttpClient(httpClient)
+                .Build()
+                .ApiLoginAsync();
+        }
+
+        private BetfairClient GetBetfairClientSessionResponse(string sessionToken)
+        {
+            this.httpMessageHandler.WithReturnContent(
+                new FakeApiLoginResponse().WithSessionToken(sessionToken));
+            var httpClient = new HttpClient(this.httpMessageHandler.Build());
+            return new BetfairFactory("AppKey", "Username", "Password").WithIdentityHttpClient(httpClient).Build();
         }
 
         private void AssertCallIsNotMade()
@@ -99,9 +169,9 @@
             this.httpMessageHandler.VerifyTimesCalled(0);
         }
 
-        private void AssertIdentityUriIsCalled()
+        private void AssertIdentityApiUriIsCalled()
         {
-            this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
+            this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
         private void AssertAppKeyInInHeader(string appKey)
@@ -118,17 +188,5 @@
         {
             this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
         }
-                
-        private static string ContentString(string username, string password)
-        {
-            var postData = new List<KeyValuePair<string, string>>
-                               {
-                                   new KeyValuePair<string, string>("username", username),
-                                   new KeyValuePair<string, string>("password", password)
-                               };
-
-            return new FormUrlEncodedContent(postData).ReadAsStringAsync().Result;
-        }
-
     }
 }

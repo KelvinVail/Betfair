@@ -94,16 +94,6 @@
                 ItExpr.IsAny<CancellationToken>());
         }
 
-        public void VerifyHeader(string header)
-        {
-            this.messageHandler.Protected().Verify(
-                "SendAsync",
-                Times.AtLeastOnce(),
-                ItExpr.Is<HttpRequestMessage>(req =>
-                        req.Headers.Contains(header)),
-                ItExpr.IsAny<CancellationToken>());
-        }
-
         public void VerifyHeaderValues(string header, string value)
         {
             IEnumerable<string> values = new List<string>();

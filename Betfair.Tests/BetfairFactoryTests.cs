@@ -28,14 +28,6 @@ namespace Betfair.Tests
         }
 
         [Fact]
-        public void IdentityUriIsCorrect()
-        {
-            Assert.Equal(
-                new Uri("https://identitysso-cert.betfair.com/"), 
-                this.factory.IdentityBaseAddress);
-        }
-
-        [Fact]
         public void AcceptJsonMediaType()
         {
             Assert.Equal("application/json", this.factory.IdentityAcceptMediaType);
@@ -43,6 +35,7 @@ namespace Betfair.Tests
 
         private void AssertTimeoutIs(int timeoutSeconds)
         {
+            if (timeoutSeconds <= 0) throw new ArgumentOutOfRangeException(nameof(timeoutSeconds));
             Assert.Equal(
                 timeoutSeconds, 
                 this.factory.IdentityTimeout);
