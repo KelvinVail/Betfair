@@ -14,7 +14,7 @@
 
     using Xunit;
 
-    public class MockHttpMessageHandler
+    public class MockHttpMessageHandler : IDisposable
     {
         private Mock<HttpMessageHandler> messageHandler;
 
@@ -26,7 +26,7 @@
 
         public MockHttpMessageHandler()
         {
-            this.returnContent = new StringContent("dummy returnContent");
+            this.returnContent = new StringContent("StringContent");
             this.httpStatusCode = HttpStatusCode.OK;
         }
 
@@ -104,6 +104,20 @@
                         req.Headers.TryGetValues(header, out values)),
                 ItExpr.IsAny<CancellationToken>());
             Assert.Contains(value, values);
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.returnContent.Dispose();
+            }
         }
 
         private HttpMessageHandler BuildHandler()

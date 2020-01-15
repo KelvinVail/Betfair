@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair", "Betfair\Betfair.csproj", "{85386913-19B6-4228-9279-79F3E42B1BA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Tests", "Betfair.Tests\Betfair.Tests.csproj", "{08847330-49D5-4DFB-876D-1B45EAF6909D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Tests", "Betfair.Tests\Betfair.Tests.csproj", "{08847330-49D5-4DFB-876D-1B45EAF6909D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5519679B-E931-4F67-AAC8-97EEC7FB5F08}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
