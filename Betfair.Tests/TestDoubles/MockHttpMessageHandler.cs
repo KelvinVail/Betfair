@@ -125,12 +125,12 @@
             this.messageHandler = new Mock<HttpMessageHandler>();
 
             this.messageHandler
-                .Protected() 
-                .Setup<Task<HttpResponseMessage>>( 
-                    "SendAsync", 
-                    ItExpr.IsAny<HttpRequestMessage>(), 
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync( 
+                .ReturnsAsync(
                     new HttpResponseMessage { StatusCode = this.httpStatusCode, Content = this.returnContent })
                 .Verifiable();
 

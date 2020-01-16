@@ -10,20 +10,21 @@
     using Betfair.Tests.TestDoubles;
     using Xunit;
 
-    public class SessionTests : Session
+    public class SessionTests : IDisposable
     {
         private readonly MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
 
         private readonly HttpClient httpClient;
 
-        private int timesDisposedCalled;
+        private readonly Session session = new Session("AppKey", "Username", "Password");
+
+        private bool disposedValue = false;
 
         public SessionTests()
-            : base("AppKey", "Username", "Password")
         {
             this.httpMessageHandler.WithReturnContent(new FakeApiLoginResponse());
             this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.WithHttpClient(this.httpClient);
+            this.session.WithHttpClient(this.httpClient);
         }
 
         [Fact]
@@ -72,21 +73,21 @@
         [Fact]
         public async Task OnLoginHttpClientIsCalled()
         {
-            await this.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyTimesCalled(1);
         }
 
         [Fact]
         public async Task OnLoginHttpPostMethodIsUsed()
         {
-            await this.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
         [Fact]
         public async Task OnLoginIdentityUriIsCalled()
         {
-            await this.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
@@ -133,25 +134,10 @@
         }
 
         [Fact]
-        public void OnDisposeDisposeIsCalled()
-        {
-            this.Dispose();
-            Assert.Equal(1, this.timesDisposedCalled);
-        }
-
-        [Fact]
         public async Task OnDisposeHttpClientIsDisposed()
         {
-            this.Dispose();
-            await Assert.ThrowsAsync<ObjectDisposedException>(this.LoginAsync);
-        }
-
-        [Fact]
-        public async Task OnDisposeFalseHttpClientIsNotDisposed()
-        {
-            this.Dispose(false);
-            await this.LoginAsync();
-            this.httpMessageHandler.VerifyTimesCalled(1);
+            this.session.Dispose();
+            await Assert.ThrowsAsync<ObjectDisposedException>(this.session.LoginAsync);
         }
 
         [Theory]
@@ -163,8 +149,8 @@
             var responseHandler = this.SetExpectedHttpResponse(status, error).Build();
             using (var client = new HttpClient(responseHandler))
             {
-                this.WithHttpClient(client);
-                var exception = await Assert.ThrowsAsync<AuthenticationException>(this.LoginAsync);
+                this.session.WithHttpClient(client);
+                var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
                 Assert.Equal($"{status}: {error}", exception.Message);
             }
         }
@@ -178,8 +164,8 @@
             this.httpMessageHandler.WithStatusCode(statusCode);
             using (var client = new HttpClient(this.httpMessageHandler.Build()))
             {
-                this.WithHttpClient(client);
-                var exception = await Assert.ThrowsAsync<AuthenticationException>(this.LoginAsync);
+                this.session.WithHttpClient(client);
+                var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
                 Assert.Equal($"{statusCode}", exception.Message);
             }
         }
@@ -194,16 +180,30 @@
                 new FakeApiLoginResponse().WithSessionToken(sessionToken));
             using (var client = new HttpClient(this.httpMessageHandler.Build()))
             {
-                this.WithHttpClient(client);
-                await this.LoginAsync();
-                Assert.Equal(sessionToken, this.SessionToken);
+                this.session.WithHttpClient(client);
+                await this.session.LoginAsync();
+                Assert.Equal(sessionToken, this.session.SessionToken);
             }
         }
 
-        protected new virtual void Dispose()
+        public void Dispose()
         {
-            this.timesDisposedCalled++;
-            base.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.disposedValue) return;
+            if (disposing)
+            {
+                this.httpClient.Dispose();
+                this.httpMessageHandler.Dispose();
+            }
+
+            this.session.Dispose();
+
+            this.disposedValue = true;
         }
 
         private static string ContentString(string username, string password)

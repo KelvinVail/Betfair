@@ -8,7 +8,7 @@
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public class Session : IDisposable
+    public sealed class Session : IDisposable
     {
         private readonly string appKey;
 
@@ -49,7 +49,7 @@
             using (var response = await this.client.SendAsync(this.apiRequest))
             {
                 if (!response.IsSuccessStatusCode) throw new AuthenticationException($"{response.StatusCode}");
-                var session = JsonConvert.DeserializeObject<LoginResponseDto>(await response.Content.ReadAsStringAsync());
+                var session = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync());
                 if (session.Status != "SUCCESS") throw new AuthenticationException($"{session.Status}: {session.Error}");
                 this.SessionToken = session.Token;
             }
@@ -57,16 +57,8 @@
 
         public void Dispose()
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposing) return;
-
-            this.client.Dispose();
             this.apiRequest.Dispose();
+            ((IDisposable)this.client).Dispose();
         }
 
         private void ConfigureHttpClient()
@@ -77,7 +69,7 @@
                 .Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        private class LoginResponseDto
+        private sealed class LoginResponse
         {
             [JsonProperty]
             internal string Token { get; set; }
