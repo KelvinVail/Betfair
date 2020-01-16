@@ -1,56 +1,58 @@
-﻿using System.Collections.Generic;
-
-namespace Betfair.Tests
+﻿namespace Betfair.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Security.Authentication;
     using System.Threading.Tasks;
     using Betfair.Tests.TestDoubles;
     using Xunit;
 
-    public class SessionTests : IDisposable
+    public class SessionTests : Session
     {
         private readonly MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
 
         private readonly HttpClient httpClient;
 
-        private Session session = new Session("AppKey", "Username", "Password");
+        private int timesDisposedCalled;
 
         public SessionTests()
+            : base("AppKey", "Username", "Password")
         {
             this.httpMessageHandler.WithReturnContent(new FakeApiLoginResponse());
             this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
+            this.WithHttpClient(this.httpClient);
         }
 
         [Fact]
         public void WhenInitializedThrowIfAppKeyIsNull()
         {
-            var exception = Assert.Throws<NullReferenceException>(() => new Session(null, "Username", "Password"));
-            Assert.Equal("appKey not set.", exception.Message);
+            var exception = Assert.Throws<ArgumentNullException>(() => new Session(null, "Username", "Password"));
+            Assert.Equal("appKey", exception.ParamName);
         }
 
         [Fact]
         public void WhenInitializedThrowIfUsernameIsNull()
         {
-            var exception = Assert.Throws<NullReferenceException>(() => new Session("AppKey", null, "Password"));
-            Assert.Equal("username not set.", exception.Message);
+            var exception = Assert.Throws<ArgumentNullException>(() => new Session("AppKey", null, "Password"));
+            Assert.Equal("username", exception.ParamName);
         }
 
         [Fact]
         public void WhenInitializedThrowIfPasswordIsNull()
         {
-            var exception = Assert.Throws<NullReferenceException>(() => new Session("AppKey", "Username", null));
-            Assert.Equal("password not set.", exception.Message);
+            var exception = Assert.Throws<ArgumentNullException>(() => new Session("AppKey", "Username", null));
+            Assert.Equal("password", exception.ParamName);
         }
 
         [Fact]
         public void ThrowWhenInitializedWithNullHttpClient()
         {
-            var exception = Assert.Throws<NullReferenceException>(() =>
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                 new Session("AppKey", "Username", "Password").WithHttpClient(null));
-            Assert.Equal("httpClient is null.", exception.Message);
+            Assert.Equal("httpClient", exception.ParamName);
         }
 
         [Fact]
@@ -70,21 +72,21 @@ namespace Betfair.Tests
         [Fact]
         public async Task OnLoginHttpClientIsCalled()
         {
-            await this.session.LoginAsync();
+            await this.LoginAsync();
             this.httpMessageHandler.VerifyTimesCalled(1);
         }
 
         [Fact]
         public async Task OnLoginHttpPostMethodIsUsed()
         {
-            await this.session.LoginAsync();
+            await this.LoginAsync();
             this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
         [Fact]
         public async Task OnLoginIdentityUriIsCalled()
         {
-            await this.session.LoginAsync();
+            await this.LoginAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
@@ -94,10 +96,12 @@ namespace Betfair.Tests
         [InlineData("12345")]
         public async Task OnLoginAppKeyIsInRequestHeader(string appKey)
         {
-            this.session = new Session(appKey, "Username", "Password");
-            this.session.WithHttpClient(this.httpClient);
-            await this.session.LoginAsync();
-            this.httpMessageHandler.VerifyHeaderValues("X-Application", appKey);
+            using (var session = new Session(appKey, "Username", "Password"))
+            {
+                session.WithHttpClient(this.httpClient);
+                await session.LoginAsync();
+                this.httpMessageHandler.VerifyHeaderValues("X-Application", appKey);
+            }
         }
 
         [Theory]
@@ -106,10 +110,12 @@ namespace Betfair.Tests
         [InlineData("Bob")]
         public async Task OnLoginUsernameIsInRequestContent(string username)
         {
-            this.session = new Session("AppKey", username, "Password");
-            this.session.WithHttpClient(this.httpClient);
-            await this.session.LoginAsync();
-            this.httpMessageHandler.VerifyRequestContent(ContentString(username, "Password"));
+            using (var session = new Session("AppKey", username, "Password"))
+            {
+                session.WithHttpClient(this.httpClient);
+                await session.LoginAsync();
+                this.httpMessageHandler.VerifyRequestContent(ContentString(username, "Password"));
+            }
         }
 
         [Theory]
@@ -118,25 +124,86 @@ namespace Betfair.Tests
         [InlineData("qwerty")]
         public async Task OnLoginPasswordIsInRequestContent(string password)
         {
-            this.session = new Session("AppKey", "Username", password);
-            this.session.WithHttpClient(this.httpClient);
-            await this.session.LoginAsync();
-            this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
+            using (var session = new Session("AppKey", "Username", password))
+            {
+                session.WithHttpClient(this.httpClient);
+                await session.LoginAsync();
+                this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
+            }
         }
 
-        public void Dispose()
+        [Fact]
+        public void OnDisposeDisposeIsCalled()
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
+            this.Dispose();
+            Assert.Equal(1, this.timesDisposedCalled);
         }
 
-        protected virtual void Dispose(bool disposing)
+        [Fact]
+        public async Task OnDisposeHttpClientIsDisposed()
         {
-            if (!disposing) return;
+            this.Dispose();
+            await Assert.ThrowsAsync<ObjectDisposedException>(this.LoginAsync);
+        }
 
-            this.httpClient.Dispose();
-            this.session.Dispose();
-            this.httpMessageHandler.Dispose();
+        [Fact]
+        public async Task OnDisposeFalseHttpClientIsNotDisposed()
+        {
+            this.Dispose(false);
+            await this.LoginAsync();
+            this.httpMessageHandler.VerifyTimesCalled(1);
+        }
+
+        [Theory]
+        [InlineData("FAIL", "INVALID_USERNAME_OR_PASSWORD")]
+        [InlineData("FAIL", "INPUT_VALIDATION_ERROR")]
+        [InlineData("LIMITED_ACCESS", "PENDING_AUTH")]
+        public async Task OnLoginThrowIfFailed(string status, string error)
+        {
+            var responseHandler = this.SetExpectedHttpResponse(status, error).Build();
+            using (var client = new HttpClient(responseHandler))
+            {
+                this.WithHttpClient(client);
+                var exception = await Assert.ThrowsAsync<AuthenticationException>(this.LoginAsync);
+                Assert.Equal($"{status}: {error}", exception.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData(HttpStatusCode.BadRequest)]
+        [InlineData(HttpStatusCode.RequestTimeout)]
+        [InlineData(HttpStatusCode.NotFound)]
+        public async void OnLoginThrowIfNotSuccessful(HttpStatusCode statusCode)
+        {
+            this.httpMessageHandler.WithStatusCode(statusCode);
+            using (var client = new HttpClient(this.httpMessageHandler.Build()))
+            {
+                this.WithHttpClient(client);
+                var exception = await Assert.ThrowsAsync<AuthenticationException>(this.LoginAsync);
+                Assert.Equal($"{statusCode}", exception.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData("SessionToken")]
+        [InlineData("NewSessionToken")]
+        [InlineData("DifferentSessionToken")]
+        public async Task OnLoginSessionTokenIsSet(string sessionToken)
+        {
+            this.httpMessageHandler.WithReturnContent(
+                new FakeApiLoginResponse().WithSessionToken(sessionToken));
+            using (var client = new HttpClient(this.httpMessageHandler.Build()))
+            {
+                this.WithHttpClient(client);
+                await this.LoginAsync();
+                Assert.Equal(sessionToken, this.SessionToken);
+            }
+        }
+
+        protected new virtual void Dispose()
+        {
+            this.timesDisposedCalled++;
+            base.Dispose();
         }
 
         private static string ContentString(string username, string password)
@@ -146,6 +213,12 @@ namespace Betfair.Tests
             {
                 return content.ReadAsStringAsync().Result;
             }
+        }
+
+        private MockHttpMessageHandler SetExpectedHttpResponse(string status, string error)
+        {
+            return this.httpMessageHandler.WithReturnContent(
+                new FakeApiLoginResponse().WithStatus(status).WithError(error));
         }
     }
 }

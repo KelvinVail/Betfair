@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Net.Http.Headers;
-
-namespace Betfair
+﻿namespace Betfair
 {
     using System;
+    using System.Collections.Generic;
     using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Security.Authentication;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
 
     public class Session : IDisposable
     {
@@ -21,9 +22,9 @@ namespace Betfair
 
         public Session(string appKey, string username, string password)
         {
-            if (string.IsNullOrEmpty(appKey)) throw new NullReferenceException($"{nameof(appKey)} not set.");
-            if (string.IsNullOrEmpty(username)) throw new NullReferenceException($"{nameof(username)} not set.");
-            if (string.IsNullOrEmpty(password)) throw new NullReferenceException($"{nameof(password)} not set.");
+            if (string.IsNullOrEmpty(appKey)) throw new ArgumentNullException(nameof(appKey));
+            if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
+            if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
 
             this.appKey = appKey;
             this.username = username;
@@ -31,9 +32,11 @@ namespace Betfair
             this.ConfigureHttpClient();
         }
 
+        public string SessionToken { get; set; }
+
         public Session WithHttpClient(HttpClient httpClient)
         {
-            this.client = httpClient ?? throw new NullReferenceException($"{nameof(httpClient)} is null.");
+            this.client = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             this.ConfigureHttpClient();
             return this;
         }
@@ -45,6 +48,10 @@ namespace Betfair
                 new Dictionary<string, string> { { "username", this.username }, { "password", this.password } });
             using (var response = await this.client.SendAsync(this.apiRequest))
             {
+                if (!response.IsSuccessStatusCode) throw new AuthenticationException($"{response.StatusCode}");
+                var session = JsonConvert.DeserializeObject<LoginResponseDto>(await response.Content.ReadAsStringAsync());
+                if (session.Status != "SUCCESS") throw new AuthenticationException($"{session.Status}: {session.Error}");
+                this.SessionToken = session.Token;
             }
         }
 
@@ -68,6 +75,18 @@ namespace Betfair
             this.client.Timeout = TimeSpan.FromSeconds(30);
             this.client.DefaultRequestHeaders.Accept
                 .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        private class LoginResponseDto
+        {
+            [JsonProperty]
+            internal string Token { get; set; }
+
+            [JsonProperty]
+            internal string Status { get; set; }
+
+            [JsonProperty]
+            internal string Error { get; set; }
         }
     }
 }

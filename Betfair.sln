@@ -33,4 +33,7 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8E0FF9AD-D181-4454-8130-FE0DE96802F9}
 	EndGlobalSection
+	GlobalSection(NDepend) = preSolution
+		Project = ".\Betfair.ndproj"
+	EndGlobalSection
 EndGlobal
