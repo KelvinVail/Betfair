@@ -24,6 +24,8 @@
 
         private bool buildWithException;
 
+        private HttpResponseMessage responseMessage;
+
         public MockHttpMessageHandler()
         {
             this.returnContent = new StringContent("StringContent");
@@ -117,21 +119,22 @@
             if (disposing)
             {
                 this.returnContent.Dispose();
+                this.responseMessage?.Dispose();
             }
         }
 
         private HttpMessageHandler BuildHandler()
         {
             this.messageHandler = new Mock<HttpMessageHandler>();
-
+            this.responseMessage = new HttpResponseMessage
+                { StatusCode = this.httpStatusCode, Content = this.returnContent };
             this.messageHandler
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(
-                    new HttpResponseMessage { StatusCode = this.httpStatusCode, Content = this.returnContent })
+                .ReturnsAsync(this.responseMessage)
                 .Verifiable();
 
             return this.messageHandler.Object;
@@ -142,10 +145,10 @@
             this.messageHandler = new Mock<HttpMessageHandler>();
 
             this.messageHandler
-                .Protected() 
-                .Setup<Task<HttpResponseMessage>>( 
-                    "SendAsync", 
-                    ItExpr.IsAny<HttpRequestMessage>(), 
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>())
                 .ThrowsAsync(new Exception("This is an exception message."))
                 .Verifiable();

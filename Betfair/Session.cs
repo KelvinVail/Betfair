@@ -3,12 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Security.Authentication;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public sealed class Session : IDisposable
+    public sealed class Session : HttpClientBase
     {
         private readonly string appKey;
 
@@ -16,57 +15,90 @@
 
         private readonly string password;
 
-        private readonly HttpRequestMessage apiRequest = new HttpRequestMessage(HttpMethod.Post, "api/login");
+        private string sessionToken;
 
-        private HttpClient client = new HttpClient();
+        private DateTime sessionCreateTime;
 
         public Session(string appKey, string username, string password)
+            : base(new Uri("https://identitysso.betfair.com"))
         {
-            if (string.IsNullOrEmpty(appKey)) throw new ArgumentNullException(nameof(appKey));
-            if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
-            if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
-
-            this.appKey = appKey;
-            this.username = username;
-            this.password = password;
-            this.ConfigureHttpClient();
+            this.appKey = Validate(appKey, nameof(appKey));
+            this.username = Validate(username, nameof(username));
+            this.password = Validate(password, nameof(password));
         }
 
-        public string SessionToken { get; set; }
+        public TimeSpan SessionTimeout { get; set; } = TimeSpan.FromHours(8);
 
-        public Session WithHttpClient(HttpClient httpClient)
+        public TimeSpan KeepAliveOffset { get; set; } = TimeSpan.FromHours(-1);
+
+        public DateTime SessionExpiryTime => this.sessionCreateTime + this.SessionTimeout;
+
+        public new Session WithHttpClient(HttpClient httpClient)
         {
-            this.client = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            this.ConfigureHttpClient();
+            base.WithHttpClient(httpClient);
             return this;
         }
 
         public async Task LoginAsync()
         {
-            this.apiRequest.Headers.Add("X-Application", this.appKey);
-            this.apiRequest.Content = new FormUrlEncodedContent(
-                new Dictionary<string, string> { { "username", this.username }, { "password", this.password } });
-            using (var response = await this.client.SendAsync(this.apiRequest))
+            var loginRequest = this.GetLoginRequest();
+            var session = await this.SendAsync<LoginResponse>(loginRequest);
+            session.Validate();
+            this.sessionCreateTime = DateTime.UtcNow;
+            this.sessionToken = session.Token;
+        }
+
+        public async Task KeepAliveAsync()
+        {
+            if (string.IsNullOrEmpty(this.sessionToken))
+                await this.LoginAsync();
+
+            if (this.SessionExpired())
+                await this.LoginAsync();
+
+            if (this.SessionAboutToExpire())
             {
-                if (!response.IsSuccessStatusCode) throw new AuthenticationException($"{response.StatusCode}");
-                var session = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync());
-                if (session.Status != "SUCCESS") throw new AuthenticationException($"{session.Status}: {session.Error}");
-                this.SessionToken = session.Token;
+                var request = new HttpRequestMessage(HttpMethod.Post, "api/keepAlive");
+                request.Headers.Add("X-Authentication", this.sessionToken);
+                var session = await this.SendAsync<LoginResponse>(request);
+                session.Validate();
+                this.sessionCreateTime = DateTime.UtcNow;
+                this.sessionToken = session.Token;
             }
         }
 
-        public void Dispose()
+        public async Task<string> GetSessionTokenAsync()
         {
-            this.apiRequest.Dispose();
-            ((IDisposable)this.client).Dispose();
+            if (string.IsNullOrEmpty(this.sessionToken))
+                await this.LoginAsync();
+
+            return this.sessionToken;
         }
 
-        private void ConfigureHttpClient()
+        private static string Validate(string value, string name)
         {
-            this.client.BaseAddress = new Uri("https://identitysso.betfair.com");
-            this.client.Timeout = TimeSpan.FromSeconds(30);
-            this.client.DefaultRequestHeaders.Accept
-                .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            if (string.IsNullOrEmpty(value)) throw new ArgumentNullException(name);
+            return value;
+        }
+
+        private HttpRequestMessage GetLoginRequest()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/login");
+            request.Headers.Add("X-Application", this.appKey);
+            request.Content = new FormUrlEncodedContent(
+                new Dictionary<string, string> { { "username", this.username }, { "password", this.password } });
+
+            return request;
+        }
+
+        private bool SessionExpired()
+        {
+            return this.SessionExpiryTime <= DateTime.UtcNow;
+        }
+
+        private bool SessionAboutToExpire()
+        {
+            return this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
         }
 
         private sealed class LoginResponse
@@ -79,6 +111,11 @@
 
             [JsonProperty]
             internal string Error { get; set; }
+
+            internal void Validate()
+            {
+                if (this.Status != "SUCCESS") throw new AuthenticationException($"{this.Status}: {this.Error}");
+            }
         }
     }
 }
