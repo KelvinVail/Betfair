@@ -41,37 +41,20 @@
 
         public async Task LoginAsync()
         {
-            var loginRequest = this.GetLoginRequest();
-            var session = await this.SendAsync<LoginResponse>(loginRequest);
-            session.Validate();
-            this.sessionCreateTime = DateTime.UtcNow;
-            this.sessionToken = session.Token;
+            var request = this.GetLoginRequest();
+            await this.SetSessionTokenAsync(request);
         }
 
         public async Task KeepAliveAsync()
         {
-            if (string.IsNullOrEmpty(this.sessionToken))
-                await this.LoginAsync();
-
-            if (this.SessionExpired())
-                await this.LoginAsync();
-
-            if (this.SessionAboutToExpire())
-            {
-                var request = new HttpRequestMessage(HttpMethod.Post, "api/keepAlive");
-                request.Headers.Add("X-Authentication", this.sessionToken);
-                var session = await this.SendAsync<LoginResponse>(request);
-                session.Validate();
-                this.sessionCreateTime = DateTime.UtcNow;
-                this.sessionToken = session.Token;
-            }
+            await this.LoginIfSessionIsNullAsync();
+            await this.LoginIfSessionExpiredAsync();
+            await this.KeepAliveIfAboutToExpireAsync();
         }
 
         public async Task<string> GetSessionTokenAsync()
         {
-            if (string.IsNullOrEmpty(this.sessionToken))
-                await this.LoginAsync();
-
+            await this.KeepAliveAsync();
             return this.sessionToken;
         }
 
@@ -89,6 +72,42 @@
                 new Dictionary<string, string> { { "username", this.username }, { "password", this.password } });
 
             return request;
+        }
+
+        private HttpRequestMessage GetKeepAliveRequest()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/keepAlive");
+            request.Headers.Add("X-Authentication", this.sessionToken);
+            return request;
+        }
+
+        private async Task LoginIfSessionIsNullAsync()
+        {
+            if (string.IsNullOrEmpty(this.sessionToken))
+                await this.LoginAsync();
+        }
+
+        private async Task LoginIfSessionExpiredAsync()
+        {
+            if (this.SessionExpired())
+                await this.LoginAsync();
+        }
+
+        private async Task KeepAliveIfAboutToExpireAsync()
+        {
+            if (this.SessionAboutToExpire())
+            {
+                var request = this.GetKeepAliveRequest();
+                await this.SetSessionTokenAsync(request);
+            }
+        }
+
+        private async Task SetSessionTokenAsync(HttpRequestMessage request)
+        {
+            var session = await this.SendAsync<LoginResponse>(request);
+            session.Validate();
+            this.sessionCreateTime = DateTime.UtcNow;
+            this.sessionToken = session.Token;
         }
 
         private bool SessionExpired()

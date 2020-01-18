@@ -1,12 +1,9 @@
-﻿using System.Globalization;
-
-namespace Betfair.Tests
+﻿namespace Betfair.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
+    using System.Globalization;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Security.Authentication;
     using System.Threading.Tasks;
     using Betfair.Tests.TestDoubles;
@@ -48,35 +45,6 @@ namespace Betfair.Tests
         {
             var exception = Assert.Throws<ArgumentNullException>(() => new Session("AppKey", "Username", null));
             Assert.Equal("password", exception.ParamName);
-        }
-
-        [Fact]
-        public void ThrowWhenInitializedWithNullHttpClient()
-        {
-            var exception = Assert.Throws<ArgumentNullException>(() =>
-                new Session("AppKey", "Username", "Password").WithHttpClient(null));
-            Assert.Equal("httpClient", exception.ParamName);
-        }
-
-        [Fact]
-        public void WhenInitializedHttpClientTimeoutIsThirtySeconds()
-        {
-            const int defaultTimeout = 30;
-            Assert.Equal(defaultTimeout, this.httpClient.Timeout.TotalSeconds);
-        }
-
-        [Fact]
-        public void WhenInitializedHttpClientAcceptsApplicationJson()
-        {
-            var applicationJson = new MediaTypeWithQualityHeaderValue("application/json");
-            Assert.Contains(applicationJson, this.httpClient.DefaultRequestHeaders.Accept);
-        }
-
-        [Fact]
-        public async Task OnLoginHttpClientIsCalled()
-        {
-            await this.session.LoginAsync();
-            this.httpMessageHandler.VerifyTimesCalled(1);
         }
 
         [Fact]
@@ -134,13 +102,6 @@ namespace Betfair.Tests
             this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
         }
 
-        [Fact]
-        public async Task OnDisposeHttpClientIsDisposed()
-        {
-            this.session.Dispose();
-            await Assert.ThrowsAsync<ObjectDisposedException>(this.session.LoginAsync);
-        }
-
         [Theory]
         [InlineData("FAIL", "INVALID_USERNAME_OR_PASSWORD")]
         [InlineData("FAIL", "INPUT_VALIDATION_ERROR")]
@@ -152,19 +113,6 @@ namespace Betfair.Tests
             this.session.WithHttpClient(this.httpClient);
             var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
             Assert.Equal($"{status}: {error}", exception.Message);
-        }
-
-        [Theory]
-        [InlineData(HttpStatusCode.BadRequest)]
-        [InlineData(HttpStatusCode.RequestTimeout)]
-        [InlineData(HttpStatusCode.NotFound)]
-        public async void OnLoginThrowIfNotSuccessful(HttpStatusCode statusCode)
-        {
-            this.httpMessageHandler.WithStatusCode(statusCode);
-            this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
-            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
-            Assert.Equal($"{statusCode}", exception.Message);
         }
 
         [Theory]
@@ -210,8 +158,9 @@ namespace Betfair.Tests
         public async Task OnKeepAliveSessionTokenIsNotRefreshedIfNotExpiredOrAboutToExpire()
         {
             await this.SetSessionToken("SessionToken");
+            this.ResetMessageHandler();
             await this.session.KeepAliveAsync();
-            this.httpMessageHandler.VerifyTimesCalled(1);
+            this.httpMessageHandler.VerifyTimesCalled(0);
         }
 
         [Fact]
@@ -227,7 +176,7 @@ namespace Betfair.Tests
         public void WhenInitializedKeepAliveOffsetIsOneHour()
         {
             const int defaultKeepAliveOffset = -1;
-            Assert.Equal(defaultKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 2);
+            Assert.Equal(defaultKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
         }
 
         [Fact]
@@ -235,7 +184,7 @@ namespace Betfair.Tests
         {
             const int newKeepAliveOffset = -2;
             this.session.KeepAliveOffset = TimeSpan.FromHours(newKeepAliveOffset);
-            Assert.Equal(newKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 2);
+            Assert.Equal(newKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
         }
 
         [Fact]
@@ -247,13 +196,11 @@ namespace Betfair.Tests
         }
 
         [Fact]
-        public async Task OnKeepAliveRequestContainsAcceptsApplicationJson()
+        public async Task OnKeepAliveHttpPostMethodIsUsed()
         {
-            var applicationJson = new MediaTypeWithQualityHeaderValue("application/json");
             await this.SetAboutToExpireSessionToken("SessionToken");
             await this.session.KeepAliveAsync();
-            this.httpMessageHandler.VerifyHeaderValues("Accept", applicationJson.ToString());
-            Assert.Contains(applicationJson, this.httpClient.DefaultRequestHeaders.Accept);
+            this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
         [Theory]
@@ -303,20 +250,6 @@ namespace Betfair.Tests
             this.session.WithHttpClient(this.httpClient);
             var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.KeepAliveAsync);
             Assert.Equal($"{status}: {error}", exception.Message);
-        }
-
-        [Theory]
-        [InlineData(HttpStatusCode.BadRequest)]
-        [InlineData(HttpStatusCode.RequestTimeout)]
-        [InlineData(HttpStatusCode.NotFound)]
-        public async void OnKeepAliveThrowIfNotSuccessful(HttpStatusCode statusCode)
-        {
-            await this.SetAboutToExpireSessionToken("SessionToken");
-            this.httpMessageHandler.WithStatusCode(statusCode);
-            this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
-            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.KeepAliveAsync);
-            Assert.Equal($"{statusCode}", exception.Message);
         }
 
         [Theory]

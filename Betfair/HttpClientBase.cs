@@ -16,7 +16,7 @@
 
         private HttpClient client;
 
-        private bool disposedValue;
+        private bool disposed;
 
         protected HttpClientBase(Uri baseAddress)
         {
@@ -41,20 +41,27 @@
         {
             this.disposables.Add(request);
             var response = await this.client.SendAsync(request);
-            if (!response.IsSuccessStatusCode) throw new AuthenticationException($"{response.StatusCode}");
+            if (!response.IsSuccessStatusCode) throw new HttpRequestException($"{response.StatusCode}");
             return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (this.disposedValue) return;
-            if (disposing)
-            {
-                this.disposables.ForEach(d => d.Dispose());
-                ((IDisposable)this.client).Dispose();
-            }
+            if (this.disposed) return;
+            if (disposing) this.DisposeManaged();
 
-            this.disposedValue = true;
+            this.disposed = true;
+        }
+
+        protected HttpClient GetBaseHttpClient()
+        {
+            return this.client;
+        }
+
+        private void DisposeManaged()
+        {
+            this.disposables.ForEach(d => d.Dispose());
+            ((IDisposable)this.client).Dispose();
         }
 
         private HttpClient Configure(HttpClient httpClient)
