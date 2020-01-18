@@ -33,6 +33,10 @@
 
         public DateTime SessionExpiryTime => this.sessionCreateTime + this.SessionTimeout;
 
+        private bool SessionExpired => this.SessionExpiryTime <= DateTime.UtcNow;
+
+        private bool SessionAboutToExpire => this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
+
         public new Session WithHttpClient(HttpClient httpClient)
         {
             base.WithHttpClient(httpClient);
@@ -42,19 +46,21 @@
         public async Task LoginAsync()
         {
             var request = this.GetLoginRequest();
-            await this.SetSessionTokenAsync(request);
+            await this.GetAndSetSessionFromBetfairAsync(request);
         }
 
         public async Task KeepAliveAsync()
         {
-            await this.LoginIfSessionIsNullAsync();
-            await this.LoginIfSessionExpiredAsync();
-            await this.KeepAliveIfAboutToExpireAsync();
+            var request = this.GetKeepAliveRequest();
+            await this.GetAndSetSessionFromBetfairAsync(request);
         }
 
         public async Task<string> GetSessionTokenAsync()
         {
-            await this.KeepAliveAsync();
+            await this.LoginIfSessionIsNullAsync();
+            await this.LoginIfSessionExpiredAsync();
+            await this.KeepAliveIfAboutToExpireAsync();
+
             return this.sessionToken;
         }
 
@@ -89,35 +95,22 @@
 
         private async Task LoginIfSessionExpiredAsync()
         {
-            if (this.SessionExpired())
+            if (this.SessionExpired)
                 await this.LoginAsync();
         }
 
         private async Task KeepAliveIfAboutToExpireAsync()
         {
-            if (this.SessionAboutToExpire())
-            {
-                var request = this.GetKeepAliveRequest();
-                await this.SetSessionTokenAsync(request);
-            }
+            if (this.SessionAboutToExpire)
+                await this.KeepAliveAsync();
         }
 
-        private async Task SetSessionTokenAsync(HttpRequestMessage request)
+        private async Task GetAndSetSessionFromBetfairAsync(HttpRequestMessage request)
         {
             var session = await this.SendAsync<LoginResponse>(request);
             session.Validate();
             this.sessionCreateTime = DateTime.UtcNow;
             this.sessionToken = session.Token;
-        }
-
-        private bool SessionExpired()
-        {
-            return this.SessionExpiryTime <= DateTime.UtcNow;
-        }
-
-        private bool SessionAboutToExpire()
-        {
-            return this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

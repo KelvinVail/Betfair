@@ -154,27 +154,20 @@
         }
 
         [Fact]
-        public async Task OnKeepAliveLoginIsCalledIfSessionTokenIsNull()
-        {
-            await this.session.KeepAliveAsync();
-            this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
-        }
-
-        [Fact]
-        public async Task OnKeepAliveSessionTokenIsNotRefreshedIfNotExpiredOrAboutToExpire()
+        public async Task OnGetSessionTokenTheSessionTokenIsNotRefreshedIfNotExpiredOrAboutToExpire()
         {
             await this.SetSessionToken("SessionToken");
             this.ResetMessageHandler();
-            await this.session.KeepAliveAsync();
+            await this.session.GetSessionTokenAsync();
             this.httpMessageHandler.VerifyTimesCalled(0);
         }
 
         [Fact]
-        public async Task OnKeepAliveLoginIsCalledIfSessionIsExpired()
+        public async Task OnGetSessionTokenLoginIsCalledIfSessionIsExpired()
         {
             await this.SetExpiredSessionToken("SessionToken");
             this.ResetMessageHandler();
-            await this.session.KeepAliveAsync();
+            await this.session.GetSessionTokenAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
