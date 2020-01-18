@@ -48,6 +48,12 @@
         }
 
         [Fact]
+        public void WhenInitializedInheritsHttpClientBase()
+        {
+            Assert.True(typeof(HttpClientBase).IsAssignableFrom(typeof(Session)));
+        }
+
+        [Fact]
         public async Task OnLoginHttpPostMethodIsUsed()
         {
             await this.session.LoginAsync();
