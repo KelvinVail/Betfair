@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Net.Http.Headers;
-    using System.Security.Authentication;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
@@ -14,15 +13,15 @@
 
         private readonly List<IDisposable> disposables = new List<IDisposable>();
 
-        private HttpClient client;
-
         private bool disposed;
 
         protected HttpClientBase(Uri baseAddress)
         {
             this.baseAddress = baseAddress;
-            this.client = this.Configure(new HttpClient());
+            this.HttpClient = this.Configure(new HttpClient());
         }
+
+        protected HttpClient HttpClient { get; private set; }
 
         public void Dispose()
         {
@@ -33,14 +32,14 @@
         protected HttpClientBase WithHttpClient(HttpClient httpClient)
         {
             if (httpClient is null) throw new ArgumentNullException(nameof(httpClient));
-            this.client = this.Configure(httpClient);
+            this.HttpClient = this.Configure(httpClient);
             return this;
         }
 
         protected async Task<T> SendAsync<T>(HttpRequestMessage request)
         {
             this.disposables.Add(request);
-            var response = await this.client.SendAsync(request);
+            var response = await this.HttpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode) throw new HttpRequestException($"{response.StatusCode}");
             return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
         }
@@ -53,15 +52,10 @@
             this.disposed = true;
         }
 
-        protected HttpClient GetBaseHttpClient()
-        {
-            return this.client;
-        }
-
         private void DisposeManaged()
         {
             this.disposables.ForEach(d => d.Dispose());
-            ((IDisposable)this.client).Dispose();
+            ((IDisposable)this.HttpClient).Dispose();
         }
 
         private HttpClient Configure(HttpClient httpClient)

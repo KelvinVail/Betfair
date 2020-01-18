@@ -120,6 +120,10 @@
             return this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance",
+            "CA1812:AvoidUninstantiatedInternalClasses",
+            Justification = "Late bound.  Used to deserialize SendAsync response.")]
         private sealed class LoginResponse
         {
             [JsonProperty]

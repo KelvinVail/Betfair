@@ -11,7 +11,7 @@
 
     public class SessionTests : IDisposable
     {
-        private MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+        private HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock();
 
         private HttpClient httpClient;
 
@@ -21,7 +21,7 @@
 
         public SessionTests()
         {
-            this.httpMessageHandler.WithReturnContent(new FakeApiLoginResponse());
+            this.httpMessageHandler.WithReturnContent(new LoginResponseStub());
             this.httpClient = new HttpClient(this.httpMessageHandler.Build());
             this.session.WithHttpClient(this.httpClient);
         }
@@ -266,7 +266,7 @@
         {
             await this.SetAboutToExpireSessionToken("AboutToExpireSessionToken");
             this.httpMessageHandler.WithReturnContent(
-                new FakeApiLoginResponse().WithSessionToken(sessionToken));
+                new LoginResponseStub().WithSessionToken(sessionToken));
             this.httpClient = new HttpClient(this.httpMessageHandler.Build());
             this.session.WithHttpClient(this.httpClient);
             await this.session.KeepAliveAsync();
@@ -302,10 +302,10 @@
             }
         }
 
-        private MockHttpMessageHandler SetExpectedHttpResponse(string status, string error)
+        private HttpMessageHandlerMock SetExpectedHttpResponse(string status, string error)
         {
             return this.httpMessageHandler.WithReturnContent(
-                new FakeApiLoginResponse().WithStatus(status).WithError(error));
+                new LoginResponseStub().WithStatus(status).WithError(error));
         }
 
         private async Task SetExpiredSessionToken(string sessionToken)
@@ -325,7 +325,7 @@
         private async Task SetSessionToken(string sessionToken)
         {
             this.httpMessageHandler.WithReturnContent(
-                new FakeApiLoginResponse().WithSessionToken(sessionToken));
+                new LoginResponseStub().WithSessionToken(sessionToken));
             this.httpClient = new HttpClient(this.httpMessageHandler.Build());
             this.session.WithHttpClient(this.httpClient);
             await this.session.LoginAsync();
@@ -333,8 +333,8 @@
 
         private void ResetMessageHandler()
         {
-            this.httpMessageHandler = new MockHttpMessageHandler();
-            this.httpMessageHandler.WithReturnContent(new FakeApiLoginResponse());
+            this.httpMessageHandler = new HttpMessageHandlerMock();
+            this.httpMessageHandler.WithReturnContent(new LoginResponseStub());
             this.httpClient = new HttpClient(this.httpMessageHandler.Build());
             this.session.WithHttpClient(this.httpClient);
         }

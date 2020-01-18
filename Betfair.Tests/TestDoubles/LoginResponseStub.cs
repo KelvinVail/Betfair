@@ -1,35 +1,35 @@
 ﻿namespace Betfair.Tests.TestDoubles
 {
-    public class FakeApiLoginResponse
+    public class LoginResponseStub
     {
-        public FakeApiLoginResponse()
+        public LoginResponseStub()
         {
             this.Status = "SUCCESS";
             this.Error = string.Empty;
             this.Token = "SessionToken";
         }
 
-        public string Token { get; set; }
+        public static string Product => "ApiKey";
 
-        public string Product => "ApiKey";
+        public string Token { get; set; }
 
         public string Status { get; set; }
 
         public string Error { get; set; }
 
-        public FakeApiLoginResponse WithStatus(string status)
+        public LoginResponseStub WithStatus(string status)
         {
             this.Status = status;
             return this;
         }
 
-        public FakeApiLoginResponse WithError(string error)
+        public LoginResponseStub WithError(string error)
         {
             this.Error = error;
             return this;
         }
 
-        public FakeApiLoginResponse WithSessionToken(string sessionToken)
+        public LoginResponseStub WithSessionToken(string sessionToken)
         {
             this.Token = sessionToken;
             return this;

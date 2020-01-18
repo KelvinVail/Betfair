@@ -1,20 +1,18 @@
-﻿using System.Net;
-using System.Security.Authentication;
-using Betfair.Tests.TestDoubles;
-
-namespace Betfair.Tests
+﻿namespace Betfair.Tests
 {
     using System;
+    using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
+    using Betfair.Tests.TestDoubles;
     using Xunit;
 
     public class HttpClientBaseTests : HttpClientBase
     {
         private readonly HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "test");
 
-        private MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+        private readonly HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock();
 
         public HttpClientBaseTests()
             : base(new Uri("https://www.test.com"))
@@ -24,7 +22,7 @@ namespace Betfair.Tests
         [Fact]
         public void WhenInitializedHttpClientIsNotNull()
         {
-            Assert.NotNull(this.GetBaseHttpClient());
+            Assert.NotNull(this.HttpClient);
         }
 
         [Fact]
@@ -38,21 +36,21 @@ namespace Betfair.Tests
         public void WhenInitializedBaseAddressIsSet()
         {
             var expectedUri = new Uri("https://www.test.com");
-            Assert.Equal(expectedUri, this.GetBaseHttpClient().BaseAddress);
+            Assert.Equal(expectedUri, this.HttpClient.BaseAddress);
         }
 
         [Fact]
         public void WhenInitializedTimeoutIsThirtySeconds()
         {
             var defaultTimeout = TimeSpan.FromSeconds(30);
-            Assert.Equal(defaultTimeout, this.GetBaseHttpClient().Timeout);
+            Assert.Equal(defaultTimeout, this.HttpClient.Timeout);
         }
 
         [Fact]
         public void WhenInitializedAcceptHeaderIsApplicationJson()
         {
             var applicationJson = new MediaTypeWithQualityHeaderValue("application/json");
-            Assert.Contains(applicationJson, this.GetBaseHttpClient().DefaultRequestHeaders.Accept);
+            Assert.Contains(applicationJson, this.HttpClient.DefaultRequestHeaders.Accept);
         }
 
         [Fact]

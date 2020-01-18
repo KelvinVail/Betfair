@@ -14,7 +14,7 @@
 
     using Xunit;
 
-    public class MockHttpMessageHandler : IDisposable
+    public class HttpMessageHandlerMock : IDisposable
     {
         private Mock<HttpMessageHandler> messageHandler;
 
@@ -26,13 +26,13 @@
 
         private HttpResponseMessage responseMessage;
 
-        public MockHttpMessageHandler()
+        public HttpMessageHandlerMock()
         {
             this.returnContent = new StringContent("StringContent");
             this.httpStatusCode = HttpStatusCode.OK;
         }
 
-        public MockHttpMessageHandler WithReturnContent(dynamic dynamicContent)
+        public HttpMessageHandlerMock WithReturnContent(dynamic dynamicContent)
         {
             var stringContent = dynamicContent is string ? dynamicContent : JsonConvert.SerializeObject(dynamicContent);
 
@@ -40,13 +40,13 @@
             return this;
         }
 
-        public MockHttpMessageHandler WithStatusCode(HttpStatusCode statusCode)
+        public HttpMessageHandlerMock WithStatusCode(HttpStatusCode statusCode)
         {
             this.httpStatusCode = statusCode;
             return this;
         }
 
-        public MockHttpMessageHandler WithException()
+        public HttpMessageHandlerMock WithException()
         {
             this.buildWithException = true;
             return this;
@@ -150,7 +150,7 @@
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>())
-                .ThrowsAsync(new Exception("This is an exception message."))
+                .ThrowsAsync(new HttpRequestException("This is an exception message."))
                 .Verifiable();
 
             return this.messageHandler.Object;
