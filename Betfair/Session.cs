@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Net.Http;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
@@ -38,6 +39,8 @@
 
         public DateTime SessionExpiryTime => this.sessionCreateTime + this.SessionTimeout;
 
+        public bool IsSessionValid => this.sessionToken != null && !this.SessionExpired;
+
         private bool SessionExpired => this.SessionExpiryTime <= DateTime.UtcNow;
 
         private bool SessionAboutToExpire => this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
@@ -63,9 +66,16 @@
             this.sessionCreateTime = DateTime.UtcNow;
         }
 
+        public async Task LogOutAsync()
+        {
+            var request = this.GetRequest("api/logout");
+            this.sessionToken = await this.GetSessionFromBetfairAsync(request);
+            this.sessionCreateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
+        }
+
         public async Task KeepAliveAsync()
         {
-            var request = this.GetKeepAliveRequest();
+            var request = this.GetRequest("api/keepAlive");
             this.sessionToken = await this.GetSessionFromBetfairAsync(request);
             this.sessionCreateTime = DateTime.UtcNow;
         }
@@ -96,9 +106,9 @@
             return request;
         }
 
-        private HttpRequestMessage GetKeepAliveRequest()
+        private HttpRequestMessage GetRequest(string requestUri)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/keepAlive");
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Add("X-Authentication", this.sessionToken);
             return request;
         }
