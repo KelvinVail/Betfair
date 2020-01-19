@@ -391,16 +391,16 @@
         }
 
         [Fact]
-        public async Task OnLogOutHttpPostMethodIsUsed()
+        public async Task OnLogoutHttpPostMethodIsUsed()
         {
-            await this.session.LogOutAsync();
+            await this.session.LogoutAsync();
             this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
         [Fact]
-        public async Task OnLogOutIdentityUriIsCalled()
+        public async Task OnLogoutIdentityUriIsCalled()
         {
-            await this.session.LogOutAsync();
+            await this.session.LogoutAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/logout"));
         }
 
@@ -408,39 +408,39 @@
         [InlineData("SessionToken")]
         [InlineData("NewSessionToken")]
         [InlineData("DifferentSessionToken")]
-        public async Task OnLogOutSessionTokenIsInRequestHeader(string sessionToken)
+        public async Task OnLogoutSessionTokenIsInRequestHeader(string sessionToken)
         {
             await this.SetSessionToken(sessionToken);
-            await this.session.LogOutAsync();
+            await this.session.LogoutAsync();
             this.httpMessageHandler.VerifyHeaderValues("X-Authentication", sessionToken);
         }
 
         [Fact]
-        public async Task OnLogOutSessionExpiryTimeIsCleared()
+        public async Task OnLogoutSessionExpiryTimeIsCleared()
         {
             var nullDateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
             await this.SetSessionToken("SessionToken");
-            await this.session.LogOutAsync();
+            await this.session.LogoutAsync();
             Assert.Equal(nullDateTime + this.session.SessionTimeout, this.session.SessionExpiryTime);
         }
 
         [Fact]
-        public async Task OnLogOutSessionTokenIsCleared()
+        public async Task OnLogoutSessionTokenIsCleared()
         {
             await this.SetSessionToken("SessionToken");
             Assert.True(this.session.IsSessionValid);
-            await this.session.LogOutAsync();
+            await this.session.LogoutAsync();
             Assert.False(this.session.IsSessionValid);
         }
 
         [Theory]
         [InlineData("FAIL")]
         [InlineData("LIMITED_ACCESS")]
-        public async Task OnLogOutThrowIfFailed(string status)
+        public async Task OnLogoutThrowIfFailed(string status)
         {
             var responseHandler = this.SetExpectedHttpResponse(status, null).Build();
             this.session.WithHandler(responseHandler);
-            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LogOutAsync);
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LogoutAsync);
             Assert.Equal($"{status}: NONE", exception.Message);
         }
 

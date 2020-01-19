@@ -39,7 +39,7 @@
 
         public DateTime SessionExpiryTime => this.sessionCreateTime + this.SessionTimeout;
 
-        public bool IsSessionValid => this.sessionToken != null && !this.SessionExpired;
+        public bool IsSessionValid => !string.IsNullOrEmpty(this.sessionToken) && !this.SessionExpired;
 
         private bool SessionExpired => this.SessionExpiryTime <= DateTime.UtcNow;
 
@@ -66,23 +66,23 @@
             this.sessionCreateTime = DateTime.UtcNow;
         }
 
-        public async Task LogOutAsync()
+        public async Task LogoutAsync()
         {
-            var request = this.GetRequest("api/logout");
+            var request = this.GetRequest("logout");
             this.sessionToken = await this.GetSessionFromBetfairAsync(request);
             this.sessionCreateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
         }
 
         public async Task KeepAliveAsync()
         {
-            var request = this.GetRequest("api/keepAlive");
+            var request = this.GetRequest("keepAlive");
             this.sessionToken = await this.GetSessionFromBetfairAsync(request);
             this.sessionCreateTime = DateTime.UtcNow;
         }
 
         public async Task<string> GetSessionTokenAsync()
         {
-            await this.LoginIfSessionIsNullAsync();
+            await this.LoginIfSessionNotValidAsync();
             await this.LoginIfSessionExpiredAsync();
             await this.KeepAliveIfAboutToExpireAsync();
 
@@ -108,14 +108,14 @@
 
         private HttpRequestMessage GetRequest(string requestUri)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            var request = new HttpRequestMessage(HttpMethod.Post, $"api/{requestUri}");
             request.Headers.Add("X-Authentication", this.sessionToken);
             return request;
         }
 
-        private async Task LoginIfSessionIsNullAsync()
+        private async Task LoginIfSessionNotValidAsync()
         {
-            if (string.IsNullOrEmpty(this.sessionToken))
+            if (!this.IsSessionValid)
                 await this.LoginAsync();
         }
 
