@@ -54,6 +54,43 @@
         }
 
         [Fact]
+        public void WhenInitializedSessionTimeoutIsEightHours()
+        {
+            const int defaultSessionTimeout = 8;
+            Assert.Equal(defaultSessionTimeout, this.session.SessionTimeout.TotalHours, 2);
+        }
+
+        [Fact]
+        public void AfterInitializedSessionTimeoutCanBeSet()
+        {
+            const int newSessionTimeout = 2;
+            this.session.SessionTimeout = TimeSpan.FromHours(newSessionTimeout);
+            Assert.Equal(newSessionTimeout, this.session.SessionTimeout.TotalHours);
+        }
+
+        [Fact]
+        public void WhenInitializedKeepAliveOffsetIsOneHour()
+        {
+            const int defaultKeepAliveOffset = -1;
+            Assert.Equal(defaultKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
+        }
+
+        [Fact]
+        public void AfterInitializedKeepAliveOffsetCanBeSet()
+        {
+            const int newKeepAliveOffset = -2;
+            this.session.KeepAliveOffset = TimeSpan.FromHours(newKeepAliveOffset);
+            Assert.Equal(newKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
+        }
+
+        [Fact]
+        public void WhenInitializedSessionExpiryTimeIsSet()
+        {
+            var nullDateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
+            Assert.Equal(nullDateTime + this.session.SessionTimeout, this.session.SessionExpiryTime);
+        }
+
+        [Fact]
         public async Task OnLoginHttpPostMethodIsUsed()
         {
             await this.session.LoginAsync();
@@ -126,18 +163,11 @@
         }
 
         [Fact]
-        public void WhenInitializedSessionTimeoutIsEightHours()
+        public async Task OnLoginSessionExpiryTimeIsUpdated()
         {
-            const int defaultSessionTimeout = 8;
-            Assert.Equal(defaultSessionTimeout, this.session.SessionTimeout.TotalHours, 2);
-        }
-
-        [Fact]
-        public void SessionTimeoutCanBeSet()
-        {
-            const int newSessionTimeout = 2;
-            this.session.SessionTimeout = TimeSpan.FromHours(newSessionTimeout);
-            Assert.Equal(newSessionTimeout, this.session.SessionTimeout.TotalHours);
+            var expiryTimeBeforeRefresh = this.session.SessionExpiryTime;
+            await this.session.LoginAsync();
+            Assert.NotEqual(expiryTimeBeforeRefresh, this.session.SessionExpiryTime);
         }
 
         [Fact]
@@ -166,21 +196,6 @@
         }
 
         [Fact]
-        public void WhenInitializedKeepAliveOffsetIsOneHour()
-        {
-            const int defaultKeepAliveOffset = -1;
-            Assert.Equal(defaultKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
-        }
-
-        [Fact]
-        public void KeepAliveOffsetCanBeSet()
-        {
-            const int newKeepAliveOffset = -2;
-            this.session.KeepAliveOffset = TimeSpan.FromHours(newKeepAliveOffset);
-            Assert.Equal(newKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
-        }
-
-        [Fact]
         public async Task OnKeepAliveTheKeepAliveUriIsCalledIfSessionIsAboutToExpire()
         {
             await this.SetAboutToExpireSessionToken("SessionToken");
@@ -205,21 +220,6 @@
             await this.SetAboutToExpireSessionToken(sessionToken);
             await this.session.KeepAliveAsync();
             this.httpMessageHandler.VerifyHeaderValues("X-Authentication", sessionToken);
-        }
-
-        [Fact]
-        public void WhenInitializedSessionExpiryTimeIsSet()
-        {
-            var nullDateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
-            Assert.Equal(nullDateTime + this.session.SessionTimeout, this.session.SessionExpiryTime);
-        }
-
-        [Fact]
-        public async Task OnLoginSessionExpiryTimeIsUpdated()
-        {
-            var expiryTimeBeforeRefresh = this.session.SessionExpiryTime;
-            await this.session.LoginAsync();
-            Assert.NotEqual(expiryTimeBeforeRefresh, this.session.SessionExpiryTime);
         }
 
         [Fact]
