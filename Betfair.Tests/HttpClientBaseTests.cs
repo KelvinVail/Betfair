@@ -17,6 +17,7 @@
         public HttpClientBaseTests()
             : base(new Uri("https://www.test.com"))
         {
+            this.WithHandler(this.httpMessageHandler.Build());
         }
 
         [Fact]
@@ -26,10 +27,16 @@
         }
 
         [Fact]
-        public void OnWithHttpClientThrowIfHttpClientIsNull()
+        public void WhenInitializedHttpHandlerIsNotNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => this.WithHttpClient(null));
-            Assert.Equal("httpClient", exception.ParamName);
+            Assert.NotNull(this.Handler);
+        }
+
+        [Fact]
+        public void OnWithHandlerThrowIfHandlerIsNull()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(() => this.WithHandler(null));
+            Assert.Equal("handler", exception.ParamName);
         }
 
         [Fact]
@@ -67,12 +74,18 @@
         public async void OnSendThrowIfNotSuccessful(HttpStatusCode statusCode)
         {
             this.httpMessageHandler.WithStatusCode(statusCode);
-            using (var client = new HttpClient(this.httpMessageHandler.Build()))
+            using (var handler = this.httpMessageHandler.Build())
             {
-                this.WithHttpClient(client);
+                this.WithHandler(handler);
                 var exception = await Assert.ThrowsAsync<HttpRequestException>(() => this.SendAsync<dynamic>(this.request));
                 Assert.Equal($"{statusCode}", exception.Message);
             }
+        }
+
+        [Fact]
+        public void OnWithCertHandlerCheckCertificateRevocationListIsTrue()
+        {
+            Assert.True(this.Handler.CheckCertificateRevocationList);
         }
     }
 }

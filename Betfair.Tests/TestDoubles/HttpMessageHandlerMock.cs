@@ -16,7 +16,7 @@
 
     public class HttpMessageHandlerMock : IDisposable
     {
-        private Mock<HttpMessageHandler> messageHandler;
+        private Mock<HttpClientHandler> messageHandler;
 
         private HttpContent returnContent;
 
@@ -52,7 +52,7 @@
             return this;
         }
 
-        public HttpMessageHandler Build()
+        public HttpClientHandler Build()
         {
             return this.buildWithException ? this.BuildWithException() : this.BuildHandler();
         }
@@ -108,6 +108,11 @@
             Assert.Contains(value, values);
         }
 
+        public void VerifyHasCertificate()
+        {
+            Assert.NotEmpty(this.messageHandler.Object.ClientCertificates);
+        }
+
         public void Dispose()
         {
             this.Dispose(true);
@@ -123,9 +128,9 @@
             }
         }
 
-        private HttpMessageHandler BuildHandler()
+        private HttpClientHandler BuildHandler()
         {
-            this.messageHandler = new Mock<HttpMessageHandler>();
+            this.messageHandler = new Mock<HttpClientHandler>();
             this.responseMessage = new HttpResponseMessage
                 { StatusCode = this.httpStatusCode, Content = this.returnContent };
             this.messageHandler
@@ -140,9 +145,9 @@
             return this.messageHandler.Object;
         }
 
-        private HttpMessageHandler BuildWithException()
+        private HttpClientHandler BuildWithException()
         {
-            this.messageHandler = new Mock<HttpMessageHandler>();
+            this.messageHandler = new Mock<HttpClientHandler>();
 
             this.messageHandler
                 .Protected()

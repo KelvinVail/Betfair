@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
@@ -18,6 +19,10 @@
         private string sessionToken;
 
         private DateTime sessionCreateTime;
+
+        private HttpClientHandler clientHandler;
+
+        private X509Certificate2 certificate;
 
         public Session(string appKey, string username, string password)
             : base(new Uri("https://identitysso.betfair.com"))
@@ -37,22 +42,32 @@
 
         private bool SessionAboutToExpire => this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
 
-        public new Session WithHttpClient(HttpClient httpClient)
+        public new Session WithHandler(HttpClientHandler handler)
         {
-            base.WithHttpClient(httpClient);
+            this.clientHandler = handler;
+            base.WithHandler(this.clientHandler);
+            return this;
+        }
+
+        public Session WithCert(X509Certificate2 cert)
+        {
+            this.certificate = cert;
+            this.clientHandler.ClientCertificates.Add(cert);
             return this;
         }
 
         public async Task LoginAsync()
         {
             var request = this.GetLoginRequest();
-            await this.GetAndSetSessionFromBetfairAsync(request);
+            this.sessionToken = await this.GetSessionFromBetfairAsync(request);
+            this.sessionCreateTime = DateTime.UtcNow;
         }
 
         public async Task KeepAliveAsync()
         {
             var request = this.GetKeepAliveRequest();
-            await this.GetAndSetSessionFromBetfairAsync(request);
+            this.sessionToken = await this.GetSessionFromBetfairAsync(request);
+            this.sessionCreateTime = DateTime.UtcNow;
         }
 
         public async Task<string> GetSessionTokenAsync()
@@ -72,7 +87,8 @@
 
         private HttpRequestMessage GetLoginRequest()
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/login");
+            var requestUri = this.certificate == null ? "api/login" : "api/certlogin";
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Add("X-Application", this.appKey);
             request.Content = new FormUrlEncodedContent(
                 new Dictionary<string, string> { { "username", this.username }, { "password", this.password } });
@@ -105,32 +121,41 @@
                 await this.KeepAliveAsync();
         }
 
-        private async Task GetAndSetSessionFromBetfairAsync(HttpRequestMessage request)
+        private async Task<string> GetSessionFromBetfairAsync(HttpRequestMessage request)
         {
             var session = await this.SendAsync<LoginResponse>(request);
             session.Validate();
-            this.sessionCreateTime = DateTime.UtcNow;
-            this.sessionToken = session.Token;
+            return session.GetToken;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Performance",
             "CA1812:AvoidUninstantiatedInternalClasses",
-            Justification = "Late bound.  Used to deserialize SendAsync response.")]
+            Justification = "Used to deserialize SendAsync response.")]
         private sealed class LoginResponse
         {
-            [JsonProperty]
-            internal string Token { get; set; }
+            internal string GetToken => this.Token ?? this.SessionToken;
 
             [JsonProperty]
-            internal string Status { get; set; }
+            private string Token { get; set; }
 
             [JsonProperty]
-            internal string Error { get; set; }
+            private string SessionToken { get; set; }
+
+            [JsonProperty]
+            private string Status { get; set; }
+
+            [JsonProperty]
+            private string LoginStatus { get; set; }
+
+            [JsonProperty]
+            private string Error { get; set; }
+
+            private string GetStatus => this.Status ?? this.LoginStatus;
 
             internal void Validate()
             {
-                if (this.Status != "SUCCESS") throw new AuthenticationException($"{this.Status}: {this.Error}");
+                if (this.GetStatus != "SUCCESS") throw new AuthenticationException($"{this.GetStatus}: {this.Error ?? "NONE"}");
             }
         }
     }

@@ -5,15 +5,16 @@
     using System.Globalization;
     using System.Net.Http;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using Betfair.Tests.TestDoubles;
     using Xunit;
 
     public class SessionTests : IDisposable
     {
-        private HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock();
+        private readonly X509Certificate2 certificate = new X509Certificate2();
 
-        private HttpClient httpClient;
+        private HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock();
 
         private Session session = new Session("AppKey", "Username", "Password");
 
@@ -22,8 +23,7 @@
         public SessionTests()
         {
             this.httpMessageHandler.WithReturnContent(new LoginResponseStub());
-            this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
+            this.session.WithHandler(this.httpMessageHandler.Build());
         }
 
         [Fact]
@@ -73,12 +73,10 @@
         [InlineData("12345")]
         public async Task OnLoginAppKeyIsInRequestHeader(string appKey)
         {
-            using (var localSession = new Session(appKey, "Username", "Password"))
-            {
-                localSession.WithHttpClient(this.httpClient);
-                await localSession.LoginAsync();
-                this.httpMessageHandler.VerifyHeaderValues("X-Application", appKey);
-            }
+            this.session = new Session(appKey, "Username", "Password");
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyHeaderValues("X-Application", appKey);
         }
 
         [Theory]
@@ -87,12 +85,10 @@
         [InlineData("Bob")]
         public async Task OnLoginUsernameIsInRequestContent(string username)
         {
-            using (var localSession = new Session("AppKey", username, "Password"))
-            {
-                localSession.WithHttpClient(this.httpClient);
-                await localSession.LoginAsync();
-                this.httpMessageHandler.VerifyRequestContent(ContentString(username, "Password"));
-            }
+            this.session = new Session("AppKey", username, "Password");
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyRequestContent(ContentString(username, "Password"));
         }
 
         [Theory]
@@ -102,8 +98,7 @@
         public async Task OnLoginPasswordIsInRequestContent(string password)
         {
             this.session = new Session("AppKey", "Username", password);
-            this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
+            this.session.WithHandler(this.httpMessageHandler.Build());
             await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
         }
@@ -115,8 +110,7 @@
         public async Task OnLoginThrowIfFailed(string status, string error)
         {
             var responseHandler = this.SetExpectedHttpResponse(status, error).Build();
-            this.httpClient = new HttpClient(responseHandler);
-            this.session.WithHttpClient(this.httpClient);
+            this.session.WithHandler(responseHandler);
             var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
             Assert.Equal($"{status}: {error}", exception.Message);
         }
@@ -245,8 +239,7 @@
         {
             await this.SetAboutToExpireSessionToken("SessionToken");
             var responseHandler = this.SetExpectedHttpResponse(status, error).Build();
-            this.httpClient = new HttpClient(responseHandler);
-            this.session.WithHttpClient(this.httpClient);
+            this.session.WithHandler(responseHandler);
             var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.KeepAliveAsync);
             Assert.Equal($"{status}: {error}", exception.Message);
         }
@@ -260,10 +253,105 @@
             await this.SetAboutToExpireSessionToken("AboutToExpireSessionToken");
             this.httpMessageHandler.WithReturnContent(
                 new LoginResponseStub().WithSessionToken(sessionToken));
-            this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
+            this.session.WithHandler(this.httpMessageHandler.Build());
             await this.session.KeepAliveAsync();
             Assert.Equal(sessionToken, await this.session.GetSessionTokenAsync());
+        }
+
+        [Fact]
+        public async Task OnLoginWithCertUriIsCalledIfCertAddedToSession()
+        {
+            await this.SetCertSessionToken("SessionToken");
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/certlogin"));
+        }
+
+        [Fact]
+        public async Task OnLoginWithCertHttpPostMethodIsUsed()
+        {
+            await this.SetCertSessionToken("SessionToken");
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
+        }
+
+        [Fact]
+        public async Task OnLoginWithCertTheRequestContainsCertificate()
+        {
+            await this.SetCertSessionToken("SessionToken");
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyHasCertificate();
+        }
+
+        [Theory]
+        [InlineData("AppKey")]
+        [InlineData("ABC")]
+        [InlineData("12345")]
+        public async Task OnLoginWithCertAppKeyIsInRequestHeader(string appKey)
+        {
+            this.session = new Session(appKey, "Username", "Password");
+            await this.SetCertSessionToken("SessionToken");
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyHeaderValues("X-Application", appKey);
+        }
+
+        [Theory]
+        [InlineData("Username")]
+        [InlineData("Kelvin")]
+        [InlineData("Bob")]
+        public async Task OnLoginWithCertUsernameIsInRequestContent(string username)
+        {
+            this.session = new Session("AppKey", username, "Password");
+            await this.SetCertSessionToken("SessionToken");
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyRequestContent(ContentString(username, "Password"));
+        }
+
+        [Theory]
+        [InlineData("Password")]
+        [InlineData("123456")]
+        [InlineData("qwerty")]
+        public async Task OnLoginWithCertPasswordIsInRequestContent(string password)
+        {
+            this.session = new Session("AppKey", "Username", password);
+            await this.SetCertSessionToken("SessionToken");
+            await this.session.LoginAsync();
+            this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
+        }
+
+        [Theory]
+        [InlineData("FAIL")]
+        [InlineData("LIMITED_ACCESS")]
+        public async Task OnLoginWithCertThrowIfFailed(string status)
+        {
+            this.SetExpectedCertHttpResponse(status);
+            this.session.WithCert(this.certificate);
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
+            Assert.Equal($"{status}: NONE", exception.Message);
+        }
+
+        [Fact]
+        public async Task OnLoginWithCertTheCertLoginResponseIsDeserialized()
+        {
+            await this.SetCertSessionToken("SessionToken");
+        }
+
+        [Theory]
+        [InlineData("SessionToken")]
+        [InlineData("NewSessionToken")]
+        [InlineData("DifferentSessionToken")]
+        public async Task OnLoginWithCertSessionTokenIsSet(string sessionToken)
+        {
+            await this.SetCertSessionToken(sessionToken);
+            Assert.Equal(sessionToken, await this.session.GetSessionTokenAsync());
+        }
+
+        [Fact]
+        public async Task OnLoginWithCertExpiryTimeIsUpdated()
+        {
+            await this.SetCertSessionToken("SessionToken");
+            var expiryTimeBeforeRefresh = this.session.SessionExpiryTime;
+            await this.session.LoginAsync();
+            Assert.NotEqual(expiryTimeBeforeRefresh, this.session.SessionExpiryTime);
         }
 
         public void Dispose()
@@ -277,8 +365,8 @@
             if (this.disposedValue) return;
             if (disposing)
             {
-                this.httpClient.Dispose();
                 this.httpMessageHandler.Dispose();
+                this.certificate.Dispose();
             }
 
             this.session.Dispose();
@@ -301,6 +389,13 @@
                 new LoginResponseStub().WithStatus(status).WithError(error));
         }
 
+        private void SetExpectedCertHttpResponse(string status)
+        {
+            this.httpMessageHandler.WithReturnContent(
+                new CertLoginResponseStub { LoginStatus = status });
+            this.session.WithHandler(this.httpMessageHandler.Build());
+        }
+
         private async Task SetExpiredSessionToken(string sessionToken)
         {
             this.session.SessionTimeout = TimeSpan.FromHours(-1);
@@ -319,8 +414,16 @@
         {
             this.httpMessageHandler.WithReturnContent(
                 new LoginResponseStub().WithSessionToken(sessionToken));
-            this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.LoginAsync();
+        }
+
+        private async Task SetCertSessionToken(string sessionToken)
+        {
+            this.httpMessageHandler.WithReturnContent(
+                new CertLoginResponseStub { SessionToken = sessionToken });
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            this.session.WithCert(this.certificate);
             await this.session.LoginAsync();
         }
 
@@ -328,8 +431,7 @@
         {
             this.httpMessageHandler = new HttpMessageHandlerMock();
             this.httpMessageHandler.WithReturnContent(new LoginResponseStub());
-            this.httpClient = new HttpClient(this.httpMessageHandler.Build());
-            this.session.WithHttpClient(this.httpClient);
+            this.session.WithHandler(this.httpMessageHandler.Build());
         }
     }
 }

@@ -23,16 +23,19 @@
 
         protected HttpClient HttpClient { get; private set; }
 
+        protected HttpClientHandler Handler { get; private set; }
+
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        protected HttpClientBase WithHttpClient(HttpClient httpClient)
+        protected HttpClientBase WithHandler(HttpClientHandler handler)
         {
-            if (httpClient is null) throw new ArgumentNullException(nameof(httpClient));
-            this.HttpClient = this.Configure(httpClient);
+            this.Handler = handler ?? throw new ArgumentNullException(nameof(handler));
+            this.Handler.CheckCertificateRevocationList = true;
+            this.HttpClient = this.Configure(new HttpClient(this.Handler));
             return this;
         }
 
