@@ -87,7 +87,7 @@
 
         private HttpRequestMessage GetLoginRequest()
         {
-            var requestUri = this.certificate == null ? "api/login" : "api/certlogin";
+            var requestUri = this.certificate == null ? "api/login" : "https://identitysso-cert.betfair.com/api/certlogin";
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Add("X-Application", this.appKey);
             request.Content = new FormUrlEncodedContent(

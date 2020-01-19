@@ -263,7 +263,7 @@
         {
             await this.SetCertSessionToken("SessionToken");
             await this.session.LoginAsync();
-            this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/certlogin"));
+            this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
         }
 
         [Fact]
