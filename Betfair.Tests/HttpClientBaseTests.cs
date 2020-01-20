@@ -17,7 +17,6 @@
         public HttpClientBaseTests()
             : base(new Uri("https://www.test.com"))
         {
-            this.WithHandler(this.httpMessageHandler.Build());
         }
 
         [Fact]
@@ -63,34 +62,25 @@
         [Fact]
         public async Task WhenInitializedHeaderContainsConnectionKeepAlive()
         {
-            using (var handler = this.httpMessageHandler.Build())
-            {
-                this.WithHandler(handler);
-                await this.SendAsync<dynamic>(this.request);
-                this.httpMessageHandler.VerifyHeaderValues("Connection", "Keep-Alive");
-            }
+            this.WithHandler(this.httpMessageHandler.Build());
+            await this.SendAsync<dynamic>(this.request);
+            this.httpMessageHandler.VerifyHeaderValues("Connection", "Keep-Alive");
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsAcceptGzip()
         {
-            using (var handler = this.httpMessageHandler.Build())
-            {
-                this.WithHandler(handler);
-                await this.SendAsync<dynamic>(this.request);
-                this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
-            }
+            this.WithHandler(this.httpMessageHandler.Build());
+            await this.SendAsync<dynamic>(this.request);
+            this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsAcceptDeflate()
         {
-            using (var handler = this.httpMessageHandler.Build())
-            {
-                this.WithHandler(handler);
-                await this.SendAsync<dynamic>(this.request);
-                this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "deflate");
-            }
+            this.WithHandler(this.httpMessageHandler.Build());
+            await this.SendAsync<dynamic>(this.request);
+            this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "deflate");
         }
 
         [Fact]
@@ -116,9 +106,29 @@
         }
 
         [Fact]
-        public void OnWithCertHandlerCheckCertificateRevocationListIsTrue()
+        public void WhenInitializedHandlerCheckCertificateRevocationListIsTrue()
         {
             Assert.True(this.Handler.CheckCertificateRevocationList);
+        }
+
+        [Fact]
+        public void WhenInitializedHandlerAutoDecompressIsGzip()
+        {
+            Assert.Equal(DecompressionMethods.GZip, this.Handler.AutomaticDecompression);
+        }
+
+        [Fact]
+        public void OnWithCertHandlerCheckCertificateRevocationListIsTrue()
+        {
+            this.WithHandler(this.httpMessageHandler.Build());
+            Assert.True(this.Handler.CheckCertificateRevocationList);
+        }
+
+        [Fact]
+        public void OnWithCertHandlerAutoDecompressIsGzip()
+        {
+            this.WithHandler(this.httpMessageHandler.Build());
+            Assert.Equal(DecompressionMethods.GZip, this.Handler.AutomaticDecompression);
         }
     }
 }

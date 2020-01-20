@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
@@ -18,7 +19,12 @@
         protected HttpClientBase(Uri baseAddress)
         {
             this.baseAddress = baseAddress;
-            this.HttpClient = this.Configure(new HttpClient());
+            this.Handler = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip,
+                CheckCertificateRevocationList = true,
+            };
+            this.HttpClient = this.Configure(new HttpClient(this.Handler));
         }
 
         protected HttpClient HttpClient { get; private set; }
@@ -35,6 +41,7 @@
         {
             this.Handler = handler ?? throw new ArgumentNullException(nameof(handler));
             this.Handler.CheckCertificateRevocationList = true;
+            this.Handler.AutomaticDecompression = DecompressionMethods.GZip;
             this.HttpClient = this.Configure(new HttpClient(this.Handler));
             return this;
         }
