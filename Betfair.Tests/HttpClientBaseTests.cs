@@ -12,7 +12,7 @@
     {
         private readonly HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "test");
 
-        private readonly HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock();
+        private readonly HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock().WithReturnContent(new LoginResponseStub());
 
         public HttpClientBaseTests()
             : base(new Uri("https://www.test.com"))
@@ -58,6 +58,39 @@
         {
             var applicationJson = new MediaTypeWithQualityHeaderValue("application/json");
             Assert.Contains(applicationJson, this.HttpClient.DefaultRequestHeaders.Accept);
+        }
+
+        [Fact]
+        public async Task WhenInitializedHeaderContainsConnectionKeepAlive()
+        {
+            using (var handler = this.httpMessageHandler.Build())
+            {
+                this.WithHandler(handler);
+                await this.SendAsync<dynamic>(this.request);
+                this.httpMessageHandler.VerifyHeaderValues("Connection", "Keep-Alive");
+            }
+        }
+
+        [Fact]
+        public async Task WhenInitializedHeaderContainsAcceptGzip()
+        {
+            using (var handler = this.httpMessageHandler.Build())
+            {
+                this.WithHandler(handler);
+                await this.SendAsync<dynamic>(this.request);
+                this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
+            }
+        }
+
+        [Fact]
+        public async Task WhenInitializedHeaderContainsAcceptDeflate()
+        {
+            using (var handler = this.httpMessageHandler.Build())
+            {
+                this.WithHandler(handler);
+                await this.SendAsync<dynamic>(this.request);
+                this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "deflate");
+            }
         }
 
         [Fact]
