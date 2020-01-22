@@ -9,10 +9,8 @@
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public sealed class Session : HttpClientBase
+    public sealed class Session : HttpClientBase, ISession
     {
-        private readonly string appKey;
-
         private readonly string username;
 
         private readonly string password;
@@ -28,10 +26,12 @@
         public Session(string appKey, string username, string password)
             : base(new Uri("https://identitysso.betfair.com"))
         {
-            this.appKey = Validate(appKey, nameof(appKey));
+            this.AppKey = Validate(appKey, nameof(appKey));
             this.username = Validate(username, nameof(username));
             this.password = Validate(password, nameof(password));
         }
+
+        public string AppKey { get; }
 
         public TimeSpan SessionTimeout { get; set; } = TimeSpan.FromHours(8);
 
@@ -99,7 +99,7 @@
         {
             var requestUri = this.certificate == null ? "api/login" : "https://identitysso-cert.betfair.com/api/certlogin";
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            request.Headers.Add("X-Application", this.appKey);
+            request.Headers.Add("X-Application", this.AppKey);
             request.Content = new FormUrlEncodedContent(
                 new Dictionary<string, string> { { "username", this.username }, { "password", this.password } });
 

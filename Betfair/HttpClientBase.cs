@@ -51,7 +51,8 @@
             this.disposables.Add(request);
             var response = await this.HttpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode) throw new HttpRequestException($"{response.StatusCode}");
-            return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
+            var x = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(x);
         }
 
         protected virtual void Dispose(bool disposing)

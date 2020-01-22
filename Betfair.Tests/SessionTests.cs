@@ -30,7 +30,7 @@
         public void WhenInitializedThrowIfAppKeyIsNull()
         {
             var exception = Assert.Throws<ArgumentNullException>(() => new Session(null, "Username", "Password"));
-            Assert.Equal("appKey", exception.ParamName);
+            Assert.Equal("AppKey", exception.ParamName);
         }
 
         [Fact]
@@ -45,6 +45,12 @@
         {
             var exception = Assert.Throws<ArgumentNullException>(() => new Session("AppKey", "Username", null));
             Assert.Equal("password", exception.ParamName);
+        }
+
+        [Fact]
+        public void WhenInitializedAppKeyIsSet()
+        {
+            Assert.Equal("AppKey", this.session.AppKey);
         }
 
         [Fact]
