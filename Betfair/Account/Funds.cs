@@ -1,12 +1,12 @@
-﻿namespace Betfair
+﻿namespace Betfair.Account
 {
     using System.Net.Http;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public sealed class AccountFunds : AccountBase
+    public sealed class Funds : BetfairAccountBase
     {
-        public AccountFunds(ISession session)
+        public Funds(ISession session)
             : base(session)
         {
         }
@@ -23,7 +23,7 @@
 
         public int PointsBalance { get; private set; }
 
-        public new AccountFunds WithHandler(HttpClientHandler handler)
+        public new Funds WithHandler(HttpClientHandler handler)
         {
             base.WithHandler(handler);
             return this;

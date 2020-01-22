@@ -1,15 +1,16 @@
-﻿namespace Betfair.Tests
+﻿namespace Betfair.Tests.Account
 {
     using System;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Betfair.Account;
     using Betfair.Tests.TestDoubles;
     using Newtonsoft.Json;
     using Xunit;
 
-    public class AccountFundsTests : IDisposable
+    public class FundsTests : IDisposable
     {
-        private readonly AccountFunds accountFunds;
+        private readonly Funds funds;
 
         private readonly SessionSpy session = new SessionSpy();
 
@@ -17,44 +18,44 @@
 
         private bool disposedValue;
 
-        public AccountFundsTests()
+        public FundsTests()
         {
             var response = new ResponseStub<AccountFundsResponseStub>(new AccountFundsResponseStub());
             this.handler.WithReturnContent(response);
-            this.accountFunds = new AccountFunds(this.session);
-            this.accountFunds.WithHandler(this.handler.Build());
+            this.funds = new Funds(this.session);
+            this.funds.WithHandler(this.handler.Build());
         }
 
         [Fact]
         public void AccountFundsClassIsSealed()
         {
-            Assert.True(typeof(AccountFunds).IsSealed);
+            Assert.True(typeof(Funds).IsSealed);
         }
 
         [Fact]
         public void WhenInitializedInheritsHttpClientBase()
         {
-            Assert.True(typeof(HttpClientBase).IsAssignableFrom(typeof(AccountFunds)));
+            Assert.True(typeof(HttpClientBase).IsAssignableFrom(typeof(Funds)));
         }
 
         [Fact]
         public async Task OnRefreshGetTokenOnSessionIsCalledAsync()
         {
-            await this.accountFunds.RefreshAsync();
+            await this.funds.RefreshAsync();
             Assert.Equal(1, this.session.TimesGetSessionTokenAsyncCalled);
         }
 
         [Fact]
         public async Task OnRefreshPostRequestIsMade()
         {
-            await this.accountFunds.RefreshAsync();
+            await this.funds.RefreshAsync();
             this.handler.VerifyHttpMethod(HttpMethod.Post);
         }
 
         [Fact]
         public async Task OnRefreshAccountUriIsCalled()
         {
-            await this.accountFunds.RefreshAsync();
+            await this.funds.RefreshAsync();
             this.handler.VerifyRequestUri(new Uri("https://api.betfair.com/exchange/account/json-rpc/v1"));
         }
 
@@ -65,7 +66,7 @@
         public async Task OnRefreshAppKeyIsInRequestHeader(string appKey)
         {
             this.session.AppKey = appKey;
-            await this.accountFunds.RefreshAsync();
+            await this.funds.RefreshAsync();
             this.handler.VerifyHeaderValues("X-Application", appKey);
         }
 
@@ -76,57 +77,57 @@
         public async Task OnRefreshSessionTokenIsInRequestHeader(string sessionToken)
         {
             this.session.SessionToken = sessionToken;
-            await this.accountFunds.RefreshAsync();
+            await this.funds.RefreshAsync();
             this.handler.VerifyHeaderValues("X-Authentication", sessionToken);
         }
 
         [Fact]
         public async Task OnRefreshRequestContentIsSet()
         {
-            await this.accountFunds.RefreshAsync();
+            await this.funds.RefreshAsync();
             this.handler.VerifyRequestContent(JsonConvert.SerializeObject(new GetAccountFundsRequestStub()));
         }
 
         [Fact]
         public async Task OnRefreshAvailableToBetBalanceIsSet()
         {
-            await this.accountFunds.RefreshAsync();
-            Assert.Equal(1000, this.accountFunds.AvailableToBetBalance);
+            await this.funds.RefreshAsync();
+            Assert.Equal(1000, this.funds.AvailableToBetBalance);
         }
 
         [Fact]
         public async Task OnRefreshExposureIsSet()
         {
-            await this.accountFunds.RefreshAsync();
-            Assert.Equal(100, this.accountFunds.Exposure);
+            await this.funds.RefreshAsync();
+            Assert.Equal(100, this.funds.Exposure);
         }
 
         [Fact]
         public async Task OnRefreshRetainedCommissionIsSet()
         {
-            await this.accountFunds.RefreshAsync();
-            Assert.Equal(10, this.accountFunds.RetainedCommission);
+            await this.funds.RefreshAsync();
+            Assert.Equal(10, this.funds.RetainedCommission);
         }
 
         [Fact]
         public async Task OnRefreshExposureLimitIsSet()
         {
-            await this.accountFunds.RefreshAsync();
-            Assert.Equal(10000, this.accountFunds.ExposureLimit);
+            await this.funds.RefreshAsync();
+            Assert.Equal(10000, this.funds.ExposureLimit);
         }
 
         [Fact]
         public async Task OnRefreshDiscountRateIsSet()
         {
-            await this.accountFunds.RefreshAsync();
-            Assert.Equal(0.1, this.accountFunds.DiscountRate);
+            await this.funds.RefreshAsync();
+            Assert.Equal(0.1, this.funds.DiscountRate);
         }
 
         [Fact]
         public async Task OnRefreshPointsBalanceIsSet()
         {
-            await this.accountFunds.RefreshAsync();
-            Assert.Equal(9, this.accountFunds.PointsBalance);
+            await this.funds.RefreshAsync();
+            Assert.Equal(9, this.funds.PointsBalance);
         }
 
         [Fact]
@@ -134,8 +135,8 @@
         {
             var response = new ResponseStub<AccountFundsResponseStub>(new AccountFundsResponseStub()) { Error = "Error" };
             this.handler.WithReturnContent(response);
-            this.accountFunds.WithHandler(this.handler.Build());
-            var exception = await Assert.ThrowsAsync<HttpRequestException>(() => this.accountFunds.RefreshAsync());
+            this.funds.WithHandler(this.handler.Build());
+            var exception = await Assert.ThrowsAsync<HttpRequestException>(() => this.funds.RefreshAsync());
             Assert.Equal("Error", exception.Message);
         }
 
@@ -152,7 +153,7 @@
             {
             }
 
-            this.accountFunds.Dispose();
+            this.funds.Dispose();
             this.handler.Dispose();
             this.disposedValue = true;
         }

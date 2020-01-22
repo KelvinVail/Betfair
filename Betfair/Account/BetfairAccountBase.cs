@@ -1,15 +1,15 @@
-﻿namespace Betfair
+﻿namespace Betfair.Account
 {
     using System;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public abstract class AccountBase : HttpClientBase
+    public abstract class BetfairAccountBase : HttpClientBase
     {
         private readonly ISession session;
 
-        protected AccountBase(ISession session)
+        protected BetfairAccountBase(ISession session)
             : base(new Uri("https://api.betfair.com/exchange/account/json-rpc/v1"))
         {
             this.session = session;
