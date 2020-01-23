@@ -1,14 +1,17 @@
 ﻿namespace Betfair.Account
 {
+    using System;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public sealed class Funds : BetfairAccountBase
+    public sealed class Funds : IDisposable
     {
+        private readonly AccountService client;
+
         public Funds(ISession session)
-            : base(session)
         {
+            this.client = new AccountService(session);
         }
 
         public double AvailableToBetBalance { get; private set; }
@@ -23,21 +26,26 @@
 
         public int PointsBalance { get; private set; }
 
-        public new Funds WithHandler(HttpClientHandler handler)
+        public Funds WithHandler(HttpClientHandler handler)
         {
-            base.WithHandler(handler);
+            this.client.WithHandler(handler);
             return this;
         }
 
         public async Task RefreshAsync()
         {
-            var response = await this.SendAsync<AccountFundsResponse>("getAccountFunds");
+            var response = await this.client.SendAsync<AccountFundsResponse>("getAccountFunds");
             this.AvailableToBetBalance = response.AvailableToBetBalance;
             this.Exposure = response.Exposure;
             this.RetainedCommission = response.RetainedCommission;
             this.ExposureLimit = response.ExposureLimit;
             this.DiscountRate = response.DiscountRate;
             this.PointsBalance = response.PointsBalance;
+        }
+
+        public void Dispose()
+        {
+            this.client.Dispose();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

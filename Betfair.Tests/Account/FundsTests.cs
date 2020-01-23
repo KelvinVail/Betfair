@@ -33,12 +33,6 @@
         }
 
         [Fact]
-        public void WhenInitializedInheritsHttpClientBase()
-        {
-            Assert.True(typeof(HttpClientBase).IsAssignableFrom(typeof(Funds)));
-        }
-
-        [Fact]
         public async Task OnRefreshGetTokenOnSessionIsCalledAsync()
         {
             await this.funds.RefreshAsync();

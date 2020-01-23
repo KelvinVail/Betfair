@@ -54,12 +54,6 @@
         }
 
         [Fact]
-        public void WhenInitializedInheritsHttpClientBase()
-        {
-            Assert.True(typeof(HttpClientBase).IsAssignableFrom(typeof(Session)));
-        }
-
-        [Fact]
         public void WhenInitializedSessionTimeoutIsEightHours()
         {
             const int defaultSessionTimeout = 8;
@@ -448,6 +442,13 @@
             this.session.WithHandler(responseHandler);
             var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LogoutAsync);
             Assert.Equal($"{status}: NONE", exception.Message);
+        }
+
+        [Fact]
+        public async Task OnDisposeHttpClientIsDisposed()
+        {
+            this.session.Dispose();
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => this.session.LoginAsync());
         }
 
         public void Dispose()

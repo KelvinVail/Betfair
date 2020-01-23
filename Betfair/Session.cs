@@ -9,8 +9,10 @@
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public sealed class Session : HttpClientBase, ISession
+    public sealed class Session : ISession, IDisposable
     {
+        private readonly ExchangeHttpClient client = new ExchangeHttpClient(new Uri("https://identitysso.betfair.com"));
+
         private readonly string username;
 
         private readonly string password;
@@ -24,7 +26,6 @@
         private X509Certificate2 certificate;
 
         public Session(string appKey, string username, string password)
-            : base(new Uri("https://identitysso.betfair.com"))
         {
             this.AppKey = Validate(appKey, nameof(appKey));
             this.username = Validate(username, nameof(username));
@@ -45,10 +46,10 @@
 
         private bool SessionAboutToExpire => this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
 
-        public new Session WithHandler(HttpClientHandler handler)
+        public Session WithHandler(HttpClientHandler handler)
         {
             this.clientHandler = handler;
-            base.WithHandler(this.clientHandler);
+            this.client.WithHandler(this.clientHandler);
             return this;
         }
 
@@ -87,6 +88,11 @@
             await this.KeepAliveIfAboutToExpireAsync();
 
             return this.sessionToken;
+        }
+
+        public void Dispose()
+        {
+            this.client.Dispose();
         }
 
         private static string Validate(string value, string name)
@@ -133,7 +139,7 @@
 
         private async Task<string> GetSessionFromBetfairAsync(HttpRequestMessage request)
         {
-            var session = await this.SendAsync<LoginResponse>(request);
+            var session = await this.client.SendAsync<LoginResponse>(request);
             session.Validate();
             return session.GetToken;
         }

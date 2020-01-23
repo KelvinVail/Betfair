@@ -1,28 +1,41 @@
-﻿namespace Betfair.Account
+﻿namespace Betfair
 {
     using System;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public abstract class BetfairAccountBase : HttpClientBase
+    internal sealed class AccountService : IDisposable
     {
+        private readonly ExchangeHttpClient client = 
+            new ExchangeHttpClient(new Uri("https://api.betfair.com/exchange/account/json-rpc/v1"));
+
         private readonly ISession session;
 
-        protected BetfairAccountBase(ISession session)
-            : base(new Uri("https://api.betfair.com/exchange/account/json-rpc/v1"))
+        internal AccountService(ISession session)
         {
             this.session = session;
         }
 
-        protected async Task<T> SendAsync<T>(string method)
+        public void Dispose()
+        {
+            this.client.Dispose();
+        }
+
+        internal AccountService WithHandler(HttpClientHandler handler)
+        {
+            this.client.WithHandler(handler);
+            return this;
+        }
+
+        internal async Task<T> SendAsync<T>(string method)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, string.Empty);
             request.Headers.Add("X-Application", this.session.AppKey);
             var token = await this.session.GetSessionTokenAsync();
             request.Headers.Add("X-Authentication", token);
             request.Content = new StringContent(JsonConvert.SerializeObject(new AccountRequest(method)));
-            var response = await this.SendAsync<AccountResponse<T>>(request);
+            var response = await this.client.SendAsync<AccountResponse<T>>(request);
             if (response.Error != null) throw new HttpRequestException(response.Error);
             return response.Result;
         }
