@@ -1,4 +1,7 @@
-﻿namespace Betfair.Tests.Account
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+namespace Betfair.Tests.Account
 {
     using System;
     using System.Globalization;
@@ -110,6 +113,12 @@
         {
             await this.statement.RefreshAsync();
             Assert.Equal(0, this.statement.Items[0].Balance);
+        }
+
+        [Fact]
+        public void WhenInitializedItemsIsReadOnlyList()
+        {
+            Assert.True(this.statement.Items is IReadOnlyList<StatementItem>);
         }
 
         public void Dispose()

@@ -15,7 +15,7 @@
             this.client = new AccountService(session);
         }
 
-        public IReadOnlyList<StatementItem> Items { get; private set; }
+        public IReadOnlyList<StatementItem> Items { get; private set; } = new List<StatementItem>();
 
         public Statement WithHandler(HttpClientHandler handler)
         {
