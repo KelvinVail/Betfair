@@ -4,6 +4,7 @@
     using System.Net.Http;
     using System.Threading.Tasks;
     using Betfair.Account;
+    using Betfair.Tests.Account.TestDoubles;
     using Betfair.Tests.TestDoubles;
     using Newtonsoft.Json;
     using Xunit;
@@ -27,7 +28,7 @@
         }
 
         [Fact]
-        public void AccountFundsClassIsSealed()
+        public void FundsClassIsSealed()
         {
             Assert.True(typeof(Funds).IsSealed);
         }

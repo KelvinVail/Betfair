@@ -7,7 +7,7 @@
 
     internal sealed class AccountService : IDisposable
     {
-        private readonly ExchangeHttpClient client = 
+        private readonly ExchangeHttpClient client =
             new ExchangeHttpClient(new Uri("https://api.betfair.com/exchange/account/json-rpc/v1"));
 
         private readonly ISession session;

@@ -1,4 +1,4 @@
-﻿namespace Betfair.Tests.TestDoubles
+﻿namespace Betfair.Tests.Account.TestDoubles
 {
     using Newtonsoft.Json;
 

@@ -50,8 +50,8 @@
             this.disposables.Add(request);
             var response = await this.httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode) throw new HttpRequestException($"{response.StatusCode}");
-            var x = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(x);
+            var responseString = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseString);
         }
 
         private HttpClient Configure(HttpClient client)
