@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-
-namespace Betfair.Tests.Account
+﻿namespace Betfair.Tests.Account
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Net.Http;
     using System.Threading.Tasks;
