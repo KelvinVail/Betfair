@@ -1,8 +1,7 @@
-﻿using System.Globalization;
-
-namespace Betfair
+﻿namespace Betfair
 {
     using System;
+    using System.Globalization;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
@@ -13,7 +12,7 @@ namespace Betfair
 
         private readonly ISession session;
 
-        private string apiEndpoint;
+        private readonly string apiEndpoint;
 
         internal ExchangeService(ISession session, string apiName)
         {
@@ -39,15 +38,15 @@ namespace Betfair
             request.Headers.Add("X-Application", this.session.AppKey);
             var token = await this.session.GetSessionTokenAsync();
             request.Headers.Add("X-Authentication", token);
-            request.Content = new StringContent(JsonConvert.SerializeObject(new AccountRequest(this.apiEndpoint, method)));
-            var response = await this.client.SendAsync<AccountResponse<T>>(request);
+            request.Content = new StringContent(JsonConvert.SerializeObject(new ExchangeRequest(this.apiEndpoint, method)));
+            var response = await this.client.SendAsync<ExchangeResponse<T>>(request);
             if (response.Error != null) throw new HttpRequestException(response.Error);
             return response.Result;
         }
 
-        private sealed class AccountRequest
+        private sealed class ExchangeRequest
         {
-            internal AccountRequest(string endpoint, string method)
+            internal ExchangeRequest(string endpoint, string method)
             {
                 this.Method = $"{endpoint}APING/v1.0/{method}";
                 this.Id = 1;
@@ -68,7 +67,7 @@ namespace Betfair
             "Microsoft.Performance",
             "CA1812:AvoidUninstantiatedInternalClasses",
             Justification = "Used to deserialize SendAsync response.")]
-        private sealed class AccountResponse<T>
+        private sealed class ExchangeResponse<T>
         {
             [JsonProperty(PropertyName = "result")]
             internal T Result { get; set; }

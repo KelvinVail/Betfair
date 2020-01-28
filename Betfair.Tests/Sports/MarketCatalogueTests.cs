@@ -1,12 +1,11 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-
-namespace Betfair.Tests.Sports
+﻿namespace Betfair.Tests.Sports
 {
     using System;
+    using System.Net.Http;
+    using System.Threading.Tasks;
     using Betfair.Sports;
     using Betfair.Tests.TestDoubles;
+    using Newtonsoft.Json;
     using Xunit;
 
     public class MarketCatalogueTests : IDisposable
@@ -15,7 +14,7 @@ namespace Betfair.Tests.Sports
 
         private readonly HttpMessageHandlerMock handler = new HttpMessageHandlerMock();
 
-        private MarketCatalogue catalogue;
+        private readonly MarketCatalogue catalogue;
 
         public MarketCatalogueTests()
         {
