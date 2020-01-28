@@ -7,11 +7,11 @@
 
     public sealed class Funds : IDisposable
     {
-        private readonly AccountService client;
+        private readonly ExchangeService client;
 
         public Funds(ISession session)
         {
-            this.client = new AccountService(session);
+            this.client = new ExchangeService(session, "Account");
         }
 
         public double AvailableToBetBalance { get; private set; }

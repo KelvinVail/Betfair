@@ -30,6 +30,7 @@
         {
             this.returnContent = new StringContent("StringContent");
             this.httpStatusCode = HttpStatusCode.OK;
+            this.WithReturnContent(new { Test = "Test" });
         }
 
         public HttpMessageHandlerMock WithReturnContent(dynamic dynamicContent)

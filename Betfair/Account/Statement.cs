@@ -8,11 +8,11 @@
 
     public sealed class Statement : IDisposable
     {
-        private readonly AccountService client;
+        private readonly ExchangeService client;
 
         public Statement(ISession session)
         {
-            this.client = new AccountService(session);
+            this.client = new ExchangeService(session, "Account");
         }
 
         public IReadOnlyList<StatementItem> Items { get; private set; } = new List<StatementItem>();

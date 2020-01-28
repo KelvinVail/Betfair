@@ -1,20 +1,25 @@
-﻿namespace Betfair
+﻿using System.Globalization;
+
+namespace Betfair
 {
     using System;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    internal sealed class AccountService : IDisposable
+    internal sealed class ExchangeService : IDisposable
     {
-        private readonly ExchangeHttpClient client =
-            new ExchangeHttpClient(new Uri("https://api.betfair.com/exchange/account/json-rpc/v1"));
+        private readonly ExchangeHttpClient client;
 
         private readonly ISession session;
 
-        internal AccountService(ISession session)
+        private string apiEndpoint;
+
+        internal ExchangeService(ISession session, string apiName)
         {
             this.session = session;
+            this.client = new ExchangeHttpClient(new Uri($"https://api.betfair.com/exchange/{apiName.ToLower(CultureInfo.CurrentCulture)}/json-rpc/v1"));
+            this.apiEndpoint = apiName == "betting" ? "Sports" : apiName;
         }
 
         public void Dispose()
@@ -22,7 +27,7 @@
             this.client.Dispose();
         }
 
-        internal AccountService WithHandler(HttpClientHandler handler)
+        internal ExchangeService WithHandler(HttpClientHandler handler)
         {
             this.client.WithHandler(handler);
             return this;
@@ -34,7 +39,7 @@
             request.Headers.Add("X-Application", this.session.AppKey);
             var token = await this.session.GetSessionTokenAsync();
             request.Headers.Add("X-Authentication", token);
-            request.Content = new StringContent(JsonConvert.SerializeObject(new AccountRequest(method)));
+            request.Content = new StringContent(JsonConvert.SerializeObject(new AccountRequest(this.apiEndpoint, method)));
             var response = await this.client.SendAsync<AccountResponse<T>>(request);
             if (response.Error != null) throw new HttpRequestException(response.Error);
             return response.Result;
@@ -42,9 +47,9 @@
 
         private sealed class AccountRequest
         {
-            internal AccountRequest(string method)
+            internal AccountRequest(string endpoint, string method)
             {
-                this.Method = $"AccountAPING/v1.0/{method}";
+                this.Method = $"{endpoint}APING/v1.0/{method}";
                 this.Id = 1;
                 this.Jsonrpc = "2.0";
             }
