@@ -1,6 +1,7 @@
 ﻿namespace Betfair.Tests.Stream
 {
     using System;
+    using System.Net.Security;
     using System.Net.Sockets;
     using Betfair.Streaming;
     using Betfair.Tests.TestDoubles;
@@ -9,20 +10,21 @@
     public class MarketSubscriptionTests : IDisposable
     {
         private readonly SessionSpy session = new SessionSpy();
-        private readonly Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        private readonly NetworkStream stream;
         private readonly TcpClientSpy client;
         private readonly MarketSubscription marketSubscription;
         private bool disposed;
 
         public MarketSubscriptionTests()
         {
-            this.socket.Connect("test.com", 443);
-            this.stream = new NetworkStream(this.socket);
             this.marketSubscription = new MarketSubscription(this.session);
-            this.client = new TcpClientSpy();
-            this.client.WithStream(this.stream);
+            this.client = new TcpClientSpy("stream-api-integration.betfair.com");
             this.marketSubscription.WithTcpClient(this.client);
+        }
+
+        [Fact]
+        public void MarketSubscriptionIsSealed()
+        {
+            Assert.True(typeof(MarketSubscription).IsSealed);
         }
 
         [Fact]
@@ -39,15 +41,27 @@
         }
 
         [Fact]
-        public void WhenInitializedSendTimeoutIsThirtySeconds()
+        public void WhenInitializedReaderWriteTimeoutIsThirtySeconds()
         {
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.SendTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Reader.BaseStream.WriteTimeout);
         }
 
         [Fact]
-        public void WhenInitializedReceiveTimeoutIsThirtySeconds()
+        public void WhenInitializedReaderReadTimeoutIsThirtySeconds()
         {
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.ReceiveTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Reader.BaseStream.ReadTimeout);
+        }
+
+        [Fact]
+        public void WhenInitializedWriterWriteTimeoutIsThirtySeconds()
+        {
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Writer.BaseStream.WriteTimeout);
+        }
+
+        [Fact]
+        public void WhenInitializedWriterReadTimeoutIsThirtySeconds()
+        {
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Writer.BaseStream.ReadTimeout);
         }
 
         [Fact]
@@ -60,6 +74,20 @@
         public void WhenInitializedTcpClientIsConnectedToBetfairPort()
         {
             Assert.Equal(443, this.client.Port);
+        }
+
+        [Fact]
+        public void WhenInitializedReaderStreamIsAuthenticated()
+        {
+            var sslStream = (SslStream)this.marketSubscription.Reader.BaseStream;
+            Assert.True(sslStream.IsAuthenticated);
+        }
+
+        [Fact]
+        public void WhenInitializedWriterStreamIsAuthenticated()
+        {
+            var sslStream = (SslStream)this.marketSubscription.Writer.BaseStream;
+            Assert.True(sslStream.IsAuthenticated);
         }
 
         public void Dispose()
@@ -75,8 +103,6 @@
                 if (disposing)
                 {
                     this.client.Dispose();
-                    this.socket.Dispose();
-                    this.stream.Dispose();
                 }
 
                 this.disposed = true;
