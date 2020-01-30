@@ -25,6 +25,8 @@
 
         public string ConnectionId { get; private set; }
 
+        public bool Connected { get; private set; }
+
         public void WithTcpClient(ITcpClient client)
         {
             this.tcpClient = client;
@@ -71,12 +73,25 @@
             var operation = GetOperation(line);
             if (operation.IsConnectionMessage)
                 this.ProcessConnectionMessage(line);
+            if (operation.IsStatusMessage)
+                this.ProcessStatusMessage(line);
         }
 
         private void ProcessConnectionMessage(string line)
         {
             var connectionMessage = JsonConvert.DeserializeObject<ConnectionMessage>(line);
             this.ConnectionId = connectionMessage.ConnectionId;
+            this.Connected = true;
+        }
+
+        private void ProcessStatusMessage(string line)
+        {
+            var message = JsonConvert.DeserializeObject<StatusMessage>(line);
+            if (message.ConnectionClosed)
+            {
+                this.ConnectionId = null;
+                this.Connected = false;
+            }
         }
 
         private sealed class ExchangeStreamClient : TcpClient, ITcpClient
@@ -93,6 +108,8 @@
             internal string Operation { get; set; }
 
             internal bool IsConnectionMessage => this.Operation == "connection";
+
+            internal bool IsStatusMessage => this.Operation == "status";
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -103,6 +120,16 @@
         {
             [JsonProperty(PropertyName = "connectionId")]
             internal string ConnectionId { get; set; }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance",
+            "CA1812:AvoidUninstantiatedInternalClasses",
+            Justification = "Used to deserialize Json.")]
+        private sealed class StatusMessage
+        {
+            [JsonProperty(PropertyName = "connectionClosed")]
+            internal bool ConnectionClosed { get; set; }
         }
     }
 }

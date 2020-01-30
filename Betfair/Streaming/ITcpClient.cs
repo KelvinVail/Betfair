@@ -13,7 +13,5 @@
         void Connect(string host, int port);
 
         NetworkStream GetStream();
-
-        void Dispose();
     }
 }

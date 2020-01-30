@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Betfair.Tests.Stream
+﻿namespace Betfair.Tests.Stream
 {
     using System;
     using System.IO;
@@ -114,30 +112,56 @@ namespace Betfair.Tests.Stream
         [Theory]
         [InlineData("106-300120115247-8647")]
         [InlineData("ConnectionId")]
-        public async Task OnReadConnectionResponseConnectionStatusIsUpdated(string id)
+        public async Task OnReadConnectionOperationConnectionIdIsUpdated(string id)
         {
-            this.SendLine($"{{\"op\":\"connection\",\"connectionId\":\"{id}\"}}");
-            await this.marketSubscription.Start();
+            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"{id}\"}}");
             Assert.Equal(id, this.marketSubscription.ConnectionId);
         }
 
-        [Theory]
-        [InlineData("106-300120115247-8647")]
-        [InlineData("ConnectionId")]
-        [InlineData("ConnectionId2")]
-        [InlineData("ConnectionId3")]
-        [InlineData("ConnectionId4")]
-        public async Task Timer(string id)
+        [Fact]
+        public async Task OnReadConnectionOperationConnectedIsTrue()
         {
-            var timer = new Stopwatch();
-            var ticksPerSecond = Stopwatch.Frequency;
-            this.SendLine($"{{\"op\":\"connection\",\"connectionId\":\"{id}\"}}");
-            timer.Start();
-            await this.marketSubscription.Start();
-            timer.Stop();
-            var ms = timer.ElapsedMilliseconds;
-            var t = timer.ElapsedTicks;
+            Assert.False(this.marketSubscription.Connected);
+            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
+            Assert.True(this.marketSubscription.Connected);
+        }
+
+        [Fact]
+        public async Task OnReadStatusTimeoutOperationConnectionIdIsSetToNull()
+        {
+            const string id = "ConnectionId";
+            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"{id}\"}}");
             Assert.Equal(id, this.marketSubscription.ConnectionId);
+
+            var message =
+                $"{{\"op\":\"status\"," +
+                $"\"statusCode\":\"FAILURE\"," +
+                $"\"errorCode\":\"TIMEOUT\"," +
+                $"\"errorMessage\":\"Timed out trying to read message make sure to add \\\\r\\\\n\\nRead data : ﻿\"," +
+                $"\"connectionClosed\":true," +
+                $"\"connectionId\":\"{id}\"}}";
+
+            await this.SendLineAsync(message);
+            Assert.Null(this.marketSubscription.ConnectionId);
+            Assert.False(this.marketSubscription.Connected);
+        }
+
+        [Fact]
+        public async Task OnReadConnectionIdPersistsIfMessageNotConnectionOperation()
+        {
+            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
+            await this.SendLineAsync($"{{\"op\":\"other\"}}");
+            Assert.Equal("ConnectionId", this.marketSubscription.ConnectionId);
+            Assert.True(this.marketSubscription.Connected);
+        }
+
+        [Fact]
+        public async void OnReadStatusConnectionIdPersistsIfConnectionClosedIsFalse()
+        {
+            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
+            await this.SendLineAsync($"{{\"op\":\"status\",\"connectionClosed\":false,}}");
+            Assert.Equal("ConnectionId", this.marketSubscription.ConnectionId);
+            Assert.True(this.marketSubscription.Connected);
         }
 
         public void Dispose()
@@ -159,10 +183,11 @@ namespace Betfair.Tests.Stream
             }
         }
 
-        private void SendLine(string line)
+        private async Task SendLineAsync(string line)
         {
             this.sendLines.AppendLine(line);
             this.marketSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(this.sendLines.ToString())));
+            await this.marketSubscription.Start();
         }
     }
 }
