@@ -35,28 +35,28 @@
         public async Task WhenInitializedAcceptHeaderIsApplicationJson()
         {
             var applicationJson = new MediaTypeWithQualityHeaderValue("application/json");
-            await this.session.GetSessionTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyHeaderValues("Accept", applicationJson.ToString());
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsConnectionKeepAlive()
         {
-            await this.session.GetSessionTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyHeaderValues("Connection", "Keep-Alive");
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsAcceptGzip()
         {
-            await this.session.GetSessionTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsAcceptDeflate()
         {
-            await this.session.GetSessionTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "deflate");
         }
 
@@ -76,7 +76,7 @@
         {
             this.httpMessageHandler.WithStatusCode(statusCode);
             this.session.WithHandler(this.httpMessageHandler.Build());
-            var exception = await Assert.ThrowsAsync<HttpRequestException>(() => this.session.GetSessionTokenAsync());
+            var exception = await Assert.ThrowsAsync<HttpRequestException>(() => this.session.GetTokenAsync());
             Assert.Equal($"{statusCode}", exception.Message);
         }
 

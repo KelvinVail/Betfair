@@ -172,7 +172,7 @@
         public async Task OnLoginSessionTokenIsSet(string sessionToken)
         {
             await this.SetSessionToken(sessionToken);
-            Assert.Equal(sessionToken, await this.session.GetSessionTokenAsync());
+            Assert.Equal(sessionToken, await this.session.GetTokenAsync());
         }
 
         [Fact]
@@ -193,7 +193,7 @@
         [Fact]
         public async Task OnGetSessionTokenLoginIsCalledIfSessionTokenIsNull()
         {
-            Assert.Equal("SessionToken", await this.session.GetSessionTokenAsync());
+            Assert.Equal("SessionToken", await this.session.GetTokenAsync());
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
@@ -202,7 +202,7 @@
         {
             await this.SetSessionToken("SessionToken");
             this.ResetMessageHandler();
-            await this.session.GetSessionTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyTimesCalled(0);
         }
 
@@ -211,7 +211,7 @@
         {
             await this.SetExpiredSessionToken("SessionToken");
             this.ResetMessageHandler();
-            await this.session.GetSessionTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
@@ -283,7 +283,7 @@
                 new LoginResponseStub().WithSessionToken(sessionToken));
             this.session.WithHandler(this.httpMessageHandler.Build());
             await this.session.KeepAliveAsync();
-            Assert.Equal(sessionToken, await this.session.GetSessionTokenAsync());
+            Assert.Equal(sessionToken, await this.session.GetTokenAsync());
         }
 
         [Fact]
@@ -378,7 +378,7 @@
         public async Task OnLoginWithCertSessionTokenIsSet(string sessionToken)
         {
             await this.SetCertSessionToken(sessionToken);
-            Assert.Equal(sessionToken, await this.session.GetSessionTokenAsync());
+            Assert.Equal(sessionToken, await this.session.GetTokenAsync());
         }
 
         [Fact]

@@ -6,6 +6,6 @@
     {
         string AppKey { get; }
 
-        Task<string> GetSessionTokenAsync();
+        Task<string> GetTokenAsync();
     }
 }

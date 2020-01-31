@@ -36,7 +36,7 @@
         {
             var request = new HttpRequestMessage(HttpMethod.Post, string.Empty);
             request.Headers.Add("X-Application", this.session.AppKey);
-            var token = await this.session.GetSessionTokenAsync();
+            var token = await this.session.GetTokenAsync();
             request.Headers.Add("X-Authentication", token);
             request.Content = new StringContent(JsonConvert.SerializeObject(new ExchangeRequest(this.apiEndpoint, method)));
             var response = await this.client.SendAsync<ExchangeResponse<T>>(request);

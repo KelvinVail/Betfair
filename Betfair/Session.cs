@@ -81,7 +81,7 @@
             this.sessionCreateTime = DateTime.UtcNow;
         }
 
-        public async Task<string> GetSessionTokenAsync()
+        public async Task<string> GetTokenAsync()
         {
             await this.LoginIfSessionNotValidAsync();
             await this.LoginIfSessionExpiredAsync();

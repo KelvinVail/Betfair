@@ -8,9 +8,9 @@
 
         public string SessionToken { get; set; } = "SessionToken";
 
-        public string AppKey { get; set; }
+        public string AppKey { get; set; } = "AppKey";
 
-        public async Task<string> GetSessionTokenAsync()
+        public async Task<string> GetTokenAsync()
         {
             this.TimesGetSessionTokenAsyncCalled++;
             return await Task.Run(() => this.SessionToken);

@@ -1,6 +1,7 @@
 ﻿namespace Betfair.Streaming
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Net.Security;
     using System.Net.Sockets;
@@ -21,16 +22,20 @@
 
         public StreamReader Reader { get; set; }
 
-        public StreamWriter Writer { get; private set; }
-
-        public string ConnectionId { get; private set; }
+        public StreamWriter Writer { get; set; }
 
         public bool Connected { get; private set; }
 
+        private Dictionary<string, Action<ResponseMessage>> ProcessMessageMap =>
+            new Dictionary<string, Action<ResponseMessage>>
+            {
+                { "connection", this.ProcessConnectionMessage },
+                { "status", this.ProcessStatusMessage },
+            };
+
         public void WithTcpClient(ITcpClient client)
         {
-            this.tcpClient = client;
-            if (client is null) throw new ArgumentNullException(nameof(client));
+            this.tcpClient = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         public void Connect()
@@ -40,12 +45,19 @@
             this.Writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
         }
 
+        public async Task AuthenticateAsync()
+        {
+            var token = await this.session.GetTokenAsync();
+            var authMessage = GetAuthenticationMessage(this.session.AppKey, token);
+            await this.Writer.WriteLineAsync(authMessage);
+        }
+
         public async Task Start()
         {
-            while (true)
+            var line = "not null";
+            while (line != null)
             {
-                var line = await this.Reader.ReadLineAsync();
-                if (line == null) return;
+                line = await this.Reader.ReadLineAsync();
                 this.ProcessLine(line);
             }
         }
@@ -63,35 +75,26 @@
             return sslStream;
         }
 
-        private static MessageOperation GetOperation(string line)
+        private static string GetAuthenticationMessage(string appKey, string token)
         {
-            return JsonConvert.DeserializeObject<MessageOperation>(line);
+            return $"{{\"op\":\"authentication\",\"id\":1,\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
         }
 
         private void ProcessLine(string line)
         {
-            var operation = GetOperation(line);
-            if (operation.IsConnectionMessage)
-                this.ProcessConnectionMessage(line);
-            if (operation.IsStatusMessage)
-                this.ProcessStatusMessage(line);
+            if (line is null) return;
+            var message = JsonConvert.DeserializeObject<ResponseMessage>(line);
+            this.ProcessMessageMap[message.Operation](message);
         }
 
-        private void ProcessConnectionMessage(string line)
+        private void ProcessConnectionMessage(ResponseMessage message)
         {
-            var connectionMessage = JsonConvert.DeserializeObject<ConnectionMessage>(line);
-            this.ConnectionId = connectionMessage.ConnectionId;
             this.Connected = true;
         }
 
-        private void ProcessStatusMessage(string line)
+        private void ProcessStatusMessage(ResponseMessage message)
         {
-            var message = JsonConvert.DeserializeObject<StatusMessage>(line);
-            if (message.ConnectionClosed)
-            {
-                this.ConnectionId = null;
-                this.Connected = false;
-            }
+            this.Connected = !message.ConnectionClosed;
         }
 
         private sealed class ExchangeStreamClient : TcpClient, ITcpClient
@@ -102,34 +105,13 @@
             "Microsoft.Performance",
             "CA1812:AvoidUninstantiatedInternalClasses",
             Justification = "Used to deserialize Json.")]
-        private sealed class MessageOperation
+        private sealed class ResponseMessage
         {
             [JsonProperty(PropertyName = "op")]
-            internal string Operation { get; set; }
+            internal string Operation { get; private set; }
 
-            internal bool IsConnectionMessage => this.Operation == "connection";
-
-            internal bool IsStatusMessage => this.Operation == "status";
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance",
-            "CA1812:AvoidUninstantiatedInternalClasses",
-            Justification = "Used to deserialize Json.")]
-        private sealed class ConnectionMessage
-        {
-            [JsonProperty(PropertyName = "connectionId")]
-            internal string ConnectionId { get; set; }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance",
-            "CA1812:AvoidUninstantiatedInternalClasses",
-            Justification = "Used to deserialize Json.")]
-        private sealed class StatusMessage
-        {
             [JsonProperty(PropertyName = "connectionClosed")]
-            internal bool ConnectionClosed { get; set; }
+            internal bool ConnectionClosed { get; private set; }
         }
     }
 }

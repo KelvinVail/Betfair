@@ -1,4 +1,6 @@
-﻿namespace Betfair.Tests.Stream
+﻿using Newtonsoft.Json;
+
+namespace Betfair.Tests.Stream
 {
     using System;
     using System.IO;
@@ -6,6 +8,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Betfair.Streaming;
+    using Betfair.Tests.Stream.TestDoubles;
     using Betfair.Tests.TestDoubles;
     using Xunit;
 
@@ -13,8 +16,9 @@
     {
         private readonly SessionSpy session = new SessionSpy();
         private readonly TcpClientSpy client;
-        private readonly MarketSubscription marketSubscription;
+        private readonly StreamWriterSpy writer = new StreamWriterSpy();
         private readonly StringBuilder sendLines = new StringBuilder();
+        private readonly MarketSubscription marketSubscription;
         private bool disposed;
 
         public MarketSubscriptionTests()
@@ -109,15 +113,6 @@
             Assert.True(this.marketSubscription.Writer.AutoFlush);
         }
 
-        [Theory]
-        [InlineData("106-300120115247-8647")]
-        [InlineData("ConnectionId")]
-        public async Task OnReadConnectionOperationConnectionIdIsUpdated(string id)
-        {
-            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"{id}\"}}");
-            Assert.Equal(id, this.marketSubscription.ConnectionId);
-        }
-
         [Fact]
         public async Task OnReadConnectionOperationConnectedIsTrue()
         {
@@ -127,11 +122,9 @@
         }
 
         [Fact]
-        public async Task OnReadStatusTimeoutOperationConnectionIdIsSetToNull()
+        public async Task OnReadStatusTimeoutOperationConnectedIsFalse()
         {
-            const string id = "ConnectionId";
-            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"{id}\"}}");
-            Assert.Equal(id, this.marketSubscription.ConnectionId);
+            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
 
             var message =
                 $"{{\"op\":\"status\"," +
@@ -139,29 +132,41 @@
                 $"\"errorCode\":\"TIMEOUT\"," +
                 $"\"errorMessage\":\"Timed out trying to read message make sure to add \\\\r\\\\n\\nRead data : ﻿\"," +
                 $"\"connectionClosed\":true," +
-                $"\"connectionId\":\"{id}\"}}";
+                $"\"connectionId\":\"ConnectionId\"}}";
 
             await this.SendLineAsync(message);
-            Assert.Null(this.marketSubscription.ConnectionId);
             Assert.False(this.marketSubscription.Connected);
         }
 
         [Fact]
-        public async Task OnReadConnectionIdPersistsIfMessageNotConnectionOperation()
-        {
-            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
-            await this.SendLineAsync($"{{\"op\":\"other\"}}");
-            Assert.Equal("ConnectionId", this.marketSubscription.ConnectionId);
-            Assert.True(this.marketSubscription.Connected);
-        }
-
-        [Fact]
-        public async void OnReadStatusConnectionIdPersistsIfConnectionClosedIsFalse()
+        public async Task OnReadStatusUpdateConnectionStatusIsUpdated()
         {
             await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
             await this.SendLineAsync($"{{\"op\":\"status\",\"connectionClosed\":false,}}");
-            Assert.Equal("ConnectionId", this.marketSubscription.ConnectionId);
             Assert.True(this.marketSubscription.Connected);
+
+            await this.SendLineAsync($"{{\"op\":\"status\",\"connectionClosed\":true,}}");
+            Assert.False(this.marketSubscription.Connected);
+        }
+
+        [Fact]
+        public async Task OnAuthenticateGetSessionTokenIsCalled()
+        {
+            this.marketSubscription.Writer = this.writer;
+            await this.marketSubscription.AuthenticateAsync();
+            Assert.Equal(1, this.session.TimesGetSessionTokenAsyncCalled);
+        }
+
+        [Fact]
+        public async Task OnAuthenticate()
+        {
+            this.marketSubscription.Writer = this.writer;
+            await this.marketSubscription.AuthenticateAsync();
+            var authMessage = JsonConvert.SerializeObject(
+                new AuthenticationMessageStub(
+                    this.session.AppKey,
+                    await this.session.GetTokenAsync()));
+            Assert.Equal(authMessage, this.writer.LineWritten);
         }
 
         public void Dispose()
@@ -177,6 +182,7 @@
                 if (disposing)
                 {
                     this.client.Dispose();
+                    this.writer.Dispose();
                 }
 
                 this.disposed = true;
