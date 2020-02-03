@@ -1,6 +1,6 @@
 ﻿namespace Betfair.Streaming
 {
-    using System.Net.Sockets;
+    using System.IO;
 
     public interface ITcpClient
     {
@@ -12,6 +12,6 @@
 
         void Connect(string host, int port);
 
-        NetworkStream GetStream();
+        Stream GetSslStream(string host);
     }
 }

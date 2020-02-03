@@ -14,9 +14,9 @@
 
         public string LineWritten { get; private set; }
 
-        public override async Task WriteLineAsync(string line)
+        public override async Task WriteLineAsync(string value)
         {
-            await Task.Run(() => this.LineWritten = line);
+            await Task.Run(() => this.LineWritten = value);
         }
     }
 }

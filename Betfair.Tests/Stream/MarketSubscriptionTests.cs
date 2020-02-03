@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Betfair.Tests.Stream
+﻿namespace Betfair.Tests.Stream
 {
     using System;
     using System.IO;
@@ -10,6 +8,7 @@ namespace Betfair.Tests.Stream
     using Betfair.Streaming;
     using Betfair.Tests.Stream.TestDoubles;
     using Betfair.Tests.TestDoubles;
+    using Newtonsoft.Json;
     using Xunit;
 
     public class MarketSubscriptionTests : IDisposable
@@ -24,7 +23,7 @@ namespace Betfair.Tests.Stream
         public MarketSubscriptionTests()
         {
             this.marketSubscription = new MarketSubscription(this.session);
-            this.client = new TcpClientSpy("stream-api-integration.betfair.com");
+            this.client = new TcpClientSpy("stream-api-integration.betfair.com", 443);
             this.marketSubscription.WithTcpClient(this.client);
         }
 
@@ -52,28 +51,28 @@ namespace Betfair.Tests.Stream
         public void OnConnectReaderWriteTimeoutIsThirtySeconds()
         {
             this.marketSubscription.Connect();
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Reader.BaseStream.WriteTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.SendTimeout);
         }
 
         [Fact]
         public void OnConnectReaderReadTimeoutIsThirtySeconds()
         {
             this.marketSubscription.Connect();
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Reader.BaseStream.ReadTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.ReceiveTimeout);
         }
 
         [Fact]
         public void OnConnectWriterWriteTimeoutIsThirtySeconds()
         {
             this.marketSubscription.Connect();
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Writer.BaseStream.WriteTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.SendTimeout);
         }
 
         [Fact]
         public void OnConnectWriterReadTimeoutIsThirtySeconds()
         {
             this.marketSubscription.Connect();
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.marketSubscription.Writer.BaseStream.ReadTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.ReceiveTimeout);
         }
 
         [Fact]
@@ -90,19 +89,25 @@ namespace Betfair.Tests.Stream
             Assert.Equal(443, this.client.Port);
         }
 
+        // This test creates a network connection, I haven't been able to figure out
+        // a good way to mock this yet.
         [Fact]
         public void OnConnectReaderStreamIsAuthenticated()
         {
-            this.marketSubscription.Connect();
-            var sslStream = (SslStream)this.marketSubscription.Reader.BaseStream;
+            var subscription = new MarketSubscription(this.session);
+            subscription.Connect();
+            var sslStream = (SslStream)subscription.Reader.BaseStream;
             Assert.True(sslStream.IsAuthenticated);
         }
 
+        // This test creates a network connection, I haven't been able to figure out
+        // a good way to mock this yet.
         [Fact]
         public void OnConnectWriterStreamIsAuthenticated()
         {
-            this.marketSubscription.Connect();
-            var sslStream = (SslStream)this.marketSubscription.Writer.BaseStream;
+            var subscription = new MarketSubscription(this.session);
+            subscription.Connect();
+            var sslStream = (SslStream)subscription.Writer.BaseStream;
             Assert.True(sslStream.IsAuthenticated);
         }
 
@@ -181,7 +186,6 @@ namespace Betfair.Tests.Stream
             {
                 if (disposing)
                 {
-                    this.client.Dispose();
                     this.writer.Dispose();
                 }
 

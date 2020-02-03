@@ -1,19 +1,14 @@
 ﻿namespace Betfair.Tests.TestDoubles
 {
-    using System;
-    using System.Net.Sockets;
+    using System.IO;
     using Betfair.Streaming;
 
-    public sealed class TcpClientSpy : ITcpClient, IDisposable
+    public sealed class TcpClientSpy : ITcpClient
     {
-        private readonly Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-        private readonly NetworkStream networkStream;
-
-        public TcpClientSpy(string host)
+        public TcpClientSpy(string host, int port)
         {
-            this.socket.Connect(host, 443);
-            this.networkStream = new NetworkStream(this.socket);
+            this.Host = host;
+            this.Port = port;
         }
 
         public string Host { get; private set; }
@@ -32,17 +27,10 @@
             this.Port = port;
         }
 
-        public NetworkStream GetStream()
+        public Stream GetSslStream(string host)
         {
-            this.networkStream.WriteTimeout = this.SendTimeout;
-            this.networkStream.ReadTimeout = this.ReceiveTimeout;
-            return this.networkStream;
-        }
-
-        public void Dispose()
-        {
-            this.socket.Dispose();
-            this.networkStream.Dispose();
+            var ms = new MemoryStream();
+            return ms;
         }
     }
 }

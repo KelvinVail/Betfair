@@ -62,17 +62,14 @@
             }
         }
 
-        private static SslStream GetSslStream(ITcpClient client)
+        private static Stream GetSslStream(ITcpClient client)
         {
             client.ReceiveBufferSize = 1024 * 1000 * 2;
             client.SendTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
             client.ReceiveTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
             client.Connect(HostName, 443);
 
-            Stream stream = client.GetStream();
-            var sslStream = new SslStream(stream, false);
-            sslStream.AuthenticateAsClient(HostName);
-            return sslStream;
+            return client.GetSslStream(HostName);
         }
 
         private static string GetAuthenticationMessage(string appKey, string token)
@@ -99,6 +96,13 @@
 
         private sealed class ExchangeStreamClient : TcpClient, ITcpClient
         {
+            public Stream GetSslStream(string host)
+            {
+                var stream = this.GetStream();
+                var sslStream = new SslStream(stream, false);
+                sslStream.AuthenticateAsClient(host);
+                return sslStream;
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
