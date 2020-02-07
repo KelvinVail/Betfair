@@ -122,22 +122,22 @@
         public async Task OnReadConnectionOperationConnectedIsTrue()
         {
             Assert.False(this.marketSubscription.Connected);
-            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
+            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
             Assert.True(this.marketSubscription.Connected);
         }
 
         [Fact]
         public async Task OnReadStatusTimeoutOperationConnectedIsFalse()
         {
-            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
+            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
 
             var message =
-                $"{{\"op\":\"status\"," +
-                $"\"statusCode\":\"FAILURE\"," +
-                $"\"errorCode\":\"TIMEOUT\"," +
-                $"\"errorMessage\":\"Timed out trying to read message make sure to add \\\\r\\\\n\\nRead data : ﻿\"," +
-                $"\"connectionClosed\":true," +
-                $"\"connectionId\":\"ConnectionId\"}}";
+                "{\"op\":\"status\"," +
+                "\"statusCode\":\"FAILURE\"," +
+                "\"errorCode\":\"TIMEOUT\"," +
+                "\"errorMessage\":\"Timed out trying to read message make sure to add \\\\r\\\\n\\nRead data : ﻿\"," +
+                "\"connectionClosed\":true," +
+                "\"connectionId\":\"ConnectionId\"}";
 
             await this.SendLineAsync(message);
             Assert.False(this.marketSubscription.Connected);
@@ -146,12 +146,18 @@
         [Fact]
         public async Task OnReadStatusUpdateConnectionStatusIsUpdated()
         {
-            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}}");
-            await this.SendLineAsync($"{{\"op\":\"status\",\"connectionClosed\":false,}}");
+            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":false,}");
             Assert.True(this.marketSubscription.Connected);
 
-            await this.SendLineAsync($"{{\"op\":\"status\",\"connectionClosed\":true,}}");
+            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":true,}");
             Assert.False(this.marketSubscription.Connected);
+        }
+
+        [Fact]
+        public async Task OnReadHandleUnknownOperationWithoutThrowing()
+        {
+            await this.SendLineAsync("{\"op\":\"unknown\"}");
         }
 
         [Fact]
@@ -165,12 +171,13 @@
         [Fact]
         public async Task OnAuthenticate()
         {
-            this.marketSubscription.Writer = this.writer;
-            await this.marketSubscription.AuthenticateAsync();
             var authMessage = JsonConvert.SerializeObject(
                 new AuthenticationMessageStub(
                     this.session.AppKey,
                     await this.session.GetTokenAsync()));
+
+            this.marketSubscription.Writer = this.writer;
+            await this.marketSubscription.AuthenticateAsync();
             Assert.Equal(authMessage, this.writer.LineWritten);
         }
 
@@ -197,7 +204,9 @@
         {
             this.sendLines.AppendLine(line);
             this.marketSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(this.sendLines.ToString())));
-            await this.marketSubscription.Start();
+            await foreach (var message in this.marketSubscription.Listen())
+            {
+            }
         }
     }
 }

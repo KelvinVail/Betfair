@@ -52,13 +52,13 @@
             await this.Writer.WriteLineAsync(authMessage);
         }
 
-        public async Task Start()
+        public async IAsyncEnumerable<string> Listen()
         {
-            var line = "not null";
-            while (line != null)
+            string line;
+            while ((line = await this.Reader.ReadLineAsync()) != null)
             {
-                line = await this.Reader.ReadLineAsync();
                 this.ProcessLine(line);
+                yield return line;
             }
         }
 
@@ -79,9 +79,9 @@
 
         private void ProcessLine(string line)
         {
-            if (line is null) return;
             var message = JsonConvert.DeserializeObject<ResponseMessage>(line);
-            this.ProcessMessageMap[message.Operation](message);
+            if (this.ProcessMessageMap.ContainsKey(message.Operation))
+                this.ProcessMessageMap[message.Operation](message);
         }
 
         private void ProcessConnectionMessage(ResponseMessage message)
