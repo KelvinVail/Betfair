@@ -181,6 +181,31 @@
             Assert.Equal(authMessage, this.writer.LineWritten);
         }
 
+        [Theory]
+        [InlineData("1.120684740")]
+        [InlineData("1.234567890")]
+        [InlineData("1.098765432")]
+        public async Task OnSubscribeSubscriptionMessageIsSent(string marketId)
+        {
+            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"marketFilter\":{{\"marketIds\":[\"{marketId}\"]}},\"marketDataFilter\":{{}}}}";
+            this.marketSubscription.Writer = this.writer;
+
+            var marketFilter = new MarketFilter().WithMarketId(marketId);
+            await this.marketSubscription.Subscribe(marketFilter, null);
+            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+        }
+
+        [Fact]
+        public async Task OnSubscribeMarketDataFilterIsSet()
+        {
+            var dataFilter = new MarketDataFilter().WithBestPrices();
+            var dataString = JsonConvert.SerializeObject(dataFilter);
+            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"marketFilter\":{{}},\"marketDataFilter\":{dataString}}}";
+            this.marketSubscription.Writer = this.writer;
+            await this.marketSubscription.Subscribe(null, dataFilter);
+            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+        }
+
         public void Dispose()
         {
             this.Dispose(true);
@@ -189,22 +214,17 @@
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposed)
-            {
-                if (disposing)
-                {
-                    this.writer.Dispose();
-                }
+            if (this.disposed) return;
+            if (disposing) this.writer.Dispose();
 
-                this.disposed = true;
-            }
+            this.disposed = true;
         }
 
         private async Task SendLineAsync(string line)
         {
             this.sendLines.AppendLine(line);
             this.marketSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(this.sendLines.ToString())));
-            await foreach (var message in this.marketSubscription.Listen())
+            await foreach (var message in this.marketSubscription.GetChanges())
             {
             }
         }

@@ -6,17 +6,6 @@ namespace Betfair.Streaming
     [DataContract]
     public class MarketFilter
     {
-        public MarketFilter()
-        {
-            this.CountryCodes = new HashSet<string>();
-            this.BettingTypes = new HashSet<string>();
-            this.MarketTypes = new HashSet<string>();
-            this.Venues = new HashSet<string>();
-            this.MarketIds = new HashSet<string>();
-            this.EventTypeIds = new HashSet<string>();
-            this.EventIds = new HashSet<string>();
-        }
-
         [DataMember(Name = "countryCodes", EmitDefaultValue = false)]
         public HashSet<string> CountryCodes { get; private set; }
 
@@ -46,12 +35,14 @@ namespace Betfair.Streaming
 
         public MarketFilter WithMarketId(string marketId)
         {
+            if (this.MarketIds == null) this.MarketIds = new HashSet<string>();
             this.MarketIds.Add(marketId);
             return this;
         }
 
         public MarketFilter WithCountryCode(string countryCode)
         {
+            if (this.CountryCodes == null) this.CountryCodes = new HashSet<string>();
             this.CountryCodes.Add(countryCode);
             return this;
         }
@@ -64,24 +55,28 @@ namespace Betfair.Streaming
 
         public MarketFilter WithMarketType(string marketType)
         {
+            if (this.MarketTypes == null) this.MarketTypes = new HashSet<string>();
             this.MarketTypes.Add(marketType);
             return this;
         }
 
         public MarketFilter WithVenue(string venue)
         {
+            if (this.Venues == null) this.Venues = new HashSet<string>();
             this.Venues.Add(venue);
             return this;
         }
 
         public MarketFilter WithEventTypeId(string eventTypeId)
         {
+            if (this.EventTypeIds == null) this.EventTypeIds = new HashSet<string>();
             this.EventTypeIds.Add(eventTypeId);
             return this;
         }
 
         public MarketFilter WithEventId(string eventId)
         {
+            if (this.EventIds == null) this.EventIds = new HashSet<string>();
             this.EventIds.Add(eventId);
             return this;
         }
@@ -94,30 +89,35 @@ namespace Betfair.Streaming
 
         public MarketFilter WithBettingTypeOdds()
         {
+            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
             this.BettingTypes.Add("ODDS");
             return this;
         }
 
         public MarketFilter WithBettingTypeLine()
         {
+            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
             this.BettingTypes.Add("LINE");
             return this;
         }
 
         public MarketFilter WithBettingTypeRange()
         {
+            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
             this.BettingTypes.Add("RANGE");
             return this;
         }
 
         public MarketFilter WithBettingTypeAsianHandicapDoubleLine()
         {
+            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
             this.BettingTypes.Add("ASIAN_HANDICAP_DOUBLE_LINE");
             return this;
         }
 
         public MarketFilter WithBettingTypeAsianHandicapSingleLine()
         {
+            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
             this.BettingTypes.Add("ASIAN_HANDICAP_SINGLE_LINE");
             return this;
         }

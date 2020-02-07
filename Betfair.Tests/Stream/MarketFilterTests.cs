@@ -8,6 +8,12 @@
         private readonly MarketFilter marketFilter = new MarketFilter();
 
         [Fact]
+        public void WhenInitializedMarketIdsIsNull()
+        {
+            Assert.Null(this.marketFilter.MarketIds);
+        }
+
+        [Fact]
         public void CanBeInitializedWithMarketId()
         {
             this.marketFilter.WithMarketId("1");
@@ -27,6 +33,12 @@
         {
             this.marketFilter.WithMarketId("1").WithMarketId("1");
             Assert.Single(this.marketFilter.MarketIds);
+        }
+
+        [Fact]
+        public void WhenInitializedCountryCodesIsNull()
+        {
+            Assert.Null(this.marketFilter.CountryCodes);
         }
 
         [Theory]
@@ -69,6 +81,12 @@
             Assert.True(this.marketFilter.TurnInPlayEnabled);
         }
 
+        [Fact]
+        public void WhenInitializedMarketTypesIsNull()
+        {
+            Assert.Null(this.marketFilter.MarketTypes);
+        }
+
         [Theory]
         [InlineData("MarketType")]
         [InlineData("MATCH_ODDS")]
@@ -94,6 +112,12 @@
             this.marketFilter.WithMarketType("MATCH_ODDS");
             this.marketFilter.WithMarketType("MATCH_ODDS");
             Assert.Single(this.marketFilter.MarketTypes);
+        }
+
+        [Fact]
+        public void WhenInitializedVenuesIsNull()
+        {
+            Assert.Null(this.marketFilter.Venues);
         }
 
         [Theory]
@@ -123,6 +147,12 @@
             Assert.Single(this.marketFilter.Venues);
         }
 
+        [Fact]
+        public void WhenInitializedEventTypeIdsIsNull()
+        {
+            Assert.Null(this.marketFilter.EventTypeIds);
+        }
+
         [Theory]
         [InlineData("EventTypeId")]
         [InlineData("1")]
@@ -148,6 +178,12 @@
             this.marketFilter.WithEventTypeId("1");
             this.marketFilter.WithEventTypeId("1");
             Assert.Single(this.marketFilter.EventTypeIds);
+        }
+
+        [Fact]
+        public void WhenInitializedEventIdsIsNull()
+        {
+            Assert.Null(this.marketFilter.EventIds);
         }
 
         [Theory]
@@ -188,6 +224,12 @@
         {
             this.marketFilter.WithBspMarketsOnly();
             Assert.True(this.marketFilter.BspMarket);
+        }
+
+        [Fact]
+        public void WhenInitializedBettingTypesIsNull()
+        {
+            Assert.Null(this.marketFilter.BettingTypes);
         }
 
         [Fact]

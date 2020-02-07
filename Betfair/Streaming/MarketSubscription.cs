@@ -52,7 +52,13 @@
             await this.Writer.WriteLineAsync(authMessage);
         }
 
-        public async IAsyncEnumerable<string> Listen()
+        public async Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter)
+        {
+            var subscriptionMessage = GetMarketSubscriptionMessage(marketFilter, dataFilter);
+            await this.Writer.WriteLineAsync(subscriptionMessage);
+        }
+
+        public async IAsyncEnumerable<string> GetChanges()
         {
             string line;
             while ((line = await this.Reader.ReadLineAsync()) != null)
@@ -75,6 +81,15 @@
         private static string GetAuthenticationMessage(string appKey, string token)
         {
             return $"{{\"op\":\"authentication\",\"id\":1,\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
+        }
+
+        private static string GetMarketSubscriptionMessage(MarketFilter marketFilter, MarketDataFilter dataFilter)
+        {
+            var filterString = marketFilter == null ? "{}" : JsonConvert.SerializeObject(marketFilter);
+            var dataString = dataFilter == null ? "{}" : JsonConvert.SerializeObject(dataFilter);
+            var subscriptionMessage =
+                $"{{\"op\":\"marketSubscription\",\"marketFilter\":{filterString},\"marketDataFilter\":{dataString}}}";
+            return subscriptionMessage;
         }
 
         private void ProcessLine(string line)

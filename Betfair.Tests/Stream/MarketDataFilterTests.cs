@@ -8,15 +8,15 @@
         private readonly MarketDataFilter marketDataFilter = new MarketDataFilter();
 
         [Fact]
-        public void DefaultInitializationHasNoDataFilters()
+        public void WhenInitializedLadderLevelsIsNull()
         {
-            Assert.Empty(this.marketDataFilter.Fields);
+            Assert.Null(this.marketDataFilter.LadderLevels);
         }
 
         [Fact]
-        public void DefaultInitializationHasZeroLadderLevels()
+        public void WhenInitializedFieldsIsNull()
         {
-            Assert.Equal(0, this.marketDataFilter.LadderLevels);
+            Assert.Null(this.marketDataFilter.Fields);
         }
 
         [Fact]
