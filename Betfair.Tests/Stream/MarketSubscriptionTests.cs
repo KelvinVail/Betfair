@@ -187,7 +187,7 @@
         [InlineData("1.098765432")]
         public async Task OnSubscribeSubscriptionMessageIsSent(string marketId)
         {
-            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"marketFilter\":{{\"marketIds\":[\"{marketId}\"]}},\"marketDataFilter\":{{}}}}";
+            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{\"marketIds\":[\"{marketId}\"]}},\"marketDataFilter\":{{}}}}";
             this.marketSubscription.Writer = this.writer;
 
             var marketFilter = new MarketFilter().WithMarketId(marketId);
@@ -200,10 +200,61 @@
         {
             var dataFilter = new MarketDataFilter().WithBestPrices();
             var dataString = JsonConvert.SerializeObject(dataFilter);
-            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"marketFilter\":{{}},\"marketDataFilter\":{dataString}}}";
+            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{dataString}}}";
             this.marketSubscription.Writer = this.writer;
             await this.marketSubscription.Subscribe(null, dataFilter);
             Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+        }
+
+        [Fact]
+        public async Task IdIncrementsOnMarketSubscription()
+        {
+            this.marketSubscription.Writer = this.writer;
+
+            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
+            await this.marketSubscription.Subscribe(null, null);
+            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+
+            var subscriptionMessage2 = $"{{\"op\":\"marketSubscription\",\"id\":2,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
+            await this.marketSubscription.Subscribe(null, null);
+            Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
+        }
+
+        [Fact]
+        public async Task OnSubscribeToOrdersOrderSubscriptionIsSent()
+        {
+            var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":1}}";
+            this.marketSubscription.Writer = this.writer;
+            await this.marketSubscription.SubscribeToOrders();
+            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+        }
+
+        [Fact]
+        public async Task IdIncrementsOnOrderSubscription()
+        {
+            this.marketSubscription.Writer = this.writer;
+
+            var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":1}}";
+            await this.marketSubscription.SubscribeToOrders();
+            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+
+            var subscriptionMessage2 = $"{{\"op\":\"orderSubscription\",\"id\":2}}";
+            await this.marketSubscription.SubscribeToOrders();
+            Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
+        }
+
+        [Fact]
+        public async Task IdIncrementsOnAnySubscription()
+        {
+            this.marketSubscription.Writer = this.writer;
+
+            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
+            await this.marketSubscription.Subscribe(null, null);
+            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+
+            var subscriptionMessage2 = $"{{\"op\":\"orderSubscription\",\"id\":2}}";
+            await this.marketSubscription.SubscribeToOrders();
+            Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
         }
 
         public void Dispose()

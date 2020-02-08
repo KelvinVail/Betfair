@@ -14,6 +14,7 @@
         private const string HostName = "stream-api.betfair.com";
         private readonly ISession session;
         private ITcpClient tcpClient = new ExchangeStreamClient();
+        private int requestId;
 
         public MarketSubscription(ISession session)
         {
@@ -48,13 +49,22 @@
         public async Task AuthenticateAsync()
         {
             var token = await this.session.GetTokenAsync();
-            var authMessage = GetAuthenticationMessage(this.session.AppKey, token);
+            this.requestId++;
+            var authMessage = GetAuthenticationMessage(this.session.AppKey, token, this.requestId);
             await this.Writer.WriteLineAsync(authMessage);
         }
 
         public async Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter)
         {
-            var subscriptionMessage = GetMarketSubscriptionMessage(marketFilter, dataFilter);
+            this.requestId++;
+            var subscriptionMessage = GetMarketSubscriptionMessage(marketFilter, dataFilter, this.requestId);
+            await this.Writer.WriteLineAsync(subscriptionMessage);
+        }
+
+        public async Task SubscribeToOrders()
+        {
+            this.requestId++;
+            var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":{this.requestId}}}";
             await this.Writer.WriteLineAsync(subscriptionMessage);
         }
 
@@ -78,17 +88,17 @@
             return client.GetSslStream(HostName);
         }
 
-        private static string GetAuthenticationMessage(string appKey, string token)
+        private static string GetAuthenticationMessage(string appKey, string token, int requestId)
         {
-            return $"{{\"op\":\"authentication\",\"id\":1,\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
+            return $"{{\"op\":\"authentication\",\"id\":{requestId},\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
         }
 
-        private static string GetMarketSubscriptionMessage(MarketFilter marketFilter, MarketDataFilter dataFilter)
+        private static string GetMarketSubscriptionMessage(MarketFilter marketFilter, MarketDataFilter dataFilter, int requestId)
         {
             var filterString = marketFilter == null ? "{}" : JsonConvert.SerializeObject(marketFilter);
             var dataString = dataFilter == null ? "{}" : JsonConvert.SerializeObject(dataFilter);
             var subscriptionMessage =
-                $"{{\"op\":\"marketSubscription\",\"marketFilter\":{filterString},\"marketDataFilter\":{dataString}}}";
+                $"{{\"op\":\"marketSubscription\",\"id\":{requestId},\"marketFilter\":{filterString},\"marketDataFilter\":{dataString}}}";
             return subscriptionMessage;
         }
 
