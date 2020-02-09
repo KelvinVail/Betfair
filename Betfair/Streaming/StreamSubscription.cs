@@ -9,14 +9,14 @@
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
-    public sealed class MarketSubscription
+    public sealed class StreamSubscription
     {
         private const string HostName = "stream-api.betfair.com";
         private readonly ISession session;
         private ITcpClient tcpClient = new ExchangeStreamClient();
         private int requestId;
 
-        public MarketSubscription(ISession session)
+        public StreamSubscription(ISession session)
         {
             this.session = session;
         }
@@ -27,8 +27,8 @@
 
         public bool Connected { get; private set; }
 
-        private Dictionary<string, Action<ResponseMessage>> ProcessMessageMap =>
-            new Dictionary<string, Action<ResponseMessage>>
+        private Dictionary<string, Action<string>> ProcessMessageMap =>
+            new Dictionary<string, Action<string>>
             {
                 { "connection", this.ProcessConnectionMessage },
                 { "status", this.ProcessStatusMessage },
@@ -102,21 +102,33 @@
             return subscriptionMessage;
         }
 
-        private void ProcessLine(string line)
+        private static string GetOperation(string line)
         {
-            var message = JsonConvert.DeserializeObject<ResponseMessage>(line);
-            if (this.ProcessMessageMap.ContainsKey(message.Operation))
-                this.ProcessMessageMap[message.Operation](message);
+            return line.Split(",")[0].Split(":")[1].Replace("\"", string.Empty, StringComparison.CurrentCulture);
         }
 
-        private void ProcessConnectionMessage(ResponseMessage message)
+        private void ProcessLine(string line)
+        {
+            var operation = GetOperation(line);
+            if (this.ProcessMessageMap.ContainsKey(operation))
+                this.ProcessMessageMap[operation](line);
+        }
+
+        private void ProcessConnectionMessage(string line)
         {
             this.Connected = true;
         }
 
-        private void ProcessStatusMessage(ResponseMessage message)
+        private void ProcessStatusMessage(string line)
         {
-            this.Connected = !message.ConnectionClosed;
+            var split = line.Split(",");
+
+            foreach (var p in split)
+            {
+                if (!p.Contains("connectionClosed", StringComparison.CurrentCulture)) continue;
+                this.Connected = !p.Contains("true", StringComparison.CurrentCulture);
+                break;
+            }
         }
 
         private sealed class ExchangeStreamClient : TcpClient, ITcpClient
@@ -128,19 +140,6 @@
                 sslStream.AuthenticateAsClient(host);
                 return sslStream;
             }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Performance",
-            "CA1812:AvoidUninstantiatedInternalClasses",
-            Justification = "Used to deserialize Json.")]
-        private sealed class ResponseMessage
-        {
-            [JsonProperty(PropertyName = "op")]
-            internal string Operation { get; private set; }
-
-            [JsonProperty(PropertyName = "connectionClosed")]
-            internal bool ConnectionClosed { get; private set; }
         }
     }
 }

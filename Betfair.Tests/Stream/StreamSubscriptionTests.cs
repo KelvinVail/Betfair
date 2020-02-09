@@ -11,81 +11,81 @@
     using Newtonsoft.Json;
     using Xunit;
 
-    public class MarketSubscriptionTests : IDisposable
+    public class StreamSubscriptionTests : IDisposable
     {
         private readonly SessionSpy session = new SessionSpy();
         private readonly TcpClientSpy client;
         private readonly StreamWriterSpy writer = new StreamWriterSpy();
         private readonly StringBuilder sendLines = new StringBuilder();
-        private readonly MarketSubscription marketSubscription;
+        private readonly StreamSubscription streamSubscription;
         private bool disposed;
 
-        public MarketSubscriptionTests()
+        public StreamSubscriptionTests()
         {
-            this.marketSubscription = new MarketSubscription(this.session);
+            this.streamSubscription = new StreamSubscription(this.session);
             this.client = new TcpClientSpy("stream-api-integration.betfair.com", 443);
-            this.marketSubscription.WithTcpClient(this.client);
+            this.streamSubscription.WithTcpClient(this.client);
         }
 
         [Fact]
         public void MarketSubscriptionIsSealed()
         {
-            Assert.True(typeof(MarketSubscription).IsSealed);
+            Assert.True(typeof(StreamSubscription).IsSealed);
         }
 
         [Fact]
         public void OnWithTcpClientThrowIfNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => this.marketSubscription.WithTcpClient(null));
+            var exception = Assert.Throws<ArgumentNullException>(() => this.streamSubscription.WithTcpClient(null));
             Assert.Equal("client", exception.ParamName);
         }
 
         [Fact]
         public void OnConnectReceiveBufferSizeIsSet()
         {
-            this.marketSubscription.Connect();
+            this.streamSubscription.Connect();
             Assert.Equal(1024 * 1000 * 2, this.client.ReceiveBufferSize);
         }
 
         [Fact]
         public void OnConnectReaderWriteTimeoutIsThirtySeconds()
         {
-            this.marketSubscription.Connect();
+            this.streamSubscription.Connect();
             Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.SendTimeout);
         }
 
         [Fact]
         public void OnConnectReaderReadTimeoutIsThirtySeconds()
         {
-            this.marketSubscription.Connect();
+            this.streamSubscription.Connect();
             Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.ReceiveTimeout);
         }
 
         [Fact]
         public void OnConnectWriterWriteTimeoutIsThirtySeconds()
         {
-            this.marketSubscription.Connect();
+            this.streamSubscription.Connect();
             Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.SendTimeout);
         }
 
         [Fact]
         public void OnConnectWriterReadTimeoutIsThirtySeconds()
         {
-            this.marketSubscription.Connect();
+            this.streamSubscription.Connect();
             Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.client.ReceiveTimeout);
         }
 
         [Fact]
         public void OnConnectTcpClientIsConnectedToBetfairHost()
         {
-            this.marketSubscription.Connect();
+            this.streamSubscription.Connect();
             Assert.Equal("stream-api.betfair.com", this.client.Host);
         }
 
         [Fact]
         public void OnConnectTcpClientIsConnectedToBetfairPort()
         {
-            this.marketSubscription.Connect();
+            this.streamSubscription.Connect();
             Assert.Equal(443, this.client.Port);
         }
 
@@ -94,7 +94,7 @@
         [Fact]
         public void OnConnectReaderStreamIsAuthenticated()
         {
-            var subscription = new MarketSubscription(this.session);
+            var subscription = new StreamSubscription(this.session);
             subscription.Connect();
             var sslStream = (SslStream)subscription.Reader.BaseStream;
             Assert.True(sslStream.IsAuthenticated);
@@ -105,7 +105,7 @@
         [Fact]
         public void OnConnectWriterStreamIsAuthenticated()
         {
-            var subscription = new MarketSubscription(this.session);
+            var subscription = new StreamSubscription(this.session);
             subscription.Connect();
             var sslStream = (SslStream)subscription.Writer.BaseStream;
             Assert.True(sslStream.IsAuthenticated);
@@ -114,16 +114,16 @@
         [Fact]
         public void OnConnectWriterIsAutoFlushed()
         {
-            this.marketSubscription.Connect();
-            Assert.True(this.marketSubscription.Writer.AutoFlush);
+            this.streamSubscription.Connect();
+            Assert.True(this.streamSubscription.Writer.AutoFlush);
         }
 
         [Fact]
         public async Task OnReadConnectionOperationConnectedIsTrue()
         {
-            Assert.False(this.marketSubscription.Connected);
+            Assert.False(this.streamSubscription.Connected);
             await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-            Assert.True(this.marketSubscription.Connected);
+            Assert.True(this.streamSubscription.Connected);
         }
 
         [Fact]
@@ -140,18 +140,18 @@
                 "\"connectionId\":\"ConnectionId\"}";
 
             await this.SendLineAsync(message);
-            Assert.False(this.marketSubscription.Connected);
+            Assert.False(this.streamSubscription.Connected);
         }
 
         [Fact]
         public async Task OnReadStatusUpdateConnectionStatusIsUpdated()
         {
             await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":false,}");
-            Assert.True(this.marketSubscription.Connected);
+            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":false}");
+            Assert.True(this.streamSubscription.Connected);
 
-            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":true,}");
-            Assert.False(this.marketSubscription.Connected);
+            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":true}");
+            Assert.False(this.streamSubscription.Connected);
         }
 
         [Fact]
@@ -163,8 +163,8 @@
         [Fact]
         public async Task OnAuthenticateGetSessionTokenIsCalled()
         {
-            this.marketSubscription.Writer = this.writer;
-            await this.marketSubscription.AuthenticateAsync();
+            this.streamSubscription.Writer = this.writer;
+            await this.streamSubscription.AuthenticateAsync();
             Assert.Equal(1, this.session.TimesGetSessionTokenAsyncCalled);
         }
 
@@ -176,8 +176,8 @@
                     this.session.AppKey,
                     await this.session.GetTokenAsync()));
 
-            this.marketSubscription.Writer = this.writer;
-            await this.marketSubscription.AuthenticateAsync();
+            this.streamSubscription.Writer = this.writer;
+            await this.streamSubscription.AuthenticateAsync();
             Assert.Equal(authMessage, this.writer.LineWritten);
         }
 
@@ -188,10 +188,10 @@
         public async Task OnSubscribeSubscriptionMessageIsSent(string marketId)
         {
             var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{\"marketIds\":[\"{marketId}\"]}},\"marketDataFilter\":{{}}}}";
-            this.marketSubscription.Writer = this.writer;
+            this.streamSubscription.Writer = this.writer;
 
             var marketFilter = new MarketFilter().WithMarketId(marketId);
-            await this.marketSubscription.Subscribe(marketFilter, null);
+            await this.streamSubscription.Subscribe(marketFilter, null);
             Assert.Equal(subscriptionMessage, this.writer.LineWritten);
         }
 
@@ -201,22 +201,22 @@
             var dataFilter = new MarketDataFilter().WithBestPrices();
             var dataString = JsonConvert.SerializeObject(dataFilter);
             var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{dataString}}}";
-            this.marketSubscription.Writer = this.writer;
-            await this.marketSubscription.Subscribe(null, dataFilter);
+            this.streamSubscription.Writer = this.writer;
+            await this.streamSubscription.Subscribe(null, dataFilter);
             Assert.Equal(subscriptionMessage, this.writer.LineWritten);
         }
 
         [Fact]
         public async Task IdIncrementsOnMarketSubscription()
         {
-            this.marketSubscription.Writer = this.writer;
+            this.streamSubscription.Writer = this.writer;
 
             var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
-            await this.marketSubscription.Subscribe(null, null);
+            await this.streamSubscription.Subscribe(null, null);
             Assert.Equal(subscriptionMessage, this.writer.LineWritten);
 
             var subscriptionMessage2 = $"{{\"op\":\"marketSubscription\",\"id\":2,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
-            await this.marketSubscription.Subscribe(null, null);
+            await this.streamSubscription.Subscribe(null, null);
             Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
         }
 
@@ -224,36 +224,36 @@
         public async Task OnSubscribeToOrdersOrderSubscriptionIsSent()
         {
             var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":1}}";
-            this.marketSubscription.Writer = this.writer;
-            await this.marketSubscription.SubscribeToOrders();
+            this.streamSubscription.Writer = this.writer;
+            await this.streamSubscription.SubscribeToOrders();
             Assert.Equal(subscriptionMessage, this.writer.LineWritten);
         }
 
         [Fact]
         public async Task IdIncrementsOnOrderSubscription()
         {
-            this.marketSubscription.Writer = this.writer;
+            this.streamSubscription.Writer = this.writer;
 
             var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":1}}";
-            await this.marketSubscription.SubscribeToOrders();
+            await this.streamSubscription.SubscribeToOrders();
             Assert.Equal(subscriptionMessage, this.writer.LineWritten);
 
             var subscriptionMessage2 = $"{{\"op\":\"orderSubscription\",\"id\":2}}";
-            await this.marketSubscription.SubscribeToOrders();
+            await this.streamSubscription.SubscribeToOrders();
             Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
         }
 
         [Fact]
         public async Task IdIncrementsOnAnySubscription()
         {
-            this.marketSubscription.Writer = this.writer;
+            this.streamSubscription.Writer = this.writer;
 
             var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
-            await this.marketSubscription.Subscribe(null, null);
+            await this.streamSubscription.Subscribe(null, null);
             Assert.Equal(subscriptionMessage, this.writer.LineWritten);
 
             var subscriptionMessage2 = $"{{\"op\":\"orderSubscription\",\"id\":2}}";
-            await this.marketSubscription.SubscribeToOrders();
+            await this.streamSubscription.SubscribeToOrders();
             Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
         }
 
@@ -274,8 +274,8 @@
         private async Task SendLineAsync(string line)
         {
             this.sendLines.AppendLine(line);
-            this.marketSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(this.sendLines.ToString())));
-            await foreach (var message in this.marketSubscription.GetChanges())
+            this.streamSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(this.sendLines.ToString())));
+            await foreach (var message in this.streamSubscription.GetChanges())
             {
             }
         }
