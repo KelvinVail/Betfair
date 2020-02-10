@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Tests.Stream.TestDoubles
 {
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
 
@@ -12,11 +13,23 @@
         {
         }
 
-        public string LineWritten { get; private set; }
+        public string LastLineWritten { get; private set; }
+
+        public List<string> AllLinesWritten { get; private set; } = new List<string>();
 
         public override async Task WriteLineAsync(string value)
         {
-            await Task.Run(() => this.LineWritten = value);
+            await Task.Run(() =>
+                {
+                    this.LastLineWritten = value;
+                    this.AllLinesWritten.Add(value);
+                });
+        }
+
+        public void ClearPreviousResults()
+        {
+            this.LastLineWritten = null;
+            this.AllLinesWritten = new List<string>();
         }
     }
 }

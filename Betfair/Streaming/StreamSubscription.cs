@@ -13,6 +13,7 @@
     {
         private const string HostName = "stream-api.betfair.com";
         private readonly ISession session;
+        private readonly List<string> subscriptionMessages = new List<string>();
         private ITcpClient tcpClient = new ExchangeStreamClient();
         private int requestId;
 
@@ -26,6 +27,8 @@
         public StreamWriter Writer { get; set; }
 
         public bool Connected { get; private set; }
+
+        public string ConnectionId { get; private set; }
 
         private Dictionary<string, Action<string>> ProcessMessageMap =>
             new Dictionary<string, Action<string>>
@@ -59,6 +62,7 @@
             this.requestId++;
             var subscriptionMessage = GetMarketSubscriptionMessage(marketFilter, dataFilter, this.requestId);
             await this.Writer.WriteLineAsync(subscriptionMessage);
+            this.subscriptionMessages.Add(subscriptionMessage);
         }
 
         public async Task SubscribeToOrders()
@@ -66,6 +70,15 @@
             this.requestId++;
             var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":{this.requestId}}}";
             await this.Writer.WriteLineAsync(subscriptionMessage);
+            this.subscriptionMessages.Add(subscriptionMessage);
+        }
+
+        public async Task Resubscribe()
+        {
+            foreach (var subscriptionMessage in this.subscriptionMessages)
+            {
+                await this.Writer.WriteLineAsync(subscriptionMessage);
+            }
         }
 
         public async IAsyncEnumerable<string> GetChanges()
@@ -95,11 +108,10 @@
 
         private static string GetMarketSubscriptionMessage(MarketFilter marketFilter, MarketDataFilter dataFilter, int requestId)
         {
-            var filterString = marketFilter == null ? "{}" : JsonConvert.SerializeObject(marketFilter);
-            var dataString = dataFilter == null ? "{}" : JsonConvert.SerializeObject(dataFilter);
-            var subscriptionMessage =
-                $"{{\"op\":\"marketSubscription\",\"id\":{requestId},\"marketFilter\":{filterString},\"marketDataFilter\":{dataString}}}";
-            return subscriptionMessage;
+            var operation = $"{{\"op\":\"marketSubscription\",\"id\":{requestId}";
+            if (marketFilter != null) operation += ",\"marketFilter\":" + JsonConvert.SerializeObject(marketFilter);
+            if (dataFilter != null) operation += ",\"marketDataFilter\":" + JsonConvert.SerializeObject(dataFilter);
+            return operation += "}";
         }
 
         private static string GetOperation(string line)
@@ -116,13 +128,22 @@
 
         private void ProcessConnectionMessage(string line)
         {
+            var split = line.Split(",");
+            foreach (var p in split)
+            {
+                if (!p.Contains("connectionId", StringComparison.CurrentCulture)) continue;
+                this.ConnectionId = p.Split(":")[1]
+                    .Replace("\"", string.Empty, StringComparison.CurrentCulture)
+                    .Replace("}", string.Empty, StringComparison.CurrentCulture);
+                break;
+            }
+
             this.Connected = true;
         }
 
         private void ProcessStatusMessage(string line)
         {
             var split = line.Split(",");
-
             foreach (var p in split)
             {
                 if (!p.Contains("connectionClosed", StringComparison.CurrentCulture)) continue;

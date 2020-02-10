@@ -25,6 +25,7 @@
             this.streamSubscription = new StreamSubscription(this.session);
             this.client = new TcpClientSpy("stream-api-integration.betfair.com", 443);
             this.streamSubscription.WithTcpClient(this.client);
+            this.streamSubscription.Writer = this.writer;
         }
 
         [Fact]
@@ -126,6 +127,16 @@
             Assert.True(this.streamSubscription.Connected);
         }
 
+        [Theory]
+        [InlineData("ConnectionId")]
+        [InlineData("NewConnectionId")]
+        [InlineData("RefreshedConnectionId")]
+        public async Task OnReadConnectionOperationConnectionIdIsRecorded(string connectionId)
+        {
+            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"{connectionId}\"}}");
+            Assert.Equal(connectionId, this.streamSubscription.ConnectionId);
+        }
+
         [Fact]
         public async Task OnReadStatusTimeoutOperationConnectedIsFalse()
         {
@@ -163,7 +174,6 @@
         [Fact]
         public async Task OnAuthenticateGetSessionTokenIsCalled()
         {
-            this.streamSubscription.Writer = this.writer;
             await this.streamSubscription.AuthenticateAsync();
             Assert.Equal(1, this.session.TimesGetSessionTokenAsyncCalled);
         }
@@ -176,9 +186,8 @@
                     this.session.AppKey,
                     await this.session.GetTokenAsync()));
 
-            this.streamSubscription.Writer = this.writer;
             await this.streamSubscription.AuthenticateAsync();
-            Assert.Equal(authMessage, this.writer.LineWritten);
+            Assert.Equal(authMessage, this.writer.LastLineWritten);
         }
 
         [Theory]
@@ -187,74 +196,105 @@
         [InlineData("1.098765432")]
         public async Task OnSubscribeSubscriptionMessageIsSent(string marketId)
         {
-            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{\"marketIds\":[\"{marketId}\"]}},\"marketDataFilter\":{{}}}}";
-            this.streamSubscription.Writer = this.writer;
-
             var marketFilter = new MarketFilter().WithMarketId(marketId);
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1)
+                .WithMarketFilter(marketFilter)
+                .ToJson();
             await this.streamSubscription.Subscribe(marketFilter, null);
-            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
         }
 
         [Fact]
         public async Task OnSubscribeMarketDataFilterIsSet()
         {
             var dataFilter = new MarketDataFilter().WithBestPrices();
-            var dataString = JsonConvert.SerializeObject(dataFilter);
-            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{dataString}}}";
-            this.streamSubscription.Writer = this.writer;
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1)
+                .WithMarketDateFilter(dataFilter)
+                .ToJson();
             await this.streamSubscription.Subscribe(null, dataFilter);
-            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
         }
 
         [Fact]
         public async Task IdIncrementsOnMarketSubscription()
         {
-            this.streamSubscription.Writer = this.writer;
-
-            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1).ToJson();
             await this.streamSubscription.Subscribe(null, null);
-            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
 
-            var subscriptionMessage2 = $"{{\"op\":\"marketSubscription\",\"id\":2,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
+            var subscriptionMessage2 = new SubscriptionMessageStub("marketSubscription", 2).ToJson();
             await this.streamSubscription.Subscribe(null, null);
-            Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage2, this.writer.LastLineWritten);
         }
 
         [Fact]
         public async Task OnSubscribeToOrdersOrderSubscriptionIsSent()
         {
-            var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":1}}";
-            this.streamSubscription.Writer = this.writer;
+            var subscriptionMessage = new SubscriptionMessageStub("orderSubscription", 1).ToJson();
             await this.streamSubscription.SubscribeToOrders();
-            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
         }
 
         [Fact]
         public async Task IdIncrementsOnOrderSubscription()
         {
-            this.streamSubscription.Writer = this.writer;
-
-            var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":1}}";
+            var subscriptionMessage = new SubscriptionMessageStub("orderSubscription", 1).ToJson();
             await this.streamSubscription.SubscribeToOrders();
-            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
 
-            var subscriptionMessage2 = $"{{\"op\":\"orderSubscription\",\"id\":2}}";
+            var subscriptionMessage2 = new SubscriptionMessageStub("orderSubscription", 2).ToJson();
             await this.streamSubscription.SubscribeToOrders();
-            Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage2, this.writer.LastLineWritten);
         }
 
         [Fact]
         public async Task IdIncrementsOnAnySubscription()
         {
-            this.streamSubscription.Writer = this.writer;
-
-            var subscriptionMessage = $"{{\"op\":\"marketSubscription\",\"id\":1,\"marketFilter\":{{}},\"marketDataFilter\":{{}}}}";
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1).ToJson();
             await this.streamSubscription.Subscribe(null, null);
-            Assert.Equal(subscriptionMessage, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
 
-            var subscriptionMessage2 = $"{{\"op\":\"orderSubscription\",\"id\":2}}";
+            var subscriptionMessage2 = new SubscriptionMessageStub("orderSubscription", 2).ToJson();
             await this.streamSubscription.SubscribeToOrders();
-            Assert.Equal(subscriptionMessage2, this.writer.LineWritten);
+            Assert.Equal(subscriptionMessage2, this.writer.LastLineWritten);
+        }
+
+        [Fact]
+        public async Task OnResubscribeOriginalMarketSubscriptionMessageIsSent()
+        {
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1).ToJson();
+            await this.streamSubscription.Subscribe(null, null);
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+
+            await this.TriggerResubscribe();
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+        }
+
+        [Fact]
+        public async Task OnResubscribeOriginalOrderSubscriptionMessageIsSent()
+        {
+            var subscriptionMessage = new SubscriptionMessageStub("orderSubscription", 1).ToJson();
+            await this.streamSubscription.SubscribeToOrders();
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+
+            await this.TriggerResubscribe();
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+        }
+
+        [Fact]
+        public async Task OnResubscribeAllSubscriptionMessagesAreSent()
+        {
+            await this.streamSubscription.Subscribe(null, null);
+            await this.streamSubscription.Subscribe(null, null);
+            await this.streamSubscription.SubscribeToOrders();
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1).ToJson();
+            var subscriptionMessage2 = new SubscriptionMessageStub("marketSubscription", 2).ToJson();
+            var subscriptionMessage3 = new SubscriptionMessageStub("orderSubscription", 3).ToJson();
+
+            await this.TriggerResubscribe();
+            Assert.Contains(subscriptionMessage, this.writer.AllLinesWritten);
+            Assert.Contains(subscriptionMessage2, this.writer.AllLinesWritten);
+            Assert.Contains(subscriptionMessage3, this.writer.AllLinesWritten);
         }
 
         public void Dispose()
@@ -278,6 +318,12 @@
             await foreach (var message in this.streamSubscription.GetChanges())
             {
             }
+        }
+
+        private async Task TriggerResubscribe()
+        {
+            this.writer.ClearPreviousResults();
+            await this.streamSubscription.Resubscribe();
         }
     }
 }

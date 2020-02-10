@@ -21,6 +21,8 @@
 
         public int ReceiveTimeout { get; set; }
 
+        public int TimeGetSslStreamCalled { get; set; }
+
         public void Connect(string host, int port)
         {
             this.Host = host;
@@ -29,6 +31,7 @@
 
         public Stream GetSslStream(string host)
         {
+            this.TimeGetSslStreamCalled++;
             var ms = new MemoryStream();
             return ms;
         }
