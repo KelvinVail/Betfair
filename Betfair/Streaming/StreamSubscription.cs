@@ -5,6 +5,7 @@
     using System.IO;
     using System.Net.Security;
     using System.Net.Sockets;
+    using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
@@ -13,7 +14,7 @@
     {
         private const string HostName = "stream-api.betfair.com";
         private readonly ISession session;
-        private readonly List<string> subscriptionMessages = new List<string>();
+        private readonly Dictionary<int, SubscriptionMessage> subscriptionMessages = new Dictionary<int, SubscriptionMessage>();
         private ITcpClient tcpClient = new ExchangeStreamClient();
         private int requestId;
 
@@ -30,8 +31,8 @@
 
         public string ConnectionId { get; private set; }
 
-        private Dictionary<string, Action<string>> ProcessMessageMap =>
-            new Dictionary<string, Action<string>>
+        private Dictionary<string, Action<ResponseMessage>> ProcessMessageMap =>
+            new Dictionary<string, Action<ResponseMessage>>
             {
                 { "connection", this.ProcessConnectionMessage },
                 { "status", this.ProcessStatusMessage },
@@ -61,23 +62,23 @@
         {
             this.requestId++;
             var subscriptionMessage = GetMarketSubscriptionMessage(marketFilter, dataFilter, this.requestId);
-            await this.Writer.WriteLineAsync(subscriptionMessage);
-            this.subscriptionMessages.Add(subscriptionMessage);
+            await this.Writer.WriteLineAsync(subscriptionMessage.ToJson());
+            this.subscriptionMessages.Add(this.requestId, subscriptionMessage);
         }
 
         public async Task SubscribeToOrders()
         {
             this.requestId++;
-            var subscriptionMessage = $"{{\"op\":\"orderSubscription\",\"id\":{this.requestId}}}";
-            await this.Writer.WriteLineAsync(subscriptionMessage);
-            this.subscriptionMessages.Add(subscriptionMessage);
+            var subscriptionMessage = new SubscriptionMessage("orderSubscription", this.requestId);
+            await this.Writer.WriteLineAsync(subscriptionMessage.ToJson());
+            this.subscriptionMessages.Add(this.requestId, subscriptionMessage);
         }
 
         public async Task Resubscribe()
         {
-            foreach (var subscriptionMessage in this.subscriptionMessages)
+            foreach (var m in this.subscriptionMessages)
             {
-                await this.Writer.WriteLineAsync(subscriptionMessage);
+                await this.Writer.WriteLineAsync(m.Value.ToJson());
             }
         }
 
@@ -86,7 +87,9 @@
             string line;
             while ((line = await this.Reader.ReadLineAsync()) != null)
             {
-                this.ProcessLine(line);
+                var message = Utf8Json.JsonSerializer.Deserialize<ResponseMessage>(line);
+                this.ProcessLine(message);
+                this.SetInitialClock(message);
                 yield return line;
             }
         }
@@ -106,49 +109,88 @@
             return $"{{\"op\":\"authentication\",\"id\":{requestId},\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
         }
 
-        private static string GetMarketSubscriptionMessage(MarketFilter marketFilter, MarketDataFilter dataFilter, int requestId)
+        private static SubscriptionMessage GetMarketSubscriptionMessage(MarketFilter marketFilter, MarketDataFilter dataFilter, int requestId)
         {
-            var operation = $"{{\"op\":\"marketSubscription\",\"id\":{requestId}";
-            if (marketFilter != null) operation += ",\"marketFilter\":" + JsonConvert.SerializeObject(marketFilter);
-            if (dataFilter != null) operation += ",\"marketDataFilter\":" + JsonConvert.SerializeObject(dataFilter);
-            return operation += "}";
+            return new SubscriptionMessage("marketSubscription", requestId)
+                .WithMarketFilter(marketFilter)
+                .WithMarketDateFilter(dataFilter);
         }
 
-        private static string GetOperation(string line)
+        private void ProcessLine(ResponseMessage message)
         {
-            return line.Split(",")[0].Split(":")[1].Replace("\"", string.Empty, StringComparison.CurrentCulture);
+            if (this.ProcessMessageMap.ContainsKey(message.Operation))
+                this.ProcessMessageMap[message.Operation](message);
         }
 
-        private void ProcessLine(string line)
+        private void ProcessConnectionMessage(ResponseMessage message)
         {
-            var operation = GetOperation(line);
-            if (this.ProcessMessageMap.ContainsKey(operation))
-                this.ProcessMessageMap[operation](line);
-        }
-
-        private void ProcessConnectionMessage(string line)
-        {
-            var split = line.Split(",");
-            foreach (var p in split)
-            {
-                if (!p.Contains("connectionId", StringComparison.CurrentCulture)) continue;
-                this.ConnectionId = p.Split(":")[1]
-                    .Replace("\"", string.Empty, StringComparison.CurrentCulture)
-                    .Replace("}", string.Empty, StringComparison.CurrentCulture);
-                break;
-            }
-
+            this.ConnectionId = message.ConnectionId;
             this.Connected = true;
         }
 
-        private void ProcessStatusMessage(string line)
+        private void ProcessStatusMessage(ResponseMessage message)
         {
-            var split = line.Split(",");
-            foreach (var p in split)
+            this.Connected = !message.ConnectionClosed;
+        }
+
+        private void SetInitialClock(ResponseMessage message)
+        {
+            if (!this.subscriptionMessages.ContainsKey(message.Id)) return;
+            var m = this.subscriptionMessages[message.Id];
+            this.subscriptionMessages[message.Id] = m.WithInitialClock(message.InitialClock);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance",
+            "CA1812:AvoidUninstantiatedInternalClasses",
+            Justification = "Used to deserialize SendAsync response.")]
+        [DataContract]
+        private sealed class SubscriptionMessage
+        {
+            internal SubscriptionMessage(string operation, int id)
             {
-                if (!p.Contains("connectionClosed", StringComparison.CurrentCulture)) continue;
-                this.Connected = !p.Contains("true", StringComparison.CurrentCulture);
-                break;
+                this.Operation = operation;
+                this.Id = id;
+            }
+
+            [DataMember(Name = "op", EmitDefaultValue = false)]
+            internal string Operation { get; private set; }
+
+            [DataMember(Name = "id", EmitDefaultValue = false)]
+            internal int Id { get; private set; }
+
+            [DataMember(Name = "marketFilter", EmitDefaultValue = false)]
+            internal MarketFilter MarketFilter { get; private set; }
+
+            [DataMember(Name = "marketDataFilter", EmitDefaultValue = false)]
+            internal MarketDataFilter MarketDataFilter { get; private set; }
+
+            [DataMember(Name = "initialClk", EmitDefaultValue = false)]
+            internal string InitialClock { get; private set; }
+
+            internal SubscriptionMessage WithMarketFilter(MarketFilter marketFilter)
+            {
+                if (marketFilter != null)
+                    this.MarketFilter = marketFilter;
+                return this;
+            }
+
+            internal SubscriptionMessage WithMarketDateFilter(MarketDataFilter marketDataFilter)
+            {
+                if (marketDataFilter != null)
+                    this.MarketDataFilter = marketDataFilter;
+                return this;
+            }
+
+            internal SubscriptionMessage WithInitialClock(string initialClock)
+            {
+                this.InitialClock = initialClock;
+                return this;
+            }
+
+            internal string ToJson()
+            {
+                return JsonConvert.SerializeObject(this, Formatting.None);
             }
         }
 

@@ -16,7 +16,6 @@
         private readonly SessionSpy session = new SessionSpy();
         private readonly TcpClientSpy client;
         private readonly StreamWriterSpy writer = new StreamWriterSpy();
-        private readonly StringBuilder sendLines = new StringBuilder();
         private readonly StreamSubscription streamSubscription;
         private bool disposed;
 
@@ -266,8 +265,9 @@
             await this.streamSubscription.Subscribe(null, null);
             Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
 
+            var reSubscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1).ToJson();
             await this.TriggerResubscribe();
-            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+            Assert.Equal(reSubscriptionMessage, this.writer.LastLineWritten);
         }
 
         [Fact]
@@ -277,8 +277,9 @@
             await this.streamSubscription.SubscribeToOrders();
             Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
 
+            var reSubscriptionMessage = new SubscriptionMessageStub("orderSubscription", 1).ToJson();
             await this.TriggerResubscribe();
-            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+            Assert.Equal(reSubscriptionMessage, this.writer.LastLineWritten);
         }
 
         [Fact]
@@ -297,6 +298,50 @@
             Assert.Contains(subscriptionMessage3, this.writer.AllLinesWritten);
         }
 
+        [Theory]
+        [InlineData("InitialClock")]
+        [InlineData("NewClock")]
+        [InlineData("RefreshedClock")]
+        public async Task OnResubscribeInitialClockIsInMessage(string initialClock)
+        {
+            await this.streamSubscription.Subscribe(null, null);
+            await this.SendLineAsync($"{{\"op\":\"mcm\",\"id\":1,\"initialClk\":\"{initialClock}\",\"clk\":\"Clock\"}}");
+
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1)
+                .WithInitialClock(initialClock)
+                .ToJson();
+
+            await this.TriggerResubscribe();
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+        }
+
+        [Fact]
+        public async Task OnResubscribeAllSubscriptionMessagesSentContainInitialClock()
+        {
+            await this.streamSubscription.Subscribe(null, null);
+            await this.streamSubscription.Subscribe(null, null);
+            await this.streamSubscription.SubscribeToOrders();
+
+            await this.SendLineAsync("{\"op\":\"mcm\",\"id\":1,\"initialClk\":\"One\",\"clk\":\"Clock\"}");
+            await this.SendLineAsync("{\"op\":\"mcm\",\"id\":2,\"initialClk\":\"Two\",\"clk\":\"Clock\"}");
+            await this.SendLineAsync("{\"op\":\"ocm\",\"id\":3,\"initialClk\":\"Three\",\"clk\":\"Clock\"}");
+
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1).WithInitialClock("One").ToJson();
+            var subscriptionMessage2 = new SubscriptionMessageStub("marketSubscription", 2).WithInitialClock("Two").ToJson();
+            var subscriptionMessage3 = new SubscriptionMessageStub("orderSubscription", 3).WithInitialClock("Three").ToJson();
+
+            await this.TriggerResubscribe();
+            Assert.Contains(subscriptionMessage, this.writer.AllLinesWritten);
+            Assert.Contains(subscriptionMessage2, this.writer.AllLinesWritten);
+            Assert.Contains(subscriptionMessage3, this.writer.AllLinesWritten);
+        }
+
+        [Fact]
+        public async Task OnReadDoNotSetInitialClockIfNoSubscriptionMessageExists()
+        {
+            await this.SendLineAsync("{\"op\":\"mcm\",\"id\":1,\"initialClk\":\"One\",\"clk\":\"Clock\"}");
+        }
+
         public void Dispose()
         {
             this.Dispose(true);
@@ -313,8 +358,9 @@
 
         private async Task SendLineAsync(string line)
         {
-            this.sendLines.AppendLine(line);
-            this.streamSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(this.sendLines.ToString())));
+            var sendLines = new StringBuilder();
+            sendLines.AppendLine(line);
+            this.streamSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(sendLines.ToString())));
             await foreach (var message in this.streamSubscription.GetChanges())
             {
             }

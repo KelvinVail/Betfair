@@ -25,6 +25,9 @@
         [DataMember(Name = "marketDataFilter", EmitDefaultValue = false)]
         public MarketDataFilter MarketDataFilter { get; private set; }
 
+        [DataMember(Name = "initialClk", EmitDefaultValue = false)]
+        public string InitialClock { get; private set; }
+
         public SubscriptionMessageStub WithMarketFilter(MarketFilter marketFilter)
         {
             this.MarketFilter = marketFilter;
@@ -34,6 +37,12 @@
         public SubscriptionMessageStub WithMarketDateFilter(MarketDataFilter marketDataFilter)
         {
             this.MarketDataFilter = marketDataFilter;
+            return this;
+        }
+
+        public SubscriptionMessageStub WithInitialClock(string initialClock)
+        {
+            this.InitialClock = initialClock;
             return this;
         }
 
