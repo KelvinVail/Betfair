@@ -1,6 +1,8 @@
 ﻿namespace Betfair.Tests.Stream
 {
     using System;
+    using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Net.Security;
     using System.Text;
@@ -173,7 +175,7 @@
         [Fact]
         public async Task OnAuthenticateGetSessionTokenIsCalled()
         {
-            await this.streamSubscription.AuthenticateAsync();
+            await this.streamSubscription.Authenticate();
             Assert.Equal(1, this.session.TimesGetSessionTokenAsyncCalled);
         }
 
@@ -185,7 +187,7 @@
                     this.session.AppKey,
                     await this.session.GetTokenAsync()));
 
-            await this.streamSubscription.AuthenticateAsync();
+            await this.streamSubscription.Authenticate();
             Assert.Equal(authMessage, this.writer.LastLineWritten);
         }
 
@@ -380,6 +382,54 @@
             Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
         }
 
+        [Fact]
+        public async Task OnStopConnectedIsFalse()
+        {
+            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            Assert.True(this.streamSubscription.Connected);
+            this.streamSubscription.Stop();
+            Assert.False(this.streamSubscription.Connected);
+        }
+
+        [Fact]
+        public async Task OnStopTcpClientIsClosed()
+        {
+            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            Assert.True(this.streamSubscription.Connected);
+            this.streamSubscription.Stop();
+            Assert.False(this.client.Connected);
+        }
+
+        [Theory]
+        [InlineData("conflateMs", "500")]
+        [InlineData("heartbeatMs", "5000")]
+        [InlineData("pt", "1234567890")]
+        [InlineData("ct", "\"SUB_IMAGE\"")]
+        [InlineData("segmentType", "\"SEG_START\"")]
+        public async Task OnGetChangesConflateMsIsDeserialized(string property, string value)
+        {
+            var receivedLine = $"{{\"op\":\"mcm\",\"{property}\":{value}}}";
+            var message = await this.SendLineAsync(receivedLine);
+            Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
+        }
+
+        [Fact]
+        public void OnSetArrivalTimeEpochMillisecondsIsSet()
+        {
+            var message = new ResponseMessage();
+            var datetime = DateTime.Parse("2020-02-14 19:17:33.123", new NumberFormatInfo());
+            message.SetArrivalTime(datetime);
+            Assert.Equal(1581707853123, message.ArrivalTime);
+        }
+
+        [Fact]
+        public async Task OnGetChangesArrivalTimeIsSet()
+        {
+            var receivedLine = $"{{\"op\":\"mcm\",\"pt\":1581707853123}}";
+            var message = await this.SendLineAsync(receivedLine);
+            Assert.NotNull(message.ArrivalTime);
+        }
+
         public void Dispose()
         {
             this.Dispose(true);
@@ -394,14 +444,18 @@
             this.disposed = true;
         }
 
-        private async Task SendLineAsync(string line)
+        private async Task<ResponseMessage> SendLineAsync(string line)
         {
             var sendLines = new StringBuilder();
             sendLines.AppendLine(line);
             this.streamSubscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(sendLines.ToString())));
+            var messages = new List<ResponseMessage>();
             await foreach (var message in this.streamSubscription.GetChanges())
             {
+                messages.Add(message);
             }
+
+            return messages[0];
         }
 
         private async Task TriggerResubscribe()

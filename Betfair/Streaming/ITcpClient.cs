@@ -12,6 +12,8 @@
 
         void Connect(string host, int port);
 
+        void Close();
+
         Stream GetSslStream(string host);
     }
 }

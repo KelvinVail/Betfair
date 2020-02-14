@@ -51,7 +51,7 @@
             this.Writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
         }
 
-        public async Task AuthenticateAsync()
+        public async Task Authenticate()
         {
             var token = await this.session.GetTokenAsync();
             this.requestId++;
@@ -80,21 +80,24 @@
         public async Task Resubscribe()
         {
             foreach (var m in this.subscriptionMessages)
-            {
                 await this.Writer.WriteLineAsync(m.Value.ToJson());
-            }
         }
 
-        public async IAsyncEnumerable<string> GetChanges()
+        public async IAsyncEnumerable<ResponseMessage> GetChanges()
         {
             string line;
             while ((line = await this.Reader.ReadLineAsync()) != null)
             {
-                var message = Utf8Json.JsonSerializer.Deserialize<ResponseMessage>(line);
-                this.ProcessLine(message);
-                this.SetClocks(message);
-                yield return line;
+                var message = JsonSerializer.Deserialize<ResponseMessage>(line);
+                this.ProcessMessage(message);
+                yield return message;
             }
+        }
+
+        public void Stop()
+        {
+            this.Connected = false;
+            this.tcpClient.Close();
         }
 
         private static Stream GetSslStream(ITcpClient client)
@@ -112,10 +115,12 @@
             return $"{{\"op\":\"authentication\",\"id\":{requestId},\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
         }
 
-        private void ProcessLine(ResponseMessage message)
+        private void ProcessMessage(ResponseMessage message)
         {
+            message.SetArrivalTime(DateTime.UtcNow);
             if (this.ProcessMessageMap.ContainsKey(message.Operation))
                 this.ProcessMessageMap[message.Operation](message);
+            this.SetClocks(message);
         }
 
         private void ProcessConnectionMessage(ResponseMessage message)
@@ -126,13 +131,15 @@
 
         private void ProcessStatusMessage(ResponseMessage message)
         {
-            this.Connected = !message.ConnectionClosed;
+            if (message.ConnectionClosed != null)
+                this.Connected = message.ConnectionClosed == true;
         }
 
         private void SetClocks(ResponseMessage message)
         {
-            if (!this.subscriptionMessages.ContainsKey(message.Id)) return;
-            this.subscriptionMessages[message.Id]
+            if (message.Id == null) return;
+            if (!this.subscriptionMessages.ContainsKey((int)message.Id)) return;
+            this.subscriptionMessages[(int)message.Id]
                 .WithInitialClock(message.InitialClock)
                 .WithClock(message.Clock);
         }
@@ -189,10 +196,9 @@
                 return this;
             }
 
-            internal SubscriptionMessage WithClock(string clock)
+            internal void WithClock(string clock)
             {
                 this.Clock = clock;
-                return this;
             }
 
             internal string ToJson()
