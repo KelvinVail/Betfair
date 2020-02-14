@@ -309,6 +309,7 @@
 
             var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1)
                 .WithInitialClock(initialClock)
+                .WithClock("Clock")
                 .ToJson();
 
             await this.TriggerResubscribe();
@@ -326,9 +327,12 @@
             await this.SendLineAsync("{\"op\":\"mcm\",\"id\":2,\"initialClk\":\"Two\",\"clk\":\"Clock\"}");
             await this.SendLineAsync("{\"op\":\"ocm\",\"id\":3,\"initialClk\":\"Three\",\"clk\":\"Clock\"}");
 
-            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1).WithInitialClock("One").ToJson();
-            var subscriptionMessage2 = new SubscriptionMessageStub("marketSubscription", 2).WithInitialClock("Two").ToJson();
-            var subscriptionMessage3 = new SubscriptionMessageStub("orderSubscription", 3).WithInitialClock("Three").ToJson();
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1)
+                .WithInitialClock("One").WithClock("Clock").ToJson();
+            var subscriptionMessage2 = new SubscriptionMessageStub("marketSubscription", 2)
+                .WithInitialClock("Two").WithClock("Clock").ToJson();
+            var subscriptionMessage3 = new SubscriptionMessageStub("orderSubscription", 3)
+                .WithInitialClock("Three").WithClock("Clock").ToJson();
 
             await this.TriggerResubscribe();
             Assert.Contains(subscriptionMessage, this.writer.AllLinesWritten);
@@ -340,6 +344,40 @@
         public async Task OnReadDoNotSetInitialClockIfNoSubscriptionMessageExists()
         {
             await this.SendLineAsync("{\"op\":\"mcm\",\"id\":1,\"initialClk\":\"One\",\"clk\":\"Clock\"}");
+        }
+
+        [Theory]
+        [InlineData("Clock")]
+        [InlineData("NewClock")]
+        [InlineData("RefreshedClock")]
+        public async Task OnResubscribeClockIsInMessage(string clock)
+        {
+            await this.streamSubscription.Subscribe(null, null);
+            await this.SendLineAsync($"{{\"op\":\"mcm\",\"id\":1,\"initialClk\":\"InitialClock\",\"clk\":\"{clock}\"}}");
+
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1)
+                .WithInitialClock("InitialClock")
+                .WithClock(clock)
+                .ToJson();
+
+            await this.TriggerResubscribe();
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
+        }
+
+        [Fact]
+        public async Task OnResubscribeLatestClockIsInMessage()
+        {
+            await this.streamSubscription.Subscribe(null, null);
+            await this.SendLineAsync($"{{\"op\":\"mcm\",\"id\":1,\"initialClk\":\"InitialClock\",\"clk\":\"Clock\"}}");
+            await this.SendLineAsync($"{{\"op\":\"mcm\",\"id\":1,\"clk\":\"NewClock\"}}");
+
+            var subscriptionMessage = new SubscriptionMessageStub("marketSubscription", 1)
+                .WithInitialClock("InitialClock")
+                .WithClock("NewClock")
+                .ToJson();
+
+            await this.TriggerResubscribe();
+            Assert.Equal(subscriptionMessage, this.writer.LastLineWritten);
         }
 
         public void Dispose()

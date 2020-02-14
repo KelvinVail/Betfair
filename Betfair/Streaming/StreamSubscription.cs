@@ -92,7 +92,7 @@
             {
                 var message = Utf8Json.JsonSerializer.Deserialize<ResponseMessage>(line);
                 this.ProcessLine(message);
-                this.SetInitialClock(message);
+                this.SetClocks(message);
                 yield return line;
             }
         }
@@ -129,11 +129,12 @@
             this.Connected = !message.ConnectionClosed;
         }
 
-        private void SetInitialClock(ResponseMessage message)
+        private void SetClocks(ResponseMessage message)
         {
             if (!this.subscriptionMessages.ContainsKey(message.Id)) return;
-            var m = this.subscriptionMessages[message.Id];
-            this.subscriptionMessages[message.Id] = m.WithInitialClock(message.InitialClock);
+            this.subscriptionMessages[message.Id]
+                .WithInitialClock(message.InitialClock)
+                .WithClock(message.Clock);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -164,6 +165,9 @@
             [DataMember(Name = "initialClk", EmitDefaultValue = false)]
             internal string InitialClock { get; private set; }
 
+            [DataMember(Name = "clk", EmitDefaultValue = false)]
+            internal string Clock { get; private set; }
+
             internal SubscriptionMessage WithMarketFilter(MarketFilter marketFilter)
             {
                 if (marketFilter != null)
@@ -180,7 +184,14 @@
 
             internal SubscriptionMessage WithInitialClock(string initialClock)
             {
+                if (initialClock == null) return this;
                 this.InitialClock = initialClock;
+                return this;
+            }
+
+            internal SubscriptionMessage WithClock(string clock)
+            {
+                this.Clock = clock;
                 return this;
             }
 

@@ -19,5 +19,8 @@
 
         [DataMember(Name = "initialClk", EmitDefaultValue = false)]
         public string InitialClock { get; set; }
+
+        [DataMember(Name = "clk", EmitDefaultValue = false)]
+        public string Clock { get; set; }
     }
 }
