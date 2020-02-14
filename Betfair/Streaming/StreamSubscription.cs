@@ -8,7 +8,8 @@
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
+    using Utf8Json;
+    using Utf8Json.Resolvers;
 
     public sealed class StreamSubscription
     {
@@ -61,7 +62,9 @@
         public async Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter)
         {
             this.requestId++;
-            var subscriptionMessage = GetMarketSubscriptionMessage(marketFilter, dataFilter, this.requestId);
+            var subscriptionMessage = new SubscriptionMessage("marketSubscription", this.requestId)
+                .WithMarketFilter(marketFilter)
+                .WithMarketDateFilter(dataFilter);
             await this.Writer.WriteLineAsync(subscriptionMessage.ToJson());
             this.subscriptionMessages.Add(this.requestId, subscriptionMessage);
         }
@@ -109,13 +112,6 @@
             return $"{{\"op\":\"authentication\",\"id\":{requestId},\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
         }
 
-        private static SubscriptionMessage GetMarketSubscriptionMessage(MarketFilter marketFilter, MarketDataFilter dataFilter, int requestId)
-        {
-            return new SubscriptionMessage("marketSubscription", requestId)
-                .WithMarketFilter(marketFilter)
-                .WithMarketDateFilter(dataFilter);
-        }
-
         private void ProcessLine(ResponseMessage message)
         {
             if (this.ProcessMessageMap.ContainsKey(message.Operation))
@@ -143,7 +139,7 @@
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Performance",
             "CA1812:AvoidUninstantiatedInternalClasses",
-            Justification = "Used to deserialize SendAsync response.")]
+            Justification = "Used to deserialize Json response.")]
         [DataContract]
         private sealed class SubscriptionMessage
         {
@@ -190,7 +186,7 @@
 
             internal string ToJson()
             {
-                return JsonConvert.SerializeObject(this, Formatting.None);
+                return JsonSerializer.ToJsonString(this, StandardResolver.AllowPrivateExcludeNull);
             }
         }
 
