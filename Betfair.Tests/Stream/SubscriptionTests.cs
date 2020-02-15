@@ -6,6 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Betfair.Stream;
+    using Betfair.Stream.Responses;
     using Betfair.Tests.Stream.TestDoubles;
     using Betfair.Tests.TestDoubles;
 
@@ -38,12 +39,12 @@
             this.disposed = true;
         }
 
-        protected async Task<ResponseMessage> SendLineAsync(string line)
+        protected async Task<ChangeMessage> SendLineAsync(string line)
         {
             var sendLines = new StringBuilder();
             sendLines.AppendLine(line);
             this.Subscription.Reader = new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(sendLines.ToString())));
-            var messages = new List<ResponseMessage>();
+            var messages = new List<ChangeMessage>();
             await foreach (var message in this.Subscription.GetChanges())
             {
                 messages.Add(message);

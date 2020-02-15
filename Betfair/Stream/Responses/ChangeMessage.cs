@@ -1,12 +1,13 @@
-﻿namespace Betfair.Stream
+﻿namespace Betfair.Stream.Responses
 {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.Serialization;
     using Utf8Json;
     using Utf8Json.Resolvers;
 
     [DataContract]
-    public sealed class ResponseMessage
+    public sealed class ChangeMessage
     {
         [DataMember(Name = "op", EmitDefaultValue = false)]
         public string Operation { get; set; }
@@ -41,11 +42,14 @@
         [DataMember(Name = "segmentType", EmitDefaultValue = false)]
         public string SegmentType { get; set; }
 
+        [DataMember(Name = "mc", EmitDefaultValue = false)]
+        public List<MarketChange> MarketChanges { get; set; }
+
         public long? ArrivalTime { get; private set; }
 
         public void SetArrivalTime(DateTime arrivalTime)
         {
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             this.ArrivalTime = (long)(arrivalTime - epoch).TotalMilliseconds;
         }
 

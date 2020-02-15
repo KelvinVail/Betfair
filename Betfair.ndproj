@@ -3485,7 +3485,7 @@ warnif count > 0 from t in JustMyCode.Types where
   t.SizeOfInst > 128 && 
 
   // You might want to restrict this rule only on structure, since the cost of copying instance data at each method call might be prohibitive
-  // t.IsStructure &&
+  t.IsStructure &&
 
   // Discard types that represent WPF, WindowsForm and ASP.NET forms and controls and EntityFramwork classes.
   t.BaseClasses.All(bc => !bc.ParentNamespace.Name.StartsWithAny(

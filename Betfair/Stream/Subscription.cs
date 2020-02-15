@@ -8,6 +8,7 @@
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
+    using Betfair.Stream.Responses;
     using Utf8Json;
     using Utf8Json.Resolvers;
 
@@ -32,8 +33,8 @@
 
         public string ConnectionId { get; private set; }
 
-        private Dictionary<string, Action<ResponseMessage>> ProcessMessageMap =>
-            new Dictionary<string, Action<ResponseMessage>>
+        private Dictionary<string, Action<ChangeMessage>> ProcessMessageMap =>
+            new Dictionary<string, Action<ChangeMessage>>
             {
                 { "connection", this.ProcessConnectionMessage },
                 { "status", this.ProcessStatusMessage },
@@ -83,12 +84,12 @@
                 await this.Writer.WriteLineAsync(m.Value.ToJson());
         }
 
-        public async IAsyncEnumerable<ResponseMessage> GetChanges()
+        public async IAsyncEnumerable<ChangeMessage> GetChanges()
         {
             string line;
             while ((line = await this.Reader.ReadLineAsync()) != null)
             {
-                var message = JsonSerializer.Deserialize<ResponseMessage>(line);
+                var message = JsonSerializer.Deserialize<ChangeMessage>(line);
                 this.ProcessMessage(message);
                 yield return message;
             }
@@ -115,7 +116,7 @@
             return $"{{\"op\":\"authentication\",\"id\":{requestId},\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
         }
 
-        private void ProcessMessage(ResponseMessage message)
+        private void ProcessMessage(ChangeMessage message)
         {
             message.SetArrivalTime(DateTime.UtcNow);
             if (this.ProcessMessageMap.ContainsKey(message.Operation))
@@ -123,19 +124,19 @@
             this.SetClocks(message);
         }
 
-        private void ProcessConnectionMessage(ResponseMessage message)
+        private void ProcessConnectionMessage(ChangeMessage message)
         {
             this.ConnectionId = message.ConnectionId;
             this.Connected = true;
         }
 
-        private void ProcessStatusMessage(ResponseMessage message)
+        private void ProcessStatusMessage(ChangeMessage message)
         {
             if (message.ConnectionClosed != null)
                 this.Connected = message.ConnectionClosed == false;
         }
 
-        private void SetClocks(ResponseMessage message)
+        private void SetClocks(ChangeMessage message)
         {
             if (message.Id == null) return;
             if (!this.subscriptionMessages.ContainsKey((int)message.Id)) return;
