@@ -1,7 +1,7 @@
-﻿namespace Betfair.Tests.TestDoubles
+﻿namespace Betfair.Tests.Stream.TestDoubles
 {
     using System.IO;
-    using Betfair.Streaming;
+    using Betfair.Stream;
 
     public sealed class TcpClientSpy : ITcpClient
     {
@@ -37,7 +37,7 @@
             this.Connected = false;
         }
 
-        public Stream GetSslStream(string host)
+        public System.IO.Stream GetSslStream(string host)
         {
             this.TimeGetSslStreamCalled++;
             var ms = new MemoryStream();

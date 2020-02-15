@@ -1,4 +1,4 @@
-﻿namespace Betfair.Streaming
+﻿namespace Betfair.Stream
 {
     using System;
     using System.Runtime.Serialization;

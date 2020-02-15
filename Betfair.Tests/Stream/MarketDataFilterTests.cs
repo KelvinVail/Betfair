@@ -1,6 +1,6 @@
 ﻿namespace Betfair.Tests.Stream
 {
-    using Betfair.Streaming;
+    using Betfair.Stream;
     using Xunit;
 
     public class MarketDataFilterTests

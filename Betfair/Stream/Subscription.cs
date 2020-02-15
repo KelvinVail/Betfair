@@ -1,4 +1,4 @@
-﻿namespace Betfair.Streaming
+﻿namespace Betfair.Stream
 {
     using System;
     using System.Collections.Generic;
@@ -11,7 +11,7 @@
     using Utf8Json;
     using Utf8Json.Resolvers;
 
-    public sealed class StreamSubscription
+    public sealed class Subscription
     {
         private const string HostName = "stream-api.betfair.com";
         private readonly ISession session;
@@ -19,7 +19,7 @@
         private ITcpClient tcpClient = new ExchangeStreamClient();
         private int requestId;
 
-        public StreamSubscription(ISession session)
+        public Subscription(ISession session)
         {
             this.session = session;
         }
@@ -100,7 +100,7 @@
             this.tcpClient.Close();
         }
 
-        private static Stream GetSslStream(ITcpClient client)
+        private static System.IO.Stream GetSslStream(ITcpClient client)
         {
             client.ReceiveBufferSize = 1024 * 1000 * 2;
             client.SendTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
@@ -132,7 +132,7 @@
         private void ProcessStatusMessage(ResponseMessage message)
         {
             if (message.ConnectionClosed != null)
-                this.Connected = message.ConnectionClosed == true;
+                this.Connected = message.ConnectionClosed == false;
         }
 
         private void SetClocks(ResponseMessage message)
@@ -209,7 +209,7 @@
 
         private sealed class ExchangeStreamClient : TcpClient, ITcpClient
         {
-            public Stream GetSslStream(string host)
+            public System.IO.Stream GetSslStream(string host)
             {
                 var stream = this.GetStream();
                 var sslStream = new SslStream(stream, false);

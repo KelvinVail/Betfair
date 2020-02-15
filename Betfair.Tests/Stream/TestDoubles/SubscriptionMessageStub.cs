@@ -1,7 +1,7 @@
 ﻿namespace Betfair.Tests.Stream.TestDoubles
 {
     using System.Runtime.Serialization;
-    using Betfair.Streaming;
+    using Betfair.Stream;
     using Newtonsoft.Json;
 
     [DataContract]

@@ -1,7 +1,5 @@
-﻿namespace Betfair.Streaming
+﻿namespace Betfair.Stream
 {
-    using System.IO;
-
     public interface ITcpClient
     {
         int ReceiveBufferSize { get; set; }
@@ -14,6 +12,6 @@
 
         void Close();
 
-        Stream GetSslStream(string host);
+        System.IO.Stream GetSslStream(string host);
     }
 }
