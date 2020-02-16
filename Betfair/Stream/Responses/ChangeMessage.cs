@@ -45,6 +45,9 @@
         [DataMember(Name = "mc", EmitDefaultValue = false)]
         public List<MarketChange> MarketChanges { get; set; }
 
+        [DataMember(Name = "oc", EmitDefaultValue = false)]
+        public List<OrderChange> OrderChanges { get; set; }
+
         public long? ArrivalTime { get; private set; }
 
         public void SetArrivalTime(DateTime arrivalTime)

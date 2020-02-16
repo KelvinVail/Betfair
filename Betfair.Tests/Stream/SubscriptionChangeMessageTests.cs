@@ -15,6 +15,7 @@
         [InlineData("ct", "\"SUB_IMAGE\"")]
         [InlineData("segmentType", "\"SEG_START\"")]
         [InlineData("mc", "[{\"id\":\"1.167778679\"}]")]
+        [InlineData("oc", "[{\"id\":\"1.167778679\"}]")]
         public async Task OnGetChangesChangeMessageIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"{property}\":{value}}}";
@@ -107,6 +108,58 @@
         public async Task OnGetChangesRunnerDefinitionIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"mc\":[{{\"marketDefinition\":{{\"runners\":[{{\"{property}\":{value}}}]}}}}]}}";
+            var message = await this.SendLineAsync(receivedLine);
+            Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
+        }
+
+        [Theory]
+        [InlineData("id", "\"1.167778679\"")]
+        [InlineData("accountId", "1234567890")]
+        [InlineData("closed", "true")]
+        [InlineData("orc", "[{\"mb\":[[4.2,598.09]]}]")]
+        public async Task OnGetChangesOrderChangeIsDeserialized(string property, string value)
+        {
+            var receivedLine = $"{{\"op\":\"mcm\",\"oc\":[{{\"{property}\":{value}}}]}}";
+            var message = await this.SendLineAsync(receivedLine);
+            Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
+        }
+
+        [Theory]
+        [InlineData("mb", "[[4.2,598.09]]")]
+        [InlineData("id", "1234567890")]
+        [InlineData("hc", "1.1")]
+        [InlineData("fullImage", "true")]
+        [InlineData("ml", "[[4.2,598.09]]")]
+        [InlineData("uo", "[{\"side\":\"B\"}]")]
+        public async Task OnGetChangesOrderRunnerChangeIsDeserialized(string property, string value)
+        {
+            var receivedLine = $"{{\"op\":\"mcm\",\"oc\":[{{\"orc\":[{{\"{property}\":{value}}}]}}]}}";
+            var message = await this.SendLineAsync(receivedLine);
+            Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
+        }
+
+        [Theory]
+        [InlineData("side", "\"B\"")]
+        [InlineData("pt", "\"L\"")]
+        [InlineData("ot", "\"L\"")]
+        [InlineData("status", "\"EC\"")]
+        [InlineData("sv", "1.1")]
+        [InlineData("p", "1.1")]
+        [InlineData("sc", "1.1")]
+        [InlineData("rc", "\"REG\"")]
+        [InlineData("s", "1.1")]
+        [InlineData("pd", "1234567890")]
+        [InlineData("rac", "\"REG\"")]
+        [InlineData("md", "1234567890")]
+        [InlineData("sl", "1.1")]
+        [InlineData("avp", "1.1")]
+        [InlineData("sm", "1.1")]
+        [InlineData("id", "\"12345\"")]
+        [InlineData("bsp", "1.1")]
+        [InlineData("sr", "1.1")]
+        public async Task OnGetChangesUnmatchedOrdersIsDeserialized(string property, string value)
+        {
+            var receivedLine = $"{{\"op\":\"mcm\",\"oc\":[{{\"orc\":[{{\"uo\":[{{\"{property}\":{value}}}]}}]}}]}}";
             var message = await this.SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
