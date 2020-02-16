@@ -1,19 +1,17 @@
 ﻿namespace Betfair.Tests.Sports
 {
     using System;
+    using System.Globalization;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Betfair.Sports;
     using Betfair.Tests.TestDoubles;
-    using Newtonsoft.Json;
     using Xunit;
 
     public class MarketCatalogueTests : IDisposable
     {
         private readonly SessionSpy session = new SessionSpy();
-
         private readonly HttpMessageHandlerMock handler = new HttpMessageHandlerMock();
-
         private readonly MarketCatalogue catalogue;
 
         public MarketCatalogueTests()
@@ -80,9 +78,191 @@
         [Fact]
         public async Task OnRefreshRequestMethodIsListMarketCatalogue()
         {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}}}";
             await this.catalogue.RefreshAsync();
-            var expectedRequest = JsonConvert.SerializeObject(new RequestBuilder().WithMethod("SportsAPING/v1.0/listMarketCatalogue"));
-            this.handler.VerifyRequestContent(expectedRequest);
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithEventTypeIdMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":" +
+                                   "{\"eventTypeIds\":[\"7\"]}}}";
+            this.catalogue.EventTypeIds.Add("7");
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithCountryMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":" +
+                                   "{\"marketCountries\":[\"GB\"]}}}";
+            this.catalogue.Countries.Add("GB");
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithDateRangeFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":" +
+                                   "{\"marketStartTime\":{\"from\":\"2020-02-09T00:00:00Z\",\"to\":\"2020-02-10T00:00:00Z\"}}}}";
+            var from = DateTime.Parse("2020-02-09 17:00:00", new DateTimeFormatInfo());
+            var to = DateTime.Parse("2020-02-10 17:00:00", new DateTimeFormatInfo());
+            this.catalogue.WithDateRange(from, to);
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithMarketTypeCodeMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":" +
+                                   "{\"marketTypeCodes\":[\"WIN\"]}}}";
+            this.catalogue.WithMarketTypeCode("WIN");
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithMaxResultsMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"maxResults\":\"100\"}}";
+            this.catalogue.WithMaxResults(100);
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithSortByMinimumTradedMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"sort\":\"MINIMUM_TRADED\"}}";
+            this.catalogue.WithSortByMinimumTraded();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithSortByMaximumTradedMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"sort\":\"MAXIMUM_TRADED\"}}";
+            this.catalogue.WithSortByMaximumTraded();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithSortByMinimumAvailableMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"sort\":\"MINIMUM_AVAILABLE\"}}";
+            this.catalogue.WithSortByMinimumAvailable();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithSortByMaximumAvailableMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"sort\":\"MAXIMUM_AVAILABLE\"}}";
+            this.catalogue.WithSortByMaximumAvailable();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithSortByFirstToStartMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"sort\":\"FIRST_TO_START\"}}";
+            this.catalogue.WithSortByFirstToStart();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithSortByLastToStartMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"sort\":\"LAST_TO_START\"}}";
+            this.catalogue.WithSortByLastToStart();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithCompetitionMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"marketProjection\":[\"COMPETITION\"]}}";
+            this.catalogue.WithCompetition();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithEventMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"marketProjection\":[\"EVENT\"]}}";
+            this.catalogue.WithEvent();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithEventTypeMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"marketProjection\":[\"EVENT_TYPE\"]}}";
+            this.catalogue.WithEventType();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithMarketDescriptionMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"marketProjection\":[\"MARKET_DESCRIPTION\"]}}";
+            this.catalogue.WithMarketDescription();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithMarketStartTimeMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"marketProjection\":[\"MARKET_START_TIME\"]}}";
+            this.catalogue.WithMarketStartTime();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithRunnerDescriptionMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"marketProjection\":[\"RUNNER_DESCRIPTION\"]}}";
+            this.catalogue.WithRunnerDescription();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
+        }
+
+        [Fact]
+        public async Task OnWithRunnerRunnerMetadataMarketFilterIsSet()
+        {
+            const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
+                                   "\"marketProjection\":[\"RUNNER_METADATA\"]}}";
+            this.catalogue.WithRunnerMetadata();
+            await this.catalogue.RefreshAsync();
+            this.handler.VerifyRequestContent(request);
         }
 
         public void Dispose()

@@ -1,22 +1,45 @@
 ﻿namespace Betfair.Tests.TestDoubles
 {
-    using Newtonsoft.Json;
+    using System.Runtime.Serialization;
+    using Utf8Json;
+    using Utf8Json.Resolvers;
 
+    [DataContract]
     public class RequestBuilder
     {
-        [JsonProperty(PropertyName = "jsonrpc")]
-        public static string Jsonrpc => "2.0";
+        public RequestBuilder()
+        {
+            this.Id = 1;
+            this.Jsonrpc = "2.0";
+        }
 
-        [JsonProperty(PropertyName = "id")]
-        public static int Id => 1;
+        [DataMember(Name = "jsonrpc", EmitDefaultValue = false)]
+        public string Jsonrpc { get; set; }
 
-        [JsonProperty(PropertyName = "method")]
+        [DataMember(Name = "id", EmitDefaultValue = false)]
+        public int Id { get; set; }
+
+        [DataMember(Name = "method", EmitDefaultValue = false)]
         public string Method { get; set; }
+
+        [DataMember(Name = "params", EmitDefaultValue = false)]
+        public dynamic Params { get; set; }
 
         public RequestBuilder WithMethod(string method)
         {
             this.Method = method;
             return this;
+        }
+
+        public RequestBuilder WithParams(dynamic parameters)
+        {
+            this.Params = parameters;
+            return this;
+        }
+
+        public string ToJson()
+        {
+            return JsonSerializer.ToJsonString(this, StandardResolver.AllowPrivateExcludeNull);
         }
     }
 }
