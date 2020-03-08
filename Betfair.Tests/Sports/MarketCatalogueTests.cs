@@ -140,7 +140,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"sort\":\"MINIMUM_TRADED\"}}";
-            this.catalogue.WithSortByMinimumTraded();
+            this.catalogue.WithSortOrder(CatalogueSort.MinimumTraded);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -150,7 +150,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"sort\":\"MAXIMUM_TRADED\"}}";
-            this.catalogue.WithSortByMaximumTraded();
+            this.catalogue.WithSortOrder(CatalogueSort.MaximumTraded);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -160,7 +160,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"sort\":\"MINIMUM_AVAILABLE\"}}";
-            this.catalogue.WithSortByMinimumAvailable();
+            this.catalogue.WithSortOrder(CatalogueSort.MinimumAvailable);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -170,7 +170,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"sort\":\"MAXIMUM_AVAILABLE\"}}";
-            this.catalogue.WithSortByMaximumAvailable();
+            this.catalogue.WithSortOrder(CatalogueSort.MaximumAvailable);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -180,7 +180,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"sort\":\"FIRST_TO_START\"}}";
-            this.catalogue.WithSortByFirstToStart();
+            this.catalogue.WithSortOrder(CatalogueSort.FirstToStart);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -190,7 +190,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"sort\":\"LAST_TO_START\"}}";
-            this.catalogue.WithSortByLastToStart();
+            this.catalogue.WithSortOrder(CatalogueSort.LastToStart);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -200,7 +200,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"marketProjection\":[\"COMPETITION\"]}}";
-            this.catalogue.WithCompetition();
+            this.catalogue.WithMarketProjection(MarketProjection.Competition);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -210,7 +210,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"marketProjection\":[\"EVENT\"]}}";
-            this.catalogue.WithEvent();
+            this.catalogue.WithMarketProjection(MarketProjection.Event);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -220,7 +220,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"marketProjection\":[\"EVENT_TYPE\"]}}";
-            this.catalogue.WithEventType();
+            this.catalogue.WithMarketProjection(MarketProjection.EventType);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -230,7 +230,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"marketProjection\":[\"MARKET_DESCRIPTION\"]}}";
-            this.catalogue.WithMarketDescription();
+            this.catalogue.WithMarketProjection(MarketProjection.MarketDescription);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -240,7 +240,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"marketProjection\":[\"MARKET_START_TIME\"]}}";
-            this.catalogue.WithMarketStartTime();
+            this.catalogue.WithMarketProjection(MarketProjection.MarketStartTime);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -250,7 +250,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"marketProjection\":[\"RUNNER_DESCRIPTION\"]}}";
-            this.catalogue.WithRunnerDescription();
+            this.catalogue.WithMarketProjection(MarketProjection.RunnerDescription);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }
@@ -260,7 +260,7 @@
         {
             const string request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SportsAPING/v1.0/listMarketCatalogue\",\"params\":{\"filter\":{}," +
                                    "\"marketProjection\":[\"RUNNER_METADATA\"]}}";
-            this.catalogue.WithRunnerMetadata();
+            this.catalogue.WithMarketProjection(MarketProjection.RunnerMetadata);
             await this.catalogue.RefreshAsync();
             this.handler.VerifyRequestContent(request);
         }

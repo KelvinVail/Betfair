@@ -47,81 +47,15 @@
             return this;
         }
 
-        public MarketCatalogue WithSortByMinimumTraded()
+        public MarketCatalogue WithSortOrder(CatalogueSort sort)
         {
-            this.parameters.Sort = "MINIMUM_TRADED";
+            this.parameters.Sort = sort;
             return this;
         }
 
-        public MarketCatalogue WithSortByMaximumTraded()
+        public MarketCatalogue WithMarketProjection(MarketProjection projection)
         {
-            this.parameters.Sort = "MAXIMUM_TRADED";
-            return this;
-        }
-
-        public MarketCatalogue WithSortByMinimumAvailable()
-        {
-            this.parameters.Sort = "MINIMUM_AVAILABLE";
-            return this;
-        }
-
-        public MarketCatalogue WithSortByMaximumAvailable()
-        {
-            this.parameters.Sort = "MAXIMUM_AVAILABLE";
-            return this;
-        }
-
-        public MarketCatalogue WithSortByFirstToStart()
-        {
-            this.parameters.Sort = "FIRST_TO_START";
-            return this;
-        }
-
-        public MarketCatalogue WithSortByLastToStart()
-        {
-            this.parameters.Sort = "LAST_TO_START";
-            return this;
-        }
-
-        public MarketCatalogue WithCompetition()
-        {
-            this.parameters.WithMarketProjection("COMPETITION");
-            return this;
-        }
-
-        public MarketCatalogue WithEvent()
-        {
-            this.parameters.WithMarketProjection("EVENT");
-            return this;
-        }
-
-        public MarketCatalogue WithEventType()
-        {
-            this.parameters.WithMarketProjection("EVENT_TYPE");
-            return this;
-        }
-
-        public MarketCatalogue WithMarketDescription()
-        {
-            this.parameters.WithMarketProjection("MARKET_DESCRIPTION");
-            return this;
-        }
-
-        public MarketCatalogue WithMarketStartTime()
-        {
-            this.parameters.WithMarketProjection("MARKET_START_TIME");
-            return this;
-        }
-
-        public MarketCatalogue WithRunnerDescription()
-        {
-            this.parameters.WithMarketProjection("RUNNER_DESCRIPTION");
-            return this;
-        }
-
-        public MarketCatalogue WithRunnerMetadata()
-        {
-            this.parameters.WithMarketProjection("RUNNER_METADATA");
+            this.parameters.WithMarketProjection(projection);
             return this;
         }
 
@@ -149,13 +83,13 @@
             internal MarketCatalogueFilter Filter { get; set; }
 
             [DataMember(Name = "marketProjection", EmitDefaultValue = false)]
-            internal List<string> MarketProjection { get; set; }
+            internal List<MarketProjection> MarketProjection { get; set; }
 
             [DataMember(Name = "maxResults", EmitDefaultValue = false)]
             internal string MaxResults { get; set; }
 
             [DataMember(Name = "sort", EmitDefaultValue = false)]
-            internal string Sort { get; set; }
+            internal CatalogueSort? Sort { get; set; }
 
             internal void WithEventTypeIds(List<string> eventTypeIds)
             {
@@ -167,10 +101,10 @@
                 if (countries.Count > 0) this.Filter.MarketCountries = countries;
             }
 
-            internal void WithMarketProjection(string projection)
+            internal void WithMarketProjection(MarketProjection projection)
             {
                 if (this.MarketProjection == null)
-                    this.MarketProjection = new List<string>();
+                    this.MarketProjection = new List<MarketProjection>();
 
                 this.MarketProjection.Add(projection);
             }

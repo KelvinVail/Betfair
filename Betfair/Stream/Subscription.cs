@@ -101,7 +101,7 @@
             this.tcpClient.Close();
         }
 
-        private static System.IO.Stream GetSslStream(ITcpClient client)
+        private static Stream GetSslStream(ITcpClient client)
         {
             client.ReceiveBufferSize = 1024 * 1000 * 2;
             client.SendTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
@@ -210,7 +210,7 @@
 
         private sealed class ExchangeStreamClient : TcpClient, ITcpClient
         {
-            public System.IO.Stream GetSslStream(string host)
+            public Stream GetSslStream(string host)
             {
                 var stream = this.GetStream();
                 var sslStream = new SslStream(stream, false);
