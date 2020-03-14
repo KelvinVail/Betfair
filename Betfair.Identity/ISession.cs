@@ -1,4 +1,4 @@
-﻿namespace Betfair
+﻿namespace Betfair.Identity
 {
     using System.Threading.Tasks;
 

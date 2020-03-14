@@ -8,6 +8,7 @@
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
+    using Identity;
     using Betfair.Stream.Responses;
     using Utf8Json;
     using Utf8Json.Resolvers;

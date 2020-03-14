@@ -1,4 +1,4 @@
-﻿namespace Betfair
+﻿namespace Betfair.Core
 {
     using System;
     using System.Collections.Generic;

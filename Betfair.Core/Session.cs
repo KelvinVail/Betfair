@@ -1,4 +1,4 @@
-﻿namespace Betfair
+﻿namespace Betfair.Core
 {
     using System;
     using System.Collections.Generic;
@@ -7,6 +7,7 @@
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
+    using Betfair.Identity;
     using Newtonsoft.Json;
 
     public sealed class Session : ISession, IDisposable
