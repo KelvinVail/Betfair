@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Kelvin Vail</Authors>
+    <Product>Betfair Identity</Product>
+    <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
+    <PackageTags>Betfair</PackageTags>
+    <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+    <Description>Interfaces to manage Identity and Sessions on Betfair.
+There is no need to install this package seperatly.</Description>
+    <Version>1.0.0-alpha</Version>
   </PropertyGroup>
 
   <ItemGroup>
