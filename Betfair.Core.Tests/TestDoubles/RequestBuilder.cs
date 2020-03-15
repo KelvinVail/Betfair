@@ -1,8 +1,6 @@
 ﻿namespace Betfair.Core.Tests.TestDoubles
 {
     using System.Runtime.Serialization;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
 
     [DataContract]
     public class RequestBuilder
@@ -24,22 +22,5 @@
 
         [DataMember(Name = "params", EmitDefaultValue = false)]
         public dynamic Params { get; set; }
-
-        public RequestBuilder WithMethod(string method)
-        {
-            this.Method = method;
-            return this;
-        }
-
-        public RequestBuilder WithParams(dynamic parameters)
-        {
-            this.Params = parameters;
-            return this;
-        }
-
-        public string ToJson()
-        {
-            return JsonSerializer.ToJsonString(this, StandardResolver.AllowPrivateExcludeNull);
-        }
     }
 }
