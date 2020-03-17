@@ -98,7 +98,7 @@
         {
             await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
             Assert.True(this.Subscription.Connected);
-            this.Subscription.Stop();
+            this.Subscription.Disconnect();
             Assert.False(this.Subscription.Connected);
         }
 
@@ -107,7 +107,7 @@
         {
             await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
             Assert.True(this.Subscription.Connected);
-            this.Subscription.Stop();
+            this.Subscription.Disconnect();
             Assert.False(this.tcpClient.Connected);
         }
     }

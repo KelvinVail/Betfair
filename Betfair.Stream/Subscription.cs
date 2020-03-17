@@ -13,7 +13,7 @@
     using Utf8Json;
     using Utf8Json.Resolvers;
 
-    public sealed class Subscription
+    public sealed class Subscription : ISubscription
     {
         private const string HostName = "stream-api.betfair.com";
         private readonly ISession session;
@@ -96,7 +96,7 @@
             }
         }
 
-        public void Stop()
+        public void Disconnect()
         {
             this.Connected = false;
             this.tcpClient.Close();
