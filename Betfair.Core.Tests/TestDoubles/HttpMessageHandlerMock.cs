@@ -8,7 +8,7 @@
     using System.Threading.Tasks;
     using Moq;
     using Moq.Protected;
-    using Newtonsoft.Json;
+    using Utf8Json;
     using Xunit;
 
     public class HttpMessageHandlerMock : IDisposable
@@ -32,7 +32,7 @@
 
         public HttpMessageHandlerMock WithReturnContent(dynamic dynamicContent)
         {
-            var stringContent = dynamicContent is string ? dynamicContent : JsonConvert.SerializeObject(dynamicContent);
+            var stringContent = dynamicContent is string ? dynamicContent : JsonSerializer.ToJsonString(dynamicContent);
 
             this.returnContent = new StringContent(stringContent);
             return this;

@@ -6,7 +6,8 @@
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
+    using Utf8Json;
+    using Utf8Json.Resolvers;
 
     internal sealed class ExchangeHttpClient : IDisposable
     {
@@ -51,7 +52,7 @@
             var response = await this.httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode) throw new HttpRequestException($"{response.StatusCode}");
             var responseString = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(responseString);
+            return JsonSerializer.Deserialize<T>(responseString, StandardResolver.AllowPrivateExcludeNull);
         }
 
         private HttpClient Configure(HttpClient client)

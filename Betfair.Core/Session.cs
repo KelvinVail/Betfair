@@ -4,11 +4,11 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net.Http;
+    using System.Runtime.Serialization;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using Betfair.Identity;
-    using Newtonsoft.Json;
 
     public sealed class Session : ISession, IDisposable
     {
@@ -149,23 +149,24 @@
             "Microsoft.Performance",
             "CA1812:AvoidUninstantiatedInternalClasses",
             Justification = "Used to deserialize SendAsync response.")]
+        [DataContract]
         private sealed class LoginResponse
         {
             internal string GetToken => this.Token ?? this.SessionToken;
 
-            [JsonProperty]
+            [DataMember(EmitDefaultValue = false)]
             private string Token { get; set; }
 
-            [JsonProperty]
+            [DataMember(EmitDefaultValue = false)]
             private string SessionToken { get; set; }
 
-            [JsonProperty]
+            [DataMember(EmitDefaultValue = false)]
             private string Status { get; set; }
 
-            [JsonProperty]
+            [DataMember(EmitDefaultValue = false)]
             private string LoginStatus { get; set; }
 
-            [JsonProperty]
+            [DataMember(EmitDefaultValue = false)]
             private string Error { get; set; }
 
             private string GetStatus => this.Status ?? this.LoginStatus;
