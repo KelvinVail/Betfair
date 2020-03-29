@@ -1,7 +1,8 @@
 ﻿namespace Betfair.Stream.Tests.TestDoubles
 {
     using System.Runtime.Serialization;
-    using Newtonsoft.Json;
+    using Utf8Json;
+    using Utf8Json.Resolvers;
 
     [DataContract]
     public class SubscriptionMessageStub
@@ -56,7 +57,7 @@
 
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this, Formatting.None);
+            return JsonSerializer.ToJsonString(this, StandardResolver.ExcludeNull);
         }
     }
 }

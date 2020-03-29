@@ -1,7 +1,8 @@
 ﻿namespace Betfair.Stream.Tests.TestDoubles
 {
-    using Newtonsoft.Json;
+    using System.Runtime.Serialization;
 
+    [DataContract]
     public sealed class AuthenticationMessageStub
     {
         public AuthenticationMessageStub(string appKey, string session)
@@ -10,16 +11,16 @@
             this.SessionToken = session;
         }
 
-        [JsonProperty(PropertyName = "op")]
+        [DataMember(Name = "op", EmitDefaultValue = false)]
         public string Op { get; set; } = "authentication";
 
-        [JsonProperty(PropertyName = "id")]
+        [DataMember(Name = "id", EmitDefaultValue = false)]
         public int? Id { get; set; } = 1;
 
-        [JsonProperty(PropertyName = "session")]
+        [DataMember(Name = "session", EmitDefaultValue = false)]
         public string SessionToken { get; set; }
 
-        [JsonProperty(PropertyName = "appKey")]
+        [DataMember(Name = "appKey", EmitDefaultValue = false)]
         public string AppKey { get; set; }
     }
 }

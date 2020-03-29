@@ -1,7 +1,8 @@
 ﻿namespace Betfair.Core.Tests.TestDoubles
 {
-    using Newtonsoft.Json;
+    using System.Runtime.Serialization;
 
+    [DataContract]
     public class ResponseStub<T>
     {
         public ResponseStub(T result)
@@ -9,16 +10,16 @@
             this.Result = result;
         }
 
-        [JsonProperty(PropertyName = "jsonrpc")]
+        [DataMember(Name = "jsonrpc", EmitDefaultValue = false)]
         public string Jsonrpc => "2.0";
 
-        [JsonProperty(PropertyName = "id")]
+        [DataMember(Name = "id", EmitDefaultValue = false)]
         public int Id => 1;
 
-        [JsonProperty(PropertyName = "result")]
+        [DataMember(Name = "result", EmitDefaultValue = false)]
         public T Result { get; set; }
 
-        [JsonProperty(PropertyName = "error")]
+        [DataMember(Name = "error", EmitDefaultValue = false)]
         public string Error { get; set; }
     }
 }

@@ -1,8 +1,9 @@
-﻿namespace Betfair.Stream.Tests
+﻿using Utf8Json;
+
+namespace Betfair.Stream.Tests
 {
     using System.Threading.Tasks;
     using Betfair.Stream.Tests.TestDoubles;
-    using Newtonsoft.Json;
     using Xunit;
 
     public sealed class SubscriptionConnectionTests : SubscriptionTests
@@ -69,7 +70,7 @@
         [Fact]
         public async Task OnAuthenticate()
         {
-            var authMessage = JsonConvert.SerializeObject(
+            var authMessage = JsonSerializer.ToJsonString(
                 new AuthenticationMessageStub(
                     this.Session.AppKey,
                     await this.Session.GetTokenAsync()));
