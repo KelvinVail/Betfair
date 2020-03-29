@@ -154,19 +154,19 @@
         {
             internal string GetToken => this.Token ?? this.SessionToken;
 
-            [DataMember(EmitDefaultValue = false)]
+            [DataMember(Name = "token", EmitDefaultValue = false)]
             private string Token { get; set; }
 
-            [DataMember(EmitDefaultValue = false)]
+            [DataMember(Name = "sessionToken", EmitDefaultValue = false)]
             private string SessionToken { get; set; }
 
-            [DataMember(EmitDefaultValue = false)]
+            [DataMember(Name = "status", EmitDefaultValue = false)]
             private string Status { get; set; }
 
-            [DataMember(EmitDefaultValue = false)]
+            [DataMember(Name = "loginStatus", EmitDefaultValue = false)]
             private string LoginStatus { get; set; }
 
-            [DataMember(EmitDefaultValue = false)]
+            [DataMember(Name = "error", EmitDefaultValue = false)]
             private string Error { get; set; }
 
             private string GetStatus => this.Status ?? this.LoginStatus;

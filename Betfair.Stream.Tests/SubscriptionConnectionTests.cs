@@ -1,9 +1,8 @@
-﻿using Utf8Json;
-
-namespace Betfair.Stream.Tests
+﻿namespace Betfair.Stream.Tests
 {
     using System.Threading.Tasks;
     using Betfair.Stream.Tests.TestDoubles;
+    using Utf8Json;
     using Xunit;
 
     public sealed class SubscriptionConnectionTests : SubscriptionTests

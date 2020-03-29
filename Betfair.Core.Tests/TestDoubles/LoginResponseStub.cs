@@ -1,5 +1,8 @@
 ﻿namespace Betfair.Core.Tests.TestDoubles
 {
+    using System.Runtime.Serialization;
+
+    [DataContract]
     public class LoginResponseStub
     {
         public LoginResponseStub()
@@ -9,12 +12,16 @@
             this.Token = "SessionToken";
         }
 
+        [DataMember(Name = "product", EmitDefaultValue = false)]
         public static string Product => "ApiKey";
 
+        [DataMember(Name = "token", EmitDefaultValue = false)]
         public string Token { get; set; }
 
+        [DataMember(Name = "status", EmitDefaultValue = false)]
         public string Status { get; set; }
 
+        [DataMember(Name = "error", EmitDefaultValue = false)]
         public string Error { get; set; }
 
         public LoginResponseStub WithStatus(string status)
