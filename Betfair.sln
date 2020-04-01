@@ -10,15 +10,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Core", "Betfair.Core\Betfair.Core.csproj", "{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core", "Betfair.Core\Betfair.Core.csproj", "{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Stream", "Betfair.Stream\Betfair.Stream.csproj", "{34383D76-B58B-451E-BABB-740713299753}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Stream", "Betfair.Stream\Betfair.Stream.csproj", "{34383D76-B58B-451E-BABB-740713299753}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Core.Tests", "Betfair.Core.Tests\Betfair.Core.Tests.csproj", "{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core.Tests", "Betfair.Core.Tests\Betfair.Core.Tests.csproj", "{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Stream.Tests", "Betfair.Stream.Tests\Betfair.Stream.Tests.csproj", "{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Stream.Tests", "Betfair.Stream.Tests\Betfair.Stream.Tests.csproj", "{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Identity", "Betfair.Identity\Betfair.Identity.csproj", "{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Betting.Tests", "Betfair.Betting.Tests\Betfair.Betting.Tests.csproj", "{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Betting", "Betfair.Betting\Betfair.Betting.csproj", "{BD165573-C81F-4D0C-8654-A40C602499E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,11 +54,22 @@ Global
 		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD165573-C81F-4D0C-8654-A40C602499E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD165573-C81F-4D0C-8654-A40C602499E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD165573-C81F-4D0C-8654-A40C602499E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD165573-C81F-4D0C-8654-A40C602499E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8E0FF9AD-D181-4454-8130-FE0DE96802F9}
+	EndGlobalSection
+	GlobalSection(NDepend) = preSolution
+		Project = ".\Betfair.ndproj"
 	EndGlobalSection
 EndGlobal
