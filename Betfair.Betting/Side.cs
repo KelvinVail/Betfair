@@ -3,6 +3,6 @@
     public enum Side
     {
         Back,
-        Lay
+        Lay,
     }
 }
