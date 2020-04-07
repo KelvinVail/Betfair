@@ -79,10 +79,13 @@
             Assert.Equal(expected, sut.ToInstruction());
         }
 
-        [Fact]
-        public void ToInstructionRoundsPriceToNearestValidPrice()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(0.01)]
+        [InlineData(1.009)]
+        public void PriceBelow1Point01IsConvertedTo1Point01(double price)
         {
-            var sut = new LimitOrder(1, Side.Back, 1, 1);
+            var sut = new LimitOrder(1, Side.Back, 1, price);
             var nearest = 1.01;
             var expected = $"{{\"selectionId\":\"1\"," +
                            $"\"side\":\"BACK\"," +
@@ -92,6 +95,59 @@
                            $"\"price\":\"{nearest}\"," +
                            $"\"persistenceType\":\"LAPSE\"}}}}";
             Assert.Equal(expected, sut.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(1001)]
+        [InlineData(1000.1)]
+        [InlineData(1000.00001)]
+        [InlineData(9999)]
+        public void PriceOver1000IsConvertedTo1000(double price)
+        {
+            var sut = new LimitOrder(1, Side.Back, 1, price);
+            var nearest = 1000;
+            var expected = $"{{\"selectionId\":\"1\"," +
+                           $"\"side\":\"BACK\"," +
+                           $"\"orderType\":\"LIMIT\"," +
+                           $"\"limitOrder\":{{" +
+                           $"\"size\":\"1\"," +
+                           $"\"price\":\"{nearest}\"," +
+                           $"\"persistenceType\":\"LAPSE\"}}}}";
+            Assert.Equal(expected, sut.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(1.015, 1.01)]
+        [InlineData(1.016, 1.02)]
+        [InlineData(2.01, 2)]
+        [InlineData(2.011, 2.02)]
+        [InlineData(3.025, 3)]
+        [InlineData(3.026, 3.05)]
+        [InlineData(4.05, 4)]
+        [InlineData(4.06, 4.1)]
+        [InlineData(6.1, 6)]
+        [InlineData(6.11, 6.2)]
+        [InlineData(10.25, 10)]
+        [InlineData(10.26, 10.5)]
+        [InlineData(20.5, 20)]
+        [InlineData(20.6, 21)]
+        [InlineData(31, 30)]
+        [InlineData(31.1, 32)]
+        [InlineData(52.5, 50)]
+        [InlineData(52.6, 55)]
+        [InlineData(105, 100)]
+        [InlineData(105.1, 110)]
+        public void PriceIsRoundedToNearestValidPrice(double price, double expected)
+        {
+            var sut = new LimitOrder(1, Side.Back, 1, price);
+            var instruction = $"{{\"selectionId\":\"1\"," +
+                              $"\"side\":\"BACK\"," +
+                              $"\"orderType\":\"LIMIT\"," +
+                              $"\"limitOrder\":{{" +
+                              $"\"size\":\"1\"," +
+                              $"\"price\":\"{expected}\"," +
+                              $"\"persistenceType\":\"LAPSE\"}}}}";
+            Assert.Equal(instruction, sut.ToInstruction());
         }
     }
 }

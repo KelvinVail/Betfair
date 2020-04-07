@@ -1,4 +1,8 @@
-﻿namespace Betfair.Betting
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
+
+namespace Betfair.Betting
 {
     using System;
     using System.Globalization;
@@ -19,7 +23,7 @@
 
         public double Size { get; }
 
-        public double Price { get; set; }
+        public double Price { get; }
 
         public string ToInstruction()
         {
@@ -34,8 +38,30 @@
 
         private static double NearestValidPrice(double price)
         {
-            if (price == 1) return 1.01;
-            return price;
+            if (price <= 1.01) return 1.01;
+            if (price >= 1000) return 1000;
+
+            var increment = GetIncrement(price);
+            return Math.Round((price * (1 / increment)) - 0.0001) / (1 / increment);
+        }
+
+        private static double GetIncrement(double price)
+        {
+            var increments = new Dictionary<int, double>
+            {
+                { 2, 0.01 },
+                { 3, 0.02 },
+                { 4, 0.05 },
+                { 6, 0.1 },
+                { 10, 0.2 },
+                { 20, 0.5 },
+                { 30, 1 },
+                { 50, 2 },
+                { 100, 5 },
+                { 1000, 10 },
+            };
+
+            return increments.First(increment => price < increment.Key).Value;
         }
     }
 }

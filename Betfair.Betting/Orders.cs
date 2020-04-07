@@ -13,18 +13,18 @@
         {
             this.MarketId = ValidateMarketId(marketId);
             if (string.IsNullOrEmpty(strategyRef)) return;
-            ValidateStrategyReference(strategyRef);
-            this.StrategyRef = strategyRef;
+            this.StrategyRef = ValidateStrategyReference(strategyRef);
         }
 
         public string StrategyRef { get; }
 
         public string MarketId { get; }
 
-        private static void ValidateStrategyReference(string strategyRef)
+        private static string ValidateStrategyReference(string strategyRef)
         {
             if (strategyRef.Length > 15)
                 throw new ArgumentOutOfRangeException(nameof(strategyRef), $"{strategyRef} must be less than 15 characters.");
+            return strategyRef;
         }
 
         private static string ValidateMarketId(string marketId)
