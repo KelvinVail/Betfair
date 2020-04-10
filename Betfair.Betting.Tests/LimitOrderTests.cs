@@ -53,11 +53,11 @@
             var sut = new LimitOrder(selectionId, side, size, price);
             var expected = $"{{\"selectionId\":\"{selectionId}\"," +
                            $"\"side\":\"{side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
-                           $"\"orderType\":\"LIMIT\"," +
-                           $"\"limitOrder\":{{" +
+                           "\"orderType\":\"LIMIT\"," +
+                           "\"limitOrder\":{" +
                            $"\"size\":\"{size}\"," +
                            $"\"price\":\"{price}\"," +
-                           $"\"persistenceType\":\"LAPSE\"}}}}";
+                           "\"persistenceType\":\"LAPSE\"}}";
             Assert.Equal(expected, sut.ToInstruction());
         }
 
@@ -69,54 +69,20 @@
         public void ToInstructionRoundsSizeToTwoDecimalsPlaces(double size, double rounded)
         {
             var sut = new LimitOrder(1, Side.Back, size, 1.01);
-            var expected = $"{{\"selectionId\":\"1\"," +
-                           $"\"side\":\"BACK\"," +
-                           $"\"orderType\":\"LIMIT\"," +
-                           $"\"limitOrder\":{{" +
+            var expected = "{\"selectionId\":\"1\"," +
+                           "\"side\":\"BACK\"," +
+                           "\"orderType\":\"LIMIT\"," +
+                           "\"limitOrder\":{" +
                            $"\"size\":\"{rounded}\"," +
-                           $"\"price\":\"1.01\"," +
-                           $"\"persistenceType\":\"LAPSE\"}}}}";
+                           "\"price\":\"1.01\"," +
+                           "\"persistenceType\":\"LAPSE\"}}";
             Assert.Equal(expected, sut.ToInstruction());
         }
 
         [Theory]
-        [InlineData(1)]
-        [InlineData(0.01)]
-        [InlineData(1.009)]
-        public void PriceBelow1Point01IsConvertedTo1Point01(double price)
-        {
-            var sut = new LimitOrder(1, Side.Back, 1, price);
-            var nearest = 1.01;
-            var expected = $"{{\"selectionId\":\"1\"," +
-                           $"\"side\":\"BACK\"," +
-                           $"\"orderType\":\"LIMIT\"," +
-                           $"\"limitOrder\":{{" +
-                           $"\"size\":\"1\"," +
-                           $"\"price\":\"{nearest}\"," +
-                           $"\"persistenceType\":\"LAPSE\"}}}}";
-            Assert.Equal(expected, sut.ToInstruction());
-        }
-
-        [Theory]
-        [InlineData(1001)]
-        [InlineData(1000.1)]
-        [InlineData(1000.00001)]
-        [InlineData(9999)]
-        public void PriceOver1000IsConvertedTo1000(double price)
-        {
-            var sut = new LimitOrder(1, Side.Back, 1, price);
-            var nearest = 1000;
-            var expected = $"{{\"selectionId\":\"1\"," +
-                           $"\"side\":\"BACK\"," +
-                           $"\"orderType\":\"LIMIT\"," +
-                           $"\"limitOrder\":{{" +
-                           $"\"size\":\"1\"," +
-                           $"\"price\":\"{nearest}\"," +
-                           $"\"persistenceType\":\"LAPSE\"}}}}";
-            Assert.Equal(expected, sut.ToInstruction());
-        }
-
-        [Theory]
+        [InlineData(1, 1.01)]
+        [InlineData(0.01, 1.01)]
+        [InlineData(1.009, 1.01)]
         [InlineData(1.015, 1.01)]
         [InlineData(1.016, 1.02)]
         [InlineData(2.01, 2)]
@@ -137,16 +103,20 @@
         [InlineData(52.6, 55)]
         [InlineData(105, 100)]
         [InlineData(105.1, 110)]
+        [InlineData(1001, 1000)]
+        [InlineData(1000.1, 1000)]
+        [InlineData(1000.00001, 1000)]
+        [InlineData(9999, 1000)]
         public void PriceIsRoundedToNearestValidPrice(double price, double expected)
         {
             var sut = new LimitOrder(1, Side.Back, 1, price);
-            var instruction = $"{{\"selectionId\":\"1\"," +
-                              $"\"side\":\"BACK\"," +
-                              $"\"orderType\":\"LIMIT\"," +
-                              $"\"limitOrder\":{{" +
-                              $"\"size\":\"1\"," +
+            var instruction = "{\"selectionId\":\"1\"," +
+                              "\"side\":\"BACK\"," +
+                              "\"orderType\":\"LIMIT\"," +
+                              "\"limitOrder\":{" +
+                              "\"size\":\"1\"," +
                               $"\"price\":\"{expected}\"," +
-                              $"\"persistenceType\":\"LAPSE\"}}}}";
+                              "\"persistenceType\":\"LAPSE\"}}";
             Assert.Equal(instruction, sut.ToInstruction());
         }
     }

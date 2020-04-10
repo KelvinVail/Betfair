@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-
-namespace Betfair.Betting
+﻿namespace Betfair.Betting
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
 
     public class LimitOrder
     {
@@ -29,11 +27,11 @@ namespace Betfair.Betting
         {
             return $"{{\"selectionId\":\"{this.SelectionId}\"," +
                    $"\"side\":\"{this.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
-                   $"\"orderType\":\"LIMIT\"," +
-                   $"\"limitOrder\":{{" +
+                   "\"orderType\":\"LIMIT\"," +
+                   "\"limitOrder\":{" +
                    $"\"size\":\"{Math.Round(this.Size, 2)}\"," +
                    $"\"price\":\"{NearestValidPrice(this.Price)}\"," +
-                   $"\"persistenceType\":\"LAPSE\"}}}}";
+                   "\"persistenceType\":\"LAPSE\"}}";
         }
 
         private static double NearestValidPrice(double price)
