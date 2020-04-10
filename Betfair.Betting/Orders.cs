@@ -2,18 +2,24 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     public class Orders
     {
+        private readonly IExchangeClient client;
+
         private readonly List<LimitOrder> orders = new List<LimitOrder>();
 
-        public Orders(string marketId)
+        public Orders(IExchangeClient client, string marketId)
         {
+            this.client = client;
             this.MarketId = ValidateMarketId(marketId);
         }
 
-        public Orders(string marketId, string strategyRef)
+        public Orders(IExchangeClient client, string marketId, string strategyRef)
         {
+            this.client = client;
             this.MarketId = ValidateMarketId(marketId);
             if (string.IsNullOrEmpty(strategyRef)) return;
             this.StrategyRef = ValidateStrategyReference(strategyRef);
@@ -23,14 +29,18 @@
 
         public string MarketId { get; }
 
-        public string ToParams()
-        {
-            return $"{{\"marketId\":\"{this.MarketId}\",{this.Reference()}\"instructions\":[{this.Instructions()}]}}";
-        }
+        public bool Placed { get; private set; }
 
         public void Add(LimitOrder limitOrder)
         {
             this.orders.Add(limitOrder);
+        }
+
+        public async Task PlaceAsync()
+        {
+            if (!this.orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
+            await this.client.SendAsync<dynamic>("Sports", "placeOrders", this.ToParams());
+            this.Placed = true;
         }
 
         private static string ValidateStrategyReference(string strategyRef)
@@ -46,9 +56,13 @@
             return marketId;
         }
 
+        private string ToParams()
+        {
+            return $"{{\"marketId\":\"{this.MarketId}\",{this.Reference()}\"instructions\":[{this.Instructions()}]}}";
+        }
+
         private string Instructions()
         {
-            if (this.orders.Count == 0) return null;
             var instructions = string.Empty;
             this.orders.ForEach(i => instructions += i.ToInstruction() + ",");
             return instructions.Remove(instructions.Length - 1, 1);
