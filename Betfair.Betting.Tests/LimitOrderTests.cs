@@ -1,10 +1,22 @@
 ﻿namespace Betfair.Betting.Tests
 {
+    using System.Collections.Generic;
     using System.Globalization;
+    using System.Threading.Tasks;
+    using Betfair.Betting.Tests.TestDoubles;
     using Xunit;
 
     public class LimitOrderTests
     {
+        private readonly ExchangeClientSpy client = new ExchangeClientSpy();
+
+        private readonly Orders orders;
+
+        public LimitOrderTests()
+        {
+            this.orders = new Orders(this.client, "MarketId");
+        }
+
         [Theory]
         [InlineData(1)]
         [InlineData(2147483648)]
@@ -118,6 +130,93 @@
                               $"\"price\":\"{expected}\"," +
                               "\"persistenceType\":\"LAPSE\"}}";
             Assert.Equal(instruction, sut.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(2.00)]
+        [InlineData(9.99)]
+        public async Task SetResultsSetsSizeMatched(double size)
+        {
+            var sut = new LimitOrder(12345, Side.Back, size, 1.01);
+            var limitOrders = new List<LimitOrder>
+            {
+                new LimitOrder(98765, Side.Lay, 2.00, 1.01),
+                sut,
+            };
+            await this.SetResults(limitOrders);
+            Assert.Equal(size, sut.SizeMatched);
+        }
+
+        [Fact]
+        public async Task SetResultsShouldHandleMissingReport()
+        {
+            var sut = new LimitOrder(12345, Side.Back, 2.00, 1.01);
+            this.orders.Add(sut);
+            var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 2.00, 1.01) };
+            await this.SetResults(limitOrders);
+            Assert.Equal(0, sut.SizeMatched);
+        }
+
+        [Theory]
+        [InlineData(2.00)]
+        [InlineData(9.99)]
+        public async Task SetResultsShouldUseCorrectResult(double size)
+        {
+            var sut = new LimitOrder(12345, Side.Back, size, 1.01);
+            var limitOrders = new List<LimitOrder>
+            {
+                new LimitOrder(98765, Side.Lay, -1, -1),
+                new LimitOrder(12345, Side.Lay, -1, -1),
+                sut,
+            };
+            await this.SetResults(limitOrders);
+            Assert.Equal(size, sut.SizeMatched);
+        }
+
+        private static string GetResult(LimitOrder limitOrder, long betId)
+        {
+            return "{" +
+                   "\"instruction\":" +
+                   "{" +
+                   $"\"selectionId\":{limitOrder.SelectionId}," +
+                   "\"limitOrder\":{" +
+                   $"\"size\":{limitOrder.Size}," +
+                   $"\"price\":{limitOrder.Price}," +
+                   "\"persistenceType\":\"LAPSE\"},\"orderType\":\"LIMIT\"," +
+                   $"\"side\":\"{limitOrder.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"" +
+                   "}" +
+                   "," +
+                   $"\"betId\":\"{betId}\"," +
+                   "\"placedDate\":\"2013-10-30T14:22:47.000Z\"," +
+                   $"\"averagePriceMatched\":{limitOrder.Price}," +
+                   $"\"sizeMatched\":{limitOrder.Size}," +
+                   "\"status\":\"SUCCESS\"" +
+                   "},";
+        }
+
+        private async Task SetResults(List<LimitOrder> limitOrders)
+        {
+            var instructions = string.Empty;
+            var i = 0;
+            foreach (var limitOrder in limitOrders)
+            {
+                i++;
+                instructions += GetResult(limitOrder, i);
+            }
+
+            instructions = instructions.Remove(instructions.Length - 1, 1);
+
+            this.client.WithReturnContent("{" +
+                                          "\"marketId\":\"MarketId\"," +
+                                          "\"instructionReports\":" +
+                                          "[" +
+                                          instructions +
+                                          "]," +
+                                          "\"status\":\"SUCCESS\"" +
+                                          "}");
+
+            limitOrders.ForEach(o => this.orders.Add(o));
+            await this.orders.PlaceAsync();
         }
     }
 }

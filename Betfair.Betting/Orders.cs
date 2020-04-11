@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using System.Threading.Tasks;
 
     public class Orders
@@ -39,8 +40,10 @@
         public async Task PlaceAsync()
         {
             if (!this.orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
-            await this.client.SendAsync<dynamic>("Sports", "placeOrders", this.ToParams());
             this.Placed = true;
+            var results = await this.client.SendAsync<PlaceResult>("Sports", "placeOrders", this.ToParams());
+            if (results is null) return;
+            this.orders.ForEach(o => o.AddReports(results.InstructionReports));
         }
 
         private static string ValidateStrategyReference(string strategyRef)
@@ -71,6 +74,17 @@
         private string Reference()
         {
             return this.StrategyRef is null ? null : $"\"customerStrategyRef\":\"{this.StrategyRef}\",";
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Performance",
+            "CA1812:AvoidUninstantiatedInternalClasses",
+            Justification = "Used to deserialize Json.")]
+        [DataContract]
+        private sealed class PlaceResult
+        {
+            [DataMember(Name = "instructionReports", EmitDefaultValue = false)]
+            internal List<InstructionReport> InstructionReports { get; set; }
         }
     }
 }

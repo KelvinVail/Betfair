@@ -23,6 +23,8 @@
 
         public double Price { get; }
 
+        public double SizeMatched { get; private set; }
+
         public string ToInstruction()
         {
             return $"{{\"selectionId\":\"{this.SelectionId}\"," +
@@ -32,6 +34,13 @@
                    $"\"size\":\"{Math.Round(this.Size, 2)}\"," +
                    $"\"price\":\"{NearestValidPrice(this.Price)}\"," +
                    "\"persistenceType\":\"LAPSE\"}}";
+        }
+
+        internal void AddReports(IEnumerable<InstructionReport> reports)
+        {
+            var report = reports.FirstOrDefault(r => r.Instruction.SelectionId == this.SelectionId && r.Instruction.Side == this.Side);
+            if (report is null) return;
+            this.SizeMatched = report.SizeMatched;
         }
 
         private static double NearestValidPrice(double price)
