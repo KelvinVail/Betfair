@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Betting
 {
+    using System;
     using System.Runtime.Serialization;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -14,5 +15,20 @@
 
         [DataMember(Name = "sizeMatched", EmitDefaultValue = false)]
         internal double SizeMatched { get; set; }
+
+        [DataMember(Name = "averagePriceMatched", EmitDefaultValue = false)]
+        internal double AveragePriceMatched { get; set; }
+
+        [DataMember(Name = "status", EmitDefaultValue = false)]
+        internal string Status { get; set; }
+
+        [DataMember(Name = "betId", EmitDefaultValue = false)]
+        internal string BetId { get; set; }
+
+        [DataMember(Name = "orderStatus", EmitDefaultValue = false)]
+        internal string OrderStatus { get; set; }
+
+        [DataMember(Name = "placedDate", EmitDefaultValue = false)]
+        internal DateTime PlacedDate { get; set; }
     }
 }

@@ -25,6 +25,16 @@
 
         public double SizeMatched { get; private set; }
 
+        public double AveragePriceMatched { get; private set; }
+
+        public string Status { get; private set; }
+
+        public string BetId { get; private set; }
+
+        public string OrderStatus { get; private set; }
+
+        public DateTime PlacedDate { get; private set; }
+
         public string ToInstruction()
         {
             return $"{{\"selectionId\":\"{this.SelectionId}\"," +
@@ -39,8 +49,7 @@
         internal void AddReports(IEnumerable<InstructionReport> reports)
         {
             var report = reports.FirstOrDefault(r => r.Instruction.SelectionId == this.SelectionId && r.Instruction.Side == this.Side);
-            if (report is null) return;
-            this.SizeMatched = report.SizeMatched;
+            this.Update(report);
         }
 
         private static double NearestValidPrice(double price)
@@ -69,6 +78,17 @@
             };
 
             return increments.First(increment => price < increment.Key).Value;
+        }
+
+        private void Update(InstructionReport report)
+        {
+            if (report is null) return;
+            this.BetId = report.BetId;
+            this.SizeMatched = report.SizeMatched;
+            this.AveragePriceMatched = report.AveragePriceMatched;
+            this.Status = report.Status;
+            this.OrderStatus = report.OrderStatus;
+            this.PlacedDate = report.PlacedDate;
         }
     }
 }

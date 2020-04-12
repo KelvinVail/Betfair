@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Betting.Tests
 {
+    using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Threading.Tasks;
@@ -133,18 +134,24 @@
         }
 
         [Theory]
-        [InlineData(2.00)]
-        [InlineData(9.99)]
-        public async Task SetResultsSetsSizeMatched(double size)
+        [InlineData(2.00, 1.01, "SUCCESS")]
+        [InlineData(9.99, 1000, "FAILURE")]
+        public async Task ResultsAreSet(double size, double price, string status)
         {
-            var sut = new LimitOrder(12345, Side.Back, size, 1.01);
+            var sut = new LimitOrder(12345, Side.Back, size, price);
             var limitOrders = new List<LimitOrder>
             {
-                new LimitOrder(98765, Side.Lay, 2.00, 1.01),
+                new LimitOrder(98765, Side.Lay, -1, -1),
                 sut,
             };
-            await this.SetResults(limitOrders);
+            await this.SetResults(limitOrders, status);
+            Assert.NotEqual("1", sut.BetId);
+            Assert.Equal("2", sut.BetId);
             Assert.Equal(size, sut.SizeMatched);
+            Assert.Equal(price, sut.AveragePriceMatched);
+            Assert.Equal(status, sut.Status);
+            Assert.Equal("EXECUTION_COMPLETE", sut.OrderStatus);
+            Assert.Equal(DateTime.Parse("2013-10-30T14:22:47.000Z", new DateTimeFormatInfo()), sut.PlacedDate);
         }
 
         [Fact]
@@ -153,7 +160,7 @@
             var sut = new LimitOrder(12345, Side.Back, 2.00, 1.01);
             this.orders.Add(sut);
             var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 2.00, 1.01) };
-            await this.SetResults(limitOrders);
+            await this.SetResults(limitOrders, "SUCCESS");
             Assert.Equal(0, sut.SizeMatched);
         }
 
@@ -169,11 +176,11 @@
                 new LimitOrder(12345, Side.Lay, -1, -1),
                 sut,
             };
-            await this.SetResults(limitOrders);
+            await this.SetResults(limitOrders, "SUCCESS");
             Assert.Equal(size, sut.SizeMatched);
         }
 
-        private static string GetResult(LimitOrder limitOrder, long betId)
+        private static string GetResult(LimitOrder limitOrder, long betId, string status)
         {
             return "{" +
                    "\"instruction\":" +
@@ -190,18 +197,19 @@
                    "\"placedDate\":\"2013-10-30T14:22:47.000Z\"," +
                    $"\"averagePriceMatched\":{limitOrder.Price}," +
                    $"\"sizeMatched\":{limitOrder.Size}," +
-                   "\"status\":\"SUCCESS\"" +
+                   $"\"orderStatus\":\"EXECUTION_COMPLETE\"," +
+                   $"\"status\":\"{status}\"" +
                    "},";
         }
 
-        private async Task SetResults(List<LimitOrder> limitOrders)
+        private async Task SetResults(List<LimitOrder> limitOrders, string status)
         {
             var instructions = string.Empty;
             var i = 0;
             foreach (var limitOrder in limitOrders)
             {
                 i++;
-                instructions += GetResult(limitOrder, i);
+                instructions += GetResult(limitOrder, i, status);
             }
 
             instructions = instructions.Remove(instructions.Length - 1, 1);

@@ -39,11 +39,10 @@
 
         public async Task PlaceAsync()
         {
-            if (!this.orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
+            this.Validate();
             this.Placed = true;
             var results = await this.client.SendAsync<PlaceResult>("Sports", "placeOrders", this.ToParams());
-            if (results is null) return;
-            this.orders.ForEach(o => o.AddReports(results.InstructionReports));
+            this.UpdateOrders(results);
         }
 
         private static string ValidateStrategyReference(string strategyRef)
@@ -55,7 +54,8 @@
 
         private static string ValidateMarketId(string marketId)
         {
-            if (string.IsNullOrEmpty(marketId)) throw new ArgumentNullException(nameof(marketId), "MarketId should not be null or empty.");
+            if (string.IsNullOrEmpty(marketId))
+                throw new ArgumentNullException(nameof(marketId), "MarketId should not be null or empty.");
             return marketId;
         }
 
@@ -74,6 +74,17 @@
         private string Reference()
         {
             return this.StrategyRef is null ? null : $"\"customerStrategyRef\":\"{this.StrategyRef}\",";
+        }
+
+        private void Validate()
+        {
+            if (!this.orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
+        }
+
+        private void UpdateOrders(PlaceResult results)
+        {
+            if (results is null) return;
+            this.orders.ForEach(o => o.AddReports(results.InstructionReports));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
