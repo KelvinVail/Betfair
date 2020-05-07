@@ -10,7 +10,7 @@
 
     public class ExchangeHttpClientTests : IDisposable
     {
-        private readonly Client client = new Client("AppKey", "Username", "Password");
+        private readonly Session session = new Session("AppKey", "Username", "Password");
 
         private readonly HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock().WithReturnContent(new LoginResponseStub());
 
@@ -21,13 +21,13 @@
         public ExchangeHttpClientTests()
         {
             this.handler = this.httpMessageHandler.Build();
-            this.client.WithHandler(this.handler);
+            this.session.WithHandler(this.handler);
         }
 
         [Fact]
         public void OnWithHandlerThrowIfHandlerIsNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => this.client.WithHandler(null));
+            var exception = Assert.Throws<ArgumentNullException>(() => this.session.WithHandler(null));
             Assert.Equal("newHandler", exception.ParamName);
         }
 
@@ -35,37 +35,37 @@
         public async Task WhenInitializedAcceptHeaderIsApplicationJson()
         {
             var applicationJson = new MediaTypeWithQualityHeaderValue("application/json");
-            await this.client.GetTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyHeaderValues("Accept", applicationJson.ToString());
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsConnectionKeepAlive()
         {
-            await this.client.GetTokenAsync();
-            this.httpMessageHandler.VerifyHeaderValues("Connection", "Keep-Alive");
+            await this.session.GetTokenAsync();
+            this.httpMessageHandler.VerifyHeaderValues("Connection", "keep-alive");
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsAcceptGzip()
         {
-            await this.client.GetTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
         }
 
         [Fact]
         public async Task WhenInitializedHeaderContainsAcceptDeflate()
         {
-            await this.client.GetTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "deflate");
         }
 
         [Fact]
         public async Task OnDisposeHttpClientIsDisposed()
         {
-            await this.client.LoginAsync();
-            this.client.Dispose();
-            await Assert.ThrowsAsync<ObjectDisposedException>(() => this.client.LoginAsync());
+            await this.session.LoginAsync();
+            this.session.Dispose();
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => this.session.LoginAsync());
         }
 
         [Theory]
@@ -75,8 +75,8 @@
         public async void OnSendThrowIfNotSuccessful(HttpStatusCode statusCode)
         {
             this.httpMessageHandler.WithStatusCode(statusCode);
-            this.client.WithHandler(this.httpMessageHandler.Build());
-            var exception = await Assert.ThrowsAsync<HttpRequestException>(() => this.client.GetTokenAsync());
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            var exception = await Assert.ThrowsAsync<HttpRequestException>(() => this.session.GetTokenAsync());
             Assert.Equal($"{statusCode}", exception.Message);
         }
 
@@ -89,14 +89,14 @@
         [Fact]
         public async Task OnLoginHandlerCheckCertificateRevocationListIsTrue()
         {
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             Assert.True(this.handler.CheckCertificateRevocationList);
         }
 
         [Fact]
         public async Task OnLoginRequestHasAutoDecompressIsGzip()
         {
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
         }
 
@@ -115,7 +115,7 @@
                 this.handler.Dispose();
             }
 
-            this.client.Dispose();
+            this.session.Dispose();
 
             this.disposed = true;
         }

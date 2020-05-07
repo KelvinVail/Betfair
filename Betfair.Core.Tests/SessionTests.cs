@@ -16,104 +16,104 @@
 
         private HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock();
 
-        private Client client = new Client("AppKey", "Username", "Password");
+        private Session session = new Session("AppKey", "Username", "Password");
 
         private bool disposedValue;
 
         public SessionTests()
         {
             this.httpMessageHandler.WithReturnContent(new LoginResponseStub());
-            this.client.WithHandler(this.httpMessageHandler.Build());
+            this.session.WithHandler(this.httpMessageHandler.Build());
         }
 
         [Fact]
         public void WhenInitializedThrowIfAppKeyIsNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new Client(null, "Username", "Password"));
+            var exception = Assert.Throws<ArgumentNullException>(() => new Session(null, "Username", "Password"));
             Assert.Equal("appKey", exception.ParamName);
         }
 
         [Fact]
         public void WhenInitializedThrowIfUsernameIsNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new Client("AppKey", null, "Password"));
+            var exception = Assert.Throws<ArgumentNullException>(() => new Session("AppKey", null, "Password"));
             Assert.Equal("username", exception.ParamName);
         }
 
         [Fact]
         public void WhenInitializedThrowIfPasswordIsNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new Client("AppKey", "Username", null));
+            var exception = Assert.Throws<ArgumentNullException>(() => new Session("AppKey", "Username", null));
             Assert.Equal("password", exception.ParamName);
         }
 
         [Fact]
         public void WhenInitializedAppKeyIsSet()
         {
-            Assert.Equal("AppKey", this.client.AppKey);
+            Assert.Equal("AppKey", this.session.AppKey);
         }
 
         [Fact]
         public void WhenInitializedSessionTimeoutIsEightHours()
         {
             const int defaultSessionTimeout = 8;
-            Assert.Equal(defaultSessionTimeout, this.client.SessionTimeout.TotalHours, 2);
+            Assert.Equal(defaultSessionTimeout, this.session.SessionTimeout.TotalHours, 2);
         }
 
         [Fact]
         public void AfterInitializedSessionTimeoutCanBeSet()
         {
             const int newSessionTimeout = 2;
-            this.client.SessionTimeout = TimeSpan.FromHours(newSessionTimeout);
-            Assert.Equal(newSessionTimeout, this.client.SessionTimeout.TotalHours);
+            this.session.SessionTimeout = TimeSpan.FromHours(newSessionTimeout);
+            Assert.Equal(newSessionTimeout, this.session.SessionTimeout.TotalHours);
         }
 
         [Fact]
         public void WhenInitializedKeepAliveOffsetIsOneHour()
         {
             const int defaultKeepAliveOffset = -1;
-            Assert.Equal(defaultKeepAliveOffset, this.client.KeepAliveOffset.TotalHours, 0);
+            Assert.Equal(defaultKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
         }
 
         [Fact]
         public void AfterInitializedKeepAliveOffsetCanBeSet()
         {
             const int newKeepAliveOffset = -2;
-            this.client.KeepAliveOffset = TimeSpan.FromHours(newKeepAliveOffset);
-            Assert.Equal(newKeepAliveOffset, this.client.KeepAliveOffset.TotalHours, 0);
+            this.session.KeepAliveOffset = TimeSpan.FromHours(newKeepAliveOffset);
+            Assert.Equal(newKeepAliveOffset, this.session.KeepAliveOffset.TotalHours, 0);
         }
 
         [Fact]
         public void WhenInitializedSessionExpiryTimeIsSet()
         {
             var nullDateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
-            Assert.Equal(nullDateTime + this.client.SessionTimeout, this.client.SessionExpiryTime);
+            Assert.Equal(nullDateTime + this.session.SessionTimeout, this.session.SessionExpiryTime);
         }
 
         [Fact]
         public void WhenInitializedSessionIsNotValid()
         {
-            Assert.False(this.client.IsSessionValid);
+            Assert.False(this.session.IsSessionValid);
         }
 
         [Fact]
         public async Task OnExpirySessionIsNotValid()
         {
             await this.SetExpiredSessionToken("SessionToken");
-            Assert.False(this.client.IsSessionValid);
+            Assert.False(this.session.IsSessionValid);
         }
 
         [Fact]
         public async Task OnLoginHttpPostMethodIsUsed()
         {
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
         [Fact]
         public async Task OnLoginIdentityUriIsCalled()
         {
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
@@ -123,9 +123,9 @@
         [InlineData("12345")]
         public async Task OnLoginAppKeyIsInRequestHeader(string appKey)
         {
-            this.client = new Client(appKey, "Username", "Password");
-            this.client.WithHandler(this.httpMessageHandler.Build());
-            await this.client.LoginAsync();
+            this.session = new Session(appKey, "Username", "Password");
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyHeaderValues("X-Application", appKey);
         }
 
@@ -135,9 +135,9 @@
         [InlineData("Bob")]
         public async Task OnLoginUsernameIsInRequestContent(string username)
         {
-            this.client = new Client("AppKey", username, "Password");
-            this.client.WithHandler(this.httpMessageHandler.Build());
-            await this.client.LoginAsync();
+            this.session = new Session("AppKey", username, "Password");
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestContent(ContentString(username, "Password"));
         }
 
@@ -147,9 +147,9 @@
         [InlineData("qwerty")]
         public async Task OnLoginPasswordIsInRequestContent(string password)
         {
-            this.client = new Client("AppKey", "Username", password);
-            this.client.WithHandler(this.httpMessageHandler.Build());
-            await this.client.LoginAsync();
+            this.session = new Session("AppKey", "Username", password);
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
         }
 
@@ -160,8 +160,8 @@
         public async Task OnLoginThrowIfFailed(string status, string error)
         {
             var responseHandler = this.SetExpectedHttpResponse(status, error).Build();
-            this.client.WithHandler(responseHandler);
-            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.client.LoginAsync);
+            this.session.WithHandler(responseHandler);
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
             Assert.Equal($"{status}: {error}", exception.Message);
         }
 
@@ -172,28 +172,28 @@
         public async Task OnLoginSessionTokenIsSet(string sessionToken)
         {
             await this.SetSessionToken(sessionToken);
-            Assert.Equal(sessionToken, await this.client.GetTokenAsync());
+            Assert.Equal(sessionToken, await this.session.GetTokenAsync());
         }
 
         [Fact]
         public async Task OnLoginSessionExpiryTimeIsUpdated()
         {
-            var expiryTimeBeforeRefresh = this.client.SessionExpiryTime;
-            await this.client.LoginAsync();
-            Assert.NotEqual(expiryTimeBeforeRefresh, this.client.SessionExpiryTime);
+            var expiryTimeBeforeRefresh = this.session.SessionExpiryTime;
+            await this.session.LoginAsync();
+            Assert.NotEqual(expiryTimeBeforeRefresh, this.session.SessionExpiryTime);
         }
 
         [Fact]
         public async Task OnLoginSessionIsValid()
         {
-            await this.client.LoginAsync();
-            Assert.True(this.client.IsSessionValid);
+            await this.session.LoginAsync();
+            Assert.True(this.session.IsSessionValid);
         }
 
         [Fact]
         public async Task OnGetSessionTokenLoginIsCalledIfSessionTokenIsNull()
         {
-            Assert.Equal("SessionToken", await this.client.GetTokenAsync());
+            Assert.Equal("SessionToken", await this.session.GetTokenAsync());
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
@@ -202,7 +202,7 @@
         {
             await this.SetSessionToken("SessionToken");
             this.ResetMessageHandler();
-            await this.client.GetTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyTimesCalled(0);
         }
 
@@ -211,7 +211,7 @@
         {
             await this.SetExpiredSessionToken("SessionToken");
             this.ResetMessageHandler();
-            await this.client.GetTokenAsync();
+            await this.session.GetTokenAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
         }
 
@@ -219,7 +219,7 @@
         public async Task OnKeepAliveTheKeepAliveUriIsCalledIfSessionIsAboutToExpire()
         {
             await this.SetAboutToExpireSessionToken("SessionToken");
-            await this.client.KeepAliveAsync();
+            await this.session.KeepAliveAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/keepAlive"));
         }
 
@@ -227,7 +227,7 @@
         public async Task OnKeepAliveHttpPostMethodIsUsed()
         {
             await this.SetAboutToExpireSessionToken("SessionToken");
-            await this.client.KeepAliveAsync();
+            await this.session.KeepAliveAsync();
             this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
@@ -235,8 +235,8 @@
         public async Task OnKeepAliveSessionIsValid()
         {
             await this.SetAboutToExpireSessionToken("SessionToken");
-            await this.client.KeepAliveAsync();
-            Assert.True(this.client.IsSessionValid);
+            await this.session.KeepAliveAsync();
+            Assert.True(this.session.IsSessionValid);
         }
 
         [Theory]
@@ -246,7 +246,7 @@
         public async Task OnKeepAliveSessionTokenIsInRequestHeader(string sessionToken)
         {
             await this.SetAboutToExpireSessionToken(sessionToken);
-            await this.client.KeepAliveAsync();
+            await this.session.KeepAliveAsync();
             this.httpMessageHandler.VerifyHeaderValues("X-Authentication", sessionToken);
         }
 
@@ -254,9 +254,9 @@
         public async Task OnKeepAliveSessionExpiryTimeIsUpdated()
         {
             await this.SetAboutToExpireSessionToken("SessionToken");
-            var expiryTimeBeforeRefresh = this.client.SessionExpiryTime;
-            await this.client.KeepAliveAsync();
-            Assert.NotEqual(expiryTimeBeforeRefresh, this.client.SessionExpiryTime);
+            var expiryTimeBeforeRefresh = this.session.SessionExpiryTime;
+            await this.session.KeepAliveAsync();
+            Assert.NotEqual(expiryTimeBeforeRefresh, this.session.SessionExpiryTime);
         }
 
         [Theory]
@@ -267,8 +267,8 @@
         {
             await this.SetAboutToExpireSessionToken("SessionToken");
             var responseHandler = this.SetExpectedHttpResponse(status, error).Build();
-            this.client.WithHandler(responseHandler);
-            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.client.KeepAliveAsync);
+            this.session.WithHandler(responseHandler);
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.KeepAliveAsync);
             Assert.Equal($"{status}: {error}", exception.Message);
         }
 
@@ -281,16 +281,16 @@
             await this.SetAboutToExpireSessionToken("AboutToExpireSessionToken");
             this.httpMessageHandler.WithReturnContent(
                 new LoginResponseStub().WithSessionToken(sessionToken));
-            this.client.WithHandler(this.httpMessageHandler.Build());
-            await this.client.KeepAliveAsync();
-            Assert.Equal(sessionToken, await this.client.GetTokenAsync());
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.KeepAliveAsync();
+            Assert.Equal(sessionToken, await this.session.GetTokenAsync());
         }
 
         [Fact]
         public async Task OnLoginWithCertUriIsCalledIfCertAddedToSession()
         {
             await this.SetCertSessionToken("SessionToken");
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
         }
 
@@ -298,7 +298,7 @@
         public async Task OnLoginWithCertHttpPostMethodIsUsed()
         {
             await this.SetCertSessionToken("SessionToken");
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
@@ -306,15 +306,15 @@
         public async Task OnLoginWithCertSessionIsValid()
         {
             await this.SetCertSessionToken("SessionToken");
-            await this.client.LoginAsync();
-            Assert.True(this.client.IsSessionValid);
+            await this.session.LoginAsync();
+            Assert.True(this.session.IsSessionValid);
         }
 
         [Fact]
         public async Task OnLoginWithCertTheRequestContainsCertificate()
         {
             await this.SetCertSessionToken("SessionToken");
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyHasCertificate();
         }
 
@@ -324,9 +324,9 @@
         [InlineData("12345")]
         public async Task OnLoginWithCertAppKeyIsInRequestHeader(string appKey)
         {
-            this.client = new Client(appKey, "Username", "Password");
+            this.session = new Session(appKey, "Username", "Password");
             await this.SetCertSessionToken("SessionToken");
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyHeaderValues("X-Application", appKey);
         }
 
@@ -336,9 +336,9 @@
         [InlineData("Bob")]
         public async Task OnLoginWithCertUsernameIsInRequestContent(string username)
         {
-            this.client = new Client("AppKey", username, "Password");
+            this.session = new Session("AppKey", username, "Password");
             await this.SetCertSessionToken("SessionToken");
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestContent(ContentString(username, "Password"));
         }
 
@@ -348,9 +348,9 @@
         [InlineData("qwerty")]
         public async Task OnLoginWithCertPasswordIsInRequestContent(string password)
         {
-            this.client = new Client("AppKey", "Username", password);
+            this.session = new Session("AppKey", "Username", password);
             await this.SetCertSessionToken("SessionToken");
-            await this.client.LoginAsync();
+            await this.session.LoginAsync();
             this.httpMessageHandler.VerifyRequestContent(ContentString("Username", password));
         }
 
@@ -360,8 +360,8 @@
         public async Task OnLoginWithCertThrowIfFailed(string status)
         {
             this.SetExpectedCertHttpResponse(status);
-            this.client.WithCert(this.certificate);
-            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.client.LoginAsync);
+            this.session.WithCert(this.certificate);
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LoginAsync);
             Assert.Equal($"{status}: NONE", exception.Message);
         }
 
@@ -378,29 +378,29 @@
         public async Task OnLoginWithCertSessionTokenIsSet(string sessionToken)
         {
             await this.SetCertSessionToken(sessionToken);
-            Assert.Equal(sessionToken, await this.client.GetTokenAsync());
+            Assert.Equal(sessionToken, await this.session.GetTokenAsync());
         }
 
         [Fact]
         public async Task OnLoginWithCertExpiryTimeIsUpdated()
         {
             await this.SetCertSessionToken("SessionToken");
-            var expiryTimeBeforeRefresh = this.client.SessionExpiryTime;
-            await this.client.LoginAsync();
-            Assert.NotEqual(expiryTimeBeforeRefresh, this.client.SessionExpiryTime);
+            var expiryTimeBeforeRefresh = this.session.SessionExpiryTime;
+            await this.session.LoginAsync();
+            Assert.NotEqual(expiryTimeBeforeRefresh, this.session.SessionExpiryTime);
         }
 
         [Fact]
         public async Task OnLogoutHttpPostMethodIsUsed()
         {
-            await this.client.LogoutAsync();
+            await this.session.LogoutAsync();
             this.httpMessageHandler.VerifyHttpMethod(HttpMethod.Post);
         }
 
         [Fact]
         public async Task OnLogoutIdentityUriIsCalled()
         {
-            await this.client.LogoutAsync();
+            await this.session.LogoutAsync();
             this.httpMessageHandler.VerifyRequestUri(new Uri("https://identitysso.betfair.com/api/logout"));
         }
 
@@ -411,7 +411,7 @@
         public async Task OnLogoutSessionTokenIsInRequestHeader(string sessionToken)
         {
             await this.SetSessionToken(sessionToken);
-            await this.client.LogoutAsync();
+            await this.session.LogoutAsync();
             this.httpMessageHandler.VerifyHeaderValues("X-Authentication", sessionToken);
         }
 
@@ -420,17 +420,17 @@
         {
             var nullDateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
             await this.SetSessionToken("SessionToken");
-            await this.client.LogoutAsync();
-            Assert.Equal(nullDateTime + this.client.SessionTimeout, this.client.SessionExpiryTime);
+            await this.session.LogoutAsync();
+            Assert.Equal(nullDateTime + this.session.SessionTimeout, this.session.SessionExpiryTime);
         }
 
         [Fact]
         public async Task OnLogoutSessionTokenIsCleared()
         {
             await this.SetSessionToken("SessionToken");
-            Assert.True(this.client.IsSessionValid);
-            await this.client.LogoutAsync();
-            Assert.False(this.client.IsSessionValid);
+            Assert.True(this.session.IsSessionValid);
+            await this.session.LogoutAsync();
+            Assert.False(this.session.IsSessionValid);
         }
 
         [Theory]
@@ -439,16 +439,16 @@
         public async Task OnLogoutThrowIfFailed(string status)
         {
             var responseHandler = this.SetExpectedHttpResponse(status, null).Build();
-            this.client.WithHandler(responseHandler);
-            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.client.LogoutAsync);
+            this.session.WithHandler(responseHandler);
+            var exception = await Assert.ThrowsAsync<AuthenticationException>(this.session.LogoutAsync);
             Assert.Equal($"{status}: NONE", exception.Message);
         }
 
         [Fact]
         public async Task OnDisposeHttpClientIsDisposed()
         {
-            this.client.Dispose();
-            await Assert.ThrowsAsync<ObjectDisposedException>(() => this.client.LoginAsync());
+            this.session.Dispose();
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => this.session.LoginAsync());
         }
 
         public void Dispose()
@@ -466,7 +466,7 @@
                 this.certificate.Dispose();
             }
 
-            this.client.Dispose();
+            this.session.Dispose();
 
             this.disposedValue = true;
         }
@@ -488,18 +488,18 @@
         {
             this.httpMessageHandler.WithReturnContent(
                 new CertLoginResponseStub { LoginStatus = status });
-            this.client.WithHandler(this.httpMessageHandler.Build());
+            this.session.WithHandler(this.httpMessageHandler.Build());
         }
 
         private async Task SetExpiredSessionToken(string sessionToken)
         {
-            this.client.SessionTimeout = TimeSpan.FromHours(-1);
+            this.session.SessionTimeout = TimeSpan.FromHours(-1);
             await this.SetSessionToken(sessionToken);
         }
 
         private async Task SetAboutToExpireSessionToken(string sessionToken)
         {
-            this.client.SessionTimeout = TimeSpan.FromMinutes(30);
+            this.session.SessionTimeout = TimeSpan.FromMinutes(30);
             await this.SetSessionToken(sessionToken);
             this.ResetMessageHandler();
             this.httpMessageHandler.VerifyTimesCalled(0);
@@ -509,24 +509,24 @@
         {
             this.httpMessageHandler.WithReturnContent(
                 new LoginResponseStub().WithSessionToken(sessionToken));
-            this.client.WithHandler(this.httpMessageHandler.Build());
-            await this.client.LoginAsync();
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            await this.session.LoginAsync();
         }
 
         private async Task SetCertSessionToken(string sessionToken)
         {
             this.httpMessageHandler.WithReturnContent(
                 new CertLoginResponseStub { SessionToken = sessionToken });
-            this.client.WithHandler(this.httpMessageHandler.Build());
-            this.client.WithCert(this.certificate);
-            await this.client.LoginAsync();
+            this.session.WithHandler(this.httpMessageHandler.Build());
+            this.session.WithCert(this.certificate);
+            await this.session.LoginAsync();
         }
 
         private void ResetMessageHandler()
         {
             this.httpMessageHandler = new HttpMessageHandlerMock();
             this.httpMessageHandler.WithReturnContent(new LoginResponseStub());
-            this.client.WithHandler(this.httpMessageHandler.Build());
+            this.session.WithHandler(this.httpMessageHandler.Build());
         }
     }
 }

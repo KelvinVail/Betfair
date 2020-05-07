@@ -5,22 +5,23 @@
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
+    using Betfair.Exchange.Interfaces;
 
-    public class Orders
+    public sealed class Orders
     {
-        private readonly IExchangeClient client;
+        private readonly IExchangeService service;
 
         private readonly List<LimitOrder> orders = new List<LimitOrder>();
 
-        public Orders(IExchangeClient client, string marketId)
+        public Orders(IExchangeService service, string marketId)
         {
-            this.client = client;
+            this.service = service;
             this.MarketId = ValidateMarketId(marketId);
         }
 
-        public Orders(IExchangeClient client, string marketId, string strategyRef)
+        public Orders(IExchangeService service, string marketId, string strategyRef)
         {
-            this.client = client;
+            this.service = service;
             this.MarketId = ValidateMarketId(marketId);
             if (string.IsNullOrEmpty(strategyRef)) return;
             this.StrategyRef = ValidateStrategyReference(strategyRef);
@@ -40,8 +41,8 @@
         public async Task PlaceAsync()
         {
             this.Validate();
+            var results = await this.service.SendAsync<PlaceResult>("Sports", "placeOrders", this.ToParams());
             this.Placed = true;
-            var results = await this.client.SendAsync<PlaceResult>("Sports", "placeOrders", this.ToParams());
             this.UpdateOrders(results);
         }
 

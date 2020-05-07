@@ -7,7 +7,7 @@
 
     public class OrdersTests
     {
-        private readonly ExchangeClientSpy client = new ExchangeClientSpy();
+        private readonly ExchangeServiceSpy service = new ExchangeServiceSpy();
 
         [Fact]
         public void MarketIdIsSetInConstructor()
@@ -70,14 +70,14 @@
         [Fact]
         public void StrategyReferenceCanBeNull()
         {
-            var nullOrders = new Orders(this.client, "MarketId", null);
+            var nullOrders = new Orders(this.service, "MarketId", null);
             Assert.Null(nullOrders.StrategyRef);
         }
 
         [Fact]
         public void StrategyReferenceCanBeEmpty()
         {
-            var emptyOrders = new Orders(this.client, "MarketId", string.Empty);
+            var emptyOrders = new Orders(this.service, "MarketId", string.Empty);
             Assert.Null(emptyOrders.StrategyRef);
         }
 
@@ -104,7 +104,7 @@
         {
             var orders = this.GetOrdersWithOrders();
             await orders.PlaceAsync();
-            Assert.Equal("Sports", this.client.Endpoint);
+            Assert.Equal("Sports", this.service.Endpoint);
         }
 
         [Fact]
@@ -112,7 +112,7 @@
         {
             var orders = this.GetOrdersWithOrders();
             await orders.PlaceAsync();
-            Assert.Equal("placeOrders", this.client.BetfairMethod);
+            Assert.Equal("placeOrders", this.service.BetfairMethod);
         }
 
         [Theory]
@@ -126,7 +126,7 @@
             orders.Add(limitOrder);
             await orders.PlaceAsync();
             var expected = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToInstruction()}]}}";
-            Assert.Equal(expected, this.client.Parameters);
+            Assert.Equal(expected, this.service.Parameters);
         }
 
         [Fact]
@@ -139,11 +139,13 @@
             orders.Add(limitOrderTwo);
             await orders.PlaceAsync();
             var expected = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrderOne.ToInstruction()},{limitOrderTwo.ToInstruction()}]}}";
-            Assert.Equal(expected, this.client.Parameters);
+            Assert.Equal(expected, this.service.Parameters);
         }
 
         [Theory]
         [InlineData("MarketId", "Reference", 12345, Side.Back, 1.01, 2.00)]
+        [InlineData("MarketId", "ABC", 12345, Side.Back, 1.01, 2.00)]
+        [InlineData("MarketId", "123", 12345, Side.Back, 1.01, 2.00)]
         public async Task LimitOrderWithReferenceCanBeAdded(string marketId, string reference, long selectionId, Side side, double price, double size)
         {
             var limitOrder = new LimitOrder(selectionId, side, price, size);
@@ -151,12 +153,12 @@
             orders.Add(limitOrder);
             await orders.PlaceAsync();
             var expected = $"{{\"marketId\":\"{marketId}\",\"customerStrategyRef\":\"{reference}\",\"instructions\":[{limitOrder.ToInstruction()}]}}";
-            Assert.Equal(expected, this.client.Parameters);
+            Assert.Equal(expected, this.service.Parameters);
         }
 
         private Orders GetOrders(string marketId, string reference = null)
         {
-            return reference is null ? new Orders(this.client, marketId) : new Orders(this.client, marketId, reference);
+            return reference is null ? new Orders(this.service, marketId) : new Orders(this.service, marketId, reference);
         }
 
         private Orders GetOrdersWithOrders()

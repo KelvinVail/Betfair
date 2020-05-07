@@ -1,16 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>1.0.2-alpha</Version>
-    <Authors>Kelvin Vail</Authors>
-    <Product>Betfair Core</Product>
-    <Description>Core package for interacting with the Betfair API.
-There is no need to install this package seperatly.
-</Description>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Kelvin Vail</Authors>
+    <Product>Betfair Exchange Interfaces</Product>
     <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
     <PackageTags>Betfair</PackageTags>
+    <Description>Interfaces to manage the Betfair Exchange.
+There is no need to install this package seperatly.</Description>
+    <Version>0.0.1-alpha</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,12 +26,7 @@ There is no need to install this package seperatly.
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Utf8Json" Version="1.3.7" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Betfair.Exchange.Interfaces\Betfair.Exchange.Interfaces.csproj" />
-    <ProjectReference Include="..\Betfair.Identity\Betfair.Identity.csproj" />
-  </ItemGroup>
 
 </Project>

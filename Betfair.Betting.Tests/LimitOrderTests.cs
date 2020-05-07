@@ -9,13 +9,13 @@
 
     public class LimitOrderTests
     {
-        private readonly ExchangeClientSpy client = new ExchangeClientSpy();
+        private readonly ExchangeServiceSpy service = new ExchangeServiceSpy();
 
         private readonly Orders orders;
 
         public LimitOrderTests()
         {
-            this.orders = new Orders(this.client, "MarketId");
+            this.orders = new Orders(this.service, "MarketId");
         }
 
         [Theory]
@@ -214,7 +214,7 @@
 
             instructions = instructions.Remove(instructions.Length - 1, 1);
 
-            this.client.WithReturnContent("{" +
+            this.service.WithReturnContent("{" +
                                           "\"marketId\":\"MarketId\"," +
                                           "\"instructionReports\":" +
                                           "[" +

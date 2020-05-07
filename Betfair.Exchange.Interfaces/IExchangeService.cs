@@ -1,8 +1,8 @@
-﻿namespace Betfair.Betting
+﻿namespace Betfair.Exchange.Interfaces
 {
     using System.Threading.Tasks;
 
-    public interface IExchangeClient
+    public interface IExchangeService
     {
         Task<T> SendAsync<T>(string endpoint, string betfairMethod, string parameters);
     }

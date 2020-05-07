@@ -1,10 +1,11 @@
 ﻿namespace Betfair.Betting.Tests.TestDoubles
 {
     using System.Threading.Tasks;
+    using Betfair.Exchange.Interfaces;
     using Utf8Json;
     using Utf8Json.Resolvers;
 
-    public class ExchangeClientSpy : IExchangeClient
+    public class ExchangeServiceSpy : IExchangeService
     {
         private string returnContent;
 
@@ -14,7 +15,7 @@
 
         public string BetfairMethod { get; private set; }
 
-        public ExchangeClientSpy WithReturnContent(string content)
+        public ExchangeServiceSpy WithReturnContent(string content)
         {
             this.returnContent = content;
             return this;

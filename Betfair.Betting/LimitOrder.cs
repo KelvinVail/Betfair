@@ -5,7 +5,7 @@
     using System.Globalization;
     using System.Linq;
 
-    public class LimitOrder
+    public sealed class LimitOrder
     {
         public LimitOrder(long selectionId, Side side, double size, double price)
         {
