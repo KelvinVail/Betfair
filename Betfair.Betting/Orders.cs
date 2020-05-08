@@ -41,7 +41,7 @@
         public async Task PlaceAsync()
         {
             this.Validate();
-            var results = await this.service.SendAsync<PlaceResult>("Sports", "placeOrders", this.ToParams());
+            var results = await this.service.SendAsync<PlaceResult>("betting", "placeOrders", this.ToParams());
             this.Placed = true;
             this.UpdateOrders(results);
         }

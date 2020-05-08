@@ -100,11 +100,11 @@
         }
 
         [Fact]
-        public async Task PlaceUsesSportsEndpoint()
+        public async Task PlaceUsesBettingEndpoint()
         {
             var orders = this.GetOrdersWithOrders();
             await orders.PlaceAsync();
-            Assert.Equal("Sports", this.service.Endpoint);
+            Assert.Equal("betting", this.service.Endpoint);
         }
 
         [Fact]

@@ -9,7 +9,7 @@
     using Utf8Json;
     using Utf8Json.Resolvers;
 
-    internal sealed class ExchangeHttpClient : IDisposable
+    internal sealed class ExchangeClient : IDisposable
     {
         private readonly Uri baseAddress;
 
@@ -19,7 +19,7 @@
 
         private HttpClientHandler handler;
 
-        internal ExchangeHttpClient(Uri baseAddress)
+        internal ExchangeClient(Uri baseAddress)
         {
             this.baseAddress = baseAddress;
             this.handler = new HttpClientHandler

@@ -12,7 +12,7 @@
 
     public sealed class Session : ISession, IDisposable
     {
-        private readonly ExchangeHttpClient client = new ExchangeHttpClient(new Uri("https://identitysso.betfair.com"));
+        private readonly ExchangeClient client = new ExchangeClient(new Uri("https://identitysso.betfair.com"));
 
         private readonly string username;
 
