@@ -119,41 +119,91 @@
         [InlineData("MarketId", 12345, Side.Back, 1.01, 2.00)]
         [InlineData("1.2345678", 11111, Side.Lay, 1000, 99.71)]
         [InlineData("1.9876543", 98765, Side.Back, 3.5, 3.48)]
-        public async Task LimitOrderCanBeAdded(string marketId, long selectionId, Side side, double price, double size)
+        public async Task LimitOrderIsPlaced(string marketId, long selectionId, Side side, double price, double size)
         {
-            var limitOrder = new LimitOrder(selectionId, side, price, size);
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
             var orders = this.GetOrders(marketId);
             orders.Add(limitOrder);
             await orders.PlaceAsync();
             var expected = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToInstruction()}]}}";
-            Assert.Equal(expected, this.service.Parameters);
+            Assert.Equal(expected, this.service.SentParameters["placeOrders"]);
         }
 
         [Fact]
-        public async Task MultipleLimitOrdersCanBeAdded()
+        public async Task MultipleLimitOrdersArePlaced()
         {
             var orders = this.GetOrders("MarketId");
-            var limitOrderOne = new LimitOrder(12345, Side.Back, 1.01, 2.00);
-            var limitOrderTwo = new LimitOrder(98765, Side.Lay, 1000, 9.99);
+            var limitOrderOne = new LimitOrder(12345, Side.Back, 2.00, 1.01);
+            var limitOrderTwo = new LimitOrder(98765, Side.Lay, 9.99, 1000);
             orders.Add(limitOrderOne);
             orders.Add(limitOrderTwo);
             await orders.PlaceAsync();
             var expected = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrderOne.ToInstruction()},{limitOrderTwo.ToInstruction()}]}}";
-            Assert.Equal(expected, this.service.Parameters);
+            Assert.Equal(expected, this.service.SentParameters["placeOrders"]);
         }
 
         [Theory]
         [InlineData("MarketId", "Reference", 12345, Side.Back, 1.01, 2.00)]
         [InlineData("MarketId", "ABC", 12345, Side.Back, 1.01, 2.00)]
         [InlineData("MarketId", "123", 12345, Side.Back, 1.01, 2.00)]
-        public async Task LimitOrderWithReferenceCanBeAdded(string marketId, string reference, long selectionId, Side side, double price, double size)
+        public async Task LimitOrderWithReferenceIsPlaced(string marketId, string reference, long selectionId, Side side, double price, double size)
         {
-            var limitOrder = new LimitOrder(selectionId, side, price, size);
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
             var orders = this.GetOrders(marketId, reference);
             orders.Add(limitOrder);
             await orders.PlaceAsync();
             var expected = $"{{\"marketId\":\"{marketId}\",\"customerStrategyRef\":\"{reference}\",\"instructions\":[{limitOrder.ToInstruction()}]}}";
-            Assert.Equal(expected, this.service.Parameters);
+            Assert.Equal(expected, this.service.SentParameters["placeOrders"]);
+        }
+
+        [Theory]
+        [InlineData("MarketId", 12345, Side.Back, 1.99, 1.01)]
+        [InlineData("1.2345678", 11111, Side.Lay, 1, 2)]
+        [InlineData("1.9876543", 98765, Side.Back, 0.10, 3.5)]
+        public async Task BelowMinimumLimitOrdersArePlaced(string marketId, long selectionId, Side side, double size, double price)
+        {
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var orders = this.GetOrders(marketId);
+            orders.Add(limitOrder);
+            await orders.PlaceAsync();
+            var placeInstruction = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToInstruction()}]}}";
+            var cancelInstruction = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToBelowMinimumCancelInstruction()}]}}";
+            var replaceInstruction = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToBelowMinimumReplaceInstruction()}]}}";
+            Assert.Equal(placeInstruction, this.service.SentParameters["placeOrders"]);
+            Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
+            Assert.Equal(replaceInstruction, this.service.SentParameters["replaceOrders"]);
+        }
+
+        [Theory]
+        [InlineData("MarketId", 12345, Side.Back, 2, 1.01)]
+        [InlineData("1.2345678", 11111, Side.Lay, 2, 2)]
+        [InlineData("1.9876543", 98765, Side.Back, 2, 3.5)]
+        public async Task BelowMinimumInstructionsNotCalledIfOrderIsAboveMinimum(string marketId, long selectionId, Side side, double size, double price)
+        {
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var orders = this.GetOrders(marketId);
+            orders.Add(limitOrder);
+            await orders.PlaceAsync();
+            Assert.False(this.service.SentParameters.ContainsKey("cancelOrders"));
+            Assert.False(this.service.SentParameters.ContainsKey("replaceOrders"));
+        }
+
+        [Theory]
+        [InlineData("MarketId", 12345, Side.Back, 1.99, 1.01, "Ref")]
+        [InlineData("1.2345678", 11111, Side.Lay, 1, 2, "MyRef")]
+        [InlineData("1.9876543", 98765, Side.Back, 0.10, 3.5, "StrategyA")]
+        public async Task BelowMinimumLimitOrdersArePlacedWithReference(string marketId, long selectionId, Side side, double size, double price, string reference)
+        {
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var orders = this.GetOrders(marketId, reference);
+            orders.Add(limitOrder);
+            await orders.PlaceAsync();
+            var placeInstruction = $"{{\"marketId\":\"{marketId}\",\"customerStrategyRef\":\"{reference}\",\"instructions\":[{limitOrder.ToInstruction()}]}}";
+            var cancelInstruction = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToBelowMinimumCancelInstruction()}]}}";
+            var replaceInstruction = $"{{\"marketId\":\"{marketId}\",\"customerStrategyRef\":\"{reference}\",\"instructions\":[{limitOrder.ToBelowMinimumReplaceInstruction()}]}}";
+            Assert.Equal(placeInstruction, this.service.SentParameters["placeOrders"]);
+            Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
+            Assert.Equal(replaceInstruction, this.service.SentParameters["replaceOrders"]);
         }
 
         private Orders GetOrders(string marketId, string reference = null)
@@ -164,7 +214,7 @@
         private Orders GetOrdersWithOrders()
         {
             var orders = this.GetOrders("MarketId");
-            var limitOrder = new LimitOrder(12345, Side.Back, 1.01, 2.00);
+            var limitOrder = new LimitOrder(12345, Side.Back, 2.00, 1.01);
             orders.Add(limitOrder);
             return orders;
         }

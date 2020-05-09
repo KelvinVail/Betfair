@@ -35,15 +35,35 @@
 
         public DateTime PlacedDate { get; private set; }
 
+        public bool BelowMinimumStake => this.Size < MinimumStake(this.Price);
+
         public string ToInstruction()
         {
             return $"{{\"selectionId\":\"{this.SelectionId}\"," +
                    $"\"side\":\"{this.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
                    "\"orderType\":\"LIMIT\"," +
                    "\"limitOrder\":{" +
-                   $"\"size\":\"{Math.Round(this.Size, 2)}\"," +
-                   $"\"price\":\"{NearestValidPrice(this.Price)}\"," +
+                   $"\"size\":\"{this.GetSize()}\"," +
+                   $"\"price\":\"{this.GetPrice()}\"," +
                    "\"persistenceType\":\"LAPSE\"}}";
+        }
+
+        public string ToCancelInstruction()
+        {
+            return this.OrderStatus == "EXECUTION_COMPLETE" ? null : $"{{\"betId\":\"{this.BetId}\"}}";
+        }
+
+        public string ToBelowMinimumCancelInstruction()
+        {
+            if (!this.BelowMinimumStake) return null;
+            var reduction = Math.Round(2 - this.Size, 2);
+            return $"{{\"betId\":\"{this.BetId}\",\"sizeReduction\":{reduction}}}";
+        }
+
+        public string ToBelowMinimumReplaceInstruction()
+        {
+            if (!this.BelowMinimumStake) return null;
+            return $"{{\"betId\":\"{this.BetId}\",\"newPrice\":{this.Price}}}";
         }
 
         internal void AddReports(IEnumerable<InstructionReport> reports)
@@ -78,6 +98,26 @@
             };
 
             return increments.First(increment => price < increment.Key).Value;
+        }
+
+        private static double MinimumStake(double price)
+        {
+            var m = Math.Ceiling(10 / price * 100) / 100;
+            return m < 2 ? m : 2;
+        }
+
+        private double GetPrice()
+        {
+            var price = this.Size < MinimumStake(this.Price)
+                ? (this.Side == Side.Back ? 1000 : 1.01)
+                : NearestValidPrice(this.Price);
+            return price;
+        }
+
+        private double GetSize()
+        {
+            var size = this.Size < MinimumStake(this.Price) ? 2 : Math.Round(this.Size, 2);
+            return size;
         }
 
         private void Update(InstructionReport report)

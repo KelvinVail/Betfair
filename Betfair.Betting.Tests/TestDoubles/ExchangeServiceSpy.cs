@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Betting.Tests.TestDoubles
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Betfair.Exchange.Interfaces;
     using Utf8Json;
@@ -7,17 +8,17 @@
 
     public class ExchangeServiceSpy : IExchangeService
     {
-        private string returnContent;
+        private Dictionary<string, string> returnContent { get; } = new Dictionary<string, string>();
 
         public string Endpoint { get; private set; }
 
-        public string Parameters { get; private set; }
-
         public string BetfairMethod { get; private set; }
 
-        public ExchangeServiceSpy WithReturnContent(string content)
+        public Dictionary<string, string> SentParameters { get; } = new Dictionary<string, string>();
+
+        public ExchangeServiceSpy WithReturnContent(string method, string content)
         {
-            this.returnContent = content;
+            this.returnContent.Add(method, content);
             return this;
         }
 
@@ -25,8 +26,8 @@
         {
             this.Endpoint = endpoint;
             this.BetfairMethod = betfairMethod;
-            this.Parameters = parameters;
-            return await Task.FromResult(this.returnContent != null ? JsonSerializer.Deserialize<T>(this.returnContent, StandardResolver.AllowPrivateExcludeNull) : default);
+            this.SentParameters.Add(betfairMethod, parameters);
+            return await Task.FromResult(this.returnContent.ContainsKey(betfairMethod) ? JsonSerializer.Deserialize<T>(this.returnContent[betfairMethod], StandardResolver.AllowPrivateExcludeNull) : default);
         }
     }
 }

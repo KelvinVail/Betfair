@@ -57,10 +57,10 @@
         }
 
         [Theory]
-        [InlineData(12345, Side.Back, 1.99, 1.01)]
+        [InlineData(12345, Side.Back, 2.99, 1.01)]
         [InlineData(98765, Side.Lay, 10.99, 1000)]
         [InlineData(2147483648, Side.Back, 7.24, 3.5)]
-        [InlineData(12345, Side.Lay, 1.99, 1.01)]
+        [InlineData(12345, Side.Lay, 2.99, 1.01)]
         public void ToInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
         {
             var sut = new LimitOrder(selectionId, side, size, price);
@@ -75,9 +75,9 @@
         }
 
         [Theory]
-        [InlineData(1.999, 2)]
+        [InlineData(2.999, 3)]
         [InlineData(3.3333333, 3.33)]
-        [InlineData(1.555, 1.56)]
+        [InlineData(2.555, 2.56)]
         [InlineData(10.6666, 10.67)]
         public void ToInstructionRoundsSizeToTwoDecimalsPlaces(double size, double rounded)
         {
@@ -122,12 +122,12 @@
         [InlineData(9999, 1000)]
         public void PriceIsRoundedToNearestValidPrice(double price, double expected)
         {
-            var sut = new LimitOrder(1, Side.Back, 1, price);
+            var sut = new LimitOrder(1, Side.Back, 2, price);
             var instruction = "{\"selectionId\":\"1\"," +
                               "\"side\":\"BACK\"," +
                               "\"orderType\":\"LIMIT\"," +
                               "\"limitOrder\":{" +
-                              "\"size\":\"1\"," +
+                              "\"size\":\"2\"," +
                               $"\"price\":\"{expected}\"," +
                               "\"persistenceType\":\"LAPSE\"}}";
             Assert.Equal(instruction, sut.ToInstruction());
@@ -180,7 +180,172 @@
             Assert.Equal(size, sut.SizeMatched);
         }
 
-        private static string GetResult(LimitOrder limitOrder, long betId, string status)
+        [Theory]
+        [InlineData(12345, Side.Back, 1.99, 1.01)]
+        [InlineData(98765, Side.Lay, 10.99, 1000)]
+        [InlineData(2147483648, Side.Back, 7.24, 3.5)]
+        [InlineData(12345, Side.Lay, 1.99, 1.01)]
+        public async Task ToCancelInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
+        {
+            var sut = new LimitOrder(selectionId, side, size, price);
+            await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS", "EXECUTABLE");
+            var expected = $"{{\"betId\":\"{sut.BetId}\"}}";
+            Assert.Equal(expected, sut.ToCancelInstruction());
+        }
+
+        [Theory]
+        [InlineData(12345, Side.Back, 1.99, 1.01)]
+        [InlineData(98765, Side.Lay, 10.99, 1000)]
+        [InlineData(2147483648, Side.Back, 7.24, 3.5)]
+        [InlineData(12345, Side.Lay, 1.99, 1.01)]
+        public async Task ToCancelInstructionShouldReturnNullIfOrderIsComplete(long selectionId, Side side, double size, double price)
+        {
+            var sut = new LimitOrder(selectionId, side, size, price);
+            await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS");
+            Assert.Null(sut.ToCancelInstruction());
+        }
+
+        [Theory]
+        [InlineData(1.99, 1.01, 2, 1000)]
+        [InlineData(2, 1.01, 2, 1.01)]
+        [InlineData(1.50, 2.2, 2, 1000)]
+        [InlineData(2, 2.2, 2, 2.2)]
+        [InlineData(1.99, 5, 2, 1000)]
+        [InlineData(2, 5, 2, 5)]
+        [InlineData(1.97, 5.1, 1.97, 5.1)]
+        [InlineData(1.96, 5.1, 2, 1000)]
+        [InlineData(1, 10, 1, 10)]
+        [InlineData(0.99, 10, 2, 1000)]
+        [InlineData(0.10, 100, 0.10, 100)]
+        [InlineData(0.09, 100, 2, 1000)]
+        [InlineData(0.01, 1000, 0.01, 1000)]
+        public void HandleBelowMinimumStakeForBackOrders(double size, double price, double expectedSize, double expectedPrice)
+        {
+            var sut = new LimitOrder(12345, Side.Back, size, price);
+            var instruction = "{\"selectionId\":\"12345\"," +
+                              "\"side\":\"BACK\"," +
+                              "\"orderType\":\"LIMIT\"," +
+                              "\"limitOrder\":{" +
+                              $"\"size\":\"{expectedSize}\"," +
+                              $"\"price\":\"{expectedPrice}\"," +
+                              "\"persistenceType\":\"LAPSE\"}}";
+            Assert.Equal(instruction, sut.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(1.99, 1.01, 2, 1.01)]
+        [InlineData(2, 1.01, 2, 1.01)]
+        [InlineData(1.50, 2.2, 2, 1.01)]
+        [InlineData(2, 2.2, 2, 2.2)]
+        [InlineData(1.99, 5, 2, 1.01)]
+        [InlineData(2, 5, 2, 5)]
+        [InlineData(1.97, 5.1, 1.97, 5.1)]
+        [InlineData(1.96, 5.1, 2, 1.01)]
+        [InlineData(1, 10, 1, 10)]
+        [InlineData(0.99, 10, 2, 1.01)]
+        [InlineData(0.10, 100, 0.10, 100)]
+        [InlineData(0.09, 100, 2, 1.01)]
+        [InlineData(0.01, 1000, 0.01, 1000)]
+        public void HandleBelowMinimumStakeForLayOrders(double size, double price, double expectedSize, double expectedPrice)
+        {
+            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var instruction = "{\"selectionId\":\"12345\"," +
+                              "\"side\":\"LAY\"," +
+                              "\"orderType\":\"LIMIT\"," +
+                              "\"limitOrder\":{" +
+                              $"\"size\":\"{expectedSize}\"," +
+                              $"\"price\":\"{expectedPrice}\"," +
+                              "\"persistenceType\":\"LAPSE\"}}";
+            Assert.Equal(instruction, sut.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(1.99, 2, true)]
+        [InlineData(1.99, 1.01, true)]
+        [InlineData(2, 1.01, false)]
+        [InlineData(1.50, 2.2, true)]
+        [InlineData(2, 2.2, false)]
+        [InlineData(1.99, 5, true)]
+        [InlineData(2, 5, false)]
+        [InlineData(1.97, 5.1, false)]
+        [InlineData(1.96, 5.1, true)]
+        [InlineData(1, 10, false)]
+        [InlineData(0.99, 10, true)]
+        [InlineData(0.10, 100, false)]
+        [InlineData(0.09, 100, true)]
+        [InlineData(0.01, 1000, false)]
+        public void BelowMinimumStakeFlagIsSet(double size, double price, bool expected)
+        {
+            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            Assert.Equal(expected, sut.BelowMinimumStake);
+        }
+
+        [Theory]
+        [InlineData(1.99, 2, 0.01)]
+        [InlineData(1.90, 2, 0.10)]
+        [InlineData(1.75, 2, 0.25)]
+        [InlineData(1.50, 2, 0.50)]
+        [InlineData(1, 2, 1)]
+        [InlineData(0.5, 2, 1.5)]
+        [InlineData(0.01, 2, 1.99)]
+        [InlineData(0.01, 6, 1.99)]
+        [InlineData(0.01, 7.2, 1.99)]
+        public void IfBelowMinimumStakeThenToBelowMinimumCancelInstructionShouldBeSet(double size, double price, double reduction)
+        {
+            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var expected = $"{{\"betId\":\"{sut.BetId}\",\"sizeReduction\":{reduction}}}";
+            Assert.Equal(expected, sut.ToBelowMinimumCancelInstruction());
+        }
+
+        [Theory]
+        [InlineData(2, 2)]
+        [InlineData(2, 5)]
+        [InlineData(1.43, 7)]
+        [InlineData(1, 10)]
+        [InlineData(0.1, 100)]
+        public void IfAboveMinimumStakeToBelowMinimumInstructionsShouldBeNull(double size, double price)
+        {
+            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            Assert.Null(sut.ToBelowMinimumCancelInstruction());
+            Assert.Null(sut.ToBelowMinimumReplaceInstruction());
+        }
+
+        [Theory]
+        [InlineData(1.99, 2)]
+        [InlineData(1.90, 2)]
+        [InlineData(1.75, 2)]
+        [InlineData(1.50, 2)]
+        [InlineData(1, 2)]
+        [InlineData(0.5, 2)]
+        [InlineData(0.01, 2)]
+        public void IfBelowMinimumStakeThenToBelowMinimumReplaceInstructionShouldBeSet(double size, double price)
+        {
+            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var expected = $"{{\"betId\":\"{sut.BetId}\",\"newPrice\":{price}}}";
+            Assert.Equal(expected, sut.ToBelowMinimumReplaceInstruction());
+        }
+
+        private async Task SetResults(List<LimitOrder> limitOrders, string status, string orderStatus = "EXECUTION_COMPLETE")
+        {
+            var instructions = string.Empty;
+            var i = 0;
+            foreach (var limitOrder in limitOrders)
+            {
+                i++;
+                instructions += GetResult(limitOrder, i, status, orderStatus) + ",";
+            }
+
+            instructions = instructions.Remove(instructions.Length - 1, 1);
+
+            this.service.WithReturnContent(
+                "placeOrders",
+                $"{{\"marketId\":\"MarketId\",\"instructionReports\":[{instructions}], \"status\":\"SUCCESS\"}}");
+
+            limitOrders.ForEach(o => this.orders.Add(o));
+            await this.orders.PlaceAsync();
+        }
+
+        private static string GetResult(LimitOrder limitOrder, long betId, string status, string orderStatus)
         {
             return "{" +
                    "\"instruction\":" +
@@ -197,34 +362,41 @@
                    "\"placedDate\":\"2013-10-30T14:22:47.000Z\"," +
                    $"\"averagePriceMatched\":{limitOrder.Price}," +
                    $"\"sizeMatched\":{limitOrder.Size}," +
-                   $"\"orderStatus\":\"EXECUTION_COMPLETE\"," +
+                   $"\"orderStatus\":\"{orderStatus}\"," +
                    $"\"status\":\"{status}\"" +
-                   "},";
+                   "}";
         }
 
-        private async Task SetResults(List<LimitOrder> limitOrders, string status)
+        private static string GetReplaceReport(LimitOrder limitOrder, string status, string newBetId)
         {
-            var instructions = string.Empty;
-            var i = 0;
-            foreach (var limitOrder in limitOrders)
-            {
-                i++;
-                instructions += GetResult(limitOrder, i, status);
-            }
-
-            instructions = instructions.Remove(instructions.Length - 1, 1);
-
-            this.service.WithReturnContent("{" +
-                                          "\"marketId\":\"MarketId\"," +
-                                          "\"instructionReports\":" +
-                                          "[" +
-                                          instructions +
-                                          "]," +
-                                          "\"status\":\"SUCCESS\"" +
-                                          "}");
-
-            limitOrders.ForEach(o => this.orders.Add(o));
-            await this.orders.PlaceAsync();
+            return "{\"jsonrpc\":\"2.0\"," +
+                   "\"result\":" +
+                   $"{{\"status\":\"{status}\"," +
+                   "\"marketId\":\"MarketId\"," +
+                   "\"instructionReports\":" +
+                   $"[{{\"status\":\"{status}\"," +
+                   "\"cancelInstructionReport\":" +
+                   $"{{\"status\":\"{status}\"," +
+                   "\"instruction\":" +
+                   $"{{\"betId\":\"{limitOrder.BetId}\"}}," +
+                   $"\"sizeCancelled\":{limitOrder.Size}," +
+                   "\"cancelledDate\":\"2020-05-09T19:53:50.000Z\"}," +
+                   "\"placeInstructionReport\":" +
+                   $"{{\"status\":\"{status}\"," +
+                   "\"instruction\":" +
+                   $"{{\"selectionId\":{limitOrder.SelectionId}," +
+                   "\"limitOrder\":" +
+                   $"{{\"size\":{limitOrder.Size}," +
+                   $"\"price\":{limitOrder.Price}," +
+                   "\"persistenceType\":\"LAPSE\"}," +
+                   "\"orderType\":\"LIMIT\"," +
+                   $"\"side\":\"{limitOrder.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"}}," +
+                   $"\"betId\":\"{newBetId}\"," +
+                   "\"placedDate\":\"2020-05-09T19:53:50.000Z\"," +
+                   "\"averagePriceMatched\":0.0," +
+                   "\"sizeMatched\":0.0," +
+                   "\"orderStatus\":\"EXECUTABLE\"}}]}," +
+                   "\"id\":1}";
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
@@ -41,9 +42,15 @@
         public async Task PlaceAsync()
         {
             this.Validate();
-            var results = await this.service.SendAsync<PlaceResult>("betting", "placeOrders", this.ToParams());
-            this.Placed = true;
+            var results = await this.service.SendAsync<PlaceResult>("betting", "placeOrders", this.Params());
             this.UpdateOrders(results);
+            if (this.orders.Any(o => o.BelowMinimumStake))
+            {
+                await this.service.SendAsync<PlaceResult>("betting", "cancelOrders", this.BelowMinimumCancelParams());
+                await this.service.SendAsync<PlaceResult>("betting", "replaceOrders", this.BelowMinimumReplaceParams());
+            }
+
+            this.Placed = true;
         }
 
         private static string ValidateStrategyReference(string strategyRef)
@@ -60,7 +67,7 @@
             return marketId;
         }
 
-        private string ToParams()
+        private string Params()
         {
             return $"{{\"marketId\":\"{this.MarketId}\",{this.Reference()}\"instructions\":[{this.Instructions()}]}}";
         }
@@ -69,6 +76,30 @@
         {
             var instructions = string.Empty;
             this.orders.ForEach(i => instructions += i.ToInstruction() + ",");
+            return instructions.Remove(instructions.Length - 1, 1);
+        }
+
+        private string BelowMinimumCancelParams()
+        {
+            return $"{{\"marketId\":\"{this.MarketId}\",\"instructions\":[{this.BelowMinimumCancelInstructions()}]}}";
+        }
+
+        private string BelowMinimumCancelInstructions()
+        {
+            var instructions = string.Empty;
+            this.orders.ForEach(i => instructions += i.ToBelowMinimumCancelInstruction() + ",");
+            return instructions.Remove(instructions.Length - 1, 1);
+        }
+
+        private string BelowMinimumReplaceParams()
+        {
+            return $"{{\"marketId\":\"{this.MarketId}\",{this.Reference()}\"instructions\":[{this.BelowMinimumReplaceInstructions()}]}}";
+        }
+
+        private string BelowMinimumReplaceInstructions()
+        {
+            var instructions = string.Empty;
+            this.orders.ForEach(i => instructions += i.ToBelowMinimumReplaceInstruction() + ",");
             return instructions.Remove(instructions.Length - 1, 1);
         }
 
@@ -88,7 +119,7 @@
             this.orders.ForEach(o => o.AddReports(results.InstructionReports));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        [SuppressMessage(
             "Microsoft.Performance",
             "CA1812:AvoidUninstantiatedInternalClasses",
             Justification = "Used to deserialize Json.")]
