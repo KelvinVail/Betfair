@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Threading.Tasks;
     using Betfair.Betting.Tests.TestDoubles;
     using Xunit;
@@ -325,6 +326,82 @@
             Assert.Equal(expected, sut.ToBelowMinimumReplaceInstruction());
         }
 
+        [Fact]
+        public async Task BetIdIsUpdatedWhenOrderIsReplaced()
+        {
+            var sut = new LimitOrder(12345, Side.Lay, 0.5, 2);
+            await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS");
+            Assert.Equal("2", sut.BetId);
+        }
+
+        [Fact]
+        public async Task SetResultsShouldUpdateCorrectBetId()
+        {
+            var order1 = new LimitOrder(12345, Side.Back, 0.5, 1.01); // betId = 1, newId = 4
+            var order2 = new LimitOrder(98765, Side.Lay, 0.5, 2); // betId = 2, newId = 5
+            var order3 = new LimitOrder(12345, Side.Lay, 0.5, 3); // betId = 3, newId = 6
+            var limitOrders = new List<LimitOrder>
+            {
+                order1,
+                order2,
+                order3,
+            };
+            await this.SetResults(limitOrders, "SUCCESS");
+            Assert.Equal("4", order1.BetId);
+            Assert.Equal("5", order2.BetId);
+            Assert.Equal("6", order3.BetId);
+        }
+
+        [Theory]
+        [InlineData(12345, Side.Back, 2, 1.01)]
+        [InlineData(11111, Side.Lay, 2, 2)]
+        [InlineData(98765, Side.Back, 2, 3.5)]
+        public async Task CancelSendsCancelInstruction(long selectionId, Side side, double size, double price)
+        {
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var limitOrder2 = new LimitOrder(1, Side.Back, 10, 2);
+            await this.SetResults(new List<LimitOrder> { limitOrder, limitOrder2 }, "SUCCESS", "EXECUTABLE");
+            var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()},{limitOrder2.ToCancelInstruction()}]}}";
+            await this.orders.CancelAsync();
+            Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
+        }
+
+        [Theory]
+        [InlineData(12345, Side.Back, 2, 1.01)]
+        [InlineData(11111, Side.Lay, 2, 2)]
+        [InlineData(98765, Side.Back, 2, 3.5)]
+        public async Task CancelHandlesNullCancelInstruction(long selectionId, Side side, double size, double price)
+        {
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var instruction = GetResult(limitOrder, 1, "SUCCESS", "EXECUTABLE");
+            this.orders.Add(limitOrder);
+
+            var limitOrder2 = new LimitOrder(1, Side.Back, 10, 2);
+            var instruction2 = GetResult(limitOrder2, 2, "SUCCESS", "EXECUTION_COMPLETE");
+            this.orders.Add(limitOrder2);
+
+            this.SetPlaceReturnContent(instruction + "," + instruction2);
+
+            await this.orders.PlaceAsync();
+
+            var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()}]}}";
+            await this.orders.CancelAsync();
+            Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
+        }
+
+        [Theory]
+        [InlineData(12345, Side.Back, 2, 1.01)]
+        [InlineData(11111, Side.Lay, 2, 2)]
+        [InlineData(98765, Side.Back, 2, 3.5)]
+        public async Task CancelDoesNotExecuteIfAllOrderAreComplete(long selectionId, Side side, double size, double price)
+        {
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var limitOrder2 = new LimitOrder(1, Side.Back, 10, 2);
+            await this.SetResults(new List<LimitOrder> { limitOrder, limitOrder2 }, "SUCCESS");
+            await this.orders.CancelAsync();
+            Assert.False(this.service.SentParameters.ContainsKey("cancelOrders"));
+        }
+
         private static string GetResult(LimitOrder limitOrder, long betId, string status, string orderStatus)
         {
             return "{" +
@@ -347,18 +424,13 @@
                    "}";
         }
 
-        private static string GetReplaceReport(LimitOrder limitOrder, string status, string newBetId)
+        private static string GetReplaceReport(LimitOrder limitOrder, string status, long newBetId, long originalBetId, string orderStatus)
         {
-            return "{\"jsonrpc\":\"2.0\"," +
-                   "\"result\":" +
-                   $"{{\"status\":\"{status}\"," +
-                   "\"marketId\":\"MarketId\"," +
-                   "\"instructionReports\":" +
-                   $"[{{\"status\":\"{status}\"," +
+            return $"{{\"status\":\"{status}\"," +
                    "\"cancelInstructionReport\":" +
                    $"{{\"status\":\"{status}\"," +
                    "\"instruction\":" +
-                   $"{{\"betId\":\"{limitOrder.BetId}\"}}," +
+                   $"{{\"betId\":\"{originalBetId}\"}}," +
                    $"\"sizeCancelled\":{limitOrder.Size}," +
                    "\"cancelledDate\":\"2020-05-09T19:53:50.000Z\"}," +
                    "\"placeInstructionReport\":" +
@@ -375,8 +447,7 @@
                    "\"placedDate\":\"2020-05-09T19:53:50.000Z\"," +
                    "\"averagePriceMatched\":0.0," +
                    "\"sizeMatched\":0.0," +
-                   "\"orderStatus\":\"EXECUTABLE\"}}]}," +
-                   "\"id\":1}";
+                   $"\"orderStatus\":\"{orderStatus}\"}}}}";
         }
 
         private async Task SetResults(List<LimitOrder> limitOrders, string status, string orderStatus = "EXECUTION_COMPLETE")
@@ -391,12 +462,40 @@
 
             instructions = instructions.Remove(instructions.Length - 1, 1);
 
+            this.SetPlaceReturnContent(instructions);
+
+            var replaceInstructions = string.Empty;
+            var o = 0;
+            foreach (var limitOrder in limitOrders.Where(o => o.BelowMinimumStake))
+            {
+                i++;
+                o++;
+                replaceInstructions += GetReplaceReport(limitOrder, orderStatus, i, o, orderStatus) + ",";
+            }
+
+            if (limitOrders.Any(o => o.BelowMinimumStake))
+            {
+                replaceInstructions = replaceInstructions.Remove(replaceInstructions.Length - 1, 1);
+
+                this.SetReplaceReturnContent(replaceInstructions);
+            }
+
+            limitOrders.ForEach(l => this.orders.Add(l));
+            await this.orders.PlaceAsync();
+        }
+
+        private void SetPlaceReturnContent(string instructions)
+        {
             this.service.WithReturnContent(
                 "placeOrders",
                 $"{{\"marketId\":\"MarketId\",\"instructionReports\":[{instructions}], \"status\":\"SUCCESS\"}}");
+        }
 
-            limitOrders.ForEach(o => this.orders.Add(o));
-            await this.orders.PlaceAsync();
+        private void SetReplaceReturnContent(string replaceInstructions)
+        {
+            this.service.WithReturnContent(
+                "replaceOrders",
+                $"{{\"marketId\":\"MarketId\",\"instructionReports\":[{replaceInstructions}], \"status\":\"SUCCESS\"}}");
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿namespace Betfair.Betting
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Microsoft.Performance",
         "CA1812:AvoidUninstantiatedInternalClasses",
         Justification = "Used to deserialize Json.")]

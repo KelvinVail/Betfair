@@ -14,18 +14,11 @@
 
         private readonly List<LimitOrder> orders = new List<LimitOrder>();
 
-        public Orders(IExchangeService service, string marketId)
+        public Orders(IExchangeService service, string marketId, string strategyRef = null)
         {
-            this.service = service;
+            this.service = ValidateExchangeService(service);
             this.MarketId = ValidateMarketId(marketId);
-        }
-
-        public Orders(IExchangeService service, string marketId, string strategyRef)
-        {
-            this.service = service;
-            this.MarketId = ValidateMarketId(marketId);
-            if (string.IsNullOrEmpty(strategyRef)) return;
-            this.StrategyRef = ValidateStrategyReference(strategyRef);
+            this.StrategyRef = ValidateStrategyRef(strategyRef);
         }
 
         public string StrategyRef { get; }
@@ -41,23 +34,30 @@
 
         public async Task PlaceAsync()
         {
-            this.Validate();
-            var results = await this.service.SendAsync<PlaceResult>("betting", "placeOrders", this.Params());
-            this.UpdateOrders(results);
+            this.ValidateOrders();
+            var report = await this.service.SendAsync<PlaceReport>("betting", "placeOrders", this.Params());
+            this.UpdateOrders(report);
             if (this.orders.Any(o => o.BelowMinimumStake))
             {
-                await this.service.SendAsync<PlaceResult>("betting", "cancelOrders", this.BelowMinimumCancelParams());
-                await this.service.SendAsync<PlaceResult>("betting", "replaceOrders", this.BelowMinimumReplaceParams());
+                await this.service.SendAsync<PlaceReport>("betting", "cancelOrders", this.BelowMinimumCancelParams());
+                var replaceReport = await this.service.SendAsync<ReplaceReport>("betting", "replaceOrders", this.BelowMinimumReplaceParams());
+                this.UpdateOrders(replaceReport);
             }
 
             this.Placed = true;
         }
 
-        private static string ValidateStrategyReference(string strategyRef)
+        public async Task CancelAsync()
         {
-            if (strategyRef.Length > 15)
-                throw new ArgumentOutOfRangeException(nameof(strategyRef), $"{strategyRef} must be less than 15 characters.");
-            return strategyRef;
+            if (this.orders.Any(o => o.OrderStatus == "EXECUTABLE"))
+                await this.service.SendAsync<PlaceReport>("betting", "cancelOrders", this.CancelParams());
+        }
+
+        private static IExchangeService ValidateExchangeService(IExchangeService service)
+        {
+            if (service is null)
+                throw new ArgumentNullException(nameof(service), "ExchangeService should not be null.");
+            return service;
         }
 
         private static string ValidateMarketId(string marketId)
@@ -65,6 +65,14 @@
             if (string.IsNullOrEmpty(marketId))
                 throw new ArgumentNullException(nameof(marketId), "MarketId should not be null or empty.");
             return marketId;
+        }
+
+        private static string ValidateStrategyRef(string strategyRef)
+        {
+            if (string.IsNullOrEmpty(strategyRef)) return null;
+            if (strategyRef.Length > 15)
+                throw new ArgumentOutOfRangeException(nameof(strategyRef), $"{strategyRef} must be less than 15 characters.");
+            return strategyRef;
         }
 
         private string Params()
@@ -77,6 +85,18 @@
             var instructions = string.Empty;
             this.orders.ForEach(i => instructions += i.ToInstruction() + ",");
             return instructions.Remove(instructions.Length - 1, 1);
+        }
+
+        private string CancelParams()
+        {
+            return $"{{\"marketId\":\"{this.MarketId}\",\"instructions\":[{this.CancelInstructions()}]}}";
+        }
+
+        private string CancelInstructions()
+        {
+            var cancelInstructions = string.Empty;
+            this.orders.Where(o => o.ToCancelInstruction() != null).ToList().ForEach(i => cancelInstructions += i.ToCancelInstruction() + ",");
+            return cancelInstructions.Remove(cancelInstructions.Length - 1, 1);
         }
 
         private string BelowMinimumCancelParams()
@@ -108,15 +128,22 @@
             return this.StrategyRef is null ? null : $"\"customerStrategyRef\":\"{this.StrategyRef}\",";
         }
 
-        private void Validate()
+        private void ValidateOrders()
         {
             if (!this.orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
         }
 
-        private void UpdateOrders(PlaceResult results)
+        private void UpdateOrders(PlaceReport reports)
         {
-            if (results is null) return;
-            this.orders.ForEach(o => o.AddReports(results.InstructionReports));
+            if (reports is null) return;
+            this.orders.ForEach(o => o.AddReports(reports.InstructionReports));
+        }
+
+        private void UpdateOrders(ReplaceReport reports)
+        {
+            if (reports is null) return;
+            var r = reports.InstructionReports.Select(i => i.PlaceInstructionReport).ToList();
+            this.orders.ForEach(o => o.AddReports(r));
         }
 
         [SuppressMessage(
@@ -124,10 +151,21 @@
             "CA1812:AvoidUninstantiatedInternalClasses",
             Justification = "Used to deserialize Json.")]
         [DataContract]
-        private sealed class PlaceResult
+        private sealed class PlaceReport
         {
             [DataMember(Name = "instructionReports", EmitDefaultValue = false)]
             internal List<InstructionReport> InstructionReports { get; set; }
+        }
+
+        [SuppressMessage(
+            "Microsoft.Performance",
+            "CA1812:AvoidUninstantiatedInternalClasses",
+            Justification = "Used to deserialize Json.")]
+        [DataContract]
+        private sealed class ReplaceReport
+        {
+            [DataMember(Name = "instructionReports", EmitDefaultValue = false)]
+            public List<ReplaceInstructionReport> InstructionReports { get; set; }
         }
     }
 }

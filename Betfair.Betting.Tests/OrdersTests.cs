@@ -23,6 +23,14 @@
         }
 
         [Fact]
+        public void ThrowIfExchangeServiceIsNull()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() => new Orders(null, "MarketId"));
+            Assert.Equal("service", ex.ParamName);
+            Assert.Equal("ExchangeService should not be null. (Parameter 'service')", ex.Message);
+        }
+
+        [Fact]
         public void ThrowIfMarketIdIsNull()
         {
             var ex = Assert.Throws<ArgumentNullException>(() => this.GetOrders(null));
@@ -70,7 +78,7 @@
         [Fact]
         public void StrategyReferenceCanBeNull()
         {
-            var nullOrders = new Orders(this.service, "MarketId", null);
+            var nullOrders = new Orders(this.service, "MarketId");
             Assert.Null(nullOrders.StrategyRef);
         }
 
