@@ -453,11 +453,11 @@
         private async Task SetResults(List<LimitOrder> limitOrders, string status, string orderStatus = "EXECUTION_COMPLETE")
         {
             var instructions = string.Empty;
-            var i = 0;
+            var betId = 0;
             foreach (var limitOrder in limitOrders)
             {
-                i++;
-                instructions += GetResult(limitOrder, i, status, orderStatus) + ",";
+                betId++;
+                instructions += GetResult(limitOrder, betId, status, orderStatus) + ",";
             }
 
             instructions = instructions.Remove(instructions.Length - 1, 1);
@@ -465,12 +465,12 @@
             this.SetPlaceReturnContent(instructions);
 
             var replaceInstructions = string.Empty;
-            var o = 0;
+            var originalBetId = 0;
             foreach (var limitOrder in limitOrders.Where(o => o.BelowMinimumStake))
             {
-                i++;
-                o++;
-                replaceInstructions += GetReplaceReport(limitOrder, orderStatus, i, o, orderStatus) + ",";
+                betId++;
+                originalBetId++;
+                replaceInstructions += GetReplaceReport(limitOrder, orderStatus, betId, originalBetId, orderStatus) + ",";
             }
 
             if (limitOrders.Any(o => o.BelowMinimumStake))

@@ -35,15 +35,8 @@
         public async Task PlaceAsync()
         {
             this.ValidateOrders();
-            var report = await this.service.SendAsync<PlaceReport>("betting", "placeOrders", this.Params());
-            this.UpdateOrders(report);
-            if (this.orders.Any(o => o.BelowMinimumStake))
-            {
-                await this.service.SendAsync<PlaceReport>("betting", "cancelOrders", this.BelowMinimumCancelParams());
-                var replaceReport = await this.service.SendAsync<ReplaceReport>("betting", "replaceOrders", this.BelowMinimumReplaceParams());
-                this.UpdateOrders(replaceReport);
-            }
-
+            await this.PlaceOrders();
+            await this.PlaceBelowMinimumOrders();
             this.Placed = true;
         }
 
@@ -75,6 +68,17 @@
             return strategyRef;
         }
 
+        private void ValidateOrders()
+        {
+            if (!this.orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
+        }
+
+        private async Task PlaceOrders()
+        {
+            var report = await this.service.SendAsync<PlaceReport>("betting", "placeOrders", this.Params());
+            this.UpdateOrders(report);
+        }
+
         private string Params()
         {
             return $"{{\"marketId\":\"{this.MarketId}\",{this.Reference()}\"instructions\":[{this.Instructions()}]}}";
@@ -87,16 +91,21 @@
             return instructions.Remove(instructions.Length - 1, 1);
         }
 
-        private string CancelParams()
+        private void UpdateOrders(PlaceReport reports)
         {
-            return $"{{\"marketId\":\"{this.MarketId}\",\"instructions\":[{this.CancelInstructions()}]}}";
+            if (reports is null) return;
+            this.orders.ForEach(o => o.AddReports(reports.InstructionReports));
         }
 
-        private string CancelInstructions()
+        private async Task PlaceBelowMinimumOrders()
         {
-            var cancelInstructions = string.Empty;
-            this.orders.Where(o => o.ToCancelInstruction() != null).ToList().ForEach(i => cancelInstructions += i.ToCancelInstruction() + ",");
-            return cancelInstructions.Remove(cancelInstructions.Length - 1, 1);
+            if (this.orders.Any(o => o.BelowMinimumStake))
+            {
+                await this.service.SendAsync<PlaceReport>("betting", "cancelOrders", this.BelowMinimumCancelParams());
+                var replaceReport =
+                    await this.service.SendAsync<ReplaceReport>("betting", "replaceOrders", this.BelowMinimumReplaceParams());
+                this.UpdateOrders(replaceReport);
+            }
         }
 
         private string BelowMinimumCancelParams()
@@ -123,27 +132,28 @@
             return instructions.Remove(instructions.Length - 1, 1);
         }
 
-        private string Reference()
-        {
-            return this.StrategyRef is null ? null : $"\"customerStrategyRef\":\"{this.StrategyRef}\",";
-        }
-
-        private void ValidateOrders()
-        {
-            if (!this.orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
-        }
-
-        private void UpdateOrders(PlaceReport reports)
-        {
-            if (reports is null) return;
-            this.orders.ForEach(o => o.AddReports(reports.InstructionReports));
-        }
-
         private void UpdateOrders(ReplaceReport reports)
         {
             if (reports is null) return;
             var r = reports.InstructionReports.Select(i => i.PlaceInstructionReport).ToList();
             this.orders.ForEach(o => o.AddReports(r));
+        }
+
+        private string Reference()
+        {
+            return this.StrategyRef is null ? null : $"\"customerStrategyRef\":\"{this.StrategyRef}\",";
+        }
+
+        private string CancelParams()
+        {
+            return $"{{\"marketId\":\"{this.MarketId}\",\"instructions\":[{this.CancelInstructions()}]}}";
+        }
+
+        private string CancelInstructions()
+        {
+            var cancelInstructions = string.Empty;
+            this.orders.Where(o => o.ToCancelInstruction() != null).ToList().ForEach(i => cancelInstructions += i.ToCancelInstruction() + ",");
+            return cancelInstructions.Remove(cancelInstructions.Length - 1, 1);
         }
 
         [SuppressMessage(

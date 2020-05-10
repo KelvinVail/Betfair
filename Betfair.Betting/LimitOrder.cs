@@ -62,8 +62,7 @@
 
         public string ToBelowMinimumReplaceInstruction()
         {
-            if (!this.BelowMinimumStake) return null;
-            return $"{{\"betId\":\"{this.BetId}\",\"newPrice\":{this.Price}}}";
+            return !this.BelowMinimumStake ? null : $"{{\"betId\":\"{this.BetId}\",\"newPrice\":{this.Price}}}";
         }
 
         internal void AddReports(IEnumerable<InstructionReport> reports)
