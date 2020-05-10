@@ -8,17 +8,17 @@
 
     public class ExchangeServiceSpy : IExchangeService
     {
-        private Dictionary<string, string> returnContent { get; } = new Dictionary<string, string>();
-
         public string Endpoint { get; private set; }
 
         public string BetfairMethod { get; private set; }
 
         public Dictionary<string, string> SentParameters { get; } = new Dictionary<string, string>();
 
+        private Dictionary<string, string> ReturnContent { get; } = new Dictionary<string, string>();
+
         public ExchangeServiceSpy WithReturnContent(string method, string content)
         {
-            this.returnContent.Add(method, content);
+            this.ReturnContent.Add(method, content);
             return this;
         }
 
@@ -27,7 +27,7 @@
             this.Endpoint = endpoint;
             this.BetfairMethod = betfairMethod;
             this.SentParameters.Add(betfairMethod, parameters);
-            return await Task.FromResult(this.returnContent.ContainsKey(betfairMethod) ? JsonSerializer.Deserialize<T>(this.returnContent[betfairMethod], StandardResolver.AllowPrivateExcludeNull) : default);
+            return await Task.FromResult(this.ReturnContent.ContainsKey(betfairMethod) ? JsonSerializer.Deserialize<T>(this.ReturnContent[betfairMethod], StandardResolver.AllowPrivateExcludeNull) : default);
         }
     }
 }

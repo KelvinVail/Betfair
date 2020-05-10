@@ -325,26 +325,6 @@
             Assert.Equal(expected, sut.ToBelowMinimumReplaceInstruction());
         }
 
-        private async Task SetResults(List<LimitOrder> limitOrders, string status, string orderStatus = "EXECUTION_COMPLETE")
-        {
-            var instructions = string.Empty;
-            var i = 0;
-            foreach (var limitOrder in limitOrders)
-            {
-                i++;
-                instructions += GetResult(limitOrder, i, status, orderStatus) + ",";
-            }
-
-            instructions = instructions.Remove(instructions.Length - 1, 1);
-
-            this.service.WithReturnContent(
-                "placeOrders",
-                $"{{\"marketId\":\"MarketId\",\"instructionReports\":[{instructions}], \"status\":\"SUCCESS\"}}");
-
-            limitOrders.ForEach(o => this.orders.Add(o));
-            await this.orders.PlaceAsync();
-        }
-
         private static string GetResult(LimitOrder limitOrder, long betId, string status, string orderStatus)
         {
             return "{" +
@@ -397,6 +377,26 @@
                    "\"sizeMatched\":0.0," +
                    "\"orderStatus\":\"EXECUTABLE\"}}]}," +
                    "\"id\":1}";
+        }
+
+        private async Task SetResults(List<LimitOrder> limitOrders, string status, string orderStatus = "EXECUTION_COMPLETE")
+        {
+            var instructions = string.Empty;
+            var i = 0;
+            foreach (var limitOrder in limitOrders)
+            {
+                i++;
+                instructions += GetResult(limitOrder, i, status, orderStatus) + ",";
+            }
+
+            instructions = instructions.Remove(instructions.Length - 1, 1);
+
+            this.service.WithReturnContent(
+                "placeOrders",
+                $"{{\"marketId\":\"MarketId\",\"instructionReports\":[{instructions}], \"status\":\"SUCCESS\"}}");
+
+            limitOrders.ForEach(o => this.orders.Add(o));
+            await this.orders.PlaceAsync();
         }
     }
 }

@@ -87,7 +87,7 @@
         private string BelowMinimumCancelInstructions()
         {
             var instructions = string.Empty;
-            this.orders.ForEach(i => instructions += i.ToBelowMinimumCancelInstruction() + ",");
+            this.orders.Where(o => o.BelowMinimumStake).ToList().ForEach(i => instructions += i.ToBelowMinimumCancelInstruction() + ",");
             return instructions.Remove(instructions.Length - 1, 1);
         }
 
@@ -99,7 +99,7 @@
         private string BelowMinimumReplaceInstructions()
         {
             var instructions = string.Empty;
-            this.orders.ForEach(i => instructions += i.ToBelowMinimumReplaceInstruction() + ",");
+            this.orders.Where(o => o.BelowMinimumStake).ToList().ForEach(i => instructions += i.ToBelowMinimumReplaceInstruction() + ",");
             return instructions.Remove(instructions.Length - 1, 1);
         }
 

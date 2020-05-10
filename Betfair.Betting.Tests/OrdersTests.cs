@@ -206,6 +206,23 @@
             Assert.Equal(replaceInstruction, this.service.SentParameters["replaceOrders"]);
         }
 
+        [Theory]
+        [InlineData("MarketId", 12345, Side.Back, 1.99, 1.01)]
+        [InlineData("1.2345678", 11111, Side.Lay, 1, 2)]
+        [InlineData("1.9876543", 98765, Side.Back, 0.10, 3.5)]
+        public async Task OnlyBelowMinimumLimitOrdersAreReplacedWhenMixedWithAboveMinimumOrders(string marketId, long selectionId, Side side, double size, double price)
+        {
+            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var orders = this.GetOrders(marketId);
+            orders.Add(limitOrder);
+            orders.Add(new LimitOrder(1, Side.Back, 10, 2));
+            await orders.PlaceAsync();
+            var cancelInstruction = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToBelowMinimumCancelInstruction()}]}}";
+            var replaceInstruction = $"{{\"marketId\":\"{marketId}\",\"instructions\":[{limitOrder.ToBelowMinimumReplaceInstruction()}]}}";
+            Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
+            Assert.Equal(replaceInstruction, this.service.SentParameters["replaceOrders"]);
+        }
+
         private Orders GetOrders(string marketId, string reference = null)
         {
             return reference is null ? new Orders(this.service, marketId) : new Orders(this.service, marketId, reference);
