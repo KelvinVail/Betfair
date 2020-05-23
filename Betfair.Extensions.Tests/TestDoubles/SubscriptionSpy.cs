@@ -9,6 +9,8 @@
     {
         public string Actions { get; private set; }
 
+        public IList<ChangeMessage> Messages { get; } = new List<ChangeMessage> { new ChangeMessage { Clock = "a" } };
+
         public void Connect()
         {
             this.Actions += "C";
@@ -34,10 +36,10 @@
 
         public async IAsyncEnumerable<ChangeMessage> GetChanges()
         {
-            for (var i = 0; i < 1; i++)
+            foreach (var changeMessage in this.Messages)
             {
                 this.Actions += "M";
-                var result = await Task.FromResult(new ChangeMessage());
+                var result = await Task.FromResult(changeMessage);
                 yield return result;
             }
         }
