@@ -24,7 +24,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Betting.Tests", "Be
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Betting", "Betfair.Betting\Betfair.Betting.csproj", "{BD165573-C81F-4D0C-8654-A40C602499E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Exchange.Interfaces", "Betfair.Exchange.Interfaces\Betfair.Exchange.Interfaces.csproj", "{4373C937-8659-468A-94F9-74403926D6D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Exchange.Interfaces", "Betfair.Exchange.Interfaces\Betfair.Exchange.Interfaces.csproj", "{4373C937-8659-468A-94F9-74403926D6D5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions", "Betfair.Extensions\Betfair.Extensions.csproj", "{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions.Tests", "Betfair.Extensions.Tests\Betfair.Extensions.Tests.csproj", "{6BB31F44-6A4C-405B-9364-6A30338848C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +72,14 @@ Global
 		{4373C937-8659-468A-94F9-74403926D6D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4373C937-8659-468A-94F9-74403926D6D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4373C937-8659-468A-94F9-74403926D6D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
