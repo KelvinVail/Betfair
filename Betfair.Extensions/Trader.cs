@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Betfair.Stream;
@@ -24,28 +25,49 @@
 
         public async Task TradeMarket(string marketId, CancellationToken cancellationToken)
         {
-            await this.Subscribe();
+            this.PassCancellationTokenToStrategies(cancellationToken);
+            await this.Subscribe(marketId);
             await foreach (var change in this.subscription.GetChanges().WithCancellation(cancellationToken))
             {
-                this.DisconnectIfCancelled(cancellationToken);
+                this.DisconnectStreamIfCancelled(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) break;
 
                 this.strategies.ForEach(async s => await s.OnChange(change));
             }
         }
 
-        private async Task Subscribe()
+        private async Task Subscribe(string marketId)
         {
-            if (this.strategies.Count == 0) throw new InvalidOperationException();
+            if (string.IsNullOrEmpty(marketId)) throw new ArgumentNullException(nameof(marketId));
+            if (this.strategies.Count == 0) throw new InvalidOperationException("Trader must contain at least one strategy.");
+
+            var marketFilter = new MarketFilter().WithMarketId(marketId);
+
             this.subscription.Connect();
             await this.subscription.Authenticate();
-            await this.subscription.Subscribe(new MarketFilter(), new MarketDataFilter());
+            await this.subscription.Subscribe(marketFilter, this.GetMergedDataFilters());
             await this.subscription.SubscribeToOrders();
         }
 
-        private void DisconnectIfCancelled(CancellationToken cancellationToken)
+        private void DisconnectStreamIfCancelled(CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested) this.subscription.Disconnect();
+        }
+
+        private MarketDataFilter GetMergedDataFilters()
+        {
+            var dataFiler = new MarketDataFilter();
+            foreach (var marketDataFilter in this.strategies.Select(s => s.DataFilter).ToList())
+            {
+                dataFiler.Merge(marketDataFilter);
+            }
+
+            return dataFiler;
+        }
+
+        private void PassCancellationTokenToStrategies(CancellationToken cancellationToken)
+        {
+            this.strategies.ForEach(s => s.WithCancellationToken(cancellationToken));
         }
     }
 }

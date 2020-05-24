@@ -66,7 +66,7 @@
             this.requestId++;
             var subscriptionMessage = new SubscriptionMessage("marketSubscription", this.requestId)
                 .WithMarketFilter(marketFilter)
-                .WithMarketDateFilter(dataFilter);
+                .WithMarketDataFilter(dataFilter);
             await this.Writer.WriteLineAsync(subscriptionMessage.ToJson());
             this.subscriptionMessages.Add(this.requestId, subscriptionMessage);
         }
@@ -184,7 +184,7 @@
                 return this;
             }
 
-            internal SubscriptionMessage WithMarketDateFilter(MarketDataFilter marketDataFilter)
+            internal SubscriptionMessage WithMarketDataFilter(MarketDataFilter marketDataFilter)
             {
                 if (marketDataFilter != null)
                     this.MarketDataFilter = marketDataFilter;

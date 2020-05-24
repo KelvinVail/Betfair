@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Stream.Tests
 {
+    using System;
     using Xunit;
 
     public class MarketDataFilterTests
@@ -134,6 +135,84 @@
             this.marketDataFilter.WithLadderLevels(10);
             this.marketDataFilter.WithBestPricesIncludingVirtual();
             Assert.Equal(10, this.marketDataFilter.LadderLevels);
+        }
+
+        [Fact]
+        public void MergeTwoFieldHashSets()
+        {
+            this.marketDataFilter.WithBestPrices();
+            var newDataFilter = new MarketDataFilter().WithLastTradedPrice();
+            this.marketDataFilter.Merge(newDataFilter);
+            Assert.Contains("EX_BEST_OFFERS", this.marketDataFilter.Fields);
+            Assert.Contains("EX_LTP", this.marketDataFilter.Fields);
+            Assert.Equal(2, this.marketDataFilter.Fields.Count);
+        }
+
+        [Fact]
+        public void HandleMergeIfOtherIsNull()
+        {
+            this.marketDataFilter.WithBestPrices();
+            this.marketDataFilter.Merge(null);
+            Assert.Contains("EX_BEST_OFFERS", this.marketDataFilter.Fields);
+            Assert.Single(this.marketDataFilter.Fields);
+        }
+
+        [Fact]
+        public void HandleMergeIfOtherFieldsAreNull()
+        {
+            this.marketDataFilter.WithBestPrices();
+            var newDataFilter = new MarketDataFilter();
+            this.marketDataFilter.Merge(newDataFilter);
+            Assert.Contains("EX_BEST_OFFERS", this.marketDataFilter.Fields);
+            Assert.Single(this.marketDataFilter.Fields);
+        }
+
+        [Fact]
+        public void OnMergeHandleIfBothLadderLevelsAreNull()
+        {
+            this.marketDataFilter.Merge(new MarketDataFilter());
+            Assert.Null(this.marketDataFilter.LadderLevels);
+        }
+
+        [Fact]
+        public void HandleMergeIfThisFieldsAreNull()
+        {
+            var newDataFilter = new MarketDataFilter().WithBestPrices();
+            this.marketDataFilter.Merge(newDataFilter);
+            Assert.Contains("EX_BEST_OFFERS", this.marketDataFilter.Fields);
+            Assert.Single(this.marketDataFilter.Fields);
+        }
+
+        [Theory]
+        [InlineData(3)]
+        [InlineData(6)]
+        [InlineData(9)]
+        public void OnMergeHandleIfThisLadderLevelIsNull(int levels)
+        {
+            var newDataFilter = new MarketDataFilter().WithLadderLevels(levels);
+            this.marketDataFilter.Merge(newDataFilter);
+            Assert.Equal(levels, this.marketDataFilter.LadderLevels);
+        }
+
+        [Theory]
+        [InlineData(3)]
+        [InlineData(6)]
+        [InlineData(9)]
+        public void OnMergeHandleIfOtherLadderLevelIsNull(int levels)
+        {
+            this.marketDataFilter.WithLadderLevels(levels);
+            var newDataFilter = new MarketDataFilter();
+            this.marketDataFilter.Merge(newDataFilter);
+            Assert.Equal(levels, this.marketDataFilter.LadderLevels);
+        }
+
+        [Fact]
+        public void MergeTwoLadderLevels()
+        {
+            this.marketDataFilter.WithLadderLevels(3);
+            var newDataFilter = new MarketDataFilter().WithLadderLevels(5);
+            this.marketDataFilter.Merge(newDataFilter);
+            Assert.Equal(5, this.marketDataFilter.LadderLevels);
         }
     }
 }

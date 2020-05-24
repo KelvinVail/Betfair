@@ -1,5 +1,6 @@
 namespace Betfair.Stream
 {
+    using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
 
@@ -83,6 +84,25 @@ namespace Betfair.Stream
             return this;
         }
 
+        public void Merge(MarketDataFilter other)
+        {
+            this.MergeFields(other);
+            this.MergeLadderLevels(other);
+        }
+
+        private void MergeFields(MarketDataFilter other)
+        {
+            this.InitializedFields();
+            if (other?.Fields != null) this.Fields.UnionWith(other.Fields);
+        }
+
+        private void MergeLadderLevels(MarketDataFilter other)
+        {
+            if (other?.LadderLevels == null) return;
+            if (this.LadderLevelsEmpty()) this.LadderLevels = other.LadderLevels;
+            if (this.LadderLevels != null) this.LadderLevels = Math.Max((int)this.LadderLevels, (int)other.LadderLevels);
+        }
+
         private bool LadderLevelsEmpty()
         {
             return this.LadderLevels == null;
@@ -90,7 +110,7 @@ namespace Betfair.Stream
 
         private void InitializedFields()
         {
-            if (this.Fields == null) this.Fields = new HashSet<string>();
+            this.Fields ??= new HashSet<string>();
         }
     }
 }

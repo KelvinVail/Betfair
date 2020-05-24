@@ -31,7 +31,8 @@
         public async Task ThrowIfTraderHasNoStrategies()
         {
             var emptyTrader = new Trader(this.subscription);
-            await Assert.ThrowsAsync<InvalidOperationException>(() => emptyTrader.TradeMarket("MarketId", CancellationToken.None));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => emptyTrader.TradeMarket("MarketId", CancellationToken.None));
+            Assert.Equal("Trader must contain at least one strategy.", ex.Message);
         }
 
         [Fact]
@@ -95,8 +96,77 @@
             Assert.Equal("a", secondStrategy.ClocksProcessed);
         }
 
-        // CorrectMarketIdIsUsedInSubscription
+        [Theory]
+        [InlineData("MarketId")]
+        [InlineData("1.23456789")]
+        public async Task CorrectMarketIdIsUsedInSubscription(string marketId)
+        {
+            await this.trader.TradeMarket(marketId, CancellationToken.None);
+            Assert.Equal(marketId, this.subscription.MarketId);
+        }
 
-        // TODO Merge MarketDataFilters from each strategy
+        [Fact]
+        public async Task ThrowIfMarketIdIsNull()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => this.trader.TradeMarket(null, CancellationToken.None));
+            Assert.Equal("Value cannot be null. (Parameter 'marketId')", ex.Message);
+        }
+
+        [Fact]
+        public async Task ThrowIfMarketIdIsEmpty()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => this.trader.TradeMarket(string.Empty, CancellationToken.None));
+            Assert.Equal("Value cannot be null. (Parameter 'marketId')", ex.Message);
+        }
+
+        [Fact]
+        public async Task SingleDataFilterFieldsAreSet()
+        {
+            this.strategy.DataFilter.WithBestPrices();
+            await this.trader.TradeMarket("MarketId", CancellationToken.None);
+            Assert.Contains("EX_BEST_OFFERS", this.subscription.Fields);
+            Assert.Single(this.subscription.Fields);
+        }
+
+        [Fact]
+        public async Task MultipleDataFilterFieldsAreSet()
+        {
+            this.strategy.DataFilter
+                .WithLastTradedPrice()
+                .WithMarketDefinition();
+            await this.trader.TradeMarket("MarketId", CancellationToken.None);
+            Assert.Contains("EX_LTP", this.subscription.Fields);
+            Assert.Contains("EX_MARKET_DEF", this.subscription.Fields);
+            Assert.Equal(2, this.subscription.Fields.Count);
+        }
+
+        [Fact]
+        public async Task MultipleStrategyDataFilterFieldsAreSet()
+        {
+            this.strategy.DataFilter
+                .WithLastTradedPrice()
+                .WithMarketDefinition();
+            var secondStrategy = new StrategySpy();
+            secondStrategy.DataFilter.WithBestPrices();
+            this.trader.AddStrategy(secondStrategy);
+
+            await this.trader.TradeMarket("MarketId", CancellationToken.None);
+            Assert.Contains("EX_LTP", this.subscription.Fields);
+            Assert.Contains("EX_MARKET_DEF", this.subscription.Fields);
+            Assert.Contains("EX_BEST_OFFERS", this.subscription.Fields);
+            Assert.Equal(3, this.subscription.Fields.Count);
+        }
+
+        [Fact]
+        public async Task CancellationTokenIsPassedToStrategies()
+        {
+            var tokenSource = new CancellationTokenSource();
+            var secondStrategy = new StrategySpy();
+            this.trader.AddStrategy(secondStrategy);
+            await this.trader.TradeMarket("MarketId", tokenSource.Token);
+            Assert.Equal(tokenSource.Token, this.strategy.Token);
+            Assert.Equal(tokenSource.Token, secondStrategy.Token);
+            tokenSource.Dispose();
+        }
     }
 }
