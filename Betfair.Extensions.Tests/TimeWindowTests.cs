@@ -24,7 +24,7 @@
         }
 
         [Fact]
-        public void AddValuesToWindow()
+        public void KeepsTrackOfMean()
         {
             this.AssertMeanIsUpdated(20000, 231.72, 231.72);
             this.AssertMeanIsUpdated(26410, 355.36, 293.54);
