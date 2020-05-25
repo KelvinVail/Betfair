@@ -30,9 +30,8 @@
             await foreach (var change in this.subscription.GetChanges().WithCancellation(cancellationToken))
             {
                 this.DisconnectStreamIfCancelled(cancellationToken);
-                if (cancellationToken.IsCancellationRequested) break;
-
                 this.strategies.ForEach(async s => await s.OnChange(change));
+                if (cancellationToken.IsCancellationRequested) break;
             }
         }
 
