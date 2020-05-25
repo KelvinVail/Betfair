@@ -85,7 +85,7 @@
                 .WithPriceSize(50, 3.99);
             this.priceSizeLadder.Update(priceSizes, 0);
 
-            Assert.Equal(5.00, this.priceSizeLadder.MostTradedPrice, 2);
+            Assert.Equal(5.00, this.priceSizeLadder.PriceWithMostSize, 2);
         }
 
         [Fact]

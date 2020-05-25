@@ -14,7 +14,7 @@
 
         public double Vwap => this.ladder.Sum(s => s.Key * s.Value) / this.ladder.Sum(s => s.Value);
 
-        public double MostTradedPrice => this.ladder.Where(w => Math.Abs(w.Value - this.ladder.Max(m => m.Value)) <= 0).Average(s => s.Key);
+        public double PriceWithMostSize => this.ladder.Where(w => Math.Abs(w.Value - this.ladder.Max(m => m.Value)) <= 0).Average(s => s.Key);
 
         public PriceSizeTimeWindow TenSecondWindow { get; } = new PriceSizeTimeWindow(10);
 
