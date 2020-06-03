@@ -218,7 +218,8 @@
                 .WithTraded(11, 10);
             this.runnerCache.ProcessRunnerChange(runnerChange, 0);
 
-            Assert.Equal(110.0, this.runnerCache.TradedLadder.TotalSize);
+            Assert.Equal(100, this.runnerCache.TradedLadder.GetSizeForPrice(10));
+            Assert.Equal(10, this.runnerCache.TradedLadder.GetSizeForPrice(11));
         }
 
         [Fact]
@@ -232,30 +233,8 @@
             var runnerChange2 = new RunnerChangeStub().WithTraded(10, 50);
             this.runnerCache.ProcessRunnerChange(runnerChange2, 0);
 
-            Assert.Equal(60.0, this.runnerCache.TradedLadder.TotalSize);
-        }
-
-        [Fact]
-        public void CalculateVwap()
-        {
-            var runnerChange = new RunnerChangeStub()
-                .WithTraded(10, 100)
-                .WithTraded(11, 10);
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
-
-            Assert.Equal(10.09, this.runnerCache.TradedLadder.Vwap, 2);
-        }
-
-        [Fact]
-        public void CalculateMostTradedPrice()
-        {
-            var runnerChange = new RunnerChangeStub()
-                .WithTraded(10, 100)
-                .WithTraded(11, 10);
-
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
-
-            Assert.Equal(10, this.runnerCache.TradedLadder.PriceWithMostSize);
+            Assert.Equal(50, this.runnerCache.TradedLadder.GetSizeForPrice(10));
+            Assert.Equal(10, this.runnerCache.TradedLadder.GetSizeForPrice(11));
         }
 
         [Fact]
@@ -266,7 +245,7 @@
 
             this.runnerCache.ProcessRunnerChange(runnerChange, 0);
 
-            Assert.Equal(0, this.runnerCache.TradedLadder.TotalSize);
+            Assert.Equal(0, this.runnerCache.TradedLadder.GetSizeForPrice(10));
         }
 
         private void AssertBestAvailableToBackContains(int level, double price, double size)
