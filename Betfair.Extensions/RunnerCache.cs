@@ -27,7 +27,7 @@
 
         public void ProcessRunnerChange(RunnerChange runnerChange, long lastUpdated)
         {
-            if (runnerChange.SelectionId != this.SelectionId) return;
+            if (runnerChange?.SelectionId != this.SelectionId) return;
 
             this.LastPublishTime = lastUpdated;
             this.SetLastTradedPrice(runnerChange);

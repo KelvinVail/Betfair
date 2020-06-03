@@ -194,6 +194,12 @@
             Assert.Equal(0, this.runnerCache.TradedLadder.GetSizeForPrice(10));
         }
 
+        [Fact]
+        public void HandleNullRunnerChange()
+        {
+            this.runnerCache.ProcessRunnerChange(null, 0);
+        }
+
         private void AssertBestAvailableToBackContains(int level, double price, double size)
         {
             Assert.Equal(price, this.runnerCache.BestAvailableToBack.Price(level), 0);
