@@ -4,7 +4,7 @@
     using System.Linq;
     using Betfair.Stream.Responses;
 
-    public class RunnerCache
+    public sealed class RunnerCache
     {
         public RunnerCache(long selectionId)
         {
@@ -13,9 +13,9 @@
 
         public long SelectionId { get; }
 
-        public double? LastTradedPrice { get; protected set; }
+        public double? LastTradedPrice { get; private set; }
 
-        public double? TotalMatched { get; protected set; }
+        public double? TotalMatched { get; private set; }
 
         public LevelLadder BestAvailableToBack { get; } = new LevelLadder();
 

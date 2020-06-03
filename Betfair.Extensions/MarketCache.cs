@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using Betfair.Stream.Responses;
 
-    public class MarketCache
+    public sealed class MarketCache
     {
         public MarketCache(string marketId)
         {

@@ -15,7 +15,7 @@
             this.AddExchangeService(this.exchange);
         }
 
-        public override MarketDataFilter DataFilter { get; }
+        public override MarketDataFilter DataFilter { get; } = new MarketDataFilter().WithBestPrices();
 
         [Fact]
         public void StrategyBaseIsAbstract()
