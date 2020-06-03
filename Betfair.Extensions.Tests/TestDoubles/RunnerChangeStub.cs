@@ -10,7 +10,7 @@
             this.SelectionId = 12345;
         }
 
-        public RunnerChangeStub WithSelectionId(long selectionId)
+        public RunnerChangeStub WithSelectionId(long? selectionId)
         {
             this.SelectionId = selectionId;
             return this;
