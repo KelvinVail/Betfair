@@ -105,9 +105,9 @@
 
             this.runnerCache.ProcessRunnerChange(runnerChange, 0);
 
-            this.AssertBestAvailableToBackContains(1, 2, 3);
-            this.AssertBestAvailableToBackContains(2, 3, 4);
-            this.AssertBestAvailableToBackContains(3, 4, 5);
+            this.AssertBestAvailableToBackContains(0, 2, 3);
+            this.AssertBestAvailableToBackContains(1, 3, 4);
+            this.AssertBestAvailableToBackContains(2, 4, 5);
         }
 
         [Fact]
@@ -123,7 +123,7 @@
                 .WithBestAvailableToBack(1, 5, 6);
             this.runnerCache.ProcessRunnerChange(runnerChange2, 0);
 
-            this.AssertBestAvailableToBackContains(2, 5, 6);
+            this.AssertBestAvailableToBackContains(1, 5, 6);
         }
 
         [Fact]
@@ -136,9 +136,9 @@
 
             this.runnerCache.ProcessRunnerChange(runnerChange, 0);
 
-            this.AssertBestAvailableToLayContains(1, 2, 3);
-            this.AssertBestAvailableToLayContains(2, 3, 4);
-            this.AssertBestAvailableToLayContains(3, 4, 5);
+            this.AssertBestAvailableToLayContains(0, 2, 3);
+            this.AssertBestAvailableToLayContains(1, 3, 4);
+            this.AssertBestAvailableToLayContains(2, 4, 5);
         }
 
         [Fact]
@@ -153,7 +153,7 @@
             var runnerChange2 = new RunnerChangeStub().WithBestAvailableToLay(1, 5, 6);
             this.runnerCache.ProcessRunnerChange(runnerChange2, 0);
 
-            this.AssertBestAvailableToLayContains(2, 5, 6);
+            this.AssertBestAvailableToLayContains(1, 5, 6);
         }
 
         [Fact]

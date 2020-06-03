@@ -1,62 +1,42 @@
 namespace Betfair.Extensions
 {
     using System.Collections.Generic;
-    using System.Linq;
 
     public class LevelLadder
     {
-        private readonly List<LevelPriceSize> ladder;
+        private readonly Dictionary<double, PriceSize> ladder = new Dictionary<double, PriceSize>();
 
-        public LevelLadder()
+        public double Price(int level)
         {
-            this.ladder = new List<LevelPriceSize>();
+            return this.ladder[level].Price;
         }
 
-        public double Price(int ladderLevel)
+        public double Size(int level)
         {
-            return this.ladder
-                .Where(w => w.Level == ladderLevel - 1)
-                .Select(s => s.Price).FirstOrDefault();
-        }
-
-        public double Size(int ladderLevel)
-        {
-            return this.ladder
-                .Where(w => w.Level == ladderLevel - 1)
-                .Select(s => s.Size).FirstOrDefault();
+            return this.ladder[level].Size;
         }
 
         internal void ProcessLevel(List<double> ladderValue)
         {
-            if (this.ladder.All(a => a.Level != (int)ladderValue[0]))
-            {
-                this.ladder.Add(new LevelPriceSize(ladderValue));
-            }
+            var level = ladderValue[0];
+            if (!this.ladder.ContainsKey(level))
+                this.ladder.Add(level, new PriceSize(ladderValue));
 
-            this.ladder.First(
-                    w => w.Level == (int)ladderValue[0]).Update(ladderValue);
+            this.ladder[level].Price = ladderValue[1];
+            this.ladder[level].Size = ladderValue[2];
         }
 
-        private class LevelPriceSize
+        private class PriceSize
         {
-            public LevelPriceSize(IReadOnlyList<double> levelPriceSize)
-            {
-                this.Level = (int)levelPriceSize[0];
-                this.Price = levelPriceSize[1];
-                this.Size = levelPriceSize[2];
-            }
-
-            public int Level { get; }
-
-            public double Price { get; private set; }
-
-            public double Size { get; private set; }
-
-            public void Update(IReadOnlyList<double> levelPriceSize)
+            public PriceSize(IReadOnlyList<double> levelPriceSize)
             {
                 this.Price = levelPriceSize[1];
                 this.Size = levelPriceSize[2];
             }
+
+            public double Price { get; set; }
+
+            public double Size { get; set; }
         }
     }
 }
