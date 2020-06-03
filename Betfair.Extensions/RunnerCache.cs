@@ -21,20 +21,6 @@
 
         public LevelLadder BestAvailableToLay { get; } = new LevelLadder();
 
-        public double TotalSizeAvailableToBack =>
-            this.BestAvailableToBack.TotalSizeAvailable();
-
-        public double TotalSizeAvailableToLay =>
-            this.BestAvailableToLay.TotalSizeAvailable();
-
-        public double InnerWom =>
-            this.BestAvailableToBack.Size(1)
-            / (this.BestAvailableToBack.Size(1) + this.BestAvailableToLay.Size(1));
-
-        public double OuterWom =>
-            this.BestAvailableToBack.TotalSizeAvailable()
-            / (this.BestAvailableToBack.TotalSizeAvailable() + this.BestAvailableToLay.TotalSizeAvailable());
-
         public PriceSizeLadder TradedLadder { get; } = new PriceSizeLadder();
 
         public long LastPublishTime { get; private set; }

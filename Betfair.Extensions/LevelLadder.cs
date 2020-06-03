@@ -26,11 +26,6 @@ namespace Betfair.Extensions
                 .Select(s => s.Size).FirstOrDefault();
         }
 
-        public double TotalSizeAvailable()
-        {
-            return this.ladder.Sum(s => s.Size);
-        }
-
         internal void ProcessLevel(List<double> ladderValue)
         {
             if (this.ladder.All(a => a.Level != (int)ladderValue[0]))

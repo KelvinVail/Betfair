@@ -157,60 +157,6 @@
         }
 
         [Fact]
-        public void CalculateTotalSizeAvailableToBack()
-        {
-            var runnerChange = new RunnerChangeStub()
-                .WithBestAvailableToBack(0, 2, 4)
-                .WithBestAvailableToBack(1, 3, 4)
-                .WithBestAvailableToBack(2, 4, 5);
-
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
-
-            Assert.Equal(13, this.runnerCache.TotalSizeAvailableToBack);
-        }
-
-        [Fact]
-        public void CalculateTotalSizeAvailableToLay()
-        {
-            var runnerChange = new RunnerChangeStub()
-                .WithBestAvailableToLay(0, 2, 3)
-                .WithBestAvailableToLay(1, 3, 4)
-                .WithBestAvailableToLay(2, 4, 5);
-
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
-
-            Assert.Equal(12, this.runnerCache.TotalSizeAvailableToLay);
-        }
-
-        [Fact]
-        public void CalculateInnerWom()
-        {
-            var runnerChange = new RunnerChangeStub()
-                .WithBestAvailableToBack(0, 2, 10)
-                .WithBestAvailableToLay(0, 2, 90);
-
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
-
-            Assert.Equal(0.1, this.runnerCache.InnerWom);
-        }
-
-        [Fact]
-        public void CalculateOuterWom()
-        {
-            var runnerChange = new RunnerChangeStub()
-                .WithBestAvailableToBack(0, 2, 10)
-                .WithBestAvailableToBack(1, 2, 11)
-                .WithBestAvailableToBack(2, 2, 12)
-                .WithBestAvailableToLay(0, 2, 90)
-                .WithBestAvailableToLay(1, 2, 95)
-                .WithBestAvailableToLay(2, 3, 100);
-
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
-
-            Assert.Equal(0.10377, this.runnerCache.OuterWom, 5);
-        }
-
-        [Fact]
         public void ProcessTraded()
         {
             var runnerChange = new RunnerChangeStub()
