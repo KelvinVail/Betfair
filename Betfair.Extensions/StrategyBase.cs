@@ -1,7 +1,6 @@
 ﻿namespace Betfair.Extensions
 {
     using System.Threading.Tasks;
-    using Betfair.Exchange.Interfaces;
     using Betfair.Stream;
     using Betfair.Stream.Responses;
 
@@ -9,12 +8,13 @@
     {
         public abstract MarketDataFilter DataFilter { get; }
 
-        public void AddExchangeService(IExchangeService exchangeStub)
+        protected MarketCache Market { get; private set; }
+
+        public void LinkToMarket(MarketCache marketCache)
         {
+            this.Market = marketCache;
         }
 
-        public async Task OnChange(ChangeMessage change)
-        {
-        }
+        public abstract Task OnMarketUpdate(MarketChange marketChange);
     }
 }
