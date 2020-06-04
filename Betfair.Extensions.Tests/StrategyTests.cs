@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Extensions.Tests
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream;
@@ -56,6 +57,14 @@
             await this.OnMarketUpdate(mc);
             Assert.Single(this.Market.Runners);
             Assert.Equal(mc, this.mChange);
+        }
+
+        [Fact]
+        public void PassCancellationToken()
+        {
+            using var source = new CancellationTokenSource();
+            this.WithCancellationToken(source.Token);
+            Assert.Equal(source.Token, this.CancellationToken);
         }
     }
 }

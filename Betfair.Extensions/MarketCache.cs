@@ -18,9 +18,9 @@
 
         public Dictionary<long, RunnerCache> Runners { get; private set; } = new Dictionary<long, RunnerCache>();
 
-        public long LastPublishedTime { get; private set; }
+        public long? LastPublishedTime { get; private set; }
 
-        public void OnMarketChange(MarketChange change, int publishTime)
+        public void OnMarketChange(MarketChange change, long? publishTime)
         {
             if (change?.MarketId != this.MarketId) return;
 

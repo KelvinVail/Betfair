@@ -23,9 +23,9 @@
 
         public PriceSizeLadder TradedLadder { get; } = new PriceSizeLadder();
 
-        public long LastPublishTime { get; private set; }
+        public long? LastPublishTime { get; private set; }
 
-        public void ProcessRunnerChange(RunnerChange runnerChange, long lastUpdated)
+        public void ProcessRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
             if (runnerChange?.SelectionId != this.SelectionId) return;
 

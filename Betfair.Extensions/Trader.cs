@@ -11,35 +11,46 @@
     {
         private readonly ISubscription subscription;
 
-        private readonly List<IStrategy> strategies = new List<IStrategy>();
+        private readonly List<StrategyBase> strategies = new List<StrategyBase>();
 
         public Trader(ISubscription subscription)
         {
             this.subscription = subscription;
         }
 
-        public void AddStrategy(IStrategy strategy)
+        public void AddStrategy(StrategyBase strategy)
         {
             this.strategies.Add(strategy);
         }
 
         public async Task TradeMarket(string marketId, CancellationToken cancellationToken)
         {
-            this.PassCancellationTokenToStrategies(cancellationToken);
+            this.Validate(marketId);
+            var market = new MarketCache(marketId);
+            this.strategies.ForEach(s => s.LinkToMarket(market));
+            this.strategies.ForEach(s => s.WithCancellationToken(cancellationToken));
             await this.Subscribe(marketId);
-            await foreach (var change in this.subscription.GetChanges().WithCancellation(cancellationToken))
+            await foreach (var change in this.subscription.GetChanges())
             {
+                if (change.Operation == "mcm")
+                {
+                    change.MarketChanges.ForEach(mc => market.OnMarketChange(mc, change.PublishTime));
+                    change.MarketChanges.ForEach(mc => this.strategies.ForEach(async s => await s.OnMarketUpdate(mc)));
+                }
+
                 this.DisconnectStreamIfCancelled(cancellationToken);
-                this.strategies.ForEach(async s => await s.OnChange(change));
                 if (cancellationToken.IsCancellationRequested) break;
             }
         }
 
-        private async Task Subscribe(string marketId)
+        private void Validate(string marketId)
         {
             if (string.IsNullOrEmpty(marketId)) throw new ArgumentNullException(nameof(marketId));
             if (this.strategies.Count == 0) throw new InvalidOperationException("Trader must contain at least one strategy.");
+        }
 
+        private async Task Subscribe(string marketId)
+        {
             var marketFilter = new MarketFilter().WithMarketId(marketId);
 
             this.subscription.Connect();
@@ -62,11 +73,6 @@
             }
 
             return dataFiler;
-        }
-
-        private void PassCancellationTokenToStrategies(CancellationToken cancellationToken)
-        {
-            this.strategies.ForEach(s => s.WithCancellationToken(cancellationToken));
         }
     }
 }

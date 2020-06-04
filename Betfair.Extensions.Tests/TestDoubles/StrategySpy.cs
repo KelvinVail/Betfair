@@ -5,23 +5,39 @@
     using Betfair.Stream;
     using Betfair.Stream.Responses;
 
-    public class StrategySpy : IStrategy
+    public class StrategySpy : StrategyBase
     {
-        public string ClocksProcessed { get; private set; }
+        public override MarketDataFilter DataFilter { get; } = new MarketDataFilter();
 
-        public MarketDataFilter DataFilter { get; } = new MarketDataFilter();
+        public int MarketUpdateCount { get; private set; }
 
-        public CancellationToken Token { get; private set; }
+        public MarketChange LastMarketChange { get; private set; }
 
-        public void WithCancellationToken(CancellationToken token)
+        public override async Task OnMarketUpdate(MarketChange marketChange)
         {
-            this.Token = token;
+            this.MarketUpdateCount += 1;
+            this.LastMarketChange = marketChange;
+            await Task.CompletedTask;
         }
 
-        public async Task OnChange(ChangeMessage change)
+        public string LinkedMarketId()
         {
-            this.ClocksProcessed += change?.Clock;
-            await Task.CompletedTask;
+            return this.Market.MarketId;
+        }
+
+        public int RunnerCount()
+        {
+            return this.Market.Runners.Count;
+        }
+
+        public long? LastPublishedTime()
+        {
+            return this.Market.LastPublishedTime;
+        }
+
+        public CancellationToken GetCancellationToken()
+        {
+            return this.CancellationToken;
         }
     }
 }

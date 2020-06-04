@@ -6,9 +6,9 @@
     {
         private readonly Dictionary<double, double> ladder = new Dictionary<double, double>();
 
-        public long LastPublishTime { get; private set; }
+        public long? LastPublishTime { get; private set; }
 
-        public void Update(List<List<double>> priceSizes, long unixMilliseconds)
+        public void Update(List<List<double>> priceSizes, long? unixMilliseconds)
         {
             this.LastPublishTime = unixMilliseconds;
             priceSizes?.ForEach(p => this.UpdatePrice(p[0], p[1]));
