@@ -24,7 +24,7 @@
         {
             const long ExpectedTimeStamp = 98765;
             var runnerChange = new RunnerChangeStub();
-            this.runnerCache.ProcessRunnerChange(runnerChange, ExpectedTimeStamp);
+            this.runnerCache.OnRunnerChange(runnerChange, ExpectedTimeStamp);
 
             Assert.Equal(98765, this.runnerCache.LastPublishTime);
         }
@@ -34,7 +34,7 @@
         {
             const long ExpectedTimeStamp = 98765;
             var runnerChange = new RunnerChangeStub();
-            this.runnerCache.ProcessRunnerChange(runnerChange, ExpectedTimeStamp);
+            this.runnerCache.OnRunnerChange(runnerChange, ExpectedTimeStamp);
 
             Assert.Equal(98765, this.runnerCache.TradedLadder.LastPublishTime);
         }
@@ -44,7 +44,7 @@
         {
             const int ExpectedLastTradedPrice = 10;
             var runnerChange = new RunnerChangeStub().WithLastTradedPrice(ExpectedLastTradedPrice);
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             Assert.Equal(ExpectedLastTradedPrice, this.runnerCache.LastTradedPrice);
         }
@@ -55,10 +55,10 @@
             const int ExpectedLastTradedPrice = 10;
 
             var runnerChange1 = new RunnerChangeStub().WithLastTradedPrice(ExpectedLastTradedPrice);
-            this.runnerCache.ProcessRunnerChange(runnerChange1, 0);
+            this.runnerCache.OnRunnerChange(runnerChange1, 0);
 
             var runnerChange2 = new RunnerChangeStub();
-            this.runnerCache.ProcessRunnerChange(runnerChange2, 0);
+            this.runnerCache.OnRunnerChange(runnerChange2, 0);
 
             Assert.Equal(ExpectedLastTradedPrice, this.runnerCache.LastTradedPrice);
         }
@@ -70,7 +70,7 @@
                 .WithSelectionId(54321)
                 .WithLastTradedPrice(10);
 
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             Assert.Null(this.runnerCache.LastTradedPrice);
         }
@@ -80,7 +80,7 @@
         {
             const int ExpectedTotalMatched = 10;
             var runnerChange = new RunnerChangeStub().WithTotalMatched(ExpectedTotalMatched);
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             Assert.Equal(ExpectedTotalMatched, this.runnerCache.TotalMatched);
         }
@@ -89,8 +89,8 @@
         public void OnlySetTotalMatchedIfNotZero()
         {
             const int ExpectedTotalMatched = 10;
-            this.runnerCache.ProcessRunnerChange(new RunnerChangeStub().WithTotalMatched(ExpectedTotalMatched), 0);
-            this.runnerCache.ProcessRunnerChange(new RunnerChangeStub(), 0);
+            this.runnerCache.OnRunnerChange(new RunnerChangeStub().WithTotalMatched(ExpectedTotalMatched), 0);
+            this.runnerCache.OnRunnerChange(new RunnerChangeStub(), 0);
 
             Assert.Equal(ExpectedTotalMatched, this.runnerCache.TotalMatched);
         }
@@ -103,7 +103,7 @@
                 .WithBestAvailableToBack(1, 3, 4)
                 .WithBestAvailableToBack(2, 4, 5);
 
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             this.AssertBestAvailableToBackContains(0, 2, 3);
             this.AssertBestAvailableToBackContains(1, 3, 4);
@@ -117,11 +117,11 @@
                 .WithBestAvailableToBack(0, 2, 3)
                 .WithBestAvailableToBack(1, 3, 4)
                 .WithBestAvailableToBack(2, 4, 5);
-            this.runnerCache.ProcessRunnerChange(runnerChange1, 0);
+            this.runnerCache.OnRunnerChange(runnerChange1, 0);
 
             var runnerChange2 = new RunnerChangeStub()
                 .WithBestAvailableToBack(1, 5, 6);
-            this.runnerCache.ProcessRunnerChange(runnerChange2, 0);
+            this.runnerCache.OnRunnerChange(runnerChange2, 0);
 
             this.AssertBestAvailableToBackContains(1, 5, 6);
         }
@@ -134,7 +134,7 @@
                 .WithBestAvailableToLay(1, 3, 4)
                 .WithBestAvailableToLay(2, 4, 5);
 
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             this.AssertBestAvailableToLayContains(0, 2, 3);
             this.AssertBestAvailableToLayContains(1, 3, 4);
@@ -148,10 +148,10 @@
                 .WithBestAvailableToLay(0, 2, 3)
                 .WithBestAvailableToLay(1, 3, 4)
                 .WithBestAvailableToLay(2, 4, 5);
-            this.runnerCache.ProcessRunnerChange(runnerChange1, 0);
+            this.runnerCache.OnRunnerChange(runnerChange1, 0);
 
             var runnerChange2 = new RunnerChangeStub().WithBestAvailableToLay(1, 5, 6);
-            this.runnerCache.ProcessRunnerChange(runnerChange2, 0);
+            this.runnerCache.OnRunnerChange(runnerChange2, 0);
 
             this.AssertBestAvailableToLayContains(1, 5, 6);
         }
@@ -162,7 +162,7 @@
             var runnerChange = new RunnerChangeStub()
                 .WithTraded(10, 100)
                 .WithTraded(11, 10);
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             Assert.Equal(100, this.runnerCache.TradedLadder.GetSizeForPrice(10));
             Assert.Equal(10, this.runnerCache.TradedLadder.GetSizeForPrice(11));
@@ -174,10 +174,10 @@
             var runnerChange = new RunnerChangeStub()
                 .WithTraded(10, 100)
                 .WithTraded(11, 10);
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             var runnerChange2 = new RunnerChangeStub().WithTraded(10, 50);
-            this.runnerCache.ProcessRunnerChange(runnerChange2, 0);
+            this.runnerCache.OnRunnerChange(runnerChange2, 0);
 
             Assert.Equal(50, this.runnerCache.TradedLadder.GetSizeForPrice(10));
             Assert.Equal(10, this.runnerCache.TradedLadder.GetSizeForPrice(11));
@@ -189,7 +189,7 @@
             var runnerChange = new RunnerChangeStub()
                 .WithTraded(null, null);
 
-            this.runnerCache.ProcessRunnerChange(runnerChange, 0);
+            this.runnerCache.OnRunnerChange(runnerChange, 0);
 
             Assert.Equal(0, this.runnerCache.TradedLadder.GetSizeForPrice(10));
         }
@@ -197,7 +197,25 @@
         [Fact]
         public void HandleNullRunnerChange()
         {
-            this.runnerCache.ProcessRunnerChange(null, 0);
+            this.runnerCache.OnRunnerChange(null, 0);
+        }
+
+        [Fact]
+        public void BestBackReturnsZeroIfLevelDoesNotExist()
+        {
+            var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToBack(1, 2.5, 100);
+            this.runnerCache.OnRunnerChange(rc, 0);
+            Assert.Equal(0, this.runnerCache.BestAvailableToBack.Price(0));
+            Assert.Equal(0, this.runnerCache.BestAvailableToBack.Size(0));
+        }
+
+        [Fact]
+        public void BestLayReturnsZeroIfLevelDoesNotExist()
+        {
+            var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToLay(1, 2.5, 100);
+            this.runnerCache.OnRunnerChange(rc, 0);
+            Assert.Equal(0, this.runnerCache.BestAvailableToLay.Price(0));
+            Assert.Equal(0, this.runnerCache.BestAvailableToLay.Size(0));
         }
 
         private void AssertBestAvailableToBackContains(int level, double price, double size)

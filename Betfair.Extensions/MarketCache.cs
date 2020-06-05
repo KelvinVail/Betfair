@@ -56,7 +56,7 @@
             if (!this.Runners.ContainsKey(selectionId))
                 this.Runners.Add(selectionId, new RunnerCache(selectionId));
 
-            this.Runners[selectionId].ProcessRunnerChange(runnerChange, this.LastPublishedTime);
+            this.Runners[selectionId].OnRunnerChange(runnerChange, this.LastPublishedTime);
         }
 
         private void NewCache()

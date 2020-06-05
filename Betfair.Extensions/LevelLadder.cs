@@ -8,11 +8,13 @@ namespace Betfair.Extensions
 
         public double Price(int level)
         {
+            if (!this.ladder.ContainsKey(level)) return 0;
             return this.ladder[level].Price;
         }
 
         public double Size(int level)
         {
+            if (!this.ladder.ContainsKey(level)) return 0;
             return this.ladder[level].Size;
         }
 

@@ -25,7 +25,7 @@
 
         public long? LastPublishTime { get; private set; }
 
-        public void ProcessRunnerChange(RunnerChange runnerChange, long? lastUpdated)
+        public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
             if (runnerChange?.SelectionId != this.SelectionId) return;
 
