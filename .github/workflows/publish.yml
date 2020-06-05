@@ -49,4 +49,10 @@ jobs:
       with:
         PROJECT_FILE_PATH: Betfair.Exchange.Interfaces/Betfair.Exchange.Interfaces.csproj
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+      # Publish Betfair Extensions
+    - name: publish Betfair.Extensions on version change
+      uses: rohith/publish-nuget@v2
+      with:
+        PROJECT_FILE_PATH: Betfair.Extensions/Betfair.Extensions.csproj
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
