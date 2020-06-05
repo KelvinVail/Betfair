@@ -35,7 +35,7 @@
             return this.Market.LastPublishedTime;
         }
 
-        public CancellationToken GetCancellationToken()
+        public CancellationToken Token()
         {
             return this.CancellationToken;
         }

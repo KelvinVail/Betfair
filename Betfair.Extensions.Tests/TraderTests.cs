@@ -260,8 +260,8 @@
 
             await this.trader.TradeMarket("1.2345", source.Token);
 
-            Assert.Equal(source.Token, this.strategy.GetCancellationToken());
-            Assert.Equal(source.Token, strategy2.GetCancellationToken());
+            Assert.Equal(source.Token, this.strategy.Token());
+            Assert.Equal(source.Token, strategy2.Token());
         }
     }
 }
