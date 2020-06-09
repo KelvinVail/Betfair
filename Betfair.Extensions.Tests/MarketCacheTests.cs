@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Extensions.Tests
 {
+    using System.Collections.Generic;
     using Betfair.Extensions;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream.Responses;
@@ -235,6 +236,39 @@
             this.marketCache.OnMarketChange(marketChange, 98765);
 
             Assert.Equal(98765, this.marketCache.Runners[12345].LastPublishTime);
+        }
+
+        [Fact]
+        public void OnMarketDefinitionAdjustmentFactorIsSet()
+        {
+            var rc = new RunnerChangeStub();
+            var rd = new RunnerDefinition { SelectionId = 12345, AdjustmentFactor = 54.32 };
+            var md = new MarketDefinition { Runners = new List<RunnerDefinition> { rd } };
+            var mc = new MarketChangeStub().WithMarketDefinition(md).WithRunnerChange(rc);
+
+            this.marketCache.OnMarketChange(mc, 0);
+            Assert.Equal(54.32, this.marketCache.Runners[12345].AdjustmentFactor);
+        }
+
+        [Fact]
+        public void HandleNullSelectionIdInRunnerDefinition()
+        {
+            var rd = new RunnerDefinition { AdjustmentFactor = 54.32 };
+            var md = new MarketDefinition { Runners = new List<RunnerDefinition> { rd } };
+            var mc = new MarketChangeStub().WithMarketDefinition(md);
+
+            this.marketCache.OnMarketChange(mc, 0);
+        }
+
+        [Fact]
+        public void HandleRunnerDefinitionForRunnerThatDoesNotExist()
+        {
+            var rc = new RunnerChangeStub();
+            var rd = new RunnerDefinition { SelectionId = 1, AdjustmentFactor = 54.32 };
+            var md = new MarketDefinition { Runners = new List<RunnerDefinition> { rd } };
+            var mc = new MarketChangeStub().WithMarketDefinition(md).WithRunnerChange(rc);
+
+            this.marketCache.OnMarketChange(mc, 0);
         }
     }
 }

@@ -42,6 +42,7 @@
             if (marketChange.TotalAmountMatched > 0) this.TotalAmountMatched = marketChange.TotalAmountMatched;
 
             this.ProcessRunnerChanges(marketChange.RunnerChanges);
+            this.ProcessRunnerDefinitions(marketChange.MarketDefinition?.Runners);
         }
 
         private void ProcessRunnerChanges(List<RunnerChange> runnerChanges)
@@ -57,6 +58,18 @@
                 this.Runners.Add(selectionId, new RunnerCache(selectionId));
 
             this.Runners[selectionId].OnRunnerChange(runnerChange, this.LastPublishedTime);
+        }
+
+        private void ProcessRunnerDefinitions(List<RunnerDefinition> runners)
+        {
+            runners?.ForEach(this.ProcessRunnerDefinition);
+        }
+
+        private void ProcessRunnerDefinition(RunnerDefinition runner)
+        {
+            if (runner.SelectionId is null) return;
+            if (this.Runners.ContainsKey((long)runner.SelectionId))
+                this.Runners[(long)runner.SelectionId].SetDefinition(runner);
         }
 
         private void NewCache()

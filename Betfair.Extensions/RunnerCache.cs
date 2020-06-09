@@ -25,6 +25,8 @@
 
         public long? LastPublishTime { get; private set; }
 
+        public double AdjustmentFactor { get; private set; }
+
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
             if (runnerChange?.SelectionId != this.SelectionId) return;
@@ -35,6 +37,13 @@
             this.ProcessBestAvailableToBack(runnerChange.BestAvailableToBack);
             this.ProcessBestAvailableToLay(runnerChange.BestAvailableToLay);
             this.UpdateTradedLadder(runnerChange);
+        }
+
+        public void SetDefinition(RunnerDefinition definition)
+        {
+            if (definition?.SelectionId != this.SelectionId) return;
+            if (definition.AdjustmentFactor is null) return;
+            this.AdjustmentFactor = (double)definition.AdjustmentFactor;
         }
 
         private void UpdateTradedLadder(RunnerChange runnerChange)

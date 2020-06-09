@@ -58,7 +58,7 @@
 
         public string ToJson()
         {
-            return JsonSerializer.ToJsonString(this, StandardResolver.ExcludeNull);
+            return JsonSerializer.ToJsonString(this, StandardResolver.AllowPrivateExcludeNull);
         }
     }
 }

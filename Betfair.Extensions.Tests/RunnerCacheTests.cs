@@ -2,6 +2,7 @@
 {
     using Betfair.Extensions;
     using Betfair.Extensions.Tests.TestDoubles;
+    using Betfair.Stream.Responses;
     using Xunit;
 
     public class RunnerCacheTests
@@ -216,6 +217,64 @@
             this.runnerCache.OnRunnerChange(rc, 0);
             Assert.Equal(0, this.runnerCache.BestAvailableToLay.Price(0));
             Assert.Equal(0, this.runnerCache.BestAvailableToLay.Size(0));
+        }
+
+        [Fact]
+        public void SetAdjustmentFactorToZeroIfNull()
+        {
+            var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToLay(1, 2.5, 100);
+            this.runnerCache.OnRunnerChange(rc, 0);
+            var d = new RunnerDefinition
+            {
+                SelectionId = 1,
+            };
+
+            this.runnerCache.SetDefinition(d);
+            Assert.Equal(0, this.runnerCache.AdjustmentFactor);
+        }
+
+        [Fact]
+        public void SetAdjustmentFactorOnRunnerDefinition()
+        {
+            var d = new RunnerDefinition
+            {
+                SelectionId = 12345,
+                AdjustmentFactor = 23.45,
+            };
+
+            this.runnerCache.SetDefinition(d);
+            Assert.Equal(23.45, this.runnerCache.AdjustmentFactor);
+        }
+
+        [Fact]
+        public void HandleNullRunnerDefinition()
+        {
+            this.runnerCache.SetDefinition(null);
+        }
+
+        [Fact]
+        public void HandleNullAdjustmentFactor()
+        {
+            var d = new RunnerDefinition
+            {
+                SelectionId = 12345,
+            };
+
+            this.runnerCache.SetDefinition(d);
+            Assert.Equal(0, this.runnerCache.AdjustmentFactor);
+        }
+
+        [Fact]
+        public void DoNotSetAdjustmentFactorIfWrongRunner()
+        {
+            var d = new RunnerDefinition
+            {
+                SelectionId = 2,
+                AdjustmentFactor = 23.45,
+            };
+
+            this.runnerCache.SetDefinition(d);
+            Assert.Equal(0, this.runnerCache.AdjustmentFactor);
         }
 
         private void AssertBestAvailableToBackContains(int level, double price, double size)
