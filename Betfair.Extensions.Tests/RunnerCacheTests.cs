@@ -1,7 +1,6 @@
 ﻿namespace Betfair.Extensions.Tests
 {
     using System;
-    using System.Collections.Generic;
     using Betfair.Extensions;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream.Responses;
@@ -310,7 +309,7 @@
             var ifWin = Math.Round((price * size) - size, 2);
             ifWin += Math.Round((10.5 * 99.99) - 99.99, 2);
 
-            Assert.Equal(ifWin, this.runner.IfWin);
+            Assert.Equal(Math.Round(ifWin, 2), this.runner.IfWin);
         }
 
         [Theory]
@@ -324,7 +323,7 @@
                 .WithMatchedBack(10.5, 99.99);
             this.runner.OnOrderChange(orc);
 
-            var ifLose = -(size + 99.99);
+            var ifLose = -Math.Round(size + 99.99, 2);
 
             Assert.Equal(ifLose, this.runner.IfLose);
         }
@@ -351,9 +350,10 @@
                 .WithMatchedLay(10.5, 99.99);
             this.runner.OnOrderChange(orc);
 
-            var ifWin = -(size + 99.99);
+            var ifWin = -Math.Round((price * size) - size, 2);
+            ifWin += -Math.Round((10.5 * 99.99) - 99.99, 2);
 
-            Assert.Equal(ifWin, this.runner.IfWin);
+            Assert.Equal(Math.Round(ifWin, 2), this.runner.IfWin);
         }
 
         [Theory]
@@ -367,10 +367,21 @@
                 .WithMatchedLay(10.5, 99.99);
             this.runner.OnOrderChange(orc);
 
-            var ifLose = Math.Round((price * size) - size, 2);
-            ifLose += Math.Round((10.5 * 99.99) - 99.99, 2);
+            var ifLose = Math.Round(size + 99.99, 2);
 
             Assert.Equal(ifLose, this.runner.IfLose);
+        }
+
+        [Fact]
+        public void CalculateIfWinAndIfLoseForBacksAndLays()
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithMatchedBack(8, 2)
+                .WithMatchedLay(8.8, 3);
+            this.runner.OnOrderChange(orc);
+
+            Assert.Equal(-9.4, this.runner.IfWin);
+            Assert.Equal(1, this.runner.IfLose);
         }
 
         [Fact]

@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Extensions
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Betfair.Stream.Responses;
@@ -32,10 +33,14 @@
         public double AdjustmentFactor { get; private set; }
 
         public double IfWin =>
-            this.matchedBacks.TotalReturn() - this.matchedLays.TotalSize();
+            Math.Round(
+                this.matchedBacks.TotalReturn() - this.matchedLays.TotalReturn(), 2);
 
         public double IfLose =>
-            this.matchedLays.TotalReturn() - this.matchedBacks.TotalSize();
+            Math.Round(
+                this.matchedLays.TotalSize() - this.matchedBacks.TotalSize(), 2);
+
+        public double Profit { get; internal set; }
 
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
@@ -87,7 +92,8 @@
 
         private void UpdateBestAvailableToBack(List<double?> availableToBack)
         {
-            this.BestAvailableToBack.ProcessLevel(availableToBack.Select(d => d ?? 0).ToList());
+            this.BestAvailableToBack.ProcessLevel(
+                availableToBack.Select(d => d ?? 0).ToList());
         }
 
         private void ProcessBestAvailableToLay(List<List<double?>> availableToLays)
@@ -97,7 +103,8 @@
 
         private void UpdateBestAvailableToLay(List<double?> availableToLay)
         {
-            this.BestAvailableToLay.ProcessLevel(availableToLay.Select(d => d ?? 0).ToList());
+            this.BestAvailableToLay.ProcessLevel(
+                availableToLay.Select(d => d ?? 0).ToList());
         }
     }
 }

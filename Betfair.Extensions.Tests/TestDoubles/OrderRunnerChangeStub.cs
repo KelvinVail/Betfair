@@ -5,9 +5,9 @@
 
     public class OrderRunnerChangeStub : OrderRunnerChange
     {
-        public OrderRunnerChangeStub()
+        public OrderRunnerChangeStub(long selectionId = 12345)
         {
-            this.SelectionId = 12345;
+            this.SelectionId = selectionId;
         }
 
         public OrderRunnerChangeStub WithMatchedBack(double? price, double? size)

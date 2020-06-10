@@ -1,6 +1,8 @@
 ﻿namespace Betfair.Extensions
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Betfair.Stream.Responses;
 
     public sealed class MarketCache
@@ -31,11 +33,23 @@
         public void OnOrderChange(OrderChange orderChange)
         {
             orderChange?.OrderRunnerChanges.ForEach(this.ProcessOrderRunnerChange);
+            this.UpdateRunnerProfits();
         }
 
         private static bool ClearCache(MarketChange marketChange)
         {
             return marketChange.ReplaceCache != null && (bool)marketChange.ReplaceCache;
+        }
+
+        private void UpdateRunnerProfits()
+        {
+            var totalIfLose = this.Runners.Sum(r => r.Value.IfLose);
+            foreach (var (_, runner) in this.Runners)
+            {
+                runner.Profit =
+                    Math.Round(
+                        runner.IfWin + totalIfLose - runner.IfLose, 2);
+            }
         }
 
         private void ProcessMarketChange(MarketChange marketChange)
