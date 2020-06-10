@@ -8,11 +8,11 @@
 
     public class MarketCacheTests
     {
-        private readonly MarketCache marketCache;
+        private readonly MarketCache market;
 
         public MarketCacheTests()
         {
-            this.marketCache = new MarketCache(DefaultMarketId);
+            this.market = new MarketCache(DefaultMarketId);
         }
 
         private static string DefaultMarketId => "1.2345";
@@ -22,13 +22,13 @@
         [Fact]
         public void WhenInitializedMarketIdIsSet()
         {
-            Assert.Equal(DefaultMarketId, this.marketCache.MarketId);
+            Assert.Equal(DefaultMarketId, this.market.MarketId);
         }
 
         [Fact]
         public void HandleNullMarketChange()
         {
-            this.marketCache.OnMarketChange(null, 0);
+            this.market.OnMarketChange(null, 0);
         }
 
         [Fact]
@@ -41,16 +41,16 @@
         public void OnMarketChangeTheChangeIsProcessed()
         {
             var marketChange = new MarketChange();
-            this.marketCache.OnMarketChange(marketChange, 0);
+            this.market.OnMarketChange(marketChange, 0);
         }
 
         [Fact]
         public void IfChangeContainMarketDefinitionTheMarketDefinitionIsSet()
         {
             var changeMessage = new MarketChangeStub().WithMarketDefinition(new MarketDefinition());
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
-            Assert.NotNull(this.marketCache.MarketDefinition);
+            Assert.NotNull(this.market.MarketDefinition);
         }
 
         [Fact]
@@ -58,44 +58,44 @@
         {
             var marketDefinition = new MarketDefinition { Venue = "Test Venue" };
             var marketChange1 = new MarketChangeStub().WithMarketDefinition(marketDefinition);
-            this.marketCache.OnMarketChange(marketChange1, 0);
+            this.market.OnMarketChange(marketChange1, 0);
 
             var marketChange2 = new MarketChangeStub();
-            this.marketCache.OnMarketChange(marketChange2, 0);
+            this.market.OnMarketChange(marketChange2, 0);
 
-            Assert.Equal("Test Venue", this.marketCache.MarketDefinition.Venue);
+            Assert.Equal("Test Venue", this.market.MarketDefinition.Venue);
         }
 
         [Fact]
         public void IfChangeIsForDifferentMarketDoNotProcessTheChange()
         {
-            this.marketCache.OnMarketChange(
+            this.market.OnMarketChange(
                 new MarketChangeStub()
                     .WithMarketId("Different MarketId")
                     .WithMarketDefinition(new MarketDefinition()), 0);
 
-            Assert.Null(this.marketCache.MarketDefinition);
+            Assert.Null(this.market.MarketDefinition);
         }
 
         [Fact]
         public void IfChangeContainsTotalMatchedUpdateTotalMatched()
         {
             const int TotalMatched = 20;
-            this.marketCache.OnMarketChange(
+            this.market.OnMarketChange(
                 new MarketChangeStub()
                     .WithTotalMatched(TotalMatched), 0);
 
-            Assert.Equal(TotalMatched, this.marketCache.TotalAmountMatched);
+            Assert.Equal(TotalMatched, this.market.TotalAmountMatched);
         }
 
         [Fact]
         public void IfChangeDoesNotContainTotalMatchedDoNotClearTotalMatched()
         {
             const int TotalMatched = 20;
-            this.marketCache.OnMarketChange(new MarketChangeStub().WithTotalMatched(TotalMatched), 0);
-            this.marketCache.OnMarketChange(new MarketChangeStub(), 0);
+            this.market.OnMarketChange(new MarketChangeStub().WithTotalMatched(TotalMatched), 0);
+            this.market.OnMarketChange(new MarketChangeStub(), 0);
 
-            Assert.Equal(TotalMatched, this.marketCache.TotalAmountMatched);
+            Assert.Equal(TotalMatched, this.market.TotalAmountMatched);
         }
 
         [Fact]
@@ -104,10 +104,10 @@
             var changeMessage = new MarketChangeStub()
                 .WithRunnerChange(new RunnerChangeStub().WithSelectionId(1))
                 .WithRunnerChange(new RunnerChangeStub().WithSelectionId(2));
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
             const int ExpectedRunnerCount = 2;
-            Assert.Equal(ExpectedRunnerCount, this.marketCache.Runners.Count);
+            Assert.Equal(ExpectedRunnerCount, this.market.Runners.Count);
         }
 
         [Fact]
@@ -116,9 +116,9 @@
             var changeMessage = new MarketChangeStub()
                 .WithRunnerChange(new RunnerChangeStub().WithSelectionId(null))
                 .WithRunnerChange(new RunnerChangeStub().WithSelectionId(2));
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
-            Assert.Single(this.marketCache.Runners);
+            Assert.Single(this.market.Runners);
         }
 
         [Fact]
@@ -127,82 +127,82 @@
             const int TotalMatched = 20;
             var changeMessage = new MarketChangeStub()
                 .WithRunnerChange(new RunnerChangeStub().WithTotalMatched(TotalMatched));
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
-            Assert.Equal(TotalMatched, this.marketCache.Runners[DefaultSelectionId].TotalMatched);
+            Assert.Equal(TotalMatched, this.market.Runners[DefaultSelectionId].TotalMatched);
         }
 
         [Fact]
         public void IfChangeAsksForCacheToBeReplacedMarketDefinitionIsCleared()
         {
             var changeMessage = new MarketChangeStub().WithMarketDefinition(new MarketDefinition());
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
             var changeMessage2 = new MarketChangeStub().WithReplaceCache();
-            this.marketCache.OnMarketChange(changeMessage2, 0);
+            this.market.OnMarketChange(changeMessage2, 0);
 
-            Assert.Null(this.marketCache.MarketDefinition);
+            Assert.Null(this.market.MarketDefinition);
         }
 
         [Fact]
         public void IfChangeAsksForCacheToBeReplacedMarketDefinitionIsReplaced()
         {
             var changeMessage = new MarketChangeStub().WithMarketDefinition(new MarketDefinition { Version = 1 });
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
             var changeMessage2 = new MarketChangeStub().WithReplaceCache().WithMarketDefinition(new MarketDefinition { Version = 2 });
-            this.marketCache.OnMarketChange(changeMessage2, 0);
+            this.market.OnMarketChange(changeMessage2, 0);
 
-            Assert.Equal(2, this.marketCache.MarketDefinition.Version);
+            Assert.Equal(2, this.market.MarketDefinition.Version);
         }
 
         [Fact]
         public void IfChangeAsksForCacheToBeReplacedTotalAmountMatchedIsCleared()
         {
             var changeMessage = new MarketChangeStub().WithTotalMatched(20);
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
             var changeMessage2 = new MarketChangeStub().WithReplaceCache();
-            this.marketCache.OnMarketChange(changeMessage2, 0);
+            this.market.OnMarketChange(changeMessage2, 0);
 
-            Assert.Equal(0, this.marketCache.TotalAmountMatched);
+            Assert.Equal(0, this.market.TotalAmountMatched);
         }
 
         [Fact]
         public void IfChangeAsksForCacheToBeReplacedTotalAmountMatchedIsReplaced()
         {
             var changeMessage = new MarketChangeStub().WithTotalMatched(20);
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
             var changeMessage2 = new MarketChangeStub().WithReplaceCache().WithTotalMatched(30);
-            this.marketCache.OnMarketChange(changeMessage2, 0);
+            this.market.OnMarketChange(changeMessage2, 0);
 
-            Assert.Equal(30, this.marketCache.TotalAmountMatched);
+            Assert.Equal(30, this.market.TotalAmountMatched);
         }
 
         [Fact]
         public void IfChangeAsksForCacheToBeReplacedRunnersAreCleared()
         {
             var changeMessage = new MarketChangeStub().WithRunnerChange(new RunnerChangeStub());
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
             var changeMessage2 = new MarketChangeStub().WithReplaceCache();
-            this.marketCache.OnMarketChange(changeMessage2, 0);
+            this.market.OnMarketChange(changeMessage2, 0);
 
-            Assert.Empty(this.marketCache.Runners);
+            Assert.Empty(this.market.Runners);
         }
 
         [Fact]
         public void IfChangeAsksForCacheToBeReplacedRunnersAreReplaced()
         {
             var changeMessage = new MarketChangeStub().WithRunnerChange(new RunnerChangeStub());
-            this.marketCache.OnMarketChange(changeMessage, 0);
+            this.market.OnMarketChange(changeMessage, 0);
 
             const int TotalMatched = 20;
             var changeMessage2 = new MarketChangeStub().WithReplaceCache().WithRunnerChange(new RunnerChangeStub().WithTotalMatched(TotalMatched));
-            this.marketCache.OnMarketChange(changeMessage2, 0);
+            this.market.OnMarketChange(changeMessage2, 0);
 
-            Assert.Equal(TotalMatched, this.marketCache.Runners[DefaultSelectionId].TotalMatched);
+            Assert.Equal(TotalMatched, this.market.Runners[DefaultSelectionId].TotalMatched);
         }
 
         [Fact]
@@ -210,9 +210,9 @@
         {
             const int PublishTime = 123;
             var changeMessage = new MarketChangeStub();
-            this.marketCache.OnMarketChange(changeMessage, PublishTime);
+            this.market.OnMarketChange(changeMessage, PublishTime);
 
-            Assert.Equal(PublishTime, this.marketCache.LastPublishedTime);
+            Assert.Equal(PublishTime, this.market.LastPublishedTime);
         }
 
         [Fact]
@@ -220,12 +220,12 @@
         {
             const int PublishTime = 123;
             var changeMessage = new MarketChangeStub();
-            this.marketCache.OnMarketChange(changeMessage, PublishTime);
+            this.market.OnMarketChange(changeMessage, PublishTime);
 
             var changeMessage2 = new MarketChangeStub().WithMarketId("WrongId");
-            this.marketCache.OnMarketChange(changeMessage2, 456);
+            this.market.OnMarketChange(changeMessage2, 456);
 
-            Assert.Equal(PublishTime, this.marketCache.LastPublishedTime);
+            Assert.Equal(PublishTime, this.market.LastPublishedTime);
         }
 
         [Fact]
@@ -233,9 +233,9 @@
         {
             var runnerChange = new RunnerChangeStub();
             var marketChange = new MarketChangeStub().WithRunnerChange(runnerChange);
-            this.marketCache.OnMarketChange(marketChange, 98765);
+            this.market.OnMarketChange(marketChange, 98765);
 
-            Assert.Equal(98765, this.marketCache.Runners[12345].LastPublishTime);
+            Assert.Equal(98765, this.market.Runners[12345].LastPublishTime);
         }
 
         [Fact]
@@ -246,8 +246,8 @@
             var md = new MarketDefinition { Runners = new List<RunnerDefinition> { rd } };
             var mc = new MarketChangeStub().WithMarketDefinition(md).WithRunnerChange(rc);
 
-            this.marketCache.OnMarketChange(mc, 0);
-            Assert.Equal(54.32, this.marketCache.Runners[12345].AdjustmentFactor);
+            this.market.OnMarketChange(mc, 0);
+            Assert.Equal(54.32, this.market.Runners[12345].AdjustmentFactor);
         }
 
         [Fact]
@@ -257,7 +257,7 @@
             var md = new MarketDefinition { Runners = new List<RunnerDefinition> { rd } };
             var mc = new MarketChangeStub().WithMarketDefinition(md);
 
-            this.marketCache.OnMarketChange(mc, 0);
+            this.market.OnMarketChange(mc, 0);
         }
 
         [Fact]
@@ -268,7 +268,38 @@
             var md = new MarketDefinition { Runners = new List<RunnerDefinition> { rd } };
             var mc = new MarketChangeStub().WithMarketDefinition(md).WithRunnerChange(rc);
 
-            this.marketCache.OnMarketChange(mc, 0);
+            this.market.OnMarketChange(mc, 0);
+        }
+
+        [Fact]
+        public void ProcessOrderChange()
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithMatchedBack(3.5, 10.99);
+            var oc = new OrderChangeStub()
+                .WithOrderRunnerChange(orc);
+            this.market.OnOrderChange(oc);
+
+            Assert.Equal(-10.99, this.market.Runners[12345].IfLose);
+        }
+
+        [Fact]
+        public void HandleNullSelectionIdOnOrderChange()
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithMatchedBack(3.5, 10.99);
+            orc.SelectionId = null;
+            var oc = new OrderChangeStub()
+                .WithOrderRunnerChange(orc);
+            this.market.OnOrderChange(oc);
+
+            Assert.Empty(this.market.Runners);
+        }
+
+        [Fact]
+        public void HandleNullOrderChange()
+        {
+            this.market.OnOrderChange(null);
         }
     }
 }

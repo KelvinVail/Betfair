@@ -28,6 +28,11 @@
             this.ProcessMarketChange(change);
         }
 
+        public void OnOrderChange(OrderChange orderChange)
+        {
+            orderChange?.OrderRunnerChanges.ForEach(this.ProcessOrderRunnerChange);
+        }
+
         private static bool ClearCache(MarketChange marketChange)
         {
             return marketChange.ReplaceCache != null && (bool)marketChange.ReplaceCache;
@@ -70,6 +75,16 @@
             if (runner.SelectionId is null) return;
             if (this.Runners.ContainsKey((long)runner.SelectionId))
                 this.Runners[(long)runner.SelectionId].SetDefinition(runner);
+        }
+
+        private void ProcessOrderRunnerChange(OrderRunnerChange orc)
+        {
+            if (orc.SelectionId is null) return;
+            var selectionId = (long)orc.SelectionId;
+            if (!this.Runners.ContainsKey(selectionId))
+                this.Runners.Add(selectionId, new RunnerCache(selectionId));
+
+            this.Runners[selectionId].OnOrderChange(orc);
         }
 
         private void NewCache()
