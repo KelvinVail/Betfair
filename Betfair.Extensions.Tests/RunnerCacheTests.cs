@@ -397,6 +397,55 @@
             Assert.Equal(0, this.runner.IfLose);
         }
 
+        [Fact]
+        public void HandleNullUnmatchedBackSize()
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(null, 10.99)
+                .WithUnmatchedBack(1.01, null)
+                .WithUnmatchedBack(null, null);
+            this.runner.OnOrderChange(orc);
+        }
+
+        [Theory]
+        [InlineData(2.5, 10.99)]
+        [InlineData(2.5, 2)]
+        public void CalculateUnmatchedLiabilityForBacks(double price, double size)
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(price, size)
+                .WithUnmatchedBack(1.01, 10.99);
+            this.runner.OnOrderChange(orc);
+            Assert.Equal(Math.Round(size + 10.99, 2), this.runner.UnmatchedLiability);
+        }
+
+        [Theory]
+        [InlineData(2.5, 10.99)]
+        [InlineData(2.5, 2)]
+        public void CalculateUnmatchedLiabilityForLays(double price, double size)
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithUnmatchedLay(price, size)
+                .WithUnmatchedLay(1.01, 10.99);
+            this.runner.OnOrderChange(orc);
+
+            var expected = Math.Round((price * size) - size, 2);
+            expected += Math.Round((1.01 * 10.99) - 10.99, 2);
+            Assert.Equal(Math.Round(expected, 2), this.runner.UnmatchedLiability);
+        }
+
+        [Fact]
+        public void ClearUnmatchedLiabilityBeforeEachUpdate()
+        {
+            var orc1 = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(2.5, 201.87);
+            this.runner.OnOrderChange(orc1);
+            var orc2 = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(1.01, 10.99);
+            this.runner.OnOrderChange(orc2);
+            Assert.Equal(10.99, this.runner.UnmatchedLiability);
+        }
+
         private void AssertBestAvailableToBackContains(int level, double price, double size)
         {
             Assert.Equal(price, this.runner.BestAvailableToBack.Price(level), 0);

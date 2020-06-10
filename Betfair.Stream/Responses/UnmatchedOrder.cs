@@ -33,13 +33,13 @@ namespace Betfair.Stream.Responses
         public double? Size { get; set; }
 
         [DataMember(Name = "pd", EmitDefaultValue = false)]
-        public long? UnixPlacedDate { get; set; }
+        public long? PlacedDate { get; set; }
 
         [DataMember(Name = "rac", EmitDefaultValue = false)]
         public string RegulatorAuthCode { get; set; }
 
         [DataMember(Name = "md", EmitDefaultValue = false)]
-        public long? UnixMatchedDate { get; set; }
+        public long? MatchedDate { get; set; }
 
         [DataMember(Name = "sl", EmitDefaultValue = false)]
         public double? SizeLapsed { get; set; }

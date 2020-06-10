@@ -42,6 +42,8 @@
 
         public double Profit { get; internal set; }
 
+        public double UnmatchedLiability { get; private set; }
+
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
             if (runnerChange?.SelectionId != this.SelectionId) return;
@@ -60,6 +62,8 @@
             if (orc.SelectionId != this.SelectionId) return;
             this.matchedBacks.Update(orc.MatchedBacks, 0);
             this.matchedLays.Update(orc.MatchedLays, 0);
+            this.UnmatchedLiability = 0;
+            orc.UnmatchedOrders?.ForEach(this.UpdateUnmatchedLiability);
         }
 
         public void SetDefinition(RunnerDefinition definition)
@@ -67,6 +71,25 @@
             if (definition?.SelectionId != this.SelectionId) return;
             if (definition.AdjustmentFactor is null) return;
             this.AdjustmentFactor = (double)definition.AdjustmentFactor;
+        }
+
+        private void UpdateUnmatchedLiability(UnmatchedOrder uo)
+        {
+            if (uo.SizeRemaining is null) return;
+            var sr = (double)uo.SizeRemaining;
+
+            if (uo.Price is null) return;
+            var price = (double)uo.Price;
+
+            switch (uo.Side)
+            {
+                case "B":
+                    this.UnmatchedLiability += sr;
+                    break;
+                case "L":
+                    this.UnmatchedLiability += Math.Round((price * sr) - sr, 2);
+                    break;
+            }
         }
 
         private void UpdateTradedLadder(RunnerChange runnerChange)
