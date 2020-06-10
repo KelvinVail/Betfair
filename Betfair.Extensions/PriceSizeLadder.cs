@@ -6,7 +6,7 @@
 
     public class PriceSizeLadder
     {
-        private readonly Dictionary<double, double> ladder = 
+        private readonly Dictionary<double, double> ladder =
             new Dictionary<double, double>();
 
         public long? LastPublishTime { get; private set; }

@@ -45,7 +45,8 @@
         public void SetLastTradedPrice()
         {
             const int ExpectedLastTradedPrice = 10;
-            var runnerChange = new RunnerChangeStub().WithLastTradedPrice(ExpectedLastTradedPrice);
+            var runnerChange = new RunnerChangeStub()
+                .WithLastTradedPrice(ExpectedLastTradedPrice);
             this.runner.OnRunnerChange(runnerChange, 0);
 
             Assert.Equal(ExpectedLastTradedPrice, this.runner.LastTradedPrice);
@@ -56,7 +57,8 @@
         {
             const int ExpectedLastTradedPrice = 10;
 
-            var runnerChange1 = new RunnerChangeStub().WithLastTradedPrice(ExpectedLastTradedPrice);
+            var runnerChange1 = new RunnerChangeStub()
+                .WithLastTradedPrice(ExpectedLastTradedPrice);
             this.runner.OnRunnerChange(runnerChange1, 0);
 
             var runnerChange2 = new RunnerChangeStub();
@@ -81,7 +83,8 @@
         public void SetTotalMatched()
         {
             const int ExpectedTotalMatched = 10;
-            var runnerChange = new RunnerChangeStub().WithTotalMatched(ExpectedTotalMatched);
+            var runnerChange = new RunnerChangeStub()
+                .WithTotalMatched(ExpectedTotalMatched);
             this.runner.OnRunnerChange(runnerChange, 0);
 
             Assert.Equal(ExpectedTotalMatched, this.runner.TotalMatched);
@@ -91,7 +94,8 @@
         public void OnlySetTotalMatchedIfNotZero()
         {
             const int ExpectedTotalMatched = 10;
-            this.runner.OnRunnerChange(new RunnerChangeStub().WithTotalMatched(ExpectedTotalMatched), 0);
+            this.runner.OnRunnerChange(
+                new RunnerChangeStub().WithTotalMatched(ExpectedTotalMatched), 0);
             this.runner.OnRunnerChange(new RunnerChangeStub(), 0);
 
             Assert.Equal(ExpectedTotalMatched, this.runner.TotalMatched);
@@ -152,7 +156,8 @@
                 .WithBestAvailableToLay(2, 4, 5);
             this.runner.OnRunnerChange(runnerChange1, 0);
 
-            var runnerChange2 = new RunnerChangeStub().WithBestAvailableToLay(1, 5, 6);
+            var runnerChange2 = new RunnerChangeStub()
+                .WithBestAvailableToLay(1, 5, 6);
             this.runner.OnRunnerChange(runnerChange2, 0);
 
             this.AssertBestAvailableToLayContains(1, 5, 6);
@@ -205,7 +210,8 @@
         [Fact]
         public void BestBackReturnsZeroIfLevelDoesNotExist()
         {
-            var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToBack(1, 2.5, 100);
+            var rc = new RunnerChangeStub()
+                .WithSelectionId(1).WithBestAvailableToBack(1, 2.5, 100);
             this.runner.OnRunnerChange(rc, 0);
             Assert.Equal(0, this.runner.BestAvailableToBack.Price(0));
             Assert.Equal(0, this.runner.BestAvailableToBack.Size(0));
@@ -214,7 +220,8 @@
         [Fact]
         public void BestLayReturnsZeroIfLevelDoesNotExist()
         {
-            var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToLay(1, 2.5, 100);
+            var rc = new RunnerChangeStub()
+                .WithSelectionId(1).WithBestAvailableToLay(1, 2.5, 100);
             this.runner.OnRunnerChange(rc, 0);
             Assert.Equal(0, this.runner.BestAvailableToLay.Price(0));
             Assert.Equal(0, this.runner.BestAvailableToLay.Size(0));
@@ -223,7 +230,8 @@
         [Fact]
         public void SetAdjustmentFactorToZeroIfNull()
         {
-            var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToLay(1, 2.5, 100);
+            var rc = new RunnerChangeStub()
+                .WithSelectionId(1).WithBestAvailableToLay(1, 2.5, 100);
             this.runner.OnRunnerChange(rc, 0);
             var d = new RunnerDefinition
             {
@@ -446,13 +454,15 @@
             Assert.Equal(10.99, this.runner.UnmatchedLiability);
         }
 
-        private void AssertBestAvailableToBackContains(int level, double price, double size)
+        private void AssertBestAvailableToBackContains(
+            int level, double price, double size)
         {
             Assert.Equal(price, this.runner.BestAvailableToBack.Price(level), 0);
             Assert.Equal(size, this.runner.BestAvailableToBack.Size(level), 0);
         }
 
-        private void AssertBestAvailableToLayContains(int level, double price, double size)
+        private void AssertBestAvailableToLayContains(
+            int level, double price, double size)
         {
             Assert.Equal(price, this.runner.BestAvailableToLay.Price(level), 0);
             Assert.Equal(size, this.runner.BestAvailableToLay.Size(level), 0);

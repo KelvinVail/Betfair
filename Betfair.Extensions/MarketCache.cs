@@ -18,7 +18,12 @@
 
         public double? TotalAmountMatched { get; private set; }
 
-        public Dictionary<long, RunnerCache> Runners { get; private set; } = new Dictionary<long, RunnerCache>();
+        public double Liability =>
+            Math.Round(
+                this.Runners.Min(r => r.Value.Profit - r.Value.UnmatchedLiability), 2);
+
+        public Dictionary<long, RunnerCache> Runners { get; private set; }
+            = new Dictionary<long, RunnerCache>();
 
         public long? LastPublishedTime { get; private set; }
 
@@ -56,9 +61,11 @@
         {
             if (ClearCache(marketChange)) this.NewCache();
 
-            if (marketChange.MarketDefinition != null) this.MarketDefinition = marketChange.MarketDefinition;
+            if (marketChange.MarketDefinition != null)
+                this.MarketDefinition = marketChange.MarketDefinition;
 
-            if (marketChange.TotalAmountMatched > 0) this.TotalAmountMatched = marketChange.TotalAmountMatched;
+            if (marketChange.TotalAmountMatched > 0)
+                this.TotalAmountMatched = marketChange.TotalAmountMatched;
 
             this.ProcessRunnerChanges(marketChange.RunnerChanges);
             this.ProcessRunnerDefinitions(marketChange.MarketDefinition?.Runners);
@@ -76,7 +83,8 @@
             if (!this.Runners.ContainsKey(selectionId))
                 this.Runners.Add(selectionId, new RunnerCache(selectionId));
 
-            this.Runners[selectionId].OnRunnerChange(runnerChange, this.LastPublishedTime);
+            this.Runners[selectionId]
+                .OnRunnerChange(runnerChange, this.LastPublishedTime);
         }
 
         private void ProcessRunnerDefinitions(List<RunnerDefinition> runners)

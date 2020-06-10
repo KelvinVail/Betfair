@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Extensions.Tests
 {
+    using System;
     using System.Collections.Generic;
     using Betfair.Extensions;
     using Betfair.Extensions.Tests.TestDoubles;
@@ -94,8 +95,8 @@
         public void IfChangeDoesNotContainTotalMatchedDoNotClearTotalMatched()
         {
             const int TotalMatched = 20;
-            this.market.OnMarketChange(new MarketChangeStub()
-                .WithTotalMatched(TotalMatched), 0);
+            this.market.OnMarketChange(
+                new MarketChangeStub().WithTotalMatched(TotalMatched), 0);
             this.market.OnMarketChange(new MarketChangeStub(), 0);
 
             Assert.Equal(TotalMatched, this.market.TotalAmountMatched);
@@ -364,6 +365,32 @@
         public void HandleNullOrderChange()
         {
             this.market.OnOrderChange(null);
+        }
+
+        [Theory]
+        [InlineData(37.9201)]
+        [InlineData(12.01)]
+        [InlineData(8.8)]
+        public void CalculateTotalLiability(double size)
+        {
+            var orc1 = new OrderRunnerChangeStub(1)
+                .WithMatchedBack(3.5, 10.99);
+
+            var orc2 = new OrderRunnerChangeStub(2)
+                .WithMatchedBack(10, 1.5)
+                .WithMatchedLay(9.5, 20.01)
+                .WithUnmatchedBack(11, size);
+
+            var oc = new OrderChangeStub()
+                .WithOrderRunnerChange(orc1)
+                .WithOrderRunnerChange(orc2);
+            this.market.OnOrderChange(oc);
+
+            Assert.Equal(45.99, this.market.Runners[1].Profit);
+            Assert.Equal(-167.58, this.market.Runners[2].Profit);
+
+            var expected = -167.58 - Math.Round(size, 2);
+            Assert.Equal(Math.Round(expected, 2), this.market.Liability);
         }
     }
 }

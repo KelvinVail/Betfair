@@ -81,15 +81,8 @@
             if (uo.Price is null) return;
             var price = (double)uo.Price;
 
-            switch (uo.Side)
-            {
-                case "B":
-                    this.UnmatchedLiability += sr;
-                    break;
-                case "L":
-                    this.UnmatchedLiability += Math.Round((price * sr) - sr, 2);
-                    break;
-            }
+            this.UnmatchedLiability +=
+                uo.Side == "B" ? sr : Math.Round((price * sr) - sr, 2);
         }
 
         private void UpdateTradedLadder(RunnerChange runnerChange)
