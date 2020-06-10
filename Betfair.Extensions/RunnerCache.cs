@@ -8,6 +8,8 @@
     {
         private readonly PriceSizeLadder matchedBacks = new PriceSizeLadder();
 
+        private readonly PriceSizeLadder matchedLays = new PriceSizeLadder();
+
         public RunnerCache(long selectionId)
         {
             this.SelectionId = selectionId;
@@ -29,7 +31,11 @@
 
         public double AdjustmentFactor { get; private set; }
 
-        public double IfWin => this.matchedBacks.TotalReturn();
+        public double IfWin =>
+            this.matchedBacks.TotalReturn() - this.matchedLays.TotalSize();
+
+        public double IfLose =>
+            this.matchedLays.TotalReturn() - this.matchedBacks.TotalSize();
 
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
@@ -45,7 +51,10 @@
 
         public void OnOrderChange(OrderRunnerChange orc)
         {
-            this.matchedBacks.Update(orc.MatchedBacks.Select(mb => mb.Select(d => d ?? 0).ToList()).ToList(), 0);
+            if (orc is null) return;
+            if (orc.SelectionId != this.SelectionId) return;
+            this.matchedBacks.Update(orc.MatchedBacks, 0);
+            this.matchedLays.Update(orc.MatchedLays, 0);
         }
 
         public void SetDefinition(RunnerDefinition definition)
@@ -58,8 +67,7 @@
         private void UpdateTradedLadder(RunnerChange runnerChange)
         {
             this.TradedLadder.Update(
-                runnerChange.Traded?.Select(t => t.Select(d => d ?? 0).ToList()).ToList(),
-                this.LastPublishTime);
+                runnerChange.Traded, this.LastPublishTime);
         }
 
         private void SetTotalMatched(RunnerChange runnerChange)
