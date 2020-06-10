@@ -1,7 +1,8 @@
 ﻿namespace Betfair.Extensions.Tests
 {
+    using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
+    using Betfair.Betting;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream;
     using Betfair.Stream.Responses;
@@ -20,10 +21,12 @@
 
         public override MarketDataFilter DataFilter { get; } = new MarketDataFilter().WithBestPrices();
 
-        public override async Task OnMarketUpdate(MarketChange marketChange)
+        public override int RatioOfBankToUse { get; } = 1;
+
+        public override List<LimitOrder> GetOrders(MarketChange marketChange, double stake)
         {
             this.mChange = marketChange;
-            await Task.CompletedTask;
+            return new List<LimitOrder>();
         }
 
         [Fact]
@@ -39,13 +42,14 @@
         }
 
         [Fact]
-        public async Task StrategyIsToldWhenTheMarketHasBeenUpdated()
+        public void StrategyIsAskedForOrdersWhenTheMarketHasBeenUpdated()
         {
-            await this.OnMarketUpdate(new MarketChange());
+            var orders = this.GetOrders(new MarketChange(), 0);
+            Assert.IsType<List<LimitOrder>>(orders);
         }
 
         [Fact]
-        public async Task StrategyIsToldWhenAndWhatHasBeenUpdated()
+        public void StrategyIsToldWhatHasBeenUpdated()
         {
             var rc = new RunnerChangeStub()
                 .WithSelectionId(1)
@@ -54,7 +58,7 @@
             var mc = new MarketChangeStub().WithRunnerChange(rc);
             this.market.OnMarketChange(mc, 0);
 
-            await this.OnMarketUpdate(mc);
+            this.GetOrders(mc, 0);
             Assert.Single(this.Market.Runners);
             Assert.Equal(mc, this.mChange);
         }

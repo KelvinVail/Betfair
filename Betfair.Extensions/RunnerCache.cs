@@ -6,6 +6,8 @@
 
     public sealed class RunnerCache
     {
+        private readonly PriceSizeLadder matchedBacks = new PriceSizeLadder();
+
         public RunnerCache(long selectionId)
         {
             this.SelectionId = selectionId;
@@ -27,6 +29,8 @@
 
         public double AdjustmentFactor { get; private set; }
 
+        public double IfWin => this.matchedBacks.TotalReturn();
+
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
             if (runnerChange?.SelectionId != this.SelectionId) return;
@@ -37,6 +41,11 @@
             this.ProcessBestAvailableToBack(runnerChange.BestAvailableToBack);
             this.ProcessBestAvailableToLay(runnerChange.BestAvailableToLay);
             this.UpdateTradedLadder(runnerChange);
+        }
+
+        public void OnOrderChange(OrderRunnerChange orc)
+        {
+            this.matchedBacks.Update(orc.MatchedBacks.Select(mb => mb.Select(d => d ?? 0).ToList()).ToList(), 0);
         }
 
         public void SetDefinition(RunnerDefinition definition)

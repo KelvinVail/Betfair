@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Extensions.Tests
 {
+    using System.Collections.Generic;
     using Betfair.Extensions;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream.Responses;
@@ -275,6 +276,28 @@
 
             this.runnerCache.SetDefinition(d);
             Assert.Equal(0, this.runnerCache.AdjustmentFactor);
+        }
+
+        [Theory]
+        [InlineData(1.2, 10.99)]
+        public void CalculateIfWinOnMatchedBacks(double price, double size)
+        {
+            var orc = new OrderRunnerChange
+            {
+                SelectionId = 12345,
+                MatchedBacks = new List<List<double?>>
+                {
+                    new List<double?> { price, size },
+                    new List<double?> { 10.5, 99.99 },
+                },
+            };
+
+            this.runnerCache.OnOrderChange(orc);
+
+            var ifWin = (price * size) - size;
+            ifWin += (10.5 * 99.99) - 99.99;
+
+            Assert.Equal(ifWin, this.runnerCache.IfWin);
         }
 
         private void AssertBestAvailableToBackContains(int level, double price, double size)

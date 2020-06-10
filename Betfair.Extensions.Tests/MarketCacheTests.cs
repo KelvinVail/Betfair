@@ -34,7 +34,7 @@
         [Fact]
         public void HandleNullRunnerChange()
         {
-            var change = new MarketChangeStub().WithRunnerChange(null);
+            new MarketChangeStub().WithRunnerChange(null);
         }
 
         [Fact]

@@ -1,6 +1,7 @@
 ﻿namespace Betfair.Extensions
 {
     using System.Collections.Generic;
+    using System.Linq;
 
     public class PriceSizeLadder
     {
@@ -18,6 +19,16 @@
         {
             if (!this.ladder.ContainsKey(price)) return 0;
             return this.ladder[price];
+        }
+
+        public double TotalReturn()
+        {
+            return this.ladder.Sum(price => (price.Key * price.Value) - price.Value);
+        }
+
+        public double TotalSize()
+        {
+            return this.ladder.Sum(p => p.Value);
         }
 
         private void UpdatePrice(double price, double size)

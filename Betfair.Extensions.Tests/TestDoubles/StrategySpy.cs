@@ -1,7 +1,8 @@
 ﻿namespace Betfair.Extensions.Tests.TestDoubles
 {
+    using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
+    using Betfair.Betting;
     using Betfair.Stream;
     using Betfair.Stream.Responses;
 
@@ -9,15 +10,17 @@
     {
         public override MarketDataFilter DataFilter { get; } = new MarketDataFilter();
 
+        public override int RatioOfBankToUse { get; } = 1;
+
         public int MarketUpdateCount { get; private set; }
 
         public MarketChange LastMarketChange { get; private set; }
 
-        public override async Task OnMarketUpdate(MarketChange marketChange)
+        public override List<LimitOrder> GetOrders(MarketChange marketChange, double stake)
         {
             this.MarketUpdateCount += 1;
             this.LastMarketChange = marketChange;
-            await Task.CompletedTask;
+            return null;
         }
 
         public string LinkedMarketId()

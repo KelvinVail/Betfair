@@ -29,6 +29,7 @@ There is no need to install this package seperatly.
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Betfair.Betting\Betfair.Betting.csproj" />
     <ProjectReference Include="..\Betfair.Exchange.Interfaces\Betfair.Exchange.Interfaces.csproj" />
     <ProjectReference Include="..\Betfair.Stream\Betfair.Stream.csproj" />
   </ItemGroup>

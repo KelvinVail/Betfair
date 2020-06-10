@@ -45,5 +45,36 @@
             Assert.Equal(2.00, this.priceSizeLadder.GetSizeForPrice(1.01), 2);
             Assert.Equal(5.00, this.priceSizeLadder.GetSizeForPrice(1.02), 2);
         }
+
+        [Theory]
+        [InlineData(1.01, 2.00)]
+        [InlineData(3.5, 10.99)]
+        [InlineData(100, 99.99)]
+        public void CalculateTotalReturn(double price, double size)
+        {
+            var priceSizes = new PriceSizesStub()
+                .WithPriceSize(price, size)
+                .WithPriceSize(12, 20.78);
+            this.priceSizeLadder.Update(priceSizes, 0);
+            var expected = (price * size) - size;
+            expected += (12 * 20.78) - 20.78;
+
+            Assert.Equal(expected, this.priceSizeLadder.TotalReturn());
+        }
+
+        [Theory]
+        [InlineData(1.01, 2.00)]
+        [InlineData(3.5, 10.99)]
+        [InlineData(100, 99.99)]
+        public void CalculateTotalSize(double price, double size)
+        {
+            var priceSizes = new PriceSizesStub()
+                .WithPriceSize(price, size)
+                .WithPriceSize(12, 20.78);
+            this.priceSizeLadder.Update(priceSizes, 0);
+            var expected = size + 20.78;
+
+            Assert.Equal(expected, this.priceSizeLadder.TotalSize());
+        }
     }
 }

@@ -23,7 +23,7 @@
             this.strategies.Add(strategy);
         }
 
-        public async Task TradeMarket(string marketId, CancellationToken cancellationToken)
+        public async Task TradeMarket(string marketId, double bank, CancellationToken cancellationToken)
         {
             this.Validate(marketId);
             var market = new MarketCache(marketId);
@@ -35,7 +35,7 @@
                 if (change.Operation == "mcm")
                 {
                     change.MarketChanges.ForEach(mc => market.OnMarketChange(mc, change.PublishTime));
-                    change.MarketChanges.ForEach(mc => this.strategies.ForEach(async s => await s.OnMarketUpdate(mc)));
+                    change.MarketChanges.ForEach(mc => this.strategies.ForEach(s => s.GetOrders(mc, 0)));
                 }
 
                 this.DisconnectStreamIfCancelled(cancellationToken);

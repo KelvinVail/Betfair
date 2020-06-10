@@ -1,13 +1,16 @@
 ﻿namespace Betfair.Extensions
 {
+    using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
+    using Betfair.Betting;
     using Betfair.Stream;
     using Betfair.Stream.Responses;
 
     public abstract class StrategyBase
     {
         public abstract MarketDataFilter DataFilter { get; }
+
+        public abstract int RatioOfBankToUse { get; }
 
         protected MarketCache Market { get; private set; }
 
@@ -23,6 +26,6 @@
             this.Market = marketCache;
         }
 
-        public abstract Task OnMarketUpdate(MarketChange marketChange);
+        public abstract List<LimitOrder> GetOrders(MarketChange marketChange, double stake);
     }
 }
