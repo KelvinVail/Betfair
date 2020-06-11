@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Betfair.Betting;
     using Betfair.Stream;
     using Betfair.Stream.Responses;
 
@@ -13,6 +14,8 @@
         private readonly ISubscription subscription;
 
         private readonly List<StrategyBase> strategies = new List<StrategyBase>();
+
+        private OrderManagerBase orderManager;
 
         public Trader(ISubscription subscription)
         {
@@ -24,7 +27,13 @@
             this.strategies.Add(strategy);
         }
 
-        public async Task TradeMarket(string marketId, double bank, CancellationToken cancellationToken)
+        public void SetOrderManager(OrderManagerBase manager)
+        {
+            this.orderManager = manager;
+        }
+
+        public async Task TradeMarket(
+            string marketId, double bank, CancellationToken cancellationToken)
         {
             var market = this.CreateMarketCache(marketId);
             this.LinkMarketToEachStrategy(market, cancellationToken);
@@ -32,7 +41,7 @@
             await foreach (var change in this.subscription.GetChanges())
             {
                 UpdateMarketCache(change, market);
-                this.GetOrdersFromEachStrategy(change);
+                await this.PlaceOrdersFromEachStrategy(change);
 
                 if (this.OnCancellation(cancellationToken)) break;
             }
@@ -52,20 +61,34 @@
                 throw new ArgumentNullException(nameof(marketId));
             if (this.strategies.Count == 0)
                 throw new InvalidOperationException("Trader must contain at least one strategy.");
+            if (this.orderManager is null)
+                throw new InvalidOperationException("Trader must contain an OrderManager.");
             return new MarketCache(marketId);
         }
 
-        private void LinkMarketToEachStrategy(MarketCache market, CancellationToken cancellationToken)
+        private void LinkMarketToEachStrategy(
+            MarketCache market, CancellationToken cancellationToken)
         {
             this.strategies.ForEach(s => s.LinkToMarket(market));
             this.strategies.ForEach(s => s.WithCancellationToken(cancellationToken));
         }
 
-        private void GetOrdersFromEachStrategy(ChangeMessage change)
+        private async Task PlaceOrdersFromEachStrategy(ChangeMessage change)
         {
             if (change.Operation == "mcm")
             {
-                change.MarketChanges.ForEach(mc => this.strategies.ForEach(s => s.GetOrders(mc, 0)));
+                var allOrders = new List<LimitOrder>();
+                change.MarketChanges.ForEach(
+                    mc => this.strategies.ForEach(
+                        s =>
+                        {
+                            var o = s.GetOrders(mc, 0);
+                            if (o != null)
+                                allOrders.AddRange(o);
+                        }));
+
+                if (allOrders.Count > 0)
+                    await this.orderManager.PlaceOrders(allOrders);
             }
         }
 
@@ -93,10 +116,9 @@
         private MarketDataFilter GetMergedDataFilters()
         {
             var dataFiler = new MarketDataFilter();
-            foreach (var marketDataFilter in this.strategies.Select(s => s.DataFilter).ToList())
-            {
+            foreach (var marketDataFilter in
+                this.strategies.Select(s => s.DataFilter).ToList())
                 dataFiler.Merge(marketDataFilter);
-            }
 
             return dataFiler;
         }

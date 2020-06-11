@@ -5,9 +5,9 @@
 
     public class OrderChangeStub : OrderChange
     {
-        public OrderChangeStub()
+        public OrderChangeStub(string marketId = "1.2345")
         {
-            this.MarketId = "1.2345";
+            this.MarketId = marketId;
         }
 
         public OrderChangeStub WithOrderRunnerChange(OrderRunnerChange orc)

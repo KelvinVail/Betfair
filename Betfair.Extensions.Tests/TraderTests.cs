@@ -2,10 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Betfair.Betting;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream.Responses;
+    using Microsoft.VisualBasic;
     using Xunit;
 
     public class TraderTests
@@ -16,10 +19,13 @@
 
         private readonly StrategySpy strategy = new StrategySpy();
 
+        private readonly OrderManagerSpy orderManager = new OrderManagerSpy();
+
         public TraderTests()
         {
             this.trader = new Trader(this.subscription);
             this.trader.AddStrategy(this.strategy);
+            this.trader.SetOrderManager(this.orderManager);
         }
 
         [Fact]
@@ -262,6 +268,55 @@
 
             Assert.Equal(source.Token, this.strategy.Token());
             Assert.Equal(source.Token, strategy2.Token());
+        }
+
+        [Fact]
+        public void CanAddAnOrderManager()
+        {
+            this.trader.SetOrderManager(this.orderManager);
+        }
+
+        [Fact]
+        public async Task ThrowIfOrderManagerNotSet()
+        {
+            var emptyTrader = new Trader(this.subscription);
+            emptyTrader.AddStrategy(this.strategy);
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => emptyTrader.TradeMarket("MarketId", 0, CancellationToken.None));
+            Assert.Equal("Trader must contain an OrderManager.", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(1, Side.Back, 2.5, 10.99)]
+        [InlineData(2, Side.Lay, 50, 2.01)]
+        public async Task OrdersFromAStrategyArePlaced(
+            long id, Side side, double price, double size)
+        {
+            this.subscription.WithMarketChange(new MarketChange());
+            var o1 = new LimitOrder(id, side, price, size);
+            this.strategy.WithOrder(o1);
+            await this.trader.TradeMarket("1.2345", 0, default);
+
+            var placedOrder = this.orderManager.OrdersPlaced
+                .First(o => o.SelectionId == id);
+            Assert.Equal(side, placedOrder.Side);
+            Assert.Equal(price, placedOrder.Price);
+            Assert.Equal(size, placedOrder.Size);
+        }
+
+        [Fact]
+        public async Task PlaceTradesFromMultipleStrategies()
+        {
+            this.subscription.WithMarketChange(new MarketChange());
+            var s2 = new StrategySpy();
+            this.trader.AddStrategy(s2);
+
+            var o1 = new LimitOrder(1, Side.Back, 2.5, 10.99);
+            this.strategy.WithOrder(o1);
+            s2.WithOrder(o1);
+
+            await this.trader.TradeMarket("1.2345", 0, default);
+
+            Assert.Equal(2, this.orderManager.OrdersPlaced.Count());
         }
     }
 }

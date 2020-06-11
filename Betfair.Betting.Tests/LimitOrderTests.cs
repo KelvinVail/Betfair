@@ -24,7 +24,7 @@
         [InlineData(2147483648)]
         public void SelectionIdIsSetInConstructor(long selectionId)
         {
-            var sut = new LimitOrder(selectionId, Side.Back, 1, 1.01);
+            var sut = new LimitOrder(selectionId, Side.Back, 1.01, 1);
             Assert.Equal(selectionId, sut.SelectionId);
         }
 
@@ -33,7 +33,7 @@
         [InlineData(Side.Lay)]
         public void SideCanBeSetInConstructor(Side side)
         {
-            var sut = new LimitOrder(1, side, 1, 1.01);
+            var sut = new LimitOrder(1, side, 1.01, 1);
             Assert.Equal(side, sut.Side);
         }
 
@@ -43,7 +43,7 @@
         [InlineData(3.3333333)]
         public void SizeCanBeSetInConstructor(double size)
         {
-            var sut = new LimitOrder(1, Side.Back, size, 1.01);
+            var sut = new LimitOrder(1, Side.Back, 1.01, size);
             Assert.Equal(size, sut.Size);
         }
 
@@ -53,7 +53,7 @@
         [InlineData(3.4567)]
         public void PriceCanBeSetInConstructor(double price)
         {
-            var sut = new LimitOrder(1, Side.Back, 1, price);
+            var sut = new LimitOrder(1, Side.Back, price, 1);
             Assert.Equal(price, sut.Price);
         }
 
@@ -64,7 +64,7 @@
         [InlineData(12345, Side.Lay, 2.99, 1.01)]
         public void ToInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
         {
-            var sut = new LimitOrder(selectionId, side, size, price);
+            var sut = new LimitOrder(selectionId, side, price, size);
             var expected = $"{{\"selectionId\":\"{selectionId}\"," +
                            $"\"side\":\"{side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
                            "\"orderType\":\"LIMIT\"," +
@@ -82,7 +82,7 @@
         [InlineData(10.6666, 10.67)]
         public void ToInstructionRoundsSizeToTwoDecimalsPlaces(double size, double rounded)
         {
-            var sut = new LimitOrder(1, Side.Back, size, 1.01);
+            var sut = new LimitOrder(1, Side.Back, 1.01, size);
             var expected = "{\"selectionId\":\"1\"," +
                            "\"side\":\"BACK\"," +
                            "\"orderType\":\"LIMIT\"," +
@@ -123,7 +123,7 @@
         [InlineData(9999, 1000)]
         public void PriceIsRoundedToNearestValidPrice(double price, double expected)
         {
-            var sut = new LimitOrder(1, Side.Back, 2, price);
+            var sut = new LimitOrder(1, Side.Back, price, 2);
             var instruction = "{\"selectionId\":\"1\"," +
                               "\"side\":\"BACK\"," +
                               "\"orderType\":\"LIMIT\"," +
@@ -139,7 +139,7 @@
         [InlineData(9.99, 1000, "FAILURE")]
         public async Task ResultsAreSet(double size, double price, string status)
         {
-            var sut = new LimitOrder(12345, Side.Back, size, price);
+            var sut = new LimitOrder(12345, Side.Back, price, size);
             var limitOrders = new List<LimitOrder>
             {
                 new LimitOrder(98765, Side.Lay, -1, -1),
@@ -158,9 +158,9 @@
         [Fact]
         public async Task SetResultsShouldHandleMissingReport()
         {
-            var sut = new LimitOrder(12345, Side.Back, 2.00, 1.01);
+            var sut = new LimitOrder(12345, Side.Back, 1.01, 2.00);
             this.orders.Add(sut);
-            var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 2.00, 1.01) };
+            var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 1.01, 2.00) };
             await this.SetResults(limitOrders, "SUCCESS");
             Assert.Equal(0, sut.SizeMatched);
         }
@@ -170,7 +170,7 @@
         [InlineData(9.99)]
         public async Task SetResultsShouldUseCorrectResult(double size)
         {
-            var sut = new LimitOrder(12345, Side.Back, size, 1.01);
+            var sut = new LimitOrder(12345, Side.Back, 1.01, size);
             var limitOrders = new List<LimitOrder>
             {
                 new LimitOrder(98765, Side.Lay, -1, -1),
@@ -188,7 +188,7 @@
         [InlineData(12345, Side.Lay, 1.99, 1.01)]
         public async Task ToCancelInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
         {
-            var sut = new LimitOrder(selectionId, side, size, price);
+            var sut = new LimitOrder(selectionId, side, price, size);
             await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS", "EXECUTABLE");
             var expected = $"{{\"betId\":\"{sut.BetId}\"}}";
             Assert.Equal(expected, sut.ToCancelInstruction());
@@ -201,7 +201,7 @@
         [InlineData(12345, Side.Lay, 1.99, 1.01)]
         public async Task ToCancelInstructionShouldReturnNullIfOrderIsComplete(long selectionId, Side side, double size, double price)
         {
-            var sut = new LimitOrder(selectionId, side, size, price);
+            var sut = new LimitOrder(selectionId, side, price, size);
             await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS");
             Assert.Null(sut.ToCancelInstruction());
         }
@@ -222,7 +222,7 @@
         [InlineData(0.01, 1000, 0.01, 1000)]
         public void HandleBelowMinimumStakeForBackOrders(double size, double price, double expectedSize, double expectedPrice)
         {
-            var sut = new LimitOrder(12345, Side.Back, size, price);
+            var sut = new LimitOrder(12345, Side.Back, price, size);
             var instruction = "{\"selectionId\":\"12345\"," +
                               "\"side\":\"BACK\"," +
                               "\"orderType\":\"LIMIT\"," +
@@ -249,7 +249,7 @@
         [InlineData(0.01, 1000, 0.01, 1000)]
         public void HandleBelowMinimumStakeForLayOrders(double size, double price, double expectedSize, double expectedPrice)
         {
-            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var sut = new LimitOrder(12345, Side.Lay, price, size);
             var instruction = "{\"selectionId\":\"12345\"," +
                               "\"side\":\"LAY\"," +
                               "\"orderType\":\"LIMIT\"," +
@@ -277,7 +277,7 @@
         [InlineData(0.01, 1000, false)]
         public void BelowMinimumStakeFlagIsSet(double size, double price, bool expected)
         {
-            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var sut = new LimitOrder(12345, Side.Lay, price, size);
             Assert.Equal(expected, sut.BelowMinimumStake);
         }
 
@@ -293,7 +293,7 @@
         [InlineData(0.01, 7.2, 1.99)]
         public void IfBelowMinimumStakeThenToBelowMinimumCancelInstructionShouldBeSet(double size, double price, double reduction)
         {
-            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var sut = new LimitOrder(12345, Side.Lay, price, size);
             var expected = $"{{\"betId\":\"{sut.BetId}\",\"sizeReduction\":{reduction}}}";
             Assert.Equal(expected, sut.ToBelowMinimumCancelInstruction());
         }
@@ -306,7 +306,7 @@
         [InlineData(0.1, 100)]
         public void IfAboveMinimumStakeToBelowMinimumInstructionsShouldBeNull(double size, double price)
         {
-            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var sut = new LimitOrder(12345, Side.Lay, price, size);
             Assert.Null(sut.ToBelowMinimumCancelInstruction());
             Assert.Null(sut.ToBelowMinimumReplaceInstruction());
         }
@@ -321,7 +321,7 @@
         [InlineData(0.01, 2)]
         public void IfBelowMinimumStakeThenToBelowMinimumReplaceInstructionShouldBeSet(double size, double price)
         {
-            var sut = new LimitOrder(12345, Side.Lay, size, price);
+            var sut = new LimitOrder(12345, Side.Lay, price, size);
             var expected = $"{{\"betId\":\"{sut.BetId}\",\"newPrice\":{price}}}";
             Assert.Equal(expected, sut.ToBelowMinimumReplaceInstruction());
         }
@@ -329,7 +329,7 @@
         [Fact]
         public async Task BetIdIsUpdatedWhenOrderIsReplaced()
         {
-            var sut = new LimitOrder(12345, Side.Lay, 0.5, 2);
+            var sut = new LimitOrder(12345, Side.Lay, 2, 0.5);
             await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS");
             Assert.Equal("2", sut.BetId);
         }
@@ -337,9 +337,9 @@
         [Fact]
         public async Task SetResultsShouldUpdateCorrectBetId()
         {
-            var order1 = new LimitOrder(12345, Side.Back, 0.5, 1.01); // betId = 1, newId = 4
-            var order2 = new LimitOrder(98765, Side.Lay, 0.5, 2); // betId = 2, newId = 5
-            var order3 = new LimitOrder(12345, Side.Lay, 0.5, 3); // betId = 3, newId = 6
+            var order1 = new LimitOrder(12345, Side.Back, 1.01, 0.5); // betId = 1, newId = 4
+            var order2 = new LimitOrder(98765, Side.Lay, 2, 0.5); // betId = 2, newId = 5
+            var order3 = new LimitOrder(12345, Side.Lay, 3, 0.5); // betId = 3, newId = 6
             var limitOrders = new List<LimitOrder>
             {
                 order1,
@@ -358,8 +358,8 @@
         [InlineData(98765, Side.Back, 2, 3.5)]
         public async Task CancelSendsCancelInstruction(long selectionId, Side side, double size, double price)
         {
-            var limitOrder = new LimitOrder(selectionId, side, size, price);
-            var limitOrder2 = new LimitOrder(1, Side.Back, 10, 2);
+            var limitOrder = new LimitOrder(selectionId, side, price, size);
+            var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
             await this.SetResults(new List<LimitOrder> { limitOrder, limitOrder2 }, "SUCCESS", "EXECUTABLE");
             var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()},{limitOrder2.ToCancelInstruction()}]}}";
             await this.orders.CancelAsync();
@@ -372,11 +372,11 @@
         [InlineData(98765, Side.Back, 2, 3.5)]
         public async Task CancelHandlesNullCancelInstruction(long selectionId, Side side, double size, double price)
         {
-            var limitOrder = new LimitOrder(selectionId, side, size, price);
+            var limitOrder = new LimitOrder(selectionId, side, price, size);
             var instruction = GetResult(limitOrder, 1, "SUCCESS", "EXECUTABLE");
             this.orders.Add(limitOrder);
 
-            var limitOrder2 = new LimitOrder(1, Side.Back, 10, 2);
+            var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
             var instruction2 = GetResult(limitOrder2, 2, "SUCCESS", "EXECUTION_COMPLETE");
             this.orders.Add(limitOrder2);
 
@@ -395,8 +395,8 @@
         [InlineData(98765, Side.Back, 2, 3.5)]
         public async Task CancelDoesNotExecuteIfAllOrderAreComplete(long selectionId, Side side, double size, double price)
         {
-            var limitOrder = new LimitOrder(selectionId, side, size, price);
-            var limitOrder2 = new LimitOrder(1, Side.Back, 10, 2);
+            var limitOrder = new LimitOrder(selectionId, side, price, size);
+            var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
             await this.SetResults(new List<LimitOrder> { limitOrder, limitOrder2 }, "SUCCESS");
             await this.orders.CancelAsync();
             Assert.False(this.service.SentParameters.ContainsKey("cancelOrders"));

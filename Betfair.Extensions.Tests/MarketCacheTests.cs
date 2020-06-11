@@ -393,5 +393,16 @@
             var expected = -167.58 - Math.Round(size, 2);
             Assert.Equal(Math.Round(expected, 2), this.market.Liability);
         }
+
+        [Fact]
+        public void DoNotProcessOrderChangeForWrongMarket()
+        {
+            var orc = new OrderRunnerChangeStub(1).WithMatchedBack(2.5, 10.99);
+            var oc = new OrderChangeStub("WrongMarketId").WithOrderRunnerChange(orc);
+            var c = this.change.WithOrderChange(oc).Build();
+            this.market.OnChange(c);
+
+            Assert.Empty(this.market.Runners);
+        }
     }
 }

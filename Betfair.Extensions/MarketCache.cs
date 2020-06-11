@@ -39,17 +39,20 @@
             return marketChange.ReplaceCache != null && (bool)marketChange.ReplaceCache;
         }
 
-        private void OnMarketChange(MarketChange change, long? publishTime)
+        private void OnMarketChange(MarketChange marketChange, long? publishTime)
         {
-            if (change?.MarketId != this.MarketId) return;
+            if (marketChange?.MarketId != this.MarketId) return;
 
             this.LastPublishedTime = publishTime;
-            this.ProcessMarketChange(change);
+            this.ProcessMarketChange(marketChange);
         }
 
         private void OnOrderChange(OrderChange orderChange)
         {
-            orderChange?.OrderRunnerChanges.ForEach(this.ProcessOrderRunnerChange);
+            if (orderChange is null) return;
+            if (orderChange.MarketId != this.MarketId) return;
+
+            orderChange.OrderRunnerChanges.ForEach(this.ProcessOrderRunnerChange);
             this.UpdateRunnerProfits();
         }
 

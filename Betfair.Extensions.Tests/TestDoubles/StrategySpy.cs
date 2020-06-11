@@ -8,6 +8,8 @@
 
     public class StrategySpy : StrategyBase
     {
+        private List<LimitOrder> orders;
+
         public override MarketDataFilter DataFilter { get; } = new MarketDataFilter();
 
         public override int RatioOfBankToUse { get; } = 1;
@@ -20,7 +22,14 @@
         {
             this.MarketUpdateCount += 1;
             this.LastMarketChange = marketChange;
-            return null;
+            return this.orders;
+        }
+
+        public StrategySpy WithOrder(LimitOrder o)
+        {
+            this.orders ??= new List<LimitOrder>();
+            this.orders.Add(o);
+            return this;
         }
 
         public string LinkedMarketId()
