@@ -12,16 +12,18 @@
 
         public override MarketDataFilter DataFilter { get; } = new MarketDataFilter();
 
-        public override int RatioOfBankToUse { get; } = 1;
-
         public int MarketUpdateCount { get; private set; }
 
         public MarketChange LastMarketChange { get; private set; }
 
-        public override List<LimitOrder> GetOrders(MarketChange marketChange, double stake)
+        public double Stake { get; private set; }
+
+        public override List<LimitOrder> GetOrders(
+            MarketChange marketChange, double stake)
         {
             this.MarketUpdateCount += 1;
             this.LastMarketChange = marketChange;
+            this.Stake = stake;
             return this.orders;
         }
 

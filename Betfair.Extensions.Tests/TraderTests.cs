@@ -8,7 +8,6 @@
     using Betfair.Betting;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream.Responses;
-    using Microsoft.VisualBasic;
     using Xunit;
 
     public class TraderTests
@@ -317,6 +316,99 @@
             await this.trader.TradeMarket("1.2345", 0, default);
 
             Assert.Equal(2, this.orderManager.OrdersPlaced.Count());
+        }
+
+        [Fact]
+        public async Task LinksMarketToOrderManager()
+        {
+            await this.trader.TradeMarket("1.2345", 0, default);
+
+            Assert.Equal("1.2345", this.orderManager.MarketCache.MarketId);
+        }
+
+        [Fact]
+        public async Task OrderManagerIsCalledOnEveryChange()
+        {
+            this.subscription.WithMarketChange(
+                new MarketChangeStub().WithTotalMatched(10));
+            await this.trader.TradeMarket("1.2345", 0, default);
+
+            var mc = this.orderManager.LastChangeMessage
+                .MarketChanges.Select(m => m.TotalAmountMatched).First();
+            Assert.Equal(10, mc);
+        }
+
+        [Theory]
+        [InlineData(100)]
+        [InlineData(99)]
+        [InlineData(291.01)]
+        [InlineData(1.0101)]
+        public async Task BankIsUsedAsStakeForSingleStrategy(double bank)
+        {
+            this.subscription.WithMarketChange(
+                new MarketChangeStub().WithTotalMatched(10));
+            await this.trader.TradeMarket("1.2345", bank, default);
+
+            Assert.Equal(Math.Round(bank, 2), this.strategy.Stake);
+        }
+
+        [Theory]
+        [InlineData(100)]
+        [InlineData(1.0101)]
+        public async Task SplitBankForMultipleStrategies(double bank)
+        {
+            this.subscription.WithMarketChange(
+                new MarketChangeStub().WithTotalMatched(10));
+            this.trader.AddStrategy(new StrategySpy());
+            await this.trader.TradeMarket("1.2345", bank, default);
+
+            Assert.Equal(Math.Round(bank / 2, 2), this.strategy.Stake);
+        }
+
+        [Theory]
+        [InlineData(100, 10.99)]
+        [InlineData(100, 1.0101)]
+        public async Task AdjustBankForMarketLiability(double bank, double liability)
+        {
+            var rc = new RunnerChangeStub().WithBestAvailableToBack(0, 2.5, 2.99);
+            var mc = new MarketChangeStub().WithTotalMatched(10).WithRunnerChange(rc);
+            this.subscription.WithMarketChange(mc);
+
+            var orc = new OrderRunnerChangeStub().WithUnmatchedBack(2.5, liability);
+            var oc = new OrderChangeStub().WithOrderRunnerChange(orc);
+            this.subscription.WithOrderChange(oc);
+            this.subscription.WithMarketChange(mc);
+
+            this.trader.AddStrategy(new StrategySpy());
+            await this.trader.TradeMarket("1.2345", bank, default);
+
+            Assert.Equal(Math.Round((bank - Math.Round(liability, 2)) / 2, 2), this.strategy.Stake);
+        }
+
+        [Fact]
+        public async Task OnMarketCloseNotCalledIfNotCancelled()
+        {
+            var rc = new RunnerChangeStub().WithBestAvailableToBack(0, 2.5, 2.99);
+            var mc = new MarketChangeStub().WithTotalMatched(10).WithRunnerChange(rc);
+            this.subscription.WithMarketChange(mc);
+
+            await this.trader.TradeMarket("1.2345", 0, default);
+
+            Assert.False(this.orderManager.OnMarketCloseCalled);
+        }
+
+        [Fact]
+        public async Task OnMarketCloseCalledIfCancelled()
+        {
+            var rc = new RunnerChangeStub().WithBestAvailableToBack(0, 2.5, 2.99);
+            var mc = new MarketChangeStub().WithTotalMatched(10).WithRunnerChange(rc);
+            this.subscription.WithMarketChange(mc);
+
+            using var source = new CancellationTokenSource();
+            source.Cancel();
+            await this.trader.TradeMarket("1.2345", 0, source.Token);
+
+            Assert.True(this.orderManager.OnMarketCloseCalled);
         }
     }
 }

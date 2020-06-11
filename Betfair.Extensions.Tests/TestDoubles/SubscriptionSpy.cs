@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Extensions.Tests.TestDoubles
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -46,6 +45,19 @@
                 Operation = "mcm",
                 ChangeType = "mc",
                 MarketChanges = marketChanges.ToList(),
+                PublishTime = this.PublishTime,
+            };
+            this.Messages.Add(change);
+            return this;
+        }
+
+        public SubscriptionSpy WithOrderChange(OrderChange orderChange)
+        {
+            var change = new ChangeMessage
+            {
+                Operation = "orc",
+                ChangeType = "oc",
+                OrderChanges = new List<OrderChange> { orderChange },
                 PublishTime = this.PublishTime,
             };
             this.Messages.Add(change);

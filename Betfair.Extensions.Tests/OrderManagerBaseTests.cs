@@ -25,5 +25,10 @@
         {
             await Task.CompletedTask;
         }
+
+        public override async Task OnMarketClose()
+        {
+            await Task.CompletedTask;
+        }
     }
 }

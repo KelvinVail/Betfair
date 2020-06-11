@@ -11,6 +11,8 @@
 
         public ChangeMessage LastChangeMessage { get; private set; }
 
+        public bool OnMarketCloseCalled { get; private set; }
+
         public override async Task PlaceOrders(IEnumerable<LimitOrder> orders)
         {
             this.OrdersPlaced = orders;
@@ -22,5 +24,13 @@
             this.LastChangeMessage = change;
             await Task.CompletedTask;
         }
+
+        public override async Task OnMarketClose()
+        {
+            this.OnMarketCloseCalled = true;
+            await Task.CompletedTask;
+        }
+
+        public MarketCache MarketCache => this.Market;
     }
 }

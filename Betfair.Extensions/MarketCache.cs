@@ -18,7 +18,7 @@
 
         public double? TotalAmountMatched { get; private set; }
 
-        public double Liability =>
+        public double Liability => this.Runners.Count == 0 ? 0 :
             Math.Round(
                 this.Runners.Min(r => r.Value.Profit - r.Value.UnmatchedLiability), 2);
 

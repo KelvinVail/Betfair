@@ -10,8 +10,6 @@
     {
         public abstract MarketDataFilter DataFilter { get; }
 
-        public abstract int RatioOfBankToUse { get; }
-
         protected MarketCache Market { get; private set; }
 
         protected CancellationToken CancellationToken { get; private set; }

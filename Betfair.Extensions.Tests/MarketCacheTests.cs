@@ -404,5 +404,11 @@
 
             Assert.Empty(this.market.Runners);
         }
+
+        [Fact]
+        public void LiabilityIsZeroIfNoRunners()
+        {
+            Assert.Equal(0, this.market.Liability);
+        }
     }
 }

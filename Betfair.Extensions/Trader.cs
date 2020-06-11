@@ -36,23 +36,21 @@
             string marketId, double bank, CancellationToken cancellationToken)
         {
             var market = this.CreateMarketCache(marketId);
-            this.LinkMarketToEachStrategy(market, cancellationToken);
+            this.LinkMarkets(market, cancellationToken);
             await this.Subscribe(marketId);
             await foreach (var change in this.subscription.GetChanges())
             {
                 UpdateMarketCache(change, market);
-                await this.PlaceOrdersFromEachStrategy(change);
+                await this.PlaceOrdersFromEachStrategy(change, bank + market.Liability);
+                await this.UpdateOrders(change);
 
-                if (this.OnCancellation(cancellationToken)) break;
+                if (this.CheckCancellationToken(cancellationToken)) break;
             }
         }
 
         private static void UpdateMarketCache(ChangeMessage change, MarketCache market)
         {
-            if (change.Operation == "mcm")
-            {
-                change.MarketChanges.ForEach(mc => market.OnChange(change));
-            }
+            market.OnChange(change);
         }
 
         private MarketCache CreateMarketCache(string marketId)
@@ -66,15 +64,18 @@
             return new MarketCache(marketId);
         }
 
-        private void LinkMarketToEachStrategy(
+        private void LinkMarkets(
             MarketCache market, CancellationToken cancellationToken)
         {
             this.strategies.ForEach(s => s.LinkToMarket(market));
             this.strategies.ForEach(s => s.WithCancellationToken(cancellationToken));
+            this.orderManager.LinkToMarket(market);
         }
 
-        private async Task PlaceOrdersFromEachStrategy(ChangeMessage change)
+        private async Task PlaceOrdersFromEachStrategy(
+            ChangeMessage change, double bank)
         {
+            var bankPerStrategy = bank / this.strategies.Count;
             if (change.Operation == "mcm")
             {
                 var allOrders = new List<LimitOrder>();
@@ -82,7 +83,7 @@
                     mc => this.strategies.ForEach(
                         s =>
                         {
-                            var o = s.GetOrders(mc, 0);
+                            var o = s.GetOrders(mc, Math.Round(bankPerStrategy, 2));
                             if (o != null)
                                 allOrders.AddRange(o);
                         }));
@@ -92,8 +93,15 @@
             }
         }
 
-        private bool OnCancellation(CancellationToken cancellationToken)
+        private async Task UpdateOrders(ChangeMessage change)
         {
+            await this.orderManager.OnChange(change);
+        }
+
+        private bool CheckCancellationToken(CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+                this.orderManager.OnMarketClose();
             this.DisconnectStreamIfCancelled(cancellationToken);
             return cancellationToken.IsCancellationRequested;
         }

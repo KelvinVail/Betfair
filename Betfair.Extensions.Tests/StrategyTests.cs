@@ -23,8 +23,6 @@
 
         public override MarketDataFilter DataFilter { get; } = new MarketDataFilter().WithBestPrices();
 
-        public override int RatioOfBankToUse { get; } = 1;
-
         public override List<LimitOrder> GetOrders(MarketChange marketChange, double stake)
         {
             this.mChange = marketChange;
