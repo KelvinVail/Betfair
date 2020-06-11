@@ -12,6 +12,8 @@
     {
         private readonly MarketCache market = new MarketCache("1.2345");
 
+        private readonly ChangeMessageStub change = new ChangeMessageStub();
+
         private MarketChange mChange;
 
         public StrategyTests()
@@ -56,7 +58,7 @@
                 .WithBestAvailableToBack(0, 2.5, 100)
                 .WithBestAvailableToLay(0, 3.0, 200);
             var mc = new MarketChangeStub().WithRunnerChange(rc);
-            this.market.OnMarketChange(mc, 0);
+            this.market.OnChange(this.change.WithMarketChange(mc).Build());
 
             this.GetOrders(mc, 0);
             Assert.Single(this.Market.Runners);

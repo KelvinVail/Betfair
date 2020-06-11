@@ -27,7 +27,19 @@
 
         public long? LastPublishedTime { get; private set; }
 
-        public void OnMarketChange(MarketChange change, long? publishTime)
+        public void OnChange(ChangeMessage change)
+        {
+            if (change is null) return;
+            change.MarketChanges?.ForEach(mc => this.OnMarketChange(mc, change.PublishTime));
+            change.OrderChanges?.ForEach(this.OnOrderChange);
+        }
+
+        private static bool ClearCache(MarketChange marketChange)
+        {
+            return marketChange.ReplaceCache != null && (bool)marketChange.ReplaceCache;
+        }
+
+        private void OnMarketChange(MarketChange change, long? publishTime)
         {
             if (change?.MarketId != this.MarketId) return;
 
@@ -35,15 +47,10 @@
             this.ProcessMarketChange(change);
         }
 
-        public void OnOrderChange(OrderChange orderChange)
+        private void OnOrderChange(OrderChange orderChange)
         {
             orderChange?.OrderRunnerChanges.ForEach(this.ProcessOrderRunnerChange);
             this.UpdateRunnerProfits();
-        }
-
-        private static bool ClearCache(MarketChange marketChange)
-        {
-            return marketChange.ReplaceCache != null && (bool)marketChange.ReplaceCache;
         }
 
         private void UpdateRunnerProfits()

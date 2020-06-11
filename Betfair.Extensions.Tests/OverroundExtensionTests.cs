@@ -7,6 +7,8 @@
     {
         private readonly MarketCache market = new MarketCache("1.2345");
 
+        private readonly ChangeMessageStub change = new ChangeMessageStub();
+
         [Fact]
         public void ReturnZeroIfNull()
         {
@@ -27,7 +29,7 @@
         {
             var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToBack(0, price, 100);
             var mc = new MarketChangeStub().WithMarketId("1.2345").WithRunnerChange(rc);
-            this.market.OnMarketChange(mc, 0);
+            this.market.OnChange(this.change.WithMarketChange(mc).Build());
             var expected = 1 / price;
 
             Assert.Equal(expected, this.market.Overround());
@@ -41,7 +43,7 @@
             var rc = new RunnerChangeStub().WithSelectionId(1).WithBestAvailableToBack(0, price1, 100);
             var rc2 = new RunnerChangeStub().WithSelectionId(2).WithBestAvailableToBack(0, price2, 100);
             var mc = new MarketChangeStub().WithMarketId("1.2345").WithRunnerChange(rc).WithRunnerChange(rc2);
-            this.market.OnMarketChange(mc, 0);
+            this.market.OnChange(this.change.WithMarketChange(mc).Build());
             var expected = (1 / price1) + (1 / price2);
 
             Assert.Equal(expected, this.market.Overround());
@@ -61,7 +63,7 @@
                 .WithRunnerChange(rc)
                 .WithRunnerChange(rc2)
                 .WithRunnerChange(rc3);
-            this.market.OnMarketChange(mc, 0);
+            this.market.OnChange(this.change.WithMarketChange(mc).Build());
             var expected = 1 / price;
 
             Assert.Equal(expected, this.market.Overround());
