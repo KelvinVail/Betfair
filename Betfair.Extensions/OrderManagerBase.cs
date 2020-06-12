@@ -7,13 +7,13 @@
 
     public abstract class OrderManagerBase
     {
+        protected MarketCache Market { get; private set; }
+
         public abstract Task PlaceOrders(IEnumerable<LimitOrder> orders);
 
         public abstract Task OnChange(ChangeMessage change);
 
         public abstract Task OnMarketClose();
-
-        protected MarketCache Market { get; private set; }
 
         public void LinkToMarket(MarketCache marketCache)
         {

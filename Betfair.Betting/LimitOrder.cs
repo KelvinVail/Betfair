@@ -121,7 +121,6 @@
 
         private void Update(InstructionReport report)
         {
-            if (report is null) return;
             this.BetId = report.BetId;
             this.SizeMatched = report.SizeMatched;
             this.AveragePriceMatched = report.AveragePriceMatched;

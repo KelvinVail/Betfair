@@ -12,11 +12,11 @@
     {
         private readonly ExchangeServiceSpy service = new ExchangeServiceSpy();
 
-        private readonly Orders orders;
+        private readonly OrderService orderService;
 
         public LimitOrderTests()
         {
-            this.orders = new Orders(this.service, "MarketId");
+            this.orderService = new OrderService(this.service);
         }
 
         [Theory]
@@ -159,10 +159,16 @@
         public async Task SetResultsShouldHandleMissingReport()
         {
             var sut = new LimitOrder(12345, Side.Back, 1.01, 2.00);
-            this.orders.Add(sut);
             var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 1.01, 2.00) };
             await this.SetResults(limitOrders, "SUCCESS");
             Assert.Equal(0, sut.SizeMatched);
+        }
+
+        [Fact]
+        public async Task SetResultsShouldHandleNullReport()
+        {
+            var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 1.01, 2.00) };
+            await this.orderService.Place("MarketId", limitOrders);
         }
 
         [Theory]
@@ -360,9 +366,10 @@
         {
             var limitOrder = new LimitOrder(selectionId, side, price, size);
             var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
-            await this.SetResults(new List<LimitOrder> { limitOrder, limitOrder2 }, "SUCCESS", "EXECUTABLE");
+            var limitOrders = new List<LimitOrder> { limitOrder, limitOrder2 };
+            await this.SetResults(limitOrders, "SUCCESS", "EXECUTABLE");
             var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()},{limitOrder2.ToCancelInstruction()}]}}";
-            await this.orders.CancelAsync();
+            await this.orderService.Cancel("MarketId", limitOrders);
             Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
         }
 
@@ -374,18 +381,16 @@
         {
             var limitOrder = new LimitOrder(selectionId, side, price, size);
             var instruction = GetResult(limitOrder, 1, "SUCCESS", "EXECUTABLE");
-            this.orders.Add(limitOrder);
 
             var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
             var instruction2 = GetResult(limitOrder2, 2, "SUCCESS", "EXECUTION_COMPLETE");
-            this.orders.Add(limitOrder2);
 
             this.SetPlaceReturnContent(instruction + "," + instruction2);
 
-            await this.orders.PlaceAsync();
+            await this.orderService.Place("MarketId", new List<LimitOrder> { limitOrder, limitOrder2 });
 
             var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()}]}}";
-            await this.orders.CancelAsync();
+            await this.orderService.Cancel("MarketId", new List<LimitOrder> { limitOrder, limitOrder2 });
             Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
         }
 
@@ -398,7 +403,7 @@
             var limitOrder = new LimitOrder(selectionId, side, price, size);
             var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
             await this.SetResults(new List<LimitOrder> { limitOrder, limitOrder2 }, "SUCCESS");
-            await this.orders.CancelAsync();
+            await this.orderService.Cancel("MarketId", new List<LimitOrder> { limitOrder, limitOrder2 });
             Assert.False(this.service.SentParameters.ContainsKey("cancelOrders"));
         }
 
@@ -480,8 +485,7 @@
                 this.SetReplaceReturnContent(replaceInstructions);
             }
 
-            limitOrders.ForEach(l => this.orders.Add(l));
-            await this.orders.PlaceAsync();
+            await this.orderService.Place("MarketId", limitOrders);
         }
 
         private void SetPlaceReturnContent(string instructions)

@@ -13,6 +13,8 @@
 
         public bool OnMarketCloseCalled { get; private set; }
 
+        public MarketCache MarketCache => this.Market;
+
         public override async Task PlaceOrders(IEnumerable<LimitOrder> orders)
         {
             this.OrdersPlaced = orders;
@@ -30,7 +32,5 @@
             this.OnMarketCloseCalled = true;
             await Task.CompletedTask;
         }
-
-        public MarketCache MarketCache => this.Market;
     }
 }
