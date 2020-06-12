@@ -1,6 +1,7 @@
 ﻿namespace Betfair.Extensions.Tests
 {
     using System;
+    using System.Linq;
     using Betfair.Extensions;
     using Betfair.Extensions.Tests.TestDoubles;
     using Betfair.Stream.Responses;
@@ -452,6 +453,57 @@
                 .WithUnmatchedBack(1.01, 10.99);
             this.runner.OnOrderChange(orc2);
             Assert.Equal(10.99, this.runner.UnmatchedLiability);
+        }
+
+        [Theory]
+        [InlineData("ABC", 12345, 2.5, 10.99)]
+        [InlineData("123", 999, 1.01, 1.99)]
+        [InlineData("XYZ", 024843, 1000, 0.01)]
+        public void AddUnmatchedOrders(string betId, long? placedDate, double? price, double? sizeRemaining)
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(price, sizeRemaining, betId, placedDate);
+            this.runner.OnOrderChange(orc);
+
+            var uo = this.runner.UnmatchedOrders.First(o => o.BetId == betId);
+            Assert.Equal(placedDate, uo.PlacedDate);
+            Assert.Equal(price, uo.Price);
+            Assert.Equal(sizeRemaining, uo.SizeRemaining);
+        }
+
+        [Theory]
+        [InlineData("ABC", 12345, 2.5, 10.99)]
+        [InlineData("123", 999, 1.01, 1.99)]
+        [InlineData("XYZ", 024843, 1000, 0.01)]
+        public void UnmatchedOrdersAreReplaced(string betId, long? placedDate, double? price, double? sizeRemaining)
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(price, sizeRemaining + 10, betId, placedDate);
+            this.runner.OnOrderChange(orc);
+
+            var orc2 = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(price, sizeRemaining, betId, placedDate);
+            this.runner.OnOrderChange(orc2);
+
+            Assert.Single(this.runner.UnmatchedOrders.Select(o => o.BetId == betId));
+            var uo = this.runner.UnmatchedOrders.First(o => o.BetId == betId);
+            Assert.Equal(sizeRemaining, uo.SizeRemaining);
+        }
+
+        [Theory]
+        [InlineData("ABC", 12345, 2.5, 10.99)]
+        [InlineData("123", 999, 1.01, 1.99)]
+        [InlineData("XYZ", 024843, 1000, 0.01)]
+        public void UnmatchedOrdersAreCleared(string betId, long? placedDate, double? price, double? sizeRemaining)
+        {
+            var orc = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(price, sizeRemaining + 10, betId, placedDate);
+            this.runner.OnOrderChange(orc);
+
+            var orc2 = new OrderRunnerChangeStub();
+            this.runner.OnOrderChange(orc2);
+
+            Assert.Null(this.runner.UnmatchedOrders);
         }
 
         private void AssertBestAvailableToBackContains(

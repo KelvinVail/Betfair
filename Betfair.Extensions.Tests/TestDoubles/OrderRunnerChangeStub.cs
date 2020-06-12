@@ -24,27 +24,33 @@
             return this;
         }
 
-        public OrderRunnerChangeStub WithUnmatchedLay(double? price, double? size)
+        public OrderRunnerChangeStub WithUnmatchedLay(
+            double? price, double? size, string betId = "1", long? placedDate = 0)
         {
             this.UnmatchedOrders ??= new List<UnmatchedOrder>();
             var uo = new UnmatchedOrder
             {
+                BetId = betId,
                 Side = "L",
                 Price = price,
                 SizeRemaining = size,
+                PlacedDate = placedDate,
             };
             this.UnmatchedOrders.Add(uo);
             return this;
         }
 
-        public OrderRunnerChangeStub WithUnmatchedBack(double? price, double? size)
+        public OrderRunnerChangeStub WithUnmatchedBack(
+            double? price, double? size, string betId = "1", long? placedDate = 0)
         {
             this.UnmatchedOrders ??= new List<UnmatchedOrder>();
             var uo = new UnmatchedOrder
             {
+                BetId = betId,
                 Side = "B",
                 Price = price,
                 SizeRemaining = size,
+                PlacedDate = placedDate,
             };
             this.UnmatchedOrders.Add(uo);
             return this;

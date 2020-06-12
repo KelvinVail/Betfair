@@ -44,6 +44,8 @@
 
         public double UnmatchedLiability { get; private set; }
 
+        public List<UnmatchedOrder> UnmatchedOrders { get; private set; }
+
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
             if (runnerChange?.SelectionId != this.SelectionId) return;
@@ -64,6 +66,7 @@
             this.matchedLays.Update(orc.MatchedLays, 0);
             this.UnmatchedLiability = 0;
             orc.UnmatchedOrders?.ForEach(this.UpdateUnmatchedLiability);
+            this.UnmatchedOrders = orc.UnmatchedOrders;
         }
 
         public void SetDefinition(RunnerDefinition definition)
