@@ -8,7 +8,7 @@
     using System.Threading.Tasks;
     using Betfair.Exchange.Interfaces;
 
-    public sealed class OrderService
+    public sealed class OrderService : IOrderService
     {
         private readonly IExchangeService exchange;
 

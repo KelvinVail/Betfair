@@ -24,6 +24,12 @@
         }
 
         [Fact]
+        public void InheritsIOrderService()
+        {
+            Assert.True(typeof(IOrderService).IsAssignableFrom(typeof(OrderService)));
+        }
+
+        [Fact]
         public void ThrowIfExchangeServiceIsNull()
         {
             var ex = Assert.Throws<ArgumentNullException>(() => new OrderService(null));
