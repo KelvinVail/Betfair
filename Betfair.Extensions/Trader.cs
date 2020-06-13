@@ -89,7 +89,7 @@
                         }));
 
                 if (allOrders.Count > 0)
-                    await this.orderManager.PlaceOrders(allOrders);
+                    await this.orderManager.Place(allOrders);
             }
         }
 

@@ -18,11 +18,14 @@
 
         private readonly StrategySpy strategy = new StrategySpy();
 
-        private readonly OrderManagerSpy orderManager = new OrderManagerSpy();
+        private readonly OrderServiceSpy orderService = new OrderServiceSpy();
+
+        private readonly OrderManagerSpy orderManager;
 
         public TraderTests()
         {
             this.trader = new Trader(this.subscription);
+            this.orderManager = new OrderManagerSpy(this.orderService);
             this.trader.AddStrategy(this.strategy);
             this.trader.SetOrderManager(this.orderManager);
         }
@@ -295,7 +298,7 @@
             this.strategy.WithOrder(o1);
             await this.trader.TradeMarket("1.2345", 0, default);
 
-            var placedOrder = this.orderManager.OrdersPlaced
+            var placedOrder = this.orderService.LastOrdersPlaced
                 .First(o => o.SelectionId == id);
             Assert.Equal(side, placedOrder.Side);
             Assert.Equal(price, placedOrder.Price);
@@ -315,7 +318,7 @@
 
             await this.trader.TradeMarket("1.2345", 0, default);
 
-            Assert.Equal(2, this.orderManager.OrdersPlaced.Count());
+            Assert.Equal(2, this.orderService.LastOrdersPlaced.Count);
         }
 
         [Fact]

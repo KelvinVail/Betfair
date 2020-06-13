@@ -1,25 +1,21 @@
 ﻿namespace Betfair.Extensions.Tests.TestDoubles
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Betfair.Betting;
     using Betfair.Stream.Responses;
 
     public class OrderManagerSpy : OrderManagerBase
     {
-        public IEnumerable<LimitOrder> OrdersPlaced { get; private set; }
+        public OrderManagerSpy(IOrderService orderService)
+            : base(orderService)
+        {
+        }
 
         public ChangeMessage LastChangeMessage { get; private set; }
 
         public bool OnMarketCloseCalled { get; private set; }
 
         public MarketCache MarketCache => this.Market;
-
-        public override async Task PlaceOrders(IEnumerable<LimitOrder> orders)
-        {
-            this.OrdersPlaced = orders;
-            await Task.CompletedTask;
-        }
 
         public override async Task OnChange(ChangeMessage change)
         {
