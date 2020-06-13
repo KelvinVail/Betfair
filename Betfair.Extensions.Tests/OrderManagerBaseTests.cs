@@ -53,5 +53,11 @@
             await this.orderManager.Place(new List<LimitOrder> { order }, strategyRef);
             Assert.Equal(strategyRef, this.orderService.StrategyRef);
         }
+
+        [Fact]
+        public void OrderServiceIsProtected()
+        {
+            Assert.True(this.orderManager.CanAccessOrderService());
+        }
     }
 }

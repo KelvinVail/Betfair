@@ -28,5 +28,11 @@
             this.OnMarketCloseCalled = true;
             await Task.CompletedTask;
         }
+
+        public bool CanAccessOrderService()
+        {
+            this.OrderService.CancelAll("Test");
+            return true;
+        }
     }
 }

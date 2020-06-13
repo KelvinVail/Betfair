@@ -8,14 +8,14 @@
 
     public abstract class OrderManagerBase
     {
-        private readonly IOrderService orderService;
-
         protected OrderManagerBase(IOrderService orderService)
         {
-            this.orderService = orderService;
+            this.OrderService = orderService;
         }
 
         protected MarketCache Market { get; private set; }
+
+        protected IOrderService OrderService { get; }
 
         public abstract Task OnChange(ChangeMessage change);
 
@@ -23,7 +23,7 @@
 
         public virtual async Task Place(IEnumerable<LimitOrder> orders, string strategyRef = null)
         {
-            await this.orderService.Place(this.Market.MarketId, orders.ToList(), strategyRef);
+            await this.OrderService.Place(this.Market.MarketId, orders.ToList(), strategyRef);
         }
 
         public void LinkToMarket(MarketCache marketCache)
