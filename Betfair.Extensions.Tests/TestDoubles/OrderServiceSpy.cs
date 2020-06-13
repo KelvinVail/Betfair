@@ -20,7 +20,12 @@
             await Task.CompletedTask;
         }
 
-        public async Task Cancel(string marketId, List<LimitOrder> orders)
+        public async Task Cancel(string marketId, List<string> betIds)
+        {
+            await Task.CompletedTask;
+        }
+
+        public async Task CancelAll(string marketId)
         {
             await Task.CompletedTask;
         }

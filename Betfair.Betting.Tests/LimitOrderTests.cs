@@ -369,42 +369,8 @@
             var limitOrders = new List<LimitOrder> { limitOrder, limitOrder2 };
             await this.SetResults(limitOrders, "SUCCESS", "EXECUTABLE");
             var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()},{limitOrder2.ToCancelInstruction()}]}}";
-            await this.orderService.Cancel("MarketId", limitOrders);
+            await this.orderService.Cancel("MarketId", limitOrders.Select(o => o.BetId).ToList());
             Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
-        }
-
-        [Theory]
-        [InlineData(12345, Side.Back, 2, 1.01)]
-        [InlineData(11111, Side.Lay, 2, 2)]
-        [InlineData(98765, Side.Back, 2, 3.5)]
-        public async Task CancelHandlesNullCancelInstruction(long selectionId, Side side, double size, double price)
-        {
-            var limitOrder = new LimitOrder(selectionId, side, price, size);
-            var instruction = GetResult(limitOrder, 1, "SUCCESS", "EXECUTABLE");
-
-            var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
-            var instruction2 = GetResult(limitOrder2, 2, "SUCCESS", "EXECUTION_COMPLETE");
-
-            this.SetPlaceReturnContent(instruction + "," + instruction2);
-
-            await this.orderService.Place("MarketId", new List<LimitOrder> { limitOrder, limitOrder2 });
-
-            var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()}]}}";
-            await this.orderService.Cancel("MarketId", new List<LimitOrder> { limitOrder, limitOrder2 });
-            Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
-        }
-
-        [Theory]
-        [InlineData(12345, Side.Back, 2, 1.01)]
-        [InlineData(11111, Side.Lay, 2, 2)]
-        [InlineData(98765, Side.Back, 2, 3.5)]
-        public async Task CancelDoesNotExecuteIfAllOrderAreComplete(long selectionId, Side side, double size, double price)
-        {
-            var limitOrder = new LimitOrder(selectionId, side, price, size);
-            var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
-            await this.SetResults(new List<LimitOrder> { limitOrder, limitOrder2 }, "SUCCESS");
-            await this.orderService.Cancel("MarketId", new List<LimitOrder> { limitOrder, limitOrder2 });
-            Assert.False(this.service.SentParameters.ContainsKey("cancelOrders"));
         }
 
         private static string GetResult(LimitOrder limitOrder, long betId, string status, string orderStatus)

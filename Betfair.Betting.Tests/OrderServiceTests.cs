@@ -185,5 +185,19 @@
             Assert.Equal(cancelInstruction, this.exchange.SentParameters["cancelOrders"]);
             Assert.Equal(replaceInstruction, this.exchange.SentParameters["replaceOrders"]);
         }
+
+        [Theory]
+        [InlineData("1.2345")]
+        [InlineData("9.8765")]
+        [InlineData("MarketId")]
+        public async Task AllOrdersOnAMarketCanBeCancelled(string marketId)
+        {
+            this.exchange.WithReturnContent("cancelOrders", "{\"Test\":\"Test\"}");
+            var expected = $"{{\"marketId\":\"{marketId}\"}}";
+            await this.orderService.CancelAll(marketId);
+            Assert.Equal(expected, this.exchange.SentParameters["cancelOrders"]);
+            Assert.Equal("betting", this.exchange.Endpoint);
+            Assert.Equal("cancelOrders", this.exchange.BetfairMethod);
+        }
     }
 }

@@ -26,10 +26,15 @@
             await this.PlaceBelowMinimumOrders(marketId, orders, strategyRef);
         }
 
-        public async Task Cancel(string marketId, List<LimitOrder> orders)
+        public async Task Cancel(string marketId, List<string> betIds)
         {
-            if (orders.Any(o => o.OrderStatus == "EXECUTABLE"))
-                await this.exchange.SendAsync<PlaceReport>("betting", "cancelOrders", CancelParams(marketId, orders));
+            if (betIds.Any())
+                await this.exchange.SendAsync<PlaceReport>("betting", "cancelOrders", CancelParams(marketId, betIds));
+        }
+
+        public async Task CancelAll(string marketId)
+        {
+            await this.exchange.SendAsync<dynamic>("betting", "cancelOrders", $"{{\"marketId\":\"{marketId}\"}}");
         }
 
         private static IExchangeService ValidateExchangeService(IExchangeService exchange)
@@ -111,15 +116,15 @@
             return strategyRef is null ? null : $"\"customerStrategyRef\":\"{strategyRef}\",";
         }
 
-        private static string CancelParams(string marketId, IEnumerable<LimitOrder> orders)
+        private static string CancelParams(string marketId, List<string> betIds)
         {
-            return $"{{\"marketId\":\"{marketId}\",\"instructions\":[{CancelInstructions(orders)}]}}";
+            return $"{{\"marketId\":\"{marketId}\",\"instructions\":[{CancelInstructions(betIds)}]}}";
         }
 
-        private static string CancelInstructions(IEnumerable<LimitOrder> orders)
+        private static string CancelInstructions(List<string> betIds)
         {
             var cancelInstructions = string.Empty;
-            orders.Where(o => o.ToCancelInstruction() != null).ToList().ForEach(i => cancelInstructions += i.ToCancelInstruction() + ",");
+            betIds.ForEach(i => cancelInstructions += $"{{\"betId\":\"{i}\"}}" + ",");
             return cancelInstructions.Remove(cancelInstructions.Length - 1, 1);
         }
 
