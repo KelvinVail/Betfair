@@ -23,7 +23,10 @@
 
         public virtual async Task Place(IEnumerable<LimitOrder> orders, string strategyRef = null)
         {
-            await this.OrderService.Place(this.Market.MarketId, orders.ToList(), strategyRef);
+            if (orders is null) return;
+            var limitOrders = orders.ToList();
+            if (!limitOrders.Any()) return;
+            await this.OrderService.Place(this.Market.MarketId, limitOrders, strategyRef);
         }
 
         public void LinkToMarket(MarketCache marketCache)

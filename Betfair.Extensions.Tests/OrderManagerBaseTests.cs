@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Extensions.Tests
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Betfair.Betting;
@@ -58,6 +59,20 @@
         public void OrderServiceIsProtected()
         {
             Assert.True(this.orderManager.CanAccessOrderService());
+        }
+
+        [Fact]
+        public async Task DoNotPlaceOrdersIfOrderListIsEmpty()
+        {
+            await this.orderManager.Place(new List<LimitOrder>());
+            Assert.DoesNotContain("P", this.orderService.Actions, StringComparison.CurrentCulture);
+        }
+
+        [Fact]
+        public async Task DoNotPlaceOrdersIfOrderListIsNull()
+        {
+            await this.orderManager.Place(null);
+            Assert.DoesNotContain("P", this.orderService.Actions, StringComparison.CurrentCulture);
         }
     }
 }
