@@ -11,7 +11,7 @@
         {
             this.SelectionId = selectionId;
             this.Side = side;
-            this.Size = size;
+            this.Size = LowestPossibleSize(side, price, size);
             this.Price = price;
         }
 
@@ -71,6 +71,13 @@
             this.Update(report);
         }
 
+        private static double LowestPossibleSize(Side side, double price, double size)
+        {
+            if (side == Side.Back) return size;
+            var m = Math.Ceiling((0.01 / (price - 1)) * 100) / 100;
+            return m > size ? m : size;
+        }
+
         private static double NearestValidPrice(double price)
         {
             if (price <= 1.01) return 1.01;
@@ -105,10 +112,15 @@
             return m < 2 ? m : 2;
         }
 
+        private static double LowestLayPrice(double size)
+        {
+            return Math.Ceiling(((0.01 + size) / size) * 100) / 100;
+        }
+
         private double GetPrice()
         {
             var price = this.Size < MinimumStake(this.Price)
-                ? (this.Side == Side.Back ? 1000 : 1.01)
+                ? (this.Side == Side.Back ? 1000 : LowestLayPrice(this.Size))
                 : NearestValidPrice(this.Price);
             return price;
         }

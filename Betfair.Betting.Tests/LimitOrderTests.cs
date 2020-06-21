@@ -249,9 +249,7 @@
         [InlineData(1.97, 5.1, 1.97, 5.1)]
         [InlineData(1.96, 5.1, 2, 1.01)]
         [InlineData(1, 10, 1, 10)]
-        [InlineData(0.99, 10, 2, 1.01)]
         [InlineData(0.10, 100, 0.10, 100)]
-        [InlineData(0.09, 100, 2, 1.01)]
         [InlineData(0.01, 1000, 0.01, 1000)]
         public void HandleBelowMinimumStakeForLayOrders(double size, double price, double expectedSize, double expectedPrice)
         {
@@ -264,6 +262,42 @@
                               $"\"price\":\"{expectedPrice}\"," +
                               "\"persistenceType\":\"LAPSE\"}}";
             Assert.Equal(instruction, sut.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(0.01, 2.2, 2)]
+        [InlineData(0.02, 1.8, 1.5)]
+        [InlineData(0.03, 1.4, 1.34)]
+        [InlineData(0.11, 1.12, 1.1)]
+        [InlineData(0.7, 1.05, 1.02)]
+        [InlineData(1, 1.05, 1.01)]
+        [InlineData(1.01, 1.05, 1.01)]
+        public void InitialPriceUsedForVerySmallLaysShouldReturnAtLeastOnePenceProfit(double size, double price, double initialPrice)
+        {
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            var instruction = "{\"selectionId\":\"12345\"," +
+                              "\"side\":\"LAY\"," +
+                              "\"orderType\":\"LIMIT\"," +
+                              "\"limitOrder\":{" +
+                              $"\"size\":\"2\"," +
+                              $"\"price\":\"{initialPrice}\"," +
+                              "\"persistenceType\":\"LAPSE\"}}";
+            Assert.Equal(instruction, order.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(1.1, 0.05, 0.1)]
+        [InlineData(1.06, 0.08, 0.17)]
+        [InlineData(1.05, 0.1, 0.2)]
+        [InlineData(1.5, 0.01, 0.02)]
+        [InlineData(1.01, 0.01, 1)]
+        public void LayOrderPlacedAtBelowMinimumShouldBeAdjustedToReturnAtLeastOnePenceProfit(double price, double size, double expectedSize)
+        {
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            Assert.Equal(expectedSize, order.Size);
+
+            var backOrder = new LimitOrder(12345, Side.Back, price, size);
+            Assert.Equal(size, backOrder.Size);
         }
 
         [Theory]

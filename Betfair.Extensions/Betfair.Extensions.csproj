@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.1.3-alpha</Version>
+    <Version>0.1.4-alpha</Version>
     <Authors>Kelvin Vail</Authors>
     <Product>Betfair Extension</Product>
     <Description>Extensions package for interacting with the Betfair API.
