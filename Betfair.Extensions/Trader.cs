@@ -44,7 +44,10 @@
                 await this.PlaceOrdersFromEachStrategy(change, bank + market.Liability);
                 await this.UpdateOrders(change);
 
-                if (this.CheckCancellationToken(cancellationToken)) break;
+                if (!cancellationToken.IsCancellationRequested) continue;
+                await this.orderManager.OnMarketClose();
+                this.DisconnectStreamIfCancelled(cancellationToken);
+                break;
             }
         }
 
@@ -96,14 +99,6 @@
         private async Task UpdateOrders(ChangeMessage change)
         {
             await this.orderManager.OnChange(change);
-        }
-
-        private bool CheckCancellationToken(CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested)
-                this.orderManager.OnMarketClose();
-            this.DisconnectStreamIfCancelled(cancellationToken);
-            return cancellationToken.IsCancellationRequested;
         }
 
         private async Task Subscribe(string marketId)
