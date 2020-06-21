@@ -25,8 +25,8 @@
 
         public override async Task OnMarketClose()
         {
+            await Task.Delay(100);
             this.OnMarketCloseCalled = true;
-            await Task.CompletedTask;
         }
 
         public bool CanAccessOrderService()
