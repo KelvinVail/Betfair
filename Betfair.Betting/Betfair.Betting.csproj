@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.1.2-alpha</Version>
+    <Version>0.1.3-alpha</Version>
     <Authors>Kelvin Vail</Authors>
     <Product>Betfair Betting</Product>
     <Description>Package for interacting with the Betfair Betting API.
