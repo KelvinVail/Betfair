@@ -13,13 +13,15 @@
 
         private readonly SessionStub session = new SessionStub();
 
+        private readonly LoggerSpy log = new LoggerSpy();
+
         private readonly ExchangeService exchange;
 
         private bool disposedValue;
 
         public ExchangeServiceTests()
         {
-            this.exchange = new ExchangeService(this.session);
+            this.exchange = new ExchangeService(this.session, this.log);
             this.exchange.WithHandler(this.httpMessageHandler.Build());
         }
 
@@ -95,6 +97,20 @@
             this.httpMessageHandler.VerifyRequestContent(expected);
         }
 
+        [Theory]
+        [InlineData("Method", "Parameters")]
+        [InlineData("placeOrder", "{\"selectionId\":12345}")]
+        public async Task HttpRequestContentBodyIsLogged(string method, string parameters)
+        {
+            await this.exchange.SendAsync<dynamic>("endpoint", method, parameters);
+            var request = "{\"jsonrpc\":\"2.0\"," +
+                           $"\"method\":\"SportsAPING/v1.0/{method}\"," +
+                           $"\"id\":1,\"params\":{parameters}}}";
+            var expected = $"Betfair API called: {request}.";
+
+            Assert.Contains(expected, this.log.MessageList.Values);
+        }
+
         [Fact]
         public async Task HttpResponseIsDeserialized()
         {
@@ -108,11 +124,35 @@
                            result.ToJson() +
                            ",\"id\":1}";
             this.httpMessageHandler.WithReturnContent(response);
-            var local = new ExchangeService(this.session);
+            using var local = new ExchangeService(this.session, this.log);
             local.WithHandler(this.httpMessageHandler.Build());
             var actual = await local.SendAsync<ExchangeResponseStub>("endpoint", "method", "parameters");
             Assert.Equal(result.ToJson(), actual.ToJson());
-            local.Dispose();
+        }
+
+        [Theory]
+        [InlineData("This is the response string")]
+        [InlineData("A different response!")]
+        public async Task HttpResponseIsLogged(string responseString)
+        {
+            var result = new ExchangeResponseStub
+            {
+                TestString = responseString,
+                TestDouble = 1234,
+            };
+
+            var response = "{\"jsonrpc\":\"2.0\",\"result\":" +
+                           result.ToJson() +
+                           ",\"id\":1}";
+            this.httpMessageHandler.WithReturnContent(response);
+            using var local = new ExchangeService(this.session, this.log);
+            local.WithHandler(this.httpMessageHandler.Build());
+
+            var actual = await local.SendAsync<ExchangeResponseStub>("endpoint", "method", "parameters");
+
+            var expected = $"Betfair API responded: {{\"result\":{actual.ToJson()}}}.";
+
+            Assert.Equal(expected, this.log.LastMessage);
         }
 
         [Theory]
@@ -132,7 +172,7 @@
                                 "\"exceptionname\":\"APINGException\"}}," +
                                 "\"id\":1}";
             this.httpMessageHandler.WithReturnContent(errorResponse);
-            var local = new ExchangeService(this.session);
+            var local = new ExchangeService(this.session, this.log);
             local.WithHandler(this.httpMessageHandler.Build());
             var ex = await Assert.ThrowsAsync<HttpRequestException>(() => local.SendAsync<ExchangeResponseStub>("endpoint", "method", "parameters"));
             Assert.Equal(code, ex.Message);

@@ -3,20 +3,26 @@
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Net.Http;
+    using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using Betfair.Exchange.Interfaces;
     using Betfair.Identity;
+    using Microsoft.Extensions.Logging;
+    using Utf8Json;
+    using Utf8Json.Resolvers;
 
     public sealed class ExchangeService : IExchangeService, IDisposable
     {
         private readonly ISession session;
+        private readonly ILogger log;
 
         private readonly ExchangeClient client = new ExchangeClient(new Uri("https://api.betfair.com/exchange/"));
 
-        public ExchangeService(ISession session)
+        public ExchangeService(ISession session, ILogger log)
         {
             this.session = session;
+            this.log = log;
         }
 
         public ExchangeService WithHandler(HttpClientHandler handler)
@@ -27,7 +33,9 @@
 
         public async Task<T> SendAsync<T>(string endpoint, string betfairMethod, string parameters)
         {
-            var response = await this.client.SendAsync<ExchangeResponse<T>>(await this.GetRequest(endpoint, betfairMethod, parameters));
+            var request = await this.GetRequest(endpoint, betfairMethod, parameters);
+            var response = await this.client.SendAsync<ExchangeResponse<T>>(request);
+            this.LogResponse(response.ToJson());
             if (!string.IsNullOrEmpty(response.Error?.ToString())) throw new HttpRequestException(response.Error.Data.Exception.ErrorCode);
             return response.Result;
         }
@@ -49,9 +57,22 @@
             var request = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/json-rpc/v1");
             request.Headers.Add("X-Authentication", await this.session.GetTokenAsync());
             request.Headers.Add("X-Application", this.session.AppKey);
-            request.Content = new StringContent(GetBody(method, parameters));
+
+            var body = GetBody(method, parameters);
+            request.Content = new StringContent(body);
+            this.LogRequest(body);
 
             return request;
+        }
+
+        private void LogRequest(string requestString)
+        {
+            this.log.LogInformation($"Betfair API called: {requestString}.");
+        }
+
+        private void LogResponse(string responseString)
+        {
+            this.log.LogInformation($"Betfair API responded: {responseString}.");
         }
 
         [SuppressMessage(
@@ -66,6 +87,11 @@
 
             [DataMember(Name = "error", EmitDefaultValue = false)]
             public ExchangeError Error { get; set; }
+
+            public string ToJson()
+            {
+                return JsonSerializer.ToJsonString(this, StandardResolver.AllowPrivateExcludeNull);
+            }
         }
 
         [SuppressMessage(

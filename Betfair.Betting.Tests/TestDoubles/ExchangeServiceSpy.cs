@@ -3,8 +3,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Betfair.Exchange.Interfaces;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
+    using Newtonsoft.Json;
 
     public class ExchangeServiceSpy : IExchangeService
     {
@@ -27,7 +26,7 @@
             this.Endpoint = endpoint;
             this.BetfairMethod = betfairMethod;
             this.SentParameters.Add(betfairMethod, parameters);
-            return await Task.FromResult(this.ReturnContent.ContainsKey(betfairMethod) ? JsonSerializer.Deserialize<T>(this.ReturnContent[betfairMethod], StandardResolver.AllowPrivateExcludeNull) : default);
+            return await Task.FromResult(this.ReturnContent.ContainsKey(betfairMethod) ? JsonConvert.DeserializeObject<T>(this.ReturnContent[betfairMethod]) : default);
         }
     }
 }
