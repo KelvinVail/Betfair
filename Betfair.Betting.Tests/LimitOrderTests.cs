@@ -407,6 +407,15 @@
             Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
         }
 
+        [Fact]
+        public async Task AddReportShouldHandleNullReport()
+        {
+            var limitOrder = new LimitOrder(123, Side.Lay, 2.5, 9.99);
+            var instruction = GetResult(new LimitOrder(987, Side.Back, 5.5, 11.99), 1, "SUCCESS", "SUCCESS");
+            this.SetPlaceReturnContent(instruction);
+            await this.orderService.Place("MarketId", new List<LimitOrder> { limitOrder });
+        }
+
         private static string GetResult(LimitOrder limitOrder, long betId, string status, string orderStatus)
         {
             return "{" +
