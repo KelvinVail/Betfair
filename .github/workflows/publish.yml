@@ -20,12 +20,12 @@ jobs:
     - name: Test
       run: dotnet test
       # Publish Identity
-    - name: publish Betfair.Identity on version change
-      uses: brandedoutcast/publish-nuget@v2.5.3
-      with:
-        PROJECT_FILE_PATH: Betfair.Identity/Betfair.Identity.csproj
-        TAG_COMMIT: false
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+  #  - name: publish Betfair.Identity on version change
+  #    uses: brandedoutcast/publish-nuget@v2.5.3
+  #    with:
+  #      PROJECT_FILE_PATH: Betfair.Identity/Betfair.Identity.csproj
+  #      TAG_COMMIT: false
+  #      NUGET_KEY: ${{secrets.NUGET_API_KEY}}
       # Publish Core
     - name: publish Betfair.Core on version change
       uses: brandedoutcast/publish-nuget@v2.5.3
