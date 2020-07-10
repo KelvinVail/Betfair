@@ -21,9 +21,9 @@
         {
             ValidateMarketId(marketId);
             ValidateStrategyRef(strategyRef);
-            ValidateOrders(orders);
-            await this.PlaceOrders(marketId, orders, strategyRef);
-            await this.PlaceBelowMinimumOrders(marketId, orders, strategyRef);
+            var validOrders = ValidateOrders(orders);
+            await this.PlaceOrders(marketId, validOrders, strategyRef);
+            await this.PlaceBelowMinimumOrders(marketId, validOrders, strategyRef);
         }
 
         public async Task Cancel(string marketId, List<string> betIds)
@@ -57,9 +57,10 @@
                 throw new ArgumentOutOfRangeException(nameof(strategyRef), $"{strategyRef} must be less than 15 characters.");
         }
 
-        private static void ValidateOrders(List<LimitOrder> orders)
+        private static List<LimitOrder> ValidateOrders(List<LimitOrder> orders)
         {
             if (!orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
+            return orders.Where(o => o.Size > 0).ToList();
         }
 
         private static string Instructions(List<LimitOrder> orders)

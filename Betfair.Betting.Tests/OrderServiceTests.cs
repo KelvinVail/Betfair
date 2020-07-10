@@ -199,5 +199,21 @@
             Assert.Equal("betting", this.exchange.Endpoint);
             Assert.Equal("cancelOrders", this.exchange.BetfairMethod);
         }
+
+        [Fact]
+        public async Task DoNotPlaceOrdersOfZeroSize()
+        {
+            var validOrder = new LimitOrder(1, Side.Lay, 2.5, 9.99);
+            var orders = new List<LimitOrder>
+            {
+                validOrder,
+                new LimitOrder(2, Side.Back, 2.5, 0),
+            };
+
+            await this.orderService.Place("1.2345", orders);
+
+            var expected = $"{{\"marketId\":\"1.2345\",\"instructions\":[{validOrder.ToInstruction()}]}}";
+            Assert.Equal(expected, this.exchange.SentParameters["placeOrders"]);
+        }
     }
 }
