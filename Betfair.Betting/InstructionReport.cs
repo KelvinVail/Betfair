@@ -23,6 +23,9 @@
         [DataMember(Name = "status", EmitDefaultValue = false)]
         internal string Status { get; set; }
 
+        [DataMember(Name = "errorCode", EmitDefaultValue = false)]
+        internal string ErrorCode { get; set; }
+
         [DataMember(Name = "betId", EmitDefaultValue = false)]
         internal string BetId { get; set; }
 

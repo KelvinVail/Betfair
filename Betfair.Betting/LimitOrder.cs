@@ -33,6 +33,8 @@
 
         public string OrderStatus { get; private set; }
 
+        public string ErrorCode { get; private set; }
+
         public DateTime PlacedDate { get; private set; }
 
         public bool BelowMinimumStake => this.Size < MinimumStake(this.Price);
@@ -141,6 +143,7 @@
             this.Status = report.Status;
             this.OrderStatus = report.OrderStatus;
             this.PlacedDate = report.PlacedDate;
+            this.ErrorCode = report.ErrorCode;
         }
     }
 }

@@ -392,6 +392,18 @@
             Assert.Equal("6", order3.BetId);
         }
 
+        [Fact]
+        public async Task ErrorCodeShouldBeSet()
+        {
+            var order = new LimitOrder(12345, Side.Back, 1.01, 0.5);
+            var limitOrders = new List<LimitOrder>
+            {
+                order,
+            };
+            await this.SetResults(limitOrders, "FAILURE");
+            Assert.Equal("TEST_ERROR", order.ErrorCode);
+        }
+
         [Theory]
         [InlineData(12345, Side.Back, 2, 1.01)]
         [InlineData(11111, Side.Lay, 2, 2)]
@@ -434,6 +446,7 @@
                    $"\"averagePriceMatched\":{limitOrder.Price}," +
                    $"\"sizeMatched\":{limitOrder.Size}," +
                    $"\"orderStatus\":\"{orderStatus}\"," +
+                   $"\"errorCode\":\"TEST_ERROR\"," +
                    $"\"status\":\"{status}\"" +
                    "}";
         }
