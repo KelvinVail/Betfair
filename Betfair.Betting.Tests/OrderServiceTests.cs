@@ -215,5 +215,22 @@
             var expected = $"{{\"marketId\":\"1.2345\",\"instructions\":[{validOrder.ToInstruction()}]}}";
             Assert.Equal(expected, this.exchange.SentParameters["placeOrders"]);
         }
+
+        [Fact]
+        public async Task DoNotPlaceOrdersBelowTheAbsoluteMinimum()
+        {
+            var validOrder = new LimitOrder(1, Side.Lay, 2.5, 9.99);
+            var invalidOrder = new LimitOrder(1, Side.Lay, 2, 0.01);
+            var orders = new List<LimitOrder>
+            {
+                validOrder,
+                invalidOrder,
+            };
+
+            await this.orderService.Place("1.2345", orders);
+
+            var expected = $"{{\"marketId\":\"1.2345\",\"instructions\":[{validOrder.ToInstruction()}]}}";
+            Assert.Equal(expected, this.exchange.SentParameters["placeOrders"]);
+        }
     }
 }

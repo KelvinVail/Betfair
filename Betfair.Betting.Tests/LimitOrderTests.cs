@@ -191,7 +191,7 @@
         [InlineData(12345, Side.Back, 1.99, 1.01)]
         [InlineData(98765, Side.Lay, 10.99, 1000)]
         [InlineData(2147483648, Side.Back, 7.24, 3.5)]
-        [InlineData(12345, Side.Lay, 1.99, 1.01)]
+        [InlineData(12345, Side.Lay, 1.99, 3)]
         public async Task ToCancelInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
         {
             var sut = new LimitOrder(selectionId, side, price, size);
@@ -204,7 +204,7 @@
         [InlineData(12345, Side.Back, 1.99, 1.01)]
         [InlineData(98765, Side.Lay, 10.99, 1000)]
         [InlineData(2147483648, Side.Back, 7.24, 3.5)]
-        [InlineData(12345, Side.Lay, 1.99, 1.01)]
+        [InlineData(12345, Side.Lay, 1.99, 3)]
         public async Task ToCancelInstructionShouldReturnNullIfOrderIsComplete(long selectionId, Side side, double size, double price)
         {
             var sut = new LimitOrder(selectionId, side, price, size);
@@ -240,7 +240,7 @@
         }
 
         [Theory]
-        [InlineData(1.99, 1.01, 2, 1.02)]
+        [InlineData(1.99, 1.02, 2, 1.02)]
         [InlineData(2, 1.01, 2, 1.01)]
         [InlineData(1.50, 2.2, 2, 1.02)]
         [InlineData(2, 2.2, 2, 2.2)]
@@ -265,13 +265,14 @@
         }
 
         [Theory]
-        [InlineData(0.01, 2.2, 2)]
-        [InlineData(0.02, 1.8, 1.5)]
-        [InlineData(0.03, 1.4, 1.34)]
-        [InlineData(0.11, 1.12, 1.1)]
-        [InlineData(0.7, 1.05, 1.03)] // Calculates to 1.02, but in reality keeps failing on live exchange.
+        [InlineData(0.01, 3.2, 3)]
+        [InlineData(0.02, 2.8, 2)]
+        [InlineData(0.03, 1.7, 1.67)]
+        [InlineData(0.11, 1.2, 1.19)]
+        [InlineData(0.7, 1.05, 1.03)]
         [InlineData(1, 1.05, 1.02)]
         [InlineData(1.01, 1.05, 1.02)]
+        [InlineData(1.99, 3, 1.02)]
         public void InitialPriceUsedForVerySmallLaysShouldReturnAtLeastOnePenceProfit(double size, double price, double initialPrice)
         {
             var order = new LimitOrder(12345, Side.Lay, price, size);
@@ -283,6 +284,21 @@
                               $"\"price\":\"{initialPrice}\"," +
                               "\"persistenceType\":\"LAPSE\"}}";
             Assert.Equal(instruction, order.ToInstruction());
+        }
+
+        [Theory]
+        [InlineData(0.01, 2.2)]
+        [InlineData(0.02, 1.8)]
+        [InlineData(0.03, 1.5)]
+        [InlineData(0.11, 1.15)]
+        [InlineData(0.7, 1.02)]
+        [InlineData(1, 1.01)]
+        [InlineData(1.01, 1.01)]
+        [InlineData(1.99, 1.01)]
+        public void ReturnNullIfOrderIsBelowAbsoluteMinimum(double size, double price)
+        {
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            Assert.Null(order.ToInstruction());
         }
 
         [Theory]
@@ -390,18 +406,6 @@
             Assert.Equal("4", order1.BetId);
             Assert.Equal("5", order2.BetId);
             Assert.Equal("6", order3.BetId);
-        }
-
-        [Fact]
-        public async Task ErrorCodeShouldBeSet()
-        {
-            var order = new LimitOrder(12345, Side.Back, 1.01, 0.5);
-            var limitOrders = new List<LimitOrder>
-            {
-                order,
-            };
-            await this.SetResults(limitOrders, "FAILURE");
-            Assert.Equal("TEST_ERROR", order.ErrorCode);
         }
 
         [Theory]

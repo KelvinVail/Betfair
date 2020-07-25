@@ -60,7 +60,7 @@
         private static List<LimitOrder> ValidateOrders(List<LimitOrder> orders)
         {
             if (!orders.Any()) throw new InvalidOperationException("Does not contain any orders.");
-            return orders.Where(o => o.Size > 0).ToList();
+            return orders.Where(o => o.Size > 0 && o.ToInstruction() != null).ToList();
         }
 
         private static string Instructions(List<LimitOrder> orders)

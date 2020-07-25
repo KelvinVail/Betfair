@@ -41,7 +41,8 @@
 
         public string ToInstruction()
         {
-            return $"{{\"selectionId\":\"{this.SelectionId}\"," +
+            return this.BelowAbsoluteMinimum() ? null :
+                   $"{{\"selectionId\":\"{this.SelectionId}\"," +
                    $"\"side\":\"{this.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
                    "\"orderType\":\"LIMIT\"," +
                    "\"limitOrder\":{" +
@@ -116,8 +117,7 @@
 
         private static double LowestLayPrice(double size)
         {
-            var price = Math.Ceiling(((0.01 + size) / size) * 100) / 100;
-            return price <= 1.02 ? price + 0.01 : price;
+            return Math.Ceiling(((0.02 + size) / size) * 100) / 100;
         }
 
         private double GetPrice()
@@ -132,6 +132,11 @@
         {
             var size = this.Size < MinimumStake(this.Price) ? 2 : Math.Round(this.Size, 2);
             return size;
+        }
+
+        private bool BelowAbsoluteMinimum()
+        {
+            return LowestLayPrice(this.Size) > this.Price && this.Side == Side.Lay;
         }
 
         private void Update(InstructionReport report)
