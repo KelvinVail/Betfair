@@ -14,7 +14,7 @@
         {
             var uo = ValidateOrder(unmatchedOrder);
             this.AddOrderToCache(uo);
-            this.RemovedOrderIfComplete(uo);
+            this.RemoveOrderIfComplete(uo);
         }
 
         public IList<UnmatchedOrder> ToList()
@@ -38,7 +38,7 @@
             this.unmatchedOrders[uo.BetId] = uo;
         }
 
-        private void RemovedOrderIfComplete(UnmatchedOrder uo)
+        private void RemoveOrderIfComplete(UnmatchedOrder uo)
         {
             if (uo.OrderStatus == "EC")
                 this.unmatchedOrders.Remove(uo.BetId);
