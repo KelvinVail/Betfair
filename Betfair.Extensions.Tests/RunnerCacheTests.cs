@@ -422,8 +422,8 @@
         public void CalculateUnmatchedLiabilityForBacks(double price, double size)
         {
             var orc = new OrderRunnerChangeStub()
-                .WithUnmatchedBack(price, size)
-                .WithUnmatchedBack(1.01, 10.99);
+                .WithUnmatchedBack(price, size, "2")
+                .WithUnmatchedBack(1.01, 10.99, "3");
             this.runner.OnOrderChange(orc);
             Assert.Equal(Math.Round(size + 10.99, 2), this.runner.UnmatchedLiability);
         }
@@ -434,8 +434,8 @@
         public void CalculateUnmatchedLiabilityForLays(double price, double size)
         {
             var orc = new OrderRunnerChangeStub()
-                .WithUnmatchedLay(price, size)
-                .WithUnmatchedLay(1.01, 10.99);
+                .WithUnmatchedLay(price, size, "2")
+                .WithUnmatchedLay(1.01, 10.99, "3");
             this.runner.OnOrderChange(orc);
 
             var expected = Math.Round((price * size) - size, 2);
@@ -494,16 +494,17 @@
         [InlineData("ABC", 12345, 2.5, 10.99)]
         [InlineData("123", 999, 1.01, 1.99)]
         [InlineData("XYZ", 024843, 1000, 0.01)]
-        public void UnmatchedOrdersAreCleared(string betId, long? placedDate, double? price, double? sizeRemaining)
+        public void UnmatchedOrdersAreClearedIfComplete(string betId, long? placedDate, double? price, double? sizeRemaining)
         {
             var orc = new OrderRunnerChangeStub()
                 .WithUnmatchedBack(price, sizeRemaining + 10, betId, placedDate);
             this.runner.OnOrderChange(orc);
 
-            var orc2 = new OrderRunnerChangeStub();
+            var orc2 = new OrderRunnerChangeStub()
+                .WithUnmatchedBack(price, sizeRemaining + 10, betId, placedDate, "EC");
             this.runner.OnOrderChange(orc2);
 
-            Assert.Null(this.runner.UnmatchedOrders);
+            Assert.Empty(this.runner.UnmatchedOrders);
         }
 
         private void AssertBestAvailableToBackContains(

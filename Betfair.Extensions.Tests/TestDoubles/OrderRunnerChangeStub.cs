@@ -41,7 +41,7 @@
         }
 
         public OrderRunnerChangeStub WithUnmatchedBack(
-            double? price, double? size, string betId = "1", long? placedDate = 0)
+            double? price, double? size, string betId = "1", long? placedDate = 0, string orderStatus = "E")
         {
             this.UnmatchedOrders ??= new List<UnmatchedOrder>();
             var uo = new UnmatchedOrder
@@ -51,6 +51,7 @@
                 Price = price,
                 SizeRemaining = size,
                 PlacedDate = placedDate,
+                OrderStatus = orderStatus,
             };
             this.UnmatchedOrders.Add(uo);
             return this;

@@ -11,6 +11,8 @@
 
         private readonly PriceSizeLadder matchedLays = new PriceSizeLadder();
 
+        private readonly UnmatchedOrders unmatchedOrders = new UnmatchedOrders();
+
         public RunnerCache(long selectionId)
         {
             this.SelectionId = selectionId;
@@ -44,7 +46,7 @@
 
         public double UnmatchedLiability { get; private set; }
 
-        public List<UnmatchedOrder> UnmatchedOrders { get; private set; }
+        public IList<UnmatchedOrder> UnmatchedOrders => this.unmatchedOrders.ToList();
 
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
@@ -65,8 +67,8 @@
             this.matchedBacks.Update(orc.MatchedBacks, 0);
             this.matchedLays.Update(orc.MatchedLays, 0);
             this.UnmatchedLiability = 0;
-            orc.UnmatchedOrders?.ForEach(this.UpdateUnmatchedLiability);
-            this.UnmatchedOrders = orc.UnmatchedOrders;
+            orc.UnmatchedOrders?.ForEach(o => this.unmatchedOrders.Update(o));
+            this.UnmatchedOrders?.ToList().ForEach(this.UpdateUnmatchedLiability);
         }
 
         public void SetDefinition(RunnerDefinition definition)
