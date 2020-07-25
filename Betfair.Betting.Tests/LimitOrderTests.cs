@@ -432,6 +432,16 @@
             await this.orderService.Place("MarketId", new List<LimitOrder> { limitOrder });
         }
 
+        [Fact]
+        public async Task ErrorCodeShouldBeRecordedIfOrderFails()
+        {
+            var order = new LimitOrder(12345, Side.Back, 2, 9.99);
+            var limitOrders = new List<LimitOrder> { order };
+            await this.SetResults(limitOrders, "FAILURE");
+
+            Assert.Equal("TEST_ERROR", order.ErrorCode);
+        }
+
         private static string GetResult(LimitOrder limitOrder, long betId, string status, string orderStatus)
         {
             return "{" +

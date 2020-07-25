@@ -410,9 +410,9 @@
         public void HandleNullUnmatchedBackSize()
         {
             var orc = new OrderRunnerChangeStub()
-                .WithUnmatchedBack(null, 10.99)
-                .WithUnmatchedBack(1.01, null)
-                .WithUnmatchedBack(null, null);
+                .WithUnmatchedBack(null, 10.99, "2")
+                .WithUnmatchedBack(1.01, null, "3")
+                .WithUnmatchedBack(null, null, "4");
             this.runner.OnOrderChange(orc);
         }
 

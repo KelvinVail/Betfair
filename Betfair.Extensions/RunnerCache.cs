@@ -68,7 +68,7 @@
             this.matchedLays.Update(orc.MatchedLays, 0);
             this.UnmatchedLiability = 0;
             orc.UnmatchedOrders?.ForEach(o => this.unmatchedOrders.Update(o));
-            this.UnmatchedOrders?.ToList().ForEach(this.UpdateUnmatchedLiability);
+            this.UnmatchedOrders.ToList().ForEach(this.UpdateUnmatchedLiability);
         }
 
         public void SetDefinition(RunnerDefinition definition)
