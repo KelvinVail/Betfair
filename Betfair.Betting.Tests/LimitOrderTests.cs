@@ -240,14 +240,14 @@
         }
 
         [Theory]
-        [InlineData(1.99, 1.01, 2, 1.01)]
+        [InlineData(1.99, 1.01, 2, 1.02)]
         [InlineData(2, 1.01, 2, 1.01)]
-        [InlineData(1.50, 2.2, 2, 1.01)]
+        [InlineData(1.50, 2.2, 2, 1.02)]
         [InlineData(2, 2.2, 2, 2.2)]
-        [InlineData(1.99, 5, 2, 1.01)]
+        [InlineData(1.99, 5, 2, 1.02)]
         [InlineData(2, 5, 2, 5)]
         [InlineData(1.97, 5.1, 1.97, 5.1)]
-        [InlineData(1.96, 5.1, 2, 1.01)]
+        [InlineData(1.96, 5.1, 2, 1.02)]
         [InlineData(1, 10, 1, 10)]
         [InlineData(0.10, 100, 0.10, 100)]
         [InlineData(0.01, 1000, 0.01, 1000)]
@@ -269,9 +269,9 @@
         [InlineData(0.02, 1.8, 1.5)]
         [InlineData(0.03, 1.4, 1.34)]
         [InlineData(0.11, 1.12, 1.1)]
-        [InlineData(0.7, 1.05, 1.02)]
-        [InlineData(1, 1.05, 1.01)]
-        [InlineData(1.01, 1.05, 1.01)]
+        [InlineData(0.7, 1.05, 1.03)] // Calculates to 1.02, but in reality keeps failing on live exchange.
+        [InlineData(1, 1.05, 1.02)]
+        [InlineData(1.01, 1.05, 1.02)]
         public void InitialPriceUsedForVerySmallLaysShouldReturnAtLeastOnePenceProfit(double size, double price, double initialPrice)
         {
             var order = new LimitOrder(12345, Side.Lay, price, size);

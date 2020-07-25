@@ -114,7 +114,8 @@
 
         private static double LowestLayPrice(double size)
         {
-            return Math.Ceiling(((0.01 + size) / size) * 100) / 100;
+            var price = Math.Ceiling(((0.01 + size) / size) * 100) / 100;
+            return price <= 1.02 ? price + 0.01 : price;
         }
 
         private double GetPrice()
