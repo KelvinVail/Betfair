@@ -42,12 +42,12 @@
         public string ToInstruction()
         {
             return this.BelowAbsoluteMinimum() ? null :
-                   $"{{\"selectionId\":\"{this.SelectionId}\"," +
+                   $"{{\"selectionId\":{this.SelectionId}," +
                    $"\"side\":\"{this.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
                    "\"orderType\":\"LIMIT\"," +
                    "\"limitOrder\":{" +
-                   $"\"size\":\"{this.GetSize()}\"," +
-                   $"\"price\":\"{this.GetPrice()}\"," +
+                   $"\"size\":{this.GetSize()}," +
+                   $"\"price\":{this.GetPrice()}," +
                    "\"persistenceType\":\"LAPSE\"}}";
         }
 

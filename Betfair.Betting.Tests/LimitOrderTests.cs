@@ -6,6 +6,8 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Betfair.Betting.Tests.TestDoubles;
+    using Betfair.Betting.Tests.TestDoubles.Requests;
+    using Betfair.Betting.Tests.TestDoubles.Responses;
     using Xunit;
 
     public class LimitOrderTests
@@ -24,8 +26,9 @@
         [InlineData(2147483648)]
         public void SelectionIdIsSetInConstructor(long selectionId)
         {
-            var sut = new LimitOrder(selectionId, Side.Back, 1.01, 1);
-            Assert.Equal(selectionId, sut.SelectionId);
+            var order = new LimitOrder(selectionId, Side.Back, 1.01, 1);
+
+            Assert.Equal(selectionId, order.SelectionId);
         }
 
         [Theory]
@@ -33,8 +36,9 @@
         [InlineData(Side.Lay)]
         public void SideCanBeSetInConstructor(Side side)
         {
-            var sut = new LimitOrder(1, side, 1.01, 1);
-            Assert.Equal(side, sut.Side);
+            var order = new LimitOrder(1, side, 1.01, 1);
+
+            Assert.Equal(side, order.Side);
         }
 
         [Theory]
@@ -43,8 +47,9 @@
         [InlineData(3.3333333)]
         public void SizeCanBeSetInConstructor(double size)
         {
-            var sut = new LimitOrder(1, Side.Back, 1.01, size);
-            Assert.Equal(size, sut.Size);
+            var order = new LimitOrder(1, Side.Back, 1.01, size);
+
+            Assert.Equal(size, order.Size);
         }
 
         [Theory]
@@ -53,8 +58,9 @@
         [InlineData(3.4567)]
         public void PriceCanBeSetInConstructor(double price)
         {
-            var sut = new LimitOrder(1, Side.Back, price, 1);
-            Assert.Equal(price, sut.Price);
+            var order = new LimitOrder(1, Side.Back, price, 1);
+
+            Assert.Equal(price, order.Price);
         }
 
         [Theory]
@@ -64,15 +70,10 @@
         [InlineData(12345, Side.Lay, 2.99, 1.01)]
         public void ToInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
         {
-            var sut = new LimitOrder(selectionId, side, price, size);
-            var expected = $"{{\"selectionId\":\"{selectionId}\"," +
-                           $"\"side\":\"{side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
-                           "\"orderType\":\"LIMIT\"," +
-                           "\"limitOrder\":{" +
-                           $"\"size\":\"{size}\"," +
-                           $"\"price\":\"{price}\"," +
-                           "\"persistenceType\":\"LAPSE\"}}";
-            Assert.Equal(expected, sut.ToInstruction());
+            var order = new LimitOrderBuilder(selectionId, side, price, size);
+            var expected = order.ExpectedInstructionJson();
+
+            Assert.Equal(expected, order.Object.ToInstruction());
         }
 
         [Theory]
@@ -82,15 +83,10 @@
         [InlineData(10.6666, 10.67)]
         public void ToInstructionRoundsSizeToTwoDecimalsPlaces(double size, double rounded)
         {
-            var sut = new LimitOrder(1, Side.Back, 1.01, size);
-            var expected = "{\"selectionId\":\"1\"," +
-                           "\"side\":\"BACK\"," +
-                           "\"orderType\":\"LIMIT\"," +
-                           "\"limitOrder\":{" +
-                           $"\"size\":\"{rounded}\"," +
-                           "\"price\":\"1.01\"," +
-                           "\"persistenceType\":\"LAPSE\"}}";
-            Assert.Equal(expected, sut.ToInstruction());
+            var order = new LimitOrder(1, Side.Back, 1.01, size);
+            var expected = new LimitOrderBuilder(1, Side.Back, 1.01, rounded).ExpectedInstructionJson();
+
+            Assert.Equal(expected, order.ToInstruction());
         }
 
         [Theory]
@@ -121,17 +117,12 @@
         [InlineData(1000.1, 1000)]
         [InlineData(1000.00001, 1000)]
         [InlineData(9999, 1000)]
-        public void PriceIsRoundedToNearestValidPrice(double price, double expected)
+        public void PriceIsRoundedToNearestValidPrice(double price, double expectedPrice)
         {
-            var sut = new LimitOrder(1, Side.Back, price, 2);
-            var instruction = "{\"selectionId\":\"1\"," +
-                              "\"side\":\"BACK\"," +
-                              "\"orderType\":\"LIMIT\"," +
-                              "\"limitOrder\":{" +
-                              "\"size\":\"2\"," +
-                              $"\"price\":\"{expected}\"," +
-                              "\"persistenceType\":\"LAPSE\"}}";
-            Assert.Equal(instruction, sut.ToInstruction());
+            var order = new LimitOrder(1, Side.Back, price, 2);
+            var expected = new LimitOrderBuilder(1, Side.Back, expectedPrice, 2).ExpectedInstructionJson();
+
+            Assert.Equal(expected, order.ToInstruction());
         }
 
         [Theory]
@@ -139,29 +130,39 @@
         [InlineData(9.99, 1000, "FAILURE")]
         public async Task ResultsAreSet(double size, double price, string status)
         {
-            var sut = new LimitOrder(12345, Side.Back, price, size);
-            var limitOrders = new List<LimitOrder>
-            {
-                new LimitOrder(98765, Side.Lay, -1, -1),
-                sut,
-            };
-            await this.SetResults(limitOrders, status);
-            Assert.NotEqual("1", sut.BetId);
-            Assert.Equal("2", sut.BetId);
-            Assert.Equal(size, sut.SizeMatched);
-            Assert.Equal(price, sut.AveragePriceMatched);
-            Assert.Equal(status, sut.Status);
-            Assert.Equal("EXECUTION_COMPLETE", sut.OrderStatus);
-            Assert.Equal(DateTime.Parse("2013-10-30T14:22:47.000Z", new DateTimeFormatInfo()), sut.PlacedDate);
+            var orders = new PlaceExecutionReportStub("MarketId", "SUCCESS");
+            orders.AddReport(new LimitOrderBuilder(98765, Side.Lay, -1, -1), "1", "SUCCESS", "EXECUTION_COMPLETE");
+
+            var order = new LimitOrderBuilder(12345, Side.Back, price, size);
+            orders.AddReport(order, "2", status, "EXECUTION_COMPLETE");
+
+            orders.SetReturnContent(this.service);
+
+            await this.orderService.Place("MarketId", orders.LimitOrders);
+
+            Assert.NotEqual("1", order.Object.BetId);
+            Assert.Equal("2", order.Object.BetId);
+            Assert.Equal(size, order.Object.SizeMatched);
+            Assert.Equal(price, order.Object.AveragePriceMatched);
+            Assert.Equal(status, order.Object.Status);
+            Assert.Equal("EXECUTION_COMPLETE", order.Object.OrderStatus);
+            Assert.Equal(DateTime.Parse("2013-10-30T14:22:47.000Z", new DateTimeFormatInfo()), order.Object.PlacedDate);
         }
 
         [Fact]
         public async Task SetResultsShouldHandleMissingReport()
         {
-            var sut = new LimitOrder(12345, Side.Back, 1.01, 2.00);
-            var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 1.01, 2.00) };
-            await this.SetResults(limitOrders, "SUCCESS");
-            Assert.Equal(0, sut.SizeMatched);
+            var orders = new PlaceExecutionReportStub("MarketId", "SUCCESS");
+            orders.AddReport(new LimitOrderBuilder(98765, Side.Lay, 1.01, 2.00), "1", "SUCCESS", "EXECUTION_COMPLETE");
+
+            var order = new LimitOrderBuilder(12345, Side.Back, 1.01, 2.00);
+            orders.AddNullReport(order);
+
+            orders.SetReturnContent(this.service);
+
+            await this.orderService.Place("MarketId", orders.LimitOrders);
+
+            Assert.Equal(0, order.Object.SizeMatched);
         }
 
         [Fact]
@@ -176,15 +177,15 @@
         [InlineData(9.99)]
         public async Task SetResultsShouldUseCorrectResult(double size)
         {
-            var sut = new LimitOrder(12345, Side.Back, 1.01, size);
-            var limitOrders = new List<LimitOrder>
+            var order = new LimitOrderBuilder(12345, Side.Back, 1.01, size);
+            var limitOrders = new List<LimitOrderBuilder>
             {
-                new LimitOrder(98765, Side.Lay, -1, -1),
-                new LimitOrder(12345, Side.Lay, -1, -1),
-                sut,
+                new LimitOrderBuilder(98765, Side.Lay, -1, -1),
+                new LimitOrderBuilder(12345, Side.Lay, -1, -1),
+                order,
             };
             await this.SetResults(limitOrders, "SUCCESS");
-            Assert.Equal(size, sut.SizeMatched);
+            Assert.Equal(size, order.Object.SizeMatched);
         }
 
         [Theory]
@@ -194,10 +195,10 @@
         [InlineData(12345, Side.Lay, 1.99, 3)]
         public async Task ToCancelInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
         {
-            var sut = new LimitOrder(selectionId, side, price, size);
-            await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS", "EXECUTABLE");
-            var expected = $"{{\"betId\":\"{sut.BetId}\"}}";
-            Assert.Equal(expected, sut.ToCancelInstruction());
+            var order = new LimitOrderBuilder(selectionId, side, price, size);
+            await this.SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS", "EXECUTABLE");
+            var expected = $"{{\"betId\":\"{order.Object.BetId}\"}}";
+            Assert.Equal(expected, order.Object.ToCancelInstruction());
         }
 
         [Theory]
@@ -207,9 +208,9 @@
         [InlineData(12345, Side.Lay, 1.99, 3)]
         public async Task ToCancelInstructionShouldReturnNullIfOrderIsComplete(long selectionId, Side side, double size, double price)
         {
-            var sut = new LimitOrder(selectionId, side, price, size);
-            await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS");
-            Assert.Null(sut.ToCancelInstruction());
+            var order = new LimitOrderBuilder(selectionId, side, price, size);
+            await this.SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS");
+            Assert.Null(order.Object.ToCancelInstruction());
         }
 
         [Theory]
@@ -228,15 +229,9 @@
         [InlineData(0.01, 1000, 0.01, 1000)]
         public void HandleBelowMinimumStakeForBackOrders(double size, double price, double expectedSize, double expectedPrice)
         {
-            var sut = new LimitOrder(12345, Side.Back, price, size);
-            var instruction = "{\"selectionId\":\"12345\"," +
-                              "\"side\":\"BACK\"," +
-                              "\"orderType\":\"LIMIT\"," +
-                              "\"limitOrder\":{" +
-                              $"\"size\":\"{expectedSize}\"," +
-                              $"\"price\":\"{expectedPrice}\"," +
-                              "\"persistenceType\":\"LAPSE\"}}";
-            Assert.Equal(instruction, sut.ToInstruction());
+            var order = new LimitOrder(12345, Side.Back, price, size);
+            var expected = new LimitOrderBuilder(12345, Side.Back, expectedPrice, expectedSize).ExpectedInstructionJson();
+            Assert.Equal(expected, order.ToInstruction());
         }
 
         [Theory]
@@ -253,15 +248,9 @@
         [InlineData(0.01, 1000, 0.01, 1000)]
         public void HandleBelowMinimumStakeForLayOrders(double size, double price, double expectedSize, double expectedPrice)
         {
-            var sut = new LimitOrder(12345, Side.Lay, price, size);
-            var instruction = "{\"selectionId\":\"12345\"," +
-                              "\"side\":\"LAY\"," +
-                              "\"orderType\":\"LIMIT\"," +
-                              "\"limitOrder\":{" +
-                              $"\"size\":\"{expectedSize}\"," +
-                              $"\"price\":\"{expectedPrice}\"," +
-                              "\"persistenceType\":\"LAPSE\"}}";
-            Assert.Equal(instruction, sut.ToInstruction());
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            var expected = new LimitOrderBuilder(12345, Side.Lay, expectedPrice, expectedSize).ExpectedInstructionJson();
+            Assert.Equal(expected, order.ToInstruction());
         }
 
         [Theory]
@@ -276,14 +265,8 @@
         public void InitialPriceUsedForVerySmallLaysShouldReturnAtLeastOnePenceProfit(double size, double price, double initialPrice)
         {
             var order = new LimitOrder(12345, Side.Lay, price, size);
-            var instruction = "{\"selectionId\":\"12345\"," +
-                              "\"side\":\"LAY\"," +
-                              "\"orderType\":\"LIMIT\"," +
-                              "\"limitOrder\":{" +
-                              $"\"size\":\"2\"," +
-                              $"\"price\":\"{initialPrice}\"," +
-                              "\"persistenceType\":\"LAPSE\"}}";
-            Assert.Equal(instruction, order.ToInstruction());
+            var expected = new LimitOrderBuilder(12345, Side.Lay, initialPrice, 2).ExpectedInstructionJson();
+            Assert.Equal(expected, order.ToInstruction());
         }
 
         [Theory]
@@ -333,8 +316,8 @@
         [InlineData(0.01, 1000, false)]
         public void BelowMinimumStakeFlagIsSet(double size, double price, bool expected)
         {
-            var sut = new LimitOrder(12345, Side.Lay, price, size);
-            Assert.Equal(expected, sut.BelowMinimumStake);
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            Assert.Equal(expected, order.BelowMinimumStake);
         }
 
         [Theory]
@@ -349,9 +332,9 @@
         [InlineData(0.01, 7.2, 1.99)]
         public void IfBelowMinimumStakeThenToBelowMinimumCancelInstructionShouldBeSet(double size, double price, double reduction)
         {
-            var sut = new LimitOrder(12345, Side.Lay, price, size);
-            var expected = $"{{\"betId\":\"{sut.BetId}\",\"sizeReduction\":{reduction}}}";
-            Assert.Equal(expected, sut.ToBelowMinimumCancelInstruction());
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            var expected = $"{{\"betId\":\"{order.BetId}\",\"sizeReduction\":{reduction}}}";
+            Assert.Equal(expected, order.ToBelowMinimumCancelInstruction());
         }
 
         [Theory]
@@ -362,9 +345,9 @@
         [InlineData(0.1, 100)]
         public void IfAboveMinimumStakeToBelowMinimumInstructionsShouldBeNull(double size, double price)
         {
-            var sut = new LimitOrder(12345, Side.Lay, price, size);
-            Assert.Null(sut.ToBelowMinimumCancelInstruction());
-            Assert.Null(sut.ToBelowMinimumReplaceInstruction());
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            Assert.Null(order.ToBelowMinimumCancelInstruction());
+            Assert.Null(order.ToBelowMinimumReplaceInstruction());
         }
 
         [Theory]
@@ -377,35 +360,35 @@
         [InlineData(0.01, 2)]
         public void IfBelowMinimumStakeThenToBelowMinimumReplaceInstructionShouldBeSet(double size, double price)
         {
-            var sut = new LimitOrder(12345, Side.Lay, price, size);
-            var expected = $"{{\"betId\":\"{sut.BetId}\",\"newPrice\":{price}}}";
-            Assert.Equal(expected, sut.ToBelowMinimumReplaceInstruction());
+            var order = new LimitOrder(12345, Side.Lay, price, size);
+            var expected = $"{{\"betId\":\"{order.BetId}\",\"newPrice\":{price}}}";
+            Assert.Equal(expected, order.ToBelowMinimumReplaceInstruction());
         }
 
         [Fact]
         public async Task BetIdIsUpdatedWhenOrderIsReplaced()
         {
-            var sut = new LimitOrder(12345, Side.Lay, 2, 0.5);
-            await this.SetResults(new List<LimitOrder> { sut }, "SUCCESS");
-            Assert.Equal("2", sut.BetId);
+            var order = new LimitOrderBuilder(12345, Side.Lay, 2, 0.5);
+            await this.SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS");
+            Assert.Equal("2", order.Object.BetId);
         }
 
         [Fact]
         public async Task SetResultsShouldUpdateCorrectBetId()
         {
-            var order1 = new LimitOrder(12345, Side.Back, 1.01, 0.5); // betId = 1, newId = 4
-            var order2 = new LimitOrder(98765, Side.Lay, 2, 0.5); // betId = 2, newId = 5
-            var order3 = new LimitOrder(12345, Side.Lay, 3, 0.5); // betId = 3, newId = 6
-            var limitOrders = new List<LimitOrder>
+            var order1 = new LimitOrderBuilder(12345, Side.Back, 1.01, 0.5); // betId = 1, newId = 4
+            var order2 = new LimitOrderBuilder(98765, Side.Lay, 2, 0.5); // betId = 2, newId = 5
+            var order3 = new LimitOrderBuilder(12345, Side.Lay, 3, 0.5); // betId = 3, newId = 6
+            var limitOrders = new List<LimitOrderBuilder>
             {
                 order1,
                 order2,
                 order3,
             };
             await this.SetResults(limitOrders, "SUCCESS");
-            Assert.Equal("4", order1.BetId);
-            Assert.Equal("5", order2.BetId);
-            Assert.Equal("6", order3.BetId);
+            Assert.Equal("4", order1.Object.BetId);
+            Assert.Equal("5", order2.Object.BetId);
+            Assert.Equal("6", order3.Object.BetId);
         }
 
         [Theory]
@@ -414,55 +397,32 @@
         [InlineData(98765, Side.Back, 2, 3.5)]
         public async Task CancelSendsCancelInstruction(long selectionId, Side side, double size, double price)
         {
-            var limitOrder = new LimitOrder(selectionId, side, price, size);
-            var limitOrder2 = new LimitOrder(1, Side.Back, 2, 10);
-            var limitOrders = new List<LimitOrder> { limitOrder, limitOrder2 };
+            var limitOrder = new LimitOrderBuilder(selectionId, side, price, size);
+            var limitOrder2 = new LimitOrderBuilder(1, Side.Back, 2, 10);
+            var limitOrders = new List<LimitOrderBuilder> { limitOrder, limitOrder2 };
             await this.SetResults(limitOrders, "SUCCESS", "EXECUTABLE");
-            var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.ToCancelInstruction()},{limitOrder2.ToCancelInstruction()}]}}";
-            await this.orderService.Cancel("MarketId", limitOrders.Select(o => o.BetId).ToList());
+            var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.Object.ToCancelInstruction()},{limitOrder2.Object.ToCancelInstruction()}]}}";
+            await this.orderService.Cancel("MarketId", limitOrders.Select(o => o.Object.BetId).ToList());
             Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
         }
 
         [Fact]
         public async Task AddReportShouldHandleNullReport()
         {
-            var limitOrder = new LimitOrder(123, Side.Lay, 2.5, 9.99);
-            var instruction = GetResult(new LimitOrder(987, Side.Back, 5.5, 11.99), 1, "SUCCESS", "SUCCESS");
+            var limitOrder = new LimitOrderBuilder(123, Side.Lay, 2.5, 9.99);
+            var instruction = new LimitOrderBuilder(987, Side.Back, 5.5, 11.99).PlaceInstructionReportJson("1", "SUCCESS", "SUCCESS");
             this.SetPlaceReturnContent(instruction);
-            await this.orderService.Place("MarketId", new List<LimitOrder> { limitOrder });
+            await this.orderService.Place("MarketId", new List<LimitOrder> { limitOrder.Object });
         }
 
         [Fact]
         public async Task ErrorCodeShouldBeRecordedIfOrderFails()
         {
-            var order = new LimitOrder(12345, Side.Back, 2, 9.99);
-            var limitOrders = new List<LimitOrder> { order };
+            var order = new LimitOrderBuilder(12345, Side.Back, 2, 9.99);
+            var limitOrders = new List<LimitOrderBuilder> { order };
             await this.SetResults(limitOrders, "FAILURE");
 
-            Assert.Equal("TEST_ERROR", order.ErrorCode);
-        }
-
-        private static string GetResult(LimitOrder limitOrder, long betId, string status, string orderStatus)
-        {
-            return "{" +
-                   "\"instruction\":" +
-                   "{" +
-                   $"\"selectionId\":{limitOrder.SelectionId}," +
-                   "\"limitOrder\":{" +
-                   $"\"size\":{limitOrder.Size}," +
-                   $"\"price\":{limitOrder.Price}," +
-                   "\"persistenceType\":\"LAPSE\"},\"orderType\":\"LIMIT\"," +
-                   $"\"side\":\"{limitOrder.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"" +
-                   "}" +
-                   "," +
-                   $"\"betId\":\"{betId}\"," +
-                   "\"placedDate\":\"2013-10-30T14:22:47.000Z\"," +
-                   $"\"averagePriceMatched\":{limitOrder.Price}," +
-                   $"\"sizeMatched\":{limitOrder.Size}," +
-                   $"\"orderStatus\":\"{orderStatus}\"," +
-                   $"\"errorCode\":\"TEST_ERROR\"," +
-                   $"\"status\":\"{status}\"" +
-                   "}";
+            Assert.Equal("TEST_ERROR", order.Object.ErrorCode);
         }
 
         private static string GetReplaceReport(LimitOrder limitOrder, string status, long newBetId, long originalBetId, string orderStatus)
@@ -491,14 +451,14 @@
                    $"\"orderStatus\":\"{orderStatus}\"}}}}";
         }
 
-        private async Task SetResults(List<LimitOrder> limitOrders, string status, string orderStatus = "EXECUTION_COMPLETE")
+        private async Task SetResults(List<LimitOrderBuilder> placeInstructions, string status, string orderStatus = "EXECUTION_COMPLETE")
         {
             var instructions = string.Empty;
             var betId = 0;
-            foreach (var limitOrder in limitOrders)
+            foreach (var instruction in placeInstructions)
             {
                 betId++;
-                instructions += GetResult(limitOrder, betId, status, orderStatus) + ",";
+                instructions += instruction.PlaceInstructionReportJson(betId.ToString(new CultureInfo(1)), status, orderStatus) + ",";
             }
 
             instructions = instructions.Remove(instructions.Length - 1, 1);
@@ -507,21 +467,21 @@
 
             var replaceInstructions = string.Empty;
             var originalBetId = 0;
-            foreach (var limitOrder in limitOrders.Where(o => o.BelowMinimumStake))
+            foreach (var limitOrder in placeInstructions.Select(p => p.Object).Where(o => o.BelowMinimumStake))
             {
                 betId++;
                 originalBetId++;
                 replaceInstructions += GetReplaceReport(limitOrder, orderStatus, betId, originalBetId, orderStatus) + ",";
             }
 
-            if (limitOrders.Any(o => o.BelowMinimumStake))
+            if (placeInstructions.Select(p => p.Object).Any(o => o.BelowMinimumStake))
             {
                 replaceInstructions = replaceInstructions.Remove(replaceInstructions.Length - 1, 1);
 
                 this.SetReplaceReturnContent(replaceInstructions);
             }
 
-            await this.orderService.Place("MarketId", limitOrders);
+            await this.orderService.Place("MarketId", placeInstructions.Select(p => p.Object).ToList());
         }
 
         private void SetPlaceReturnContent(string instructions)
