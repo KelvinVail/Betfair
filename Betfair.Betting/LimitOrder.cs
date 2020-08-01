@@ -39,6 +39,8 @@
 
         public bool BelowMinimumStake => this.Size < MinimumStake(this.Price);
 
+        public bool Valid => IsProfitRatioValid(this.Price, this.Size);
+
         public string ToInstruction()
         {
             return this.BelowAbsoluteMinimum() ? null :
@@ -118,6 +120,15 @@
         private static double LowestLayPrice(double size)
         {
             return Math.Ceiling(((0.02 + size) / size) * 100) / 100;
+        }
+
+        private static bool IsProfitRatioValid(double price, double size)
+        {
+            var liability = Math.Round(size * (1 - price), 2, MidpointRounding.AwayFromZero);
+            var actualProfitRatio = size / liability;
+            var fairProfitRatio = 1 / (1 - price);
+            var diff = Math.Round((actualProfitRatio / fairProfitRatio) - 1, 4);
+            return diff >= -0.2 && diff < 0.25;
         }
 
         private double GetPrice()
