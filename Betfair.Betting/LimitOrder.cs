@@ -7,11 +7,56 @@
 
     public sealed class LimitOrder
     {
+        private readonly Dictionary<double, double> lowestValidPrices
+            = new Dictionary<double, double>
+            {
+                { 0.01, 1.8 }, { 0.02, 1.4 }, { 0.03, 1.27 }, { 0.04, 1.2 },
+                { 0.05, 1.16 }, { 0.06, 1.14 }, { 0.07, 1.12 }, { 0.08, 1.1 },
+                { 0.09, 1.09 }, { 0.1, 1.08 }, { 0.11, 1.08 }, { 0.12, 1.07 },
+                { 0.13, 1.07 }, { 0.14, 1.06 }, { 0.15, 1.06 }, { 0.16, 1.05 },
+                { 0.17, 1.05 }, { 0.18, 1.05 }, { 0.19, 1.05 }, { 0.2, 1.04 },
+                { 0.21, 1.04 }, { 0.22, 1.04 }, { 0.23, 1.04 }, { 0.24, 1.04 },
+                { 0.25, 1.04 }, { 0.26, 1.04 }, { 0.27, 1.03 }, { 0.28, 1.03 },
+                { 0.29, 1.03 }, { 0.3, 1.03 }, { 0.31, 1.03 }, { 0.32, 1.03 },
+                { 0.33, 1.03 }, { 0.34, 1.03 }, { 0.35, 1.03 }, { 0.36, 1.03 },
+                { 0.37, 1.03 }, { 0.38, 1.03 }, { 0.39, 1.03 }, { 0.4, 1.02 },
+                { 0.41, 1.02 }, { 0.42, 1.02 }, { 0.43, 1.02 }, { 0.44, 1.02 },
+                { 0.45, 1.02 }, { 0.46, 1.02 }, { 0.47, 1.02 }, { 0.48, 1.02 },
+                { 0.49, 1.02 }, { 0.5, 1.02 }, { 0.51, 1.02 }, { 0.52, 1.02 },
+                { 0.53, 1.02 }, { 0.54, 1.02 }, { 0.55, 1.02 }, { 0.56, 1.02 },
+                { 0.57, 1.02 }, { 0.58, 1.02 }, { 0.59, 1.02 }, { 0.6, 1.02 },
+                { 0.61, 1.02 }, { 0.62, 1.02 }, { 0.63, 1.03 }, { 0.64, 1.03 },
+                { 0.65, 1.03 }, { 0.66, 1.03 }, { 0.67, 1.03 }, { 0.68, 1.03 },
+                { 0.69, 1.03 }, { 0.7, 1.03 }, { 0.71, 1.03 }, { 0.72, 1.03 },
+                { 0.73, 1.03 }, { 0.74, 1.03 }, { 0.75, 1.03 }, { 0.76, 1.03 },
+                { 0.77, 1.03 }, { 0.78, 1.03 }, { 0.79, 1.03 }, { 0.8, 1.01 },
+                { 0.81, 1.01 }, { 0.82, 1.01 }, { 0.83, 1.01 }, { 0.84, 1.01 },
+                { 0.85, 1.01 }, { 0.86, 1.01 }, { 0.87, 1.01 }, { 0.88, 1.01 },
+                { 0.89, 1.01 }, { 0.9, 1.01 }, { 0.91, 1.01 }, { 0.92, 1.01 },
+                { 0.93, 1.01 }, { 0.94, 1.01 }, { 0.95, 1.01 }, { 0.96, 1.01 },
+                { 0.97, 1.01 }, { 0.98, 1.01 }, { 0.99, 1.01 }, { 1, 1.01 },
+                { 1.01, 1.01 }, { 1.02, 1.01 }, { 1.03, 1.01 }, { 1.04, 1.01 },
+                { 1.05, 1.01 }, { 1.06, 1.01 }, { 1.07, 1.01 }, { 1.08, 1.01 },
+                { 1.09, 1.01 }, { 1.1, 1.01 }, { 1.11, 1.01 }, { 1.12, 1.01 },
+                { 1.13, 1.01 }, { 1.14, 1.01 }, { 1.15, 1.01 }, { 1.16, 1.01 },
+                { 1.17, 1.01 }, { 1.18, 1.01 }, { 1.19, 1.01 }, { 1.2, 1.01 },
+                { 1.21, 1.01 }, { 1.22, 1.01 }, { 1.23, 1.01 }, { 1.24, 1.01 },
+                { 1.25, 1.02 }, { 1.26, 1.02 }, { 1.27, 1.02 }, { 1.28, 1.02 },
+                { 1.29, 1.02 }, { 1.3, 1.02 }, { 1.31, 1.02 }, { 1.32, 1.02 },
+                { 1.33, 1.02 }, { 1.34, 1.02 }, { 1.35, 1.02 }, { 1.36, 1.02 },
+                { 1.37, 1.02 }, { 1.38, 1.02 }, { 1.39, 1.02 }, { 1.4, 1.02 },
+                { 1.41, 1.02 }, { 1.42, 1.02 }, { 1.43, 1.02 }, { 1.44, 1.02 },
+                { 1.45, 1.02 }, { 1.46, 1.02 }, { 1.47, 1.02 }, { 1.48, 1.02 },
+                { 1.49, 1.02 }, { 1.5, 1.02 }, { 1.51, 1.02 }, { 1.52, 1.02 },
+                { 1.53, 1.02 }, { 1.54, 1.02 }, { 1.55, 1.02 }, { 1.56, 1.02 },
+                { 1.57, 1.02 }, { 1.58, 1.02 }, { 1.59, 1.02 },
+            };
+
         public LimitOrder(long selectionId, Side side, double price, double size)
         {
             this.SelectionId = selectionId;
             this.Side = side;
-            this.Size = LowestPossibleSize(side, price, size);
+            this.Size = size;
             this.Price = price;
         }
 
@@ -39,23 +84,26 @@
 
         public bool BelowMinimumStake => this.Size < MinimumStake(this.Price);
 
-        public bool Valid => IsProfitRatioValid(this.Price, this.Size);
+        public bool Valid => IsProfitRatioValid(NearestValidPrice(this.Price), this.Size);
 
         public string ToInstruction()
         {
-            return this.BelowAbsoluteMinimum() ? null :
-                   $"{{\"selectionId\":{this.SelectionId}," +
+            if (this.Side == Side.Lay && this.ValidPrice() > this.Price) return null;
+            if (!this.Valid) return null;
+
+            return $"{{\"selectionId\":{this.SelectionId}," +
                    $"\"side\":\"{this.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
                    "\"orderType\":\"LIMIT\"," +
                    "\"limitOrder\":{" +
                    $"\"size\":{this.GetSize()}," +
-                   $"\"price\":{this.GetPrice()}," +
+                   $"\"price\":{this.ValidPrice()}," +
                    "\"persistenceType\":\"LAPSE\"}}";
         }
 
         public string ToCancelInstruction()
         {
-            return this.OrderStatus == "EXECUTION_COMPLETE" ? null : $"{{\"betId\":\"{this.BetId}\"}}";
+            return this.OrderStatus == "EXECUTION_COMPLETE" ? null
+                : $"{{\"betId\":\"{this.BetId}\"}}";
         }
 
         public string ToBelowMinimumCancelInstruction()
@@ -74,13 +122,6 @@
         {
             var report = reports.FirstOrDefault(r => r.Instruction.SelectionId == this.SelectionId && r.Instruction.Side == this.Side);
             this.Update(report);
-        }
-
-        private static double LowestPossibleSize(Side side, double price, double size)
-        {
-            if (side == Side.Back) return size;
-            var m = Math.Ceiling((0.01 / (price - 1)) * 100) / 100;
-            return m > size ? m : size;
         }
 
         private static double NearestValidPrice(double price)
@@ -117,11 +158,6 @@
             return m < 2 ? m : 2;
         }
 
-        private static double LowestLayPrice(double size)
-        {
-            return Math.Ceiling(((0.02 + size) / size) * 100) / 100;
-        }
-
         private static bool IsProfitRatioValid(double price, double size)
         {
             var liability = Math.Round(size * (1 - price), 2, MidpointRounding.AwayFromZero);
@@ -131,23 +167,24 @@
             return diff >= -0.2 && diff < 0.25;
         }
 
-        private double GetPrice()
+        private double ValidPrice()
         {
             var price = this.Size < MinimumStake(this.Price)
-                ? (this.Side == Side.Back ? 1000 : LowestLayPrice(this.Size))
+                ? (this.Side == Side.Back ? 1000 : this.LowestValidPrice(this.Size))
                 : NearestValidPrice(this.Price);
             return price;
+        }
+
+        private double LowestValidPrice(double size)
+        {
+            return !this.lowestValidPrices.ContainsKey(size) ? 1.01
+                : this.lowestValidPrices[size];
         }
 
         private double GetSize()
         {
             var size = this.Size < MinimumStake(this.Price) ? 2 : Math.Round(this.Size, 2);
             return size;
-        }
-
-        private bool BelowAbsoluteMinimum()
-        {
-            return LowestLayPrice(this.Size) > this.Price && this.Side == Side.Lay;
         }
 
         private void Update(InstructionReport report)
