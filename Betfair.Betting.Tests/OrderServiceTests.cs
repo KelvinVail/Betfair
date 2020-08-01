@@ -217,10 +217,10 @@
         }
 
         [Fact]
-        public async Task DoNotPlaceOrdersBelowTheAbsoluteMinimum()
+        public async Task DoNotPlaceOrdersWithAnInvalidProfitRatio()
         {
             var validOrder = new LimitOrder(1, Side.Lay, 2.5, 9.99);
-            var invalidOrder = new LimitOrder(1, Side.Lay, 2, 0.01);
+            var invalidOrder = new LimitOrder(1, Side.Lay, 1.09, 0.08);
             var orders = new List<LimitOrder>
             {
                 validOrder,
