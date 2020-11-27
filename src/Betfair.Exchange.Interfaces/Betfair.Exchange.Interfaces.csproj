@@ -1,16 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.1.8-alpha</Version>
-    <Authors>Kelvin Vail</Authors>
-    <Product>Betfair Betting</Product>
-    <Description>Package for interacting with the Betfair Betting API.
-There is no need to install this package seperatly.
-</Description>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Kelvin Vail</Authors>
+    <Product>Betfair Exchange Interfaces</Product>
     <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
     <PackageTags>Betfair</PackageTags>
+    <Description>Interfaces to manage the Betfair Exchange.
+There is no need to install this package seperatly.</Description>
+    <Version>0.0.1-alpha</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +18,7 @@ There is no need to install this package seperatly.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -28,8 +28,5 @@ There is no need to install this package seperatly.
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Betfair.Exchange.Interfaces\Betfair.Exchange.Interfaces.csproj" />
-  </ItemGroup>
 
 </Project>
