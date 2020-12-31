@@ -1,62 +1,58 @@
-﻿namespace Betfair.Core.Tests.TestDoubles
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Moq;
-    using Moq.Protected;
-    using Utf8Json;
-    using Xunit;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Moq;
+using Moq.Protected;
+using Utf8Json;
+using Xunit;
 
+namespace Betfair.Core.Tests.TestDoubles
+{
     public class HttpMessageHandlerMock : IDisposable
     {
-        private Mock<HttpClientHandler> messageHandler;
-
-        private HttpContent returnContent;
-
-        private HttpStatusCode httpStatusCode;
-
-        private bool buildWithException;
-
-        private HttpResponseMessage responseMessage;
+        private Mock<HttpClientHandler> _messageHandler;
+        private HttpContent _returnContent;
+        private HttpStatusCode _httpStatusCode;
+        private bool _buildWithException;
+        private HttpResponseMessage _responseMessage;
 
         public HttpMessageHandlerMock()
         {
-            this.httpStatusCode = HttpStatusCode.OK;
-            this.WithReturnContent(new { Test = "Test" });
+            _httpStatusCode = HttpStatusCode.OK;
+            WithReturnContent(new { Test = "Test" });
         }
 
         public HttpMessageHandlerMock WithReturnContent(dynamic dynamicContent)
         {
             var stringContent = dynamicContent is string ? dynamicContent : JsonSerializer.ToJsonString(dynamicContent);
 
-            this.returnContent = new StringContent(stringContent);
+            _returnContent = new StringContent(stringContent);
             return this;
         }
 
         public HttpMessageHandlerMock WithStatusCode(HttpStatusCode statusCode)
         {
-            this.httpStatusCode = statusCode;
+            _httpStatusCode = statusCode;
             return this;
         }
 
         public HttpMessageHandlerMock WithException()
         {
-            this.buildWithException = true;
+            _buildWithException = true;
             return this;
         }
 
         public HttpClientHandler Build()
         {
-            return this.buildWithException ? this.BuildWithException() : this.BuildHandler();
+            return _buildWithException ? BuildWithException() : BuildHandler();
         }
 
         public void VerifyTimesCalled(int timesCalled)
         {
-            this.messageHandler.Protected().Verify(
+            _messageHandler.Protected().Verify(
                 "SendAsync",
                 Times.Exactly(timesCalled),
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -65,7 +61,7 @@
 
         public void VerifyHttpMethod(HttpMethod method)
         {
-            this.messageHandler.Protected().Verify(
+            _messageHandler.Protected().Verify(
                 "SendAsync",
                 Times.AtLeastOnce(),
                 ItExpr.Is<HttpRequestMessage>(req =>
@@ -75,7 +71,7 @@
 
         public void VerifyRequestUri(Uri requestUri)
         {
-            this.messageHandler.Protected().Verify(
+            _messageHandler.Protected().Verify(
                 "SendAsync",
                 Times.AtLeastOnce(),
                 ItExpr.Is<HttpRequestMessage>(req =>
@@ -85,7 +81,7 @@
 
         public void VerifyRequestContent(string body)
         {
-            this.messageHandler.Protected().Verify(
+            _messageHandler.Protected().Verify(
                 "SendAsync",
                 Times.AtLeastOnce(),
                 ItExpr.Is<HttpRequestMessage>(req =>
@@ -96,7 +92,7 @@
         public void VerifyHeaderValues(string header, string value)
         {
             IEnumerable<string> values = new List<string>();
-            this.messageHandler.Protected().Verify(
+            _messageHandler.Protected().Verify(
                 "SendAsync",
                 Times.AtLeastOnce(),
                 ItExpr.Is<HttpRequestMessage>(req =>
@@ -107,12 +103,12 @@
 
         public void VerifyHasCertificate()
         {
-            Assert.NotEmpty(this.messageHandler.Object.ClientCertificates);
+            Assert.NotEmpty(_messageHandler.Object.ClientCertificates);
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -120,33 +116,33 @@
         {
             if (disposing)
             {
-                this.returnContent.Dispose();
-                this.responseMessage?.Dispose();
+                _returnContent.Dispose();
+                _responseMessage?.Dispose();
             }
         }
 
         private HttpClientHandler BuildHandler()
         {
-            this.messageHandler = new Mock<HttpClientHandler>();
-            this.responseMessage = new HttpResponseMessage
-                { StatusCode = this.httpStatusCode, Content = this.returnContent };
-            this.messageHandler
+            _messageHandler = new Mock<HttpClientHandler>();
+            _responseMessage = new HttpResponseMessage
+                { StatusCode = _httpStatusCode, Content = _returnContent };
+            _messageHandler
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(this.responseMessage)
+                .ReturnsAsync(_responseMessage)
                 .Verifiable();
 
-            return this.messageHandler.Object;
+            return _messageHandler.Object;
         }
 
         private HttpClientHandler BuildWithException()
         {
-            this.messageHandler = new Mock<HttpClientHandler>();
+            _messageHandler = new Mock<HttpClientHandler>();
 
-            this.messageHandler
+            _messageHandler
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
@@ -155,7 +151,7 @@
                 .ThrowsAsync(new HttpRequestException("This is an exception message."))
                 .Verifiable();
 
-            return this.messageHandler.Object;
+            return _messageHandler.Object;
         }
     }
 }

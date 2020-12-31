@@ -1,8 +1,8 @@
-﻿namespace Betfair.Betting
-{
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
+namespace Betfair.Betting
+{
     public interface IOrderService
     {
         Task Place(string marketId, List<LimitOrder> orders, string strategyRef = null);

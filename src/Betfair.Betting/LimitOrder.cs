@@ -1,13 +1,13 @@
-﻿namespace Betfair.Betting
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
+namespace Betfair.Betting
+{
     public sealed class LimitOrder
     {
-        private readonly Dictionary<double, double> lowestValidPrices
+        private readonly Dictionary<double, double> _lowestValidPrices
             = new Dictionary<double, double>
             {
                 { 0.01, 1.8 }, { 0.02, 1.4 }, { 0.03, 1.27 }, { 0.04, 1.2 },
@@ -54,10 +54,10 @@
 
         public LimitOrder(long selectionId, Side side, double price, double size)
         {
-            this.SelectionId = selectionId;
-            this.Side = side;
-            this.Size = size;
-            this.Price = price;
+            SelectionId = selectionId;
+            Side = side;
+            Size = size;
+            Price = price;
         }
 
         public long SelectionId { get; }
@@ -82,46 +82,46 @@
 
         public DateTime PlacedDate { get; private set; }
 
-        public bool BelowMinimumStake => this.Size < MinimumStake(this.Price);
+        public bool BelowMinimumStake => Size < MinimumStake(Price);
 
-        public bool Valid => IsProfitRatioValid(NearestValidPrice(this.Price), this.Size);
+        public bool Valid => IsProfitRatioValid(NearestValidPrice(Price), Size);
 
         public string ToInstruction()
         {
-            if (this.Side == Side.Lay && this.ValidPrice() > this.Price) return null;
-            if (!this.Valid) return null;
+            if (Side == Side.Lay && ValidPrice() > Price) return null;
+            if (!Valid) return null;
 
-            return $"{{\"selectionId\":{this.SelectionId}," +
-                   $"\"side\":\"{this.Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
+            return $"{{\"selectionId\":{SelectionId}," +
+                   $"\"side\":\"{Side.ToString().ToUpper(CultureInfo.CurrentCulture)}\"," +
                    "\"orderType\":\"LIMIT\"," +
                    "\"limitOrder\":{" +
-                   $"\"size\":{this.GetSize()}," +
-                   $"\"price\":{this.ValidPrice()}," +
+                   $"\"size\":{GetSize()}," +
+                   $"\"price\":{ValidPrice()}," +
                    "\"persistenceType\":\"LAPSE\"}}";
         }
 
         public string ToCancelInstruction()
         {
-            return this.OrderStatus == "EXECUTION_COMPLETE" ? null
-                : $"{{\"betId\":\"{this.BetId}\"}}";
+            return OrderStatus == "EXECUTION_COMPLETE" ? null
+                : $"{{\"betId\":\"{BetId}\"}}";
         }
 
         public string ToBelowMinimumCancelInstruction()
         {
-            if (!this.BelowMinimumStake) return null;
-            var reduction = Math.Round(2 - this.Size, 2);
-            return $"{{\"betId\":\"{this.BetId}\",\"sizeReduction\":{reduction}}}";
+            if (!BelowMinimumStake) return null;
+            var reduction = Math.Round(2 - Size, 2);
+            return $"{{\"betId\":\"{BetId}\",\"sizeReduction\":{reduction}}}";
         }
 
         public string ToBelowMinimumReplaceInstruction()
         {
-            return !this.BelowMinimumStake ? null : $"{{\"betId\":\"{this.BetId}\",\"newPrice\":{this.Price}}}";
+            return !BelowMinimumStake ? null : $"{{\"betId\":\"{BetId}\",\"newPrice\":{Price}}}";
         }
 
         internal void AddReports(IEnumerable<InstructionReport> reports)
         {
-            var report = reports.FirstOrDefault(r => r.Instruction.SelectionId == this.SelectionId && r.Instruction.Side == this.Side);
-            this.Update(report);
+            var report = reports.FirstOrDefault(r => r.Instruction.SelectionId == SelectionId && r.Instruction.Side == Side);
+            Update(report);
         }
 
         private static double NearestValidPrice(double price)
@@ -169,34 +169,39 @@
 
         private double ValidPrice()
         {
-            var price = this.Size < MinimumStake(this.Price)
-                ? (this.Side == Side.Back ? 1000 : this.LowestValidPrice(this.Size))
-                : NearestValidPrice(this.Price);
+            var price = Size < MinimumStake(Price)
+                ? LowestValidPriceOrDefault()
+                : NearestValidPrice(Price);
             return price;
+        }
+
+        private double LowestValidPriceOrDefault()
+        {
+            return Side == Side.Back ? 1000 : LowestValidPrice(Size);
         }
 
         private double LowestValidPrice(double size)
         {
-            return !this.lowestValidPrices.ContainsKey(size) ? 1.01
-                : this.lowestValidPrices[size];
+            return !_lowestValidPrices.ContainsKey(size) ? 1.01
+                : _lowestValidPrices[size];
         }
 
         private double GetSize()
         {
-            var size = this.Size < MinimumStake(this.Price) ? 2 : Math.Round(this.Size, 2);
+            var size = Size < MinimumStake(Price) ? 2 : Math.Round(Size, 2);
             return size;
         }
 
         private void Update(InstructionReport report)
         {
             if (report is null) return;
-            this.BetId = report.BetId;
-            this.SizeMatched = report.SizeMatched;
-            this.AveragePriceMatched = report.AveragePriceMatched;
-            this.Status = report.Status;
-            this.OrderStatus = report.OrderStatus;
-            this.PlacedDate = report.PlacedDate;
-            this.ErrorCode = report.ErrorCode;
+            BetId = report.BetId;
+            SizeMatched = report.SizeMatched;
+            AveragePriceMatched = report.AveragePriceMatched;
+            Status = report.Status;
+            OrderStatus = report.OrderStatus;
+            PlacedDate = report.PlacedDate;
+            ErrorCode = report.ErrorCode;
         }
     }
 }

@@ -1,10 +1,10 @@
-﻿namespace Betfair.Betting.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Betfair.Exchange.Interfaces;
-    using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Betfair.Exchange.Interfaces;
+using Newtonsoft.Json;
 
+namespace Betfair.Betting.Tests.TestDoubles
+{
     public class ExchangeServiceSpy : IExchangeService
     {
         public string Endpoint { get; private set; }
@@ -17,16 +17,16 @@
 
         public ExchangeServiceSpy WithReturnContent(string method, string content)
         {
-            this.ReturnContent.Add(method, content);
+            ReturnContent.Add(method, content);
             return this;
         }
 
         public async Task<T> SendAsync<T>(string endpoint, string betfairMethod, string parameters)
         {
-            this.Endpoint = endpoint;
-            this.BetfairMethod = betfairMethod;
-            this.SentParameters.Add(betfairMethod, parameters);
-            return await Task.FromResult(this.ReturnContent.ContainsKey(betfairMethod) ? JsonConvert.DeserializeObject<T>(this.ReturnContent[betfairMethod]) : default);
+            Endpoint = endpoint;
+            BetfairMethod = betfairMethod;
+            SentParameters.Add(betfairMethod, parameters);
+            return await Task.FromResult(ReturnContent.ContainsKey(betfairMethod) ? JsonConvert.DeserializeObject<T>(ReturnContent[betfairMethod]) : default);
         }
     }
 }

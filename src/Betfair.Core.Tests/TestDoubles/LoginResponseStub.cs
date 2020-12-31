@@ -1,15 +1,15 @@
-﻿namespace Betfair.Core.Tests.TestDoubles
-{
-    using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
+namespace Betfair.Core.Tests.TestDoubles
+{
     [DataContract]
     public class LoginResponseStub
     {
         public LoginResponseStub()
         {
-            this.Status = "SUCCESS";
-            this.Error = string.Empty;
-            this.Token = "SessionToken";
+            Status = "SUCCESS";
+            Error = string.Empty;
+            Token = "SessionToken";
         }
 
         [DataMember(Name = "product", EmitDefaultValue = false)]
@@ -26,19 +26,19 @@
 
         public LoginResponseStub WithStatus(string status)
         {
-            this.Status = status;
+            Status = status;
             return this;
         }
 
         public LoginResponseStub WithError(string error)
         {
-            this.Error = error;
+            Error = error;
             return this;
         }
 
         public LoginResponseStub WithSessionToken(string sessionToken)
         {
-            this.Token = sessionToken;
+            Token = sessionToken;
             return this;
         }
     }

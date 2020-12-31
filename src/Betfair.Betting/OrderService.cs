@@ -1,20 +1,20 @@
-﻿namespace Betfair.Betting
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
-    using Betfair.Exchange.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Betfair.Exchange.Interfaces;
 
+namespace Betfair.Betting
+{
     public sealed class OrderService : IOrderService
     {
-        private readonly IExchangeService exchange;
+        private readonly IExchangeService _exchange;
 
         public OrderService(IExchangeService exchange)
         {
-            this.exchange = ValidateExchangeService(exchange);
+            _exchange = ValidateExchangeService(exchange);
         }
 
         public async Task Place(string marketId, List<LimitOrder> orders, string strategyRef = null)
@@ -22,19 +22,19 @@
             ValidateMarketId(marketId);
             ValidateStrategyRef(strategyRef);
             var validOrders = ValidateOrders(orders);
-            await this.PlaceOrders(marketId, validOrders, strategyRef);
-            await this.PlaceBelowMinimumOrders(marketId, validOrders, strategyRef);
+            await PlaceOrders(marketId, validOrders, strategyRef);
+            await PlaceBelowMinimumOrders(marketId, validOrders, strategyRef);
         }
 
         public async Task Cancel(string marketId, List<string> betIds)
         {
             if (betIds.Any())
-                await this.exchange.SendAsync<PlaceReport>("betting", "cancelOrders", CancelParams(marketId, betIds));
+                await _exchange.SendAsync<PlaceReport>("betting", "cancelOrders", CancelParams(marketId, betIds));
         }
 
         public async Task CancelAll(string marketId)
         {
-            await this.exchange.SendAsync<dynamic>("betting", "cancelOrders", $"{{\"marketId\":\"{marketId}\"}}");
+            await _exchange.SendAsync<dynamic>("betting", "cancelOrders", $"{{\"marketId\":\"{marketId}\"}}");
         }
 
         private static IExchangeService ValidateExchangeService(IExchangeService exchange)
@@ -70,12 +70,6 @@
             return instructions.Remove(instructions.Length - 1, 1);
         }
 
-        private static void UpdateOrders(PlaceReport reports, List<LimitOrder> orders)
-        {
-            if (reports is null) return;
-            orders.ForEach(o => o.AddReports(reports.InstructionReports));
-        }
-
         private static string Params(string marketId, List<LimitOrder> orders, string strategyRef = null)
         {
             return $"{{\"marketId\":\"{marketId}\",{Reference(strategyRef)}\"instructions\":[{Instructions(orders)}]}}";
@@ -105,6 +99,12 @@
             return instructions.Remove(instructions.Length - 1, 1);
         }
 
+        private static void UpdateOrders(PlaceReport reports, List<LimitOrder> orders)
+        {
+            if (reports is null) return;
+            orders.ForEach(o => o.AddReports(reports.InstructionReports));
+        }
+
         private static void UpdateOrders(ReplaceReport reports, List<LimitOrder> orders)
         {
             if (reports is null) return;
@@ -131,7 +131,7 @@
 
         private async Task PlaceOrders(string marketId, List<LimitOrder> orders, string strategyRef)
         {
-            var report = await this.exchange.SendAsync<PlaceReport>("betting", "placeOrders", Params(marketId, orders, strategyRef));
+            var report = await _exchange.SendAsync<PlaceReport>("betting", "placeOrders", Params(marketId, orders, strategyRef));
             UpdateOrders(report, orders);
         }
 
@@ -139,9 +139,9 @@
         {
             if (orders.Any(o => o.BelowMinimumStake))
             {
-                await this.exchange.SendAsync<PlaceReport>("betting", "cancelOrders", BelowMinimumCancelParams(marketId, orders));
+                await _exchange.SendAsync<PlaceReport>("betting", "cancelOrders", BelowMinimumCancelParams(marketId, orders));
                 var replaceReport =
-                    await this.exchange.SendAsync<ReplaceReport>("betting", "replaceOrders", BelowMinimumReplaceParams(marketId, orders, strategyRef));
+                    await _exchange.SendAsync<ReplaceReport>("betting", "replaceOrders", BelowMinimumReplaceParams(marketId, orders, strategyRef));
                 UpdateOrders(replaceReport, orders);
             }
         }

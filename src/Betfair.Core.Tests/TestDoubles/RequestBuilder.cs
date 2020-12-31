@@ -1,14 +1,14 @@
-﻿namespace Betfair.Core.Tests.TestDoubles
-{
-    using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
+namespace Betfair.Core.Tests.TestDoubles
+{
     [DataContract]
     public class RequestBuilder
     {
         public RequestBuilder()
         {
-            this.Id = 1;
-            this.Jsonrpc = "2.0";
+            Id = 1;
+            Jsonrpc = "2.0";
         }
 
         [DataMember(Name = "jsonrpc", EmitDefaultValue = false)]

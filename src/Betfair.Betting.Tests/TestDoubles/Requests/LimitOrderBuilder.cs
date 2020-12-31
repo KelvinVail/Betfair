@@ -1,23 +1,23 @@
+using System.Runtime.Serialization;
+using Betfair.Betting.Tests.TestDoubles.Responses;
+using Utf8Json;
+using Utf8Json.Resolvers;
+
 namespace Betfair.Betting.Tests.TestDoubles.Requests
 {
-    using System.Runtime.Serialization;
-    using Betfair.Betting.Tests.TestDoubles.Responses;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
-
     public class LimitOrderBuilder
     {
         public LimitOrderBuilder(long selectionId, Side side, double price, double size)
         {
-            this.SelectionId = selectionId;
-            this.Side = side;
-            this.LimitOrder = new LimitOrderStub(price, size);
-            this.OrderType = "LIMIT";
-            this.Object = new LimitOrder(
-                this.SelectionId,
-                this.Side,
-                this.LimitOrder.Price,
-                this.LimitOrder.Size);
+            SelectionId = selectionId;
+            Side = side;
+            LimitOrder = new LimitOrderStub(price, size);
+            OrderType = "LIMIT";
+            Object = new LimitOrder(
+                SelectionId,
+                Side,
+                LimitOrder.Price,
+                LimitOrder.Size);
         }
 
         [DataMember(Name = "selectionId", EmitDefaultValue = false)]

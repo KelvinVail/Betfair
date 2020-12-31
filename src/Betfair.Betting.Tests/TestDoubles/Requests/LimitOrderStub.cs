@@ -1,14 +1,14 @@
+using System.Runtime.Serialization;
+
 namespace Betfair.Betting.Tests.TestDoubles.Requests
 {
-    using System.Runtime.Serialization;
-
     public class LimitOrderStub
     {
         public LimitOrderStub(double price, double size)
         {
-            this.Price = price;
-            this.Size = size;
-            this.PersistenceType = "LAPSE";
+            Price = price;
+            Size = size;
+            PersistenceType = "LAPSE";
         }
 
         [DataMember(Name = "size", EmitDefaultValue = false)]

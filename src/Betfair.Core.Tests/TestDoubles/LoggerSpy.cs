@@ -1,10 +1,10 @@
-﻿namespace Betfair.Core.Tests.TestDoubles
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Extensions.Logging;
 
+namespace Betfair.Core.Tests.TestDoubles
+{
     public class LoggerSpy : ILogger
     {
         public string LastMessage { get; private set; }
@@ -17,10 +17,10 @@
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            this.LastMessage = state.ToString();
-            this.LastLevel = logLevel.ToString();
-            this.LogCount += 1;
-            this.MessageList.Add(this.LogCount, this.LastMessage);
+            LastMessage = state.ToString();
+            LastLevel = logLevel.ToString();
+            LogCount += 1;
+            MessageList.Add(LogCount, LastMessage);
         }
 
         public bool IsEnabled(LogLevel logLevel)
@@ -35,12 +35,12 @@
 
         public string GetMessageNumber(int value)
         {
-            return this.MessageList.ContainsKey(value) ? this.MessageList[value] : null;
+            return MessageList.ContainsKey(value) ? MessageList[value] : null;
         }
 
         public int TimesLogged(string message)
         {
-            return this.MessageList.Count(m => m.Value == message);
+            return MessageList.Count(m => m.Value == message);
         }
     }
 }

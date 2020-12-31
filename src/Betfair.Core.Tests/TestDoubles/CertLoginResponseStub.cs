@@ -1,7 +1,7 @@
-﻿namespace Betfair.Core.Tests.TestDoubles
-{
-    using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
+namespace Betfair.Core.Tests.TestDoubles
+{
     [DataContract]
     public class CertLoginResponseStub
     {

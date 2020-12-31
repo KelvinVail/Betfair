@@ -1,17 +1,17 @@
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Betfair.Betting.Tests.TestDoubles.Requests;
+using Utf8Json;
+using Utf8Json.Resolvers;
+
 namespace Betfair.Betting.Tests.TestDoubles.Responses
 {
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-    using Betfair.Betting.Tests.TestDoubles.Requests;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
-
     public class PlaceExecutionReportStub
     {
         public PlaceExecutionReportStub(string marketId, string status)
         {
-            this.MarketId = marketId;
-            this.Status = status;
+            MarketId = marketId;
+            Status = status;
         }
 
         [DataMember(Name = "status", EmitDefaultValue = false)]
@@ -33,14 +33,14 @@ namespace Betfair.Betting.Tests.TestDoubles.Responses
 
         internal void AddReport(LimitOrderBuilder order, string betId, string status, string orderStatus)
         {
-            this.InstructionReports ??= new List<PlaceInstructionReportStub>();
-            this.InstructionReports.Add(order.PlaceInstructionReportObject(betId, status, orderStatus));
-            this.LimitOrders.Add(order.Object);
+            InstructionReports ??= new List<PlaceInstructionReportStub>();
+            InstructionReports.Add(order.PlaceInstructionReportObject(betId, status, orderStatus));
+            LimitOrders.Add(order.Object);
         }
 
         internal void AddNullReport(LimitOrderBuilder order)
         {
-            this.LimitOrders.Add(order.Object);
+            LimitOrders.Add(order.Object);
         }
 
         internal void SetReturnContent(ExchangeServiceSpy exchange)

@@ -1,7 +1,7 @@
-﻿namespace Betfair.Betting
-{
-    using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
+namespace Betfair.Betting
+{
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Microsoft.Performance",
         "CA1812:AvoidUninstantiatedInternalClasses",

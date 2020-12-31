@@ -1,13 +1,13 @@
-﻿namespace Betfair.Core.Tests.TestDoubles
-{
-    using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
+namespace Betfair.Core.Tests.TestDoubles
+{
     [DataContract]
     public class ResponseStub<T>
     {
         public ResponseStub(T result)
         {
-            this.Result = result;
+            Result = result;
         }
 
         [DataMember(Name = "jsonrpc", EmitDefaultValue = false)]

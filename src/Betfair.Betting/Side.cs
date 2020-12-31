@@ -1,8 +1,8 @@
-﻿namespace Betfair.Betting
-{
-    using System.Runtime.Serialization;
-    using System.Text.Json.Serialization;
+﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
+namespace Betfair.Betting
+{
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Side
     {

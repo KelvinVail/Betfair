@@ -1,24 +1,23 @@
-﻿namespace Betfair.Betting.Tests
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Betfair.Betting.Tests.TestDoubles;
-    using Betfair.Betting.Tests.TestDoubles.Requests;
-    using Betfair.Betting.Tests.TestDoubles.Responses;
-    using Xunit;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using Betfair.Betting.Tests.TestDoubles;
+using Betfair.Betting.Tests.TestDoubles.Requests;
+using Betfair.Betting.Tests.TestDoubles.Responses;
+using Xunit;
 
+namespace Betfair.Betting.Tests
+{
     public class LimitOrderTests
     {
-        private readonly ExchangeServiceSpy service = new ExchangeServiceSpy();
-
-        private readonly OrderService orderService;
+        private readonly ExchangeServiceSpy _service = new ExchangeServiceSpy();
+        private readonly OrderService _orderService;
 
         public LimitOrderTests()
         {
-            this.orderService = new OrderService(this.service);
+            _orderService = new OrderService(_service);
         }
 
         [Theory]
@@ -136,9 +135,9 @@
             var order = new LimitOrderBuilder(12345, Side.Back, price, size);
             orders.AddReport(order, "2", status, "EXECUTION_COMPLETE");
 
-            orders.SetReturnContent(this.service);
+            orders.SetReturnContent(_service);
 
-            await this.orderService.Place("MarketId", orders.LimitOrders);
+            await _orderService.Place("MarketId", orders.LimitOrders);
 
             Assert.NotEqual("1", order.Object.BetId);
             Assert.Equal("2", order.Object.BetId);
@@ -158,9 +157,9 @@
             var order = new LimitOrderBuilder(12345, Side.Back, 1.01, 2.00);
             orders.AddNullReport(order);
 
-            orders.SetReturnContent(this.service);
+            orders.SetReturnContent(_service);
 
-            await this.orderService.Place("MarketId", orders.LimitOrders);
+            await _orderService.Place("MarketId", orders.LimitOrders);
 
             Assert.Equal(0, order.Object.SizeMatched);
         }
@@ -169,7 +168,7 @@
         public async Task SetResultsShouldHandleNullReport()
         {
             var limitOrders = new List<LimitOrder> { new LimitOrder(98765, Side.Lay, 1.01, 2.00) };
-            await this.orderService.Place("MarketId", limitOrders);
+            await _orderService.Place("MarketId", limitOrders);
         }
 
         [Theory]
@@ -184,7 +183,7 @@
                 new LimitOrderBuilder(12345, Side.Lay, -1, -1),
                 order,
             };
-            await this.SetResults(limitOrders, "SUCCESS");
+            await SetResults(limitOrders, "SUCCESS");
             Assert.Equal(size, order.Object.SizeMatched);
         }
 
@@ -196,7 +195,7 @@
         public async Task ToCancelInstructionReturnCorrectJsonString(long selectionId, Side side, double size, double price)
         {
             var order = new LimitOrderBuilder(selectionId, side, price, size);
-            await this.SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS", "EXECUTABLE");
+            await SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS", "EXECUTABLE");
             var expected = $"{{\"betId\":\"{order.Object.BetId}\"}}";
             Assert.Equal(expected, order.Object.ToCancelInstruction());
         }
@@ -209,7 +208,7 @@
         public async Task ToCancelInstructionShouldReturnNullIfOrderIsComplete(long selectionId, Side side, double size, double price)
         {
             var order = new LimitOrderBuilder(selectionId, side, price, size);
-            await this.SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS");
+            await SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS");
             Assert.Null(order.Object.ToCancelInstruction());
         }
 
@@ -342,7 +341,7 @@
         public async Task BetIdIsUpdatedWhenOrderIsReplaced()
         {
             var order = new LimitOrderBuilder(12345, Side.Lay, 2, 0.5);
-            await this.SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS");
+            await SetResults(new List<LimitOrderBuilder> { order }, "SUCCESS");
             Assert.Equal("2", order.Object.BetId);
         }
 
@@ -358,7 +357,7 @@
                 order2,
                 order3,
             };
-            await this.SetResults(limitOrders, "SUCCESS");
+            await SetResults(limitOrders, "SUCCESS");
             Assert.Equal("4", order1.Object.BetId);
             Assert.Equal("5", order2.Object.BetId);
             Assert.Equal("6", order3.Object.BetId);
@@ -373,10 +372,10 @@
             var limitOrder = new LimitOrderBuilder(selectionId, side, price, size);
             var limitOrder2 = new LimitOrderBuilder(1, Side.Back, 2, 10);
             var limitOrders = new List<LimitOrderBuilder> { limitOrder, limitOrder2 };
-            await this.SetResults(limitOrders, "SUCCESS", "EXECUTABLE");
+            await SetResults(limitOrders, "SUCCESS", "EXECUTABLE");
             var cancelInstruction = $"{{\"marketId\":\"MarketId\",\"instructions\":[{limitOrder.Object.ToCancelInstruction()},{limitOrder2.Object.ToCancelInstruction()}]}}";
-            await this.orderService.Cancel("MarketId", limitOrders.Select(o => o.Object.BetId).ToList());
-            Assert.Equal(cancelInstruction, this.service.SentParameters["cancelOrders"]);
+            await _orderService.Cancel("MarketId", limitOrders.Select(o => o.Object.BetId).ToList());
+            Assert.Equal(cancelInstruction, _service.SentParameters["cancelOrders"]);
         }
 
         [Fact]
@@ -384,8 +383,8 @@
         {
             var limitOrder = new LimitOrderBuilder(123, Side.Lay, 2.5, 9.99);
             var instruction = new LimitOrderBuilder(987, Side.Back, 5.5, 11.99).PlaceInstructionReportJson("1", "SUCCESS", "SUCCESS");
-            this.SetPlaceReturnContent(instruction);
-            await this.orderService.Place("MarketId", new List<LimitOrder> { limitOrder.Object });
+            SetPlaceReturnContent(instruction);
+            await _orderService.Place("MarketId", new List<LimitOrder> { limitOrder.Object });
         }
 
         [Fact]
@@ -393,7 +392,7 @@
         {
             var order = new LimitOrderBuilder(12345, Side.Back, 2, 9.99);
             var limitOrders = new List<LimitOrderBuilder> { order };
-            await this.SetResults(limitOrders, "FAILURE");
+            await SetResults(limitOrders, "FAILURE");
 
             Assert.Equal("TEST_ERROR", order.Object.ErrorCode);
         }
@@ -892,7 +891,7 @@
 
             instructions = instructions.Remove(instructions.Length - 1, 1);
 
-            this.SetPlaceReturnContent(instructions);
+            SetPlaceReturnContent(instructions);
 
             var replaceInstructions = string.Empty;
             var originalBetId = 0;
@@ -907,22 +906,22 @@
             {
                 replaceInstructions = replaceInstructions.Remove(replaceInstructions.Length - 1, 1);
 
-                this.SetReplaceReturnContent(replaceInstructions);
+                SetReplaceReturnContent(replaceInstructions);
             }
 
-            await this.orderService.Place("MarketId", placeInstructions.Select(p => p.Object).ToList());
+            await _orderService.Place("MarketId", placeInstructions.Select(p => p.Object).ToList());
         }
 
         private void SetPlaceReturnContent(string instructions)
         {
-            this.service.WithReturnContent(
+            _service.WithReturnContent(
                 "placeOrders",
                 $"{{\"marketId\":\"MarketId\",\"instructionReports\":[{instructions}], \"status\":\"SUCCESS\"}}");
         }
 
         private void SetReplaceReturnContent(string replaceInstructions)
         {
-            this.service.WithReturnContent(
+            _service.WithReturnContent(
                 "replaceOrders",
                 $"{{\"marketId\":\"MarketId\",\"instructionReports\":[{replaceInstructions}], \"status\":\"SUCCESS\"}}");
         }

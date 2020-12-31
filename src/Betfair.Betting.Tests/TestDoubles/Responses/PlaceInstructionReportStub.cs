@@ -1,12 +1,12 @@
+using System;
+using System.Globalization;
+using System.Runtime.Serialization;
+using Betfair.Betting.Tests.TestDoubles.Requests;
+using Utf8Json;
+using Utf8Json.Resolvers;
+
 namespace Betfair.Betting.Tests.TestDoubles.Responses
 {
-    using System;
-    using System.Globalization;
-    using System.Runtime.Serialization;
-    using Betfair.Betting.Tests.TestDoubles.Requests;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
-
     public class PlaceInstructionReportStub
     {
         public PlaceInstructionReportStub(
@@ -15,14 +15,14 @@ namespace Betfair.Betting.Tests.TestDoubles.Responses
             string status,
             string orderStatus)
         {
-            this.Instruction = instruction;
-            this.BetId = betId;
-            this.Status = status;
-            this.OrderStatus = orderStatus;
-            this.PlacedDate = DateTime.Parse("2013-10-30T14:22:47.000Z", new CultureInfo(1));
-            this.AveragePriceMatched = instruction?.LimitOrder.Price;
-            this.SizeMatched = instruction?.LimitOrder.Size;
-            this.ErrorCode = "TEST_ERROR";
+            Instruction = instruction;
+            BetId = betId;
+            Status = status;
+            OrderStatus = orderStatus;
+            PlacedDate = DateTime.Parse("2013-10-30T14:22:47.000Z", new CultureInfo(1));
+            AveragePriceMatched = instruction?.LimitOrder.Price;
+            SizeMatched = instruction?.LimitOrder.Size;
+            ErrorCode = "TEST_ERROR";
         }
 
         [DataMember(Name = "status", EmitDefaultValue = false)]
