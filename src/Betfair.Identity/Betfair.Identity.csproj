@@ -15,6 +15,7 @@ There is no need to install this package seperatly.</Description>
 
   <ItemGroup>
     <AdditionalFiles Include="..\CodeMetricsConfig.txt" Link="CodeMetricsConfig.txt" />
+    <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>

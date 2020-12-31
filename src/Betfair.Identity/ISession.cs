@@ -1,7 +1,7 @@
-﻿namespace Betfair.Identity
-{
-    using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
+namespace Betfair.Identity
+{
     public interface ISession
     {
         string AppKey { get; }
