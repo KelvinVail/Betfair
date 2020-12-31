@@ -1,28 +1,24 @@
-﻿namespace Betfair.Core.Tests
-{
-    using System;
-    using System.Net.Http;
-    using System.Threading.Tasks;
-    using Betfair.Core.Tests.TestDoubles;
-    using Betfair.Exchange.Interfaces;
-    using Xunit;
+﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Betfair.Core.Tests.TestDoubles;
+using Betfair.Exchange.Interfaces;
+using Xunit;
 
+namespace Betfair.Core.Tests
+{
     public class ExchangeServiceTests : IDisposable
     {
-        private readonly HttpMessageHandlerMock httpMessageHandler = new HttpMessageHandlerMock();
-
-        private readonly SessionStub session = new SessionStub();
-
-        private readonly LoggerSpy log = new LoggerSpy();
-
-        private readonly ExchangeService exchange;
-
-        private bool disposedValue;
+        private readonly HttpMessageHandlerMock _httpMessageHandler = new HttpMessageHandlerMock();
+        private readonly SessionStub _session = new SessionStub();
+        private readonly LoggerSpy _log = new LoggerSpy();
+        private readonly ExchangeService _exchange;
+        private bool _disposedValue;
 
         public ExchangeServiceTests()
         {
-            this.exchange = new ExchangeService(this.session, this.log);
-            this.exchange.WithHandler(this.httpMessageHandler.Build());
+            _exchange = new ExchangeService(_session, _log);
+            _exchange.WithHandler(_httpMessageHandler.Build());
         }
 
         [Fact]
@@ -43,15 +39,15 @@
         [InlineData("account")]
         public async Task TheSpecifiedEndpointIsCalled(string endpoint)
         {
-            await this.exchange.SendAsync<string>(endpoint, "method", "parameters");
-            this.httpMessageHandler.VerifyRequestUri(new Uri($"https://api.betfair.com/exchange/{endpoint}/json-rpc/v1"));
+            await _exchange.SendAsync<string>(endpoint, "method", "parameters");
+            _httpMessageHandler.VerifyRequestUri(new Uri($"https://api.betfair.com/exchange/{endpoint}/json-rpc/v1"));
         }
 
         [Fact]
         public async Task OnDisposeHttpClientIsDisposed()
         {
-            this.exchange.Dispose();
-            await Assert.ThrowsAsync<ObjectDisposedException>(() => this.exchange.SendAsync<dynamic>("endpoint", "method", "parameters"));
+            _exchange.Dispose();
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => _exchange.SendAsync<dynamic>("endpoint", "method", "parameters"));
         }
 
         [Fact]
@@ -63,8 +59,8 @@
         [Fact]
         public async Task KeepAliveIsInHttpRequestHeader()
         {
-            await this.exchange.SendAsync<dynamic>("endpoint", "method", "parameters");
-            this.httpMessageHandler.VerifyHeaderValues("Connection", "keep-alive");
+            await _exchange.SendAsync<dynamic>("endpoint", "method", "parameters");
+            _httpMessageHandler.VerifyHeaderValues("Connection", "keep-alive");
         }
 
         [Theory]
@@ -73,16 +69,16 @@
         [InlineData("NewToken")]
         public async Task SessionTokenIsInHttpRequestHeader(string token)
         {
-            this.session.Token = token;
-            await this.exchange.SendAsync<dynamic>("endpoint", "method", "parameters");
-            this.httpMessageHandler.VerifyHeaderValues("X-Authentication", token);
+            _session.Token = token;
+            await _exchange.SendAsync<dynamic>("endpoint", "method", "parameters");
+            _httpMessageHandler.VerifyHeaderValues("X-Authentication", token);
         }
 
         [Fact]
         public async Task AppKeyIsInHttpRequestHeader()
         {
-            await this.exchange.SendAsync<dynamic>("endpoint", "method", "parameters");
-            this.httpMessageHandler.VerifyHeaderValues("X-Application", "AppKey");
+            await _exchange.SendAsync<dynamic>("endpoint", "method", "parameters");
+            _httpMessageHandler.VerifyHeaderValues("X-Application", "AppKey");
         }
 
         [Theory]
@@ -90,11 +86,11 @@
         [InlineData("placeOrder", "{\"selectionId\":12345}")]
         public async Task HttpRequestContentBodyIsSet(string method, string parameters)
         {
-            await this.exchange.SendAsync<dynamic>("endpoint", method, parameters);
+            await _exchange.SendAsync<dynamic>("endpoint", method, parameters);
             var expected = "{\"jsonrpc\":\"2.0\"," +
                            $"\"method\":\"SportsAPING/v1.0/{method}\"," +
                            $"\"id\":1,\"params\":{parameters}}}";
-            this.httpMessageHandler.VerifyRequestContent(expected);
+            _httpMessageHandler.VerifyRequestContent(expected);
         }
 
         [Theory]
@@ -102,13 +98,13 @@
         [InlineData("placeOrder", "{\"selectionId\":12345}")]
         public async Task HttpRequestContentBodyIsLogged(string method, string parameters)
         {
-            await this.exchange.SendAsync<dynamic>("endpoint", method, parameters);
+            await _exchange.SendAsync<dynamic>("endpoint", method, parameters);
             var request = "{\"jsonrpc\":\"2.0\"," +
                            $"\"method\":\"SportsAPING/v1.0/{method}\"," +
                            $"\"id\":1,\"params\":{parameters}}}";
             var expected = $"Betfair API called: {request}.";
 
-            Assert.Contains(expected, this.log.MessageList.Values);
+            Assert.Contains(expected, _log.MessageList.Values);
         }
 
         [Fact]
@@ -123,9 +119,9 @@
             var response = "{\"jsonrpc\":\"2.0\",\"result\":" +
                            result.ToJson() +
                            ",\"id\":1}";
-            this.httpMessageHandler.WithReturnContent(response);
-            using var local = new ExchangeService(this.session, this.log);
-            local.WithHandler(this.httpMessageHandler.Build());
+            _httpMessageHandler.WithReturnContent(response);
+            using var local = new ExchangeService(_session, _log);
+            local.WithHandler(_httpMessageHandler.Build());
             var actual = await local.SendAsync<ExchangeResponseStub>("endpoint", "method", "parameters");
             Assert.Equal(result.ToJson(), actual.ToJson());
         }
@@ -144,15 +140,15 @@
             var response = "{\"jsonrpc\":\"2.0\",\"result\":" +
                            result.ToJson() +
                            ",\"id\":1}";
-            this.httpMessageHandler.WithReturnContent(response);
-            using var local = new ExchangeService(this.session, this.log);
-            local.WithHandler(this.httpMessageHandler.Build());
+            _httpMessageHandler.WithReturnContent(response);
+            using var local = new ExchangeService(_session, _log);
+            local.WithHandler(_httpMessageHandler.Build());
 
             var actual = await local.SendAsync<ExchangeResponseStub>("endpoint", "method", "parameters");
 
             var expected = $"Betfair API responded: {{\"result\":{actual.ToJson()}}}.";
 
-            Assert.Equal(expected, this.log.LastMessage);
+            Assert.Equal(expected, _log.LastMessage);
         }
 
         [Theory]
@@ -171,9 +167,9 @@
                                 "\"errorDetails\":\"\"}," +
                                 "\"exceptionname\":\"APINGException\"}}," +
                                 "\"id\":1}";
-            this.httpMessageHandler.WithReturnContent(errorResponse);
-            var local = new ExchangeService(this.session, this.log);
-            local.WithHandler(this.httpMessageHandler.Build());
+            _httpMessageHandler.WithReturnContent(errorResponse);
+            var local = new ExchangeService(_session, _log);
+            local.WithHandler(_httpMessageHandler.Build());
             var ex = await Assert.ThrowsAsync<HttpRequestException>(() => local.SendAsync<ExchangeResponseStub>("endpoint", "method", "parameters"));
             Assert.Equal(code, ex.Message);
             local.Dispose();
@@ -181,21 +177,21 @@
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (this.disposedValue) return;
+            if (_disposedValue) return;
             if (disposing)
             {
-                this.httpMessageHandler.Dispose();
+                _httpMessageHandler.Dispose();
             }
 
-            this.exchange.Dispose();
+            _exchange.Dispose();
 
-            this.disposedValue = true;
+            _disposedValue = true;
         }
     }
 }

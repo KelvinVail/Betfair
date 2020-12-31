@@ -1,47 +1,46 @@
-﻿namespace Betfair.Core
-{
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Net.Http;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
-    using Betfair.Exchange.Interfaces;
-    using Betfair.Identity;
-    using Microsoft.Extensions.Logging;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Betfair.Exchange.Interfaces;
+using Betfair.Identity;
+using Microsoft.Extensions.Logging;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
+namespace Betfair.Core
+{
     public sealed class ExchangeService : IExchangeService, IDisposable
     {
-        private readonly ISession session;
-        private readonly ILogger log;
-
-        private readonly ExchangeClient client = new ExchangeClient(new Uri("https://api.betfair.com/exchange/"));
+        private readonly ISession _session;
+        private readonly ILogger _log;
+        private readonly ExchangeClient _client = new ExchangeClient(new Uri("https://api.betfair.com/exchange/"));
 
         public ExchangeService(ISession session, ILogger log)
         {
-            this.session = session;
-            this.log = log;
+            _session = session;
+            _log = log;
         }
 
         public ExchangeService WithHandler(HttpClientHandler handler)
         {
-            this.client.WithHandler(handler);
+            _client.WithHandler(handler);
             return this;
         }
 
         public async Task<T> SendAsync<T>(string endpoint, string betfairMethod, string parameters)
         {
-            var request = await this.GetRequest(endpoint, betfairMethod, parameters);
-            var response = await this.client.SendAsync<ExchangeResponse<T>>(request);
-            this.LogResponse(response.ToJson());
+            var request = await GetRequest(endpoint, betfairMethod, parameters);
+            var response = await _client.SendAsync<ExchangeResponse<T>>(request);
+            LogResponse(response.ToJson());
             if (!string.IsNullOrEmpty(response.Error?.ToString())) throw new HttpRequestException(response.Error.Data.Exception.ErrorCode);
             return response.Result;
         }
 
         public void Dispose()
         {
-            this.client.Dispose();
+            _client.Dispose();
         }
 
         private static string GetBody(string method, string parameters)
@@ -54,24 +53,24 @@
         private async Task<HttpRequestMessage> GetRequest(string endpoint, string method, string parameters)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/json-rpc/v1");
-            request.Headers.Add("X-Authentication", await this.session.GetTokenAsync());
-            request.Headers.Add("X-Application", this.session.AppKey);
+            request.Headers.Add("X-Authentication", await _session.GetTokenAsync());
+            request.Headers.Add("X-Application", _session.AppKey);
 
             var body = GetBody(method, parameters);
             request.Content = new StringContent(body);
-            this.LogRequest(body);
+            LogRequest(body);
 
             return request;
         }
 
         private void LogRequest(string requestString)
         {
-            this.log.LogInformation($"Betfair API called: {requestString}.");
+            _log.LogInformation($"Betfair API called: {requestString}.");
         }
 
         private void LogResponse(string responseString)
         {
-            this.log.LogInformation($"Betfair API responded: {responseString}.");
+            _log.LogInformation($"Betfair API responded: {responseString}.");
         }
 
         [SuppressMessage(

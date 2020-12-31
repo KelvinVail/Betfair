@@ -1,36 +1,30 @@
-﻿namespace Betfair.Core
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Net.Http;
-    using System.Runtime.Serialization;
-    using System.Security.Authentication;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Threading.Tasks;
-    using Betfair.Identity;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Net.Http;
+using System.Runtime.Serialization;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Betfair.Identity;
 
+namespace Betfair.Core
+{
     public sealed class Session : ISession, IDisposable
     {
-        private readonly ExchangeClient client = new ExchangeClient(new Uri("https://identitysso.betfair.com"));
-
-        private readonly string username;
-
-        private readonly string password;
-
-        private string sessionToken;
-
-        private DateTime sessionCreateTime;
-
-        private HttpClientHandler clientHandler;
-
-        private X509Certificate2 certificate;
+        private readonly ExchangeClient _client = new ExchangeClient(new Uri("https://identitysso.betfair.com"));
+        private readonly string _username;
+        private readonly string _password;
+        private string _sessionToken;
+        private DateTime _sessionCreateTime;
+        private HttpClientHandler _clientHandler;
+        private X509Certificate2 _certificate;
 
         public Session(string appKey, string username, string password)
         {
-            this.AppKey = Validate(appKey, nameof(appKey));
-            this.username = Validate(username, nameof(username));
-            this.password = Validate(password, nameof(password));
+            AppKey = Validate(appKey, nameof(appKey));
+            _username = Validate(username, nameof(username));
+            _password = Validate(password, nameof(password));
         }
 
         public string AppKey { get; }
@@ -39,61 +33,61 @@
 
         public TimeSpan KeepAliveOffset { get; set; } = TimeSpan.FromHours(-1);
 
-        public DateTime SessionExpiryTime => this.sessionCreateTime + this.SessionTimeout;
+        public DateTime SessionExpiryTime => _sessionCreateTime + SessionTimeout;
 
-        public bool IsSessionValid => !string.IsNullOrEmpty(this.sessionToken) && !this.SessionExpired;
+        public bool IsSessionValid => !string.IsNullOrEmpty(_sessionToken) && !SessionExpired;
 
-        private bool SessionExpired => this.SessionExpiryTime <= DateTime.UtcNow;
+        private bool SessionExpired => SessionExpiryTime <= DateTime.UtcNow;
 
-        private bool SessionAboutToExpire => this.SessionExpiryTime + this.KeepAliveOffset <= DateTime.UtcNow;
+        private bool SessionAboutToExpire => SessionExpiryTime + KeepAliveOffset <= DateTime.UtcNow;
 
         public Session WithHandler(HttpClientHandler handler)
         {
-            this.clientHandler = handler;
-            this.client.WithHandler(this.clientHandler);
+            _clientHandler = handler;
+            _client.WithHandler(_clientHandler);
             return this;
         }
 
         public Session WithCert(X509Certificate2 cert)
         {
-            this.certificate = cert;
-            this.clientHandler.ClientCertificates.Add(cert);
+            _certificate = cert;
+            _clientHandler.ClientCertificates.Add(cert);
             return this;
         }
 
         public async Task LoginAsync()
         {
-            var request = this.GetLoginRequest();
-            this.sessionToken = await this.GetSessionFromBetfairAsync(request);
-            this.sessionCreateTime = DateTime.UtcNow;
+            var request = GetLoginRequest();
+            _sessionToken = await GetSessionFromBetfairAsync(request);
+            _sessionCreateTime = DateTime.UtcNow;
         }
 
         public async Task LogoutAsync()
         {
-            var request = this.GetRequest("logout");
-            this.sessionToken = await this.GetSessionFromBetfairAsync(request);
-            this.sessionCreateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
+            var request = GetRequest("logout");
+            _sessionToken = await GetSessionFromBetfairAsync(request);
+            _sessionCreateTime = DateTime.Parse("0001-01-01T00:00:00.0000000", new DateTimeFormatInfo());
         }
 
         public async Task KeepAliveAsync()
         {
-            var request = this.GetRequest("keepAlive");
-            this.sessionToken = await this.GetSessionFromBetfairAsync(request);
-            this.sessionCreateTime = DateTime.UtcNow;
+            var request = GetRequest("keepAlive");
+            _sessionToken = await GetSessionFromBetfairAsync(request);
+            _sessionCreateTime = DateTime.UtcNow;
         }
 
         public async Task<string> GetTokenAsync()
         {
-            await this.LoginIfSessionNotValidAsync();
-            await this.LoginIfSessionExpiredAsync();
-            await this.KeepAliveIfAboutToExpireAsync();
+            await LoginIfSessionNotValidAsync();
+            await LoginIfSessionExpiredAsync();
+            await KeepAliveIfAboutToExpireAsync();
 
-            return this.sessionToken;
+            return _sessionToken;
         }
 
         public void Dispose()
         {
-            this.client.Dispose();
+            _client.Dispose();
         }
 
         private static string Validate(string value, string name)
@@ -104,11 +98,11 @@
 
         private HttpRequestMessage GetLoginRequest()
         {
-            var requestUri = this.certificate == null ? "api/login" : "https://identitysso-cert.betfair.com/api/certlogin";
+            var requestUri = _certificate == null ? "api/login" : "https://identitysso-cert.betfair.com/api/certlogin";
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            request.Headers.Add("X-Application", this.AppKey);
+            request.Headers.Add("X-Application", AppKey);
             request.Content = new FormUrlEncodedContent(
-                new Dictionary<string, string> { { "username", this.username }, { "password", this.password } });
+                new Dictionary<string, string> { { "username", _username }, { "password", _password } });
 
             return request;
         }
@@ -116,32 +110,32 @@
         private HttpRequestMessage GetRequest(string requestUri)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, $"api/{requestUri}");
-            request.Headers.Add("X-Authentication", this.sessionToken);
+            request.Headers.Add("X-Authentication", _sessionToken);
             return request;
         }
 
         private async Task LoginIfSessionNotValidAsync()
         {
-            if (!this.IsSessionValid)
-                await this.LoginAsync();
+            if (!IsSessionValid)
+                await LoginAsync();
         }
 
         private async Task LoginIfSessionExpiredAsync()
         {
-            if (this.SessionExpired)
-                await this.LoginAsync();
+            if (SessionExpired)
+                await LoginAsync();
         }
 
         private async Task KeepAliveIfAboutToExpireAsync()
         {
-            if (this.SessionAboutToExpire)
-                await this.KeepAliveAsync();
+            if (SessionAboutToExpire)
+                await KeepAliveAsync();
         }
 
         private async Task<string> GetSessionFromBetfairAsync(HttpRequestMessage request)
         {
-            var session = await this.client.SendAsync<LoginResponse>(request);
-            session.Validate();
+            var session = await _client.SendAsync<LoginResponse>(request);
+            session.ValidateResponse();
             return session.GetToken;
         }
 
@@ -152,7 +146,7 @@
         [DataContract]
         private sealed class LoginResponse
         {
-            internal string GetToken => this.Token ?? this.SessionToken;
+            internal string GetToken => Token ?? SessionToken;
 
             [DataMember(Name = "token", EmitDefaultValue = false)]
             private string Token { get; set; }
@@ -169,11 +163,11 @@
             [DataMember(Name = "error", EmitDefaultValue = false)]
             private string Error { get; set; }
 
-            private string GetStatus => this.Status ?? this.LoginStatus;
+            private string GetStatus => Status ?? LoginStatus;
 
-            internal void Validate()
+            internal void ValidateResponse()
             {
-                if (this.GetStatus != "SUCCESS") throw new AuthenticationException($"{this.GetStatus}: {this.Error ?? "NONE"}");
+                if (GetStatus != "SUCCESS") throw new AuthenticationException($"{GetStatus}: {Error ?? "NONE"}");
             }
         }
     }
