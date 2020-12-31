@@ -1,33 +1,33 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class OrderRunnerChangeStub : OrderRunnerChange
     {
         public OrderRunnerChangeStub(long selectionId = 12345)
         {
-            this.SelectionId = selectionId;
+            SelectionId = selectionId;
         }
 
         public OrderRunnerChangeStub WithMatchedBack(double? price, double? size)
         {
-            this.MatchedBacks ??= new List<List<double?>>();
-            this.MatchedBacks.Add(new List<double?> { price, size });
+            MatchedBacks ??= new List<List<double?>>();
+            MatchedBacks.Add(new List<double?> { price, size });
             return this;
         }
 
         public OrderRunnerChangeStub WithMatchedLay(double? price, double? size)
         {
-            this.MatchedLays ??= new List<List<double?>>();
-            this.MatchedLays.Add(new List<double?> { price, size });
+            MatchedLays ??= new List<List<double?>>();
+            MatchedLays.Add(new List<double?> { price, size });
             return this;
         }
 
         public OrderRunnerChangeStub WithUnmatchedLay(
             double? price, double? size, string betId = "1", long? placedDate = 0)
         {
-            this.UnmatchedOrders ??= new List<UnmatchedOrder>();
+            UnmatchedOrders ??= new List<UnmatchedOrder>();
             var uo = new UnmatchedOrder
             {
                 BetId = betId,
@@ -36,14 +36,14 @@
                 SizeRemaining = size,
                 PlacedDate = placedDate,
             };
-            this.UnmatchedOrders.Add(uo);
+            UnmatchedOrders.Add(uo);
             return this;
         }
 
         public OrderRunnerChangeStub WithUnmatchedBack(
             double? price, double? size, string betId = "1", long? placedDate = 0, string orderStatus = "E")
         {
-            this.UnmatchedOrders ??= new List<UnmatchedOrder>();
+            UnmatchedOrders ??= new List<UnmatchedOrder>();
             var uo = new UnmatchedOrder
             {
                 BetId = betId,
@@ -53,7 +53,7 @@
                 PlacedDate = placedDate,
                 OrderStatus = orderStatus,
             };
-            this.UnmatchedOrders.Add(uo);
+            UnmatchedOrders.Add(uo);
             return this;
         }
     }

@@ -1,9 +1,9 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Threading.Tasks;
-    using Betfair.Betting;
-    using Betfair.Stream.Responses;
+﻿using System.Threading.Tasks;
+using Betfair.Betting;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class OrderManagerSpy : OrderManagerBase
     {
         public OrderManagerSpy(IOrderService orderService)
@@ -15,23 +15,23 @@
 
         public bool OnMarketCloseCalled { get; private set; }
 
-        public MarketCache MarketCache => this.Market;
+        public MarketCache MarketCache => Market;
 
         public override async Task OnChange(ChangeMessage change)
         {
-            this.LastChangeMessage = change;
+            LastChangeMessage = change;
             await Task.CompletedTask;
         }
 
         public override async Task OnMarketClose()
         {
             await Task.Delay(100);
-            this.OnMarketCloseCalled = true;
+            OnMarketCloseCalled = true;
         }
 
         public bool CanAccessOrderService()
         {
-            this.OrderService.CancelAll("Test");
+            OrderService.CancelAll("Test");
             return true;
         }
     }

@@ -1,14 +1,14 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using System.Threading;
-    using Betfair.Betting;
-    using Betfair.Stream;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using System.Threading;
+using Betfair.Betting;
+using Betfair.Stream;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class StrategySpy : StrategyBase
     {
-        private List<LimitOrder> orders;
+        private List<LimitOrder> _orders;
 
         public override MarketDataFilter DataFilter { get; } = new MarketDataFilter();
 
@@ -21,37 +21,37 @@
         public override List<LimitOrder> GetOrders(
             MarketChange marketChange, double stake)
         {
-            this.MarketUpdateCount += 1;
-            this.LastMarketChange = marketChange;
-            this.Stake = stake;
-            return this.orders;
+            MarketUpdateCount += 1;
+            LastMarketChange = marketChange;
+            Stake = stake;
+            return _orders;
         }
 
         public StrategySpy WithOrder(LimitOrder o)
         {
-            this.orders ??= new List<LimitOrder>();
-            this.orders.Add(o);
+            _orders ??= new List<LimitOrder>();
+            _orders.Add(o);
             return this;
         }
 
         public string LinkedMarketId()
         {
-            return this.Market.MarketId;
+            return Market.MarketId;
         }
 
         public int RunnerCount()
         {
-            return this.Market.Runners.Count;
+            return Market.Runners.Count;
         }
 
         public long? LastPublishedTime()
         {
-            return this.Market.LastPublishedTime;
+            return Market.LastPublishedTime;
         }
 
         public CancellationToken Token()
         {
-            return this.CancellationToken;
+            return CancellationToken;
         }
     }
 }

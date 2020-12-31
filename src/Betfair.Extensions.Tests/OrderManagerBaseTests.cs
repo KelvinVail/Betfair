@@ -1,36 +1,35 @@
-﻿namespace Betfair.Extensions.Tests
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Betfair.Betting;
-    using Betfair.Extensions.Tests.TestDoubles;
-    using Xunit;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Betfair.Betting;
+using Betfair.Extensions.Tests.TestDoubles;
+using Xunit;
 
+namespace Betfair.Extensions.Tests
+{
     public class OrderManagerBaseTests
     {
-        private readonly OrderServiceSpy orderService = new OrderServiceSpy();
-
-        private readonly OrderManagerSpy orderManager;
+        private readonly OrderServiceSpy _orderService = new OrderServiceSpy();
+        private readonly OrderManagerSpy _orderManager;
 
         public OrderManagerBaseTests()
         {
-            this.orderManager = new OrderManagerSpy(this.orderService);
-            this.orderManager.LinkToMarket(new MarketCache("1.2345"));
+            _orderManager = new OrderManagerSpy(_orderService);
+            _orderManager.LinkToMarket(new MarketCache("1.2345"));
         }
 
         [Fact]
         public void CanBeLinkedToAMarket()
         {
-            Assert.Equal("1.2345", this.orderManager.MarketCache.MarketId);
+            Assert.Equal("1.2345", _orderManager.MarketCache.MarketId);
         }
 
         [Fact]
         public async Task PlaceCallsOrderService()
         {
             var order = new LimitOrder(1, Side.Back, 2.5, 9.99);
-            await this.orderManager.Place(new List<LimitOrder> { order });
-            Assert.Contains(order, this.orderService.LastOrdersPlaced);
+            await _orderManager.Place(new List<LimitOrder> { order });
+            Assert.Contains(order, _orderService.LastOrdersPlaced);
         }
 
         [Theory]
@@ -38,10 +37,10 @@
         [InlineData("9.8765")]
         public async Task PlaceOrdersUsesMarketIdFromCache(string marketId)
         {
-            this.orderManager.LinkToMarket(new MarketCache(marketId));
+            _orderManager.LinkToMarket(new MarketCache(marketId));
             var order = new LimitOrder(1, Side.Back, 2.5, 9.99);
-            await this.orderManager.Place(new List<LimitOrder> { order });
-            Assert.Equal(marketId, this.orderService.MarketId);
+            await _orderManager.Place(new List<LimitOrder> { order });
+            Assert.Equal(marketId, _orderService.MarketId);
         }
 
         [Theory]
@@ -49,30 +48,30 @@
         [InlineData("OtherRef")]
         public async Task StrategyRefCanBeSet(string strategyRef)
         {
-            this.orderManager.LinkToMarket(new MarketCache("1.2345"));
+            _orderManager.LinkToMarket(new MarketCache("1.2345"));
             var order = new LimitOrder(1, Side.Back, 2.5, 9.99);
-            await this.orderManager.Place(new List<LimitOrder> { order }, strategyRef);
-            Assert.Equal(strategyRef, this.orderService.StrategyRef);
+            await _orderManager.Place(new List<LimitOrder> { order }, strategyRef);
+            Assert.Equal(strategyRef, _orderService.StrategyRef);
         }
 
         [Fact]
         public void OrderServiceIsProtected()
         {
-            Assert.True(this.orderManager.CanAccessOrderService());
+            Assert.True(_orderManager.CanAccessOrderService());
         }
 
         [Fact]
         public async Task DoNotPlaceOrdersIfOrderListIsEmpty()
         {
-            await this.orderManager.Place(new List<LimitOrder>());
-            Assert.DoesNotContain("P", this.orderService.Actions, StringComparison.CurrentCulture);
+            await _orderManager.Place(new List<LimitOrder>());
+            Assert.DoesNotContain("P", _orderService.Actions, StringComparison.CurrentCulture);
         }
 
         [Fact]
         public async Task DoNotPlaceOrdersIfOrderListIsNull()
         {
-            await this.orderManager.Place(null);
-            Assert.DoesNotContain("P", this.orderService.Actions, StringComparison.CurrentCulture);
+            await _orderManager.Place(null);
+            Assert.DoesNotContain("P", _orderService.Actions, StringComparison.CurrentCulture);
         }
     }
 }

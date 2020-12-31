@@ -1,17 +1,16 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Betfair.Stream;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Betfair.Stream;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class SubscriptionSpy : ISubscription
     {
-        private int messagesToProcess;
-
-        private CancellationTokenSource tokenSource;
+        private int _messagesToProcess;
+        private CancellationTokenSource _tokenSource;
 
         public string Actions { get; private set; }
 
@@ -32,9 +31,9 @@
                 Operation = "mcm",
                 ChangeType = "mc",
                 MarketChanges = new List<MarketChange> { marketChange },
-                PublishTime = this.PublishTime,
+                PublishTime = PublishTime,
             };
-            this.Messages.Add(change);
+            Messages.Add(change);
             return this;
         }
 
@@ -45,9 +44,9 @@
                 Operation = "mcm",
                 ChangeType = "mc",
                 MarketChanges = marketChanges.ToList(),
-                PublishTime = this.PublishTime,
+                PublishTime = PublishTime,
             };
-            this.Messages.Add(change);
+            Messages.Add(change);
             return this;
         }
 
@@ -58,51 +57,51 @@
                 Operation = "orc",
                 ChangeType = "oc",
                 OrderChanges = new List<OrderChange> { orderChange },
-                PublishTime = this.PublishTime,
+                PublishTime = PublishTime,
             };
-            this.Messages.Add(change);
+            Messages.Add(change);
             return this;
         }
 
         public void CancelAfterThisManyMessages(int messages, CancellationTokenSource source)
         {
-            this.messagesToProcess = messages;
-            this.tokenSource = source;
+            _messagesToProcess = messages;
+            _tokenSource = source;
         }
 
         public void Connect()
         {
-            this.Actions += "C";
+            Actions += "C";
         }
 
         public async Task Authenticate()
         {
-            this.Actions += "A";
+            Actions += "A";
             await Task.CompletedTask;
         }
 
         public async Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter)
         {
-            this.Actions += "S";
-            this.MarketId = marketFilter?.MarketIds?.SingleOrDefault();
-            this.Fields = dataFilter?.Fields;
-            this.LadderLevels = dataFilter?.LadderLevels;
+            Actions += "S";
+            MarketId = marketFilter?.MarketIds?.SingleOrDefault();
+            Fields = dataFilter?.Fields;
+            LadderLevels = dataFilter?.LadderLevels;
             await Task.CompletedTask;
         }
 
         public async Task SubscribeToOrders()
         {
-            this.Actions += "O";
+            Actions += "O";
             await Task.CompletedTask;
         }
 
         public async IAsyncEnumerable<ChangeMessage> GetChanges()
         {
-            foreach (var changeMessage in this.Messages)
+            foreach (var changeMessage in Messages)
             {
-                this.Actions += "M";
-                this.messagesToProcess -= 1;
-                if (this.messagesToProcess <= 0) this.tokenSource?.Cancel();
+                Actions += "M";
+                _messagesToProcess -= 1;
+                if (_messagesToProcess <= 0) _tokenSource?.Cancel();
                 var result = await Task.FromResult(changeMessage);
                 yield return result;
             }
@@ -110,7 +109,7 @@
 
         public void Disconnect()
         {
-            this.Actions += "D";
+            Actions += "D";
         }
     }
 }

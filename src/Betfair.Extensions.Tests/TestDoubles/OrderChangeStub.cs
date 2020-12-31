@@ -1,19 +1,19 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class OrderChangeStub : OrderChange
     {
         public OrderChangeStub(string marketId = "1.2345")
         {
-            this.MarketId = marketId;
+            MarketId = marketId;
         }
 
         public OrderChangeStub WithOrderRunnerChange(OrderRunnerChange orc)
         {
-            this.OrderRunnerChanges ??= new List<OrderRunnerChange>();
-            this.OrderRunnerChanges.Add(orc);
+            OrderRunnerChanges ??= new List<OrderRunnerChange>();
+            OrderRunnerChanges.Add(orc);
             return this;
         }
     }

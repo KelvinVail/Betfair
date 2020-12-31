@@ -1,24 +1,24 @@
-﻿namespace Betfair.Extensions.Tests
-{
-    using System;
-    using System.Linq;
-    using Betfair.Stream.Responses;
-    using Xunit;
+﻿using System;
+using System.Linq;
+using Betfair.Stream.Responses;
+using Xunit;
 
+namespace Betfair.Extensions.Tests
+{
     public class UnmatchedOrdersTests
     {
-        private readonly UnmatchedOrders unmatchedOrders = new UnmatchedOrders();
+        private readonly UnmatchedOrders _unmatchedOrders = new UnmatchedOrders();
 
         [Fact]
         public void OnUpdateExceptsAnUnmatchedOrder()
         {
-            this.unmatchedOrders.Update(new UnmatchedOrder { BetId = "1" });
+            _unmatchedOrders.Update(new UnmatchedOrder { BetId = "1" });
         }
 
         [Fact]
         public void OnUpdateThrowIfUnmatchedOrderIsNull()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() => this.unmatchedOrders.Update(null));
+            var ex = Assert.Throws<ArgumentNullException>(() => _unmatchedOrders.Update(null));
             Assert.Equal("unmatchedOrder", ex.ParamName);
         }
 
@@ -26,7 +26,7 @@
         public void OnUpdateThrowIfBetIdIsNull()
         {
             var ex = Assert.Throws<ArgumentNullException>(
-                () => this.unmatchedOrders.Update(new UnmatchedOrder()));
+                () => _unmatchedOrders.Update(new UnmatchedOrder()));
             Assert.Equal("unmatchedOrder", ex.ParamName);
             Assert.StartsWith("BetId should not be null.", ex.Message, StringComparison.InvariantCulture);
         }
@@ -40,9 +40,9 @@
             string orderStatus,
             double sizeRemaining)
         {
-            this.AddUnmatchedOrder(betId, side, orderStatus, sizeRemaining);
+            AddUnmatchedOrder(betId, side, orderStatus, sizeRemaining);
 
-            var order = this.unmatchedOrders.ToList().Single();
+            var order = _unmatchedOrders.ToList().Single();
 
             AssertOrderIsEqual(betId, side, orderStatus, sizeRemaining, order);
         }
@@ -56,10 +56,10 @@
             string orderStatus,
             double sizeRemaining)
         {
-            this.AddUnmatchedOrder("999", "B", "E", 45.24);
-            this.AddUnmatchedOrder(betId, side, orderStatus, sizeRemaining);
+            AddUnmatchedOrder("999", "B", "E", 45.24);
+            AddUnmatchedOrder(betId, side, orderStatus, sizeRemaining);
 
-            var orders = this.unmatchedOrders.ToList();
+            var orders = _unmatchedOrders.ToList();
             Assert.Equal(2, orders.Count);
 
             var order = orders.Single(w => w.BetId == betId);
@@ -75,10 +75,10 @@
             string orderStatus,
             double sizeRemaining)
         {
-            this.AddUnmatchedOrder(betId, side, orderStatus, 1000);
-            this.AddUnmatchedOrder(betId, side, orderStatus, sizeRemaining);
+            AddUnmatchedOrder(betId, side, orderStatus, 1000);
+            AddUnmatchedOrder(betId, side, orderStatus, sizeRemaining);
 
-            var order = this.unmatchedOrders.ToList().Single();
+            var order = _unmatchedOrders.ToList().Single();
 
             AssertOrderIsEqual(betId, side, orderStatus, sizeRemaining, order);
         }
@@ -86,23 +86,23 @@
         [Fact]
         public void OnUpdateRemoveTheOrderIfItIsCompleted()
         {
-            this.AddUnmatchedOrder("1", "B", "E", 9.99);
-            var order = this.unmatchedOrders.ToList().Single();
+            AddUnmatchedOrder("1", "B", "E", 9.99);
+            var order = _unmatchedOrders.ToList().Single();
             AssertOrderIsEqual("1", "B", "E", 9.99, order);
 
-            this.AddUnmatchedOrder("1", "B", "EC", 9.99);
+            AddUnmatchedOrder("1", "B", "EC", 9.99);
 
-            Assert.Empty(this.unmatchedOrders.ToList());
+            Assert.Empty(_unmatchedOrders.ToList());
         }
 
         [Fact]
         public void OnUpdateOnlyCompletedOrdersAreRemoved()
         {
-            this.AddUnmatchedOrder("1", "B", "E", 9.99);
-            this.AddUnmatchedOrder("2", "L", "E", 20.50);
-            this.AddUnmatchedOrder("1", "B", "EC", 9.99);
+            AddUnmatchedOrder("1", "B", "E", 9.99);
+            AddUnmatchedOrder("2", "L", "E", 20.50);
+            AddUnmatchedOrder("1", "B", "EC", 9.99);
 
-            var order = this.unmatchedOrders.ToList().Single();
+            var order = _unmatchedOrders.ToList().Single();
 
             AssertOrderIsEqual("2", "L", "E", 20.50, order);
         }
@@ -110,8 +110,8 @@
         [Fact]
         public void OnUpdateDoNotAddOrderIfItIsComplete()
         {
-            this.AddUnmatchedOrder("1", "B", "EC", 9.99);
-            Assert.Empty(this.unmatchedOrders.ToList());
+            AddUnmatchedOrder("1", "B", "EC", 9.99);
+            Assert.Empty(_unmatchedOrders.ToList());
         }
 
         private static void AssertOrderIsEqual(
@@ -137,7 +137,7 @@
                 SizeRemaining = sizeRemaining,
             };
 
-            this.unmatchedOrders.Update(uo);
+            _unmatchedOrders.Update(uo);
         }
     }
 }

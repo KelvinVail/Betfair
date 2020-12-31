@@ -1,9 +1,9 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Betfair.Betting;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Betfair.Betting;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class OrderServiceSpy : IOrderService
     {
         public List<LimitOrder> LastOrdersPlaced { get; private set; }
@@ -16,22 +16,22 @@
 
         public async Task Place(string marketId, List<LimitOrder> orders, string strategyRef = null)
         {
-            this.MarketId = marketId;
-            this.StrategyRef = strategyRef;
-            this.LastOrdersPlaced = orders;
-            this.Actions += "P";
+            MarketId = marketId;
+            StrategyRef = strategyRef;
+            LastOrdersPlaced = orders;
+            Actions += "P";
             await Task.CompletedTask;
         }
 
         public async Task Cancel(string marketId, List<string> betIds)
         {
-            this.Actions += "c";
+            Actions += "c";
             await Task.CompletedTask;
         }
 
         public async Task CancelAll(string marketId)
         {
-            this.Actions += "C";
+            Actions += "C";
             await Task.CompletedTask;
         }
     }

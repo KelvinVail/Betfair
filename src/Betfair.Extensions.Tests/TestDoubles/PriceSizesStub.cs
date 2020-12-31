@@ -1,13 +1,13 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class PriceSizesStub : List<List<double?>>
     {
         public PriceSizesStub WithPriceSize(double? price, double? size)
         {
             var priceSize = new List<double?> { price, size };
-            this.Add(priceSize);
+            Add(priceSize);
             return this;
         }
     }

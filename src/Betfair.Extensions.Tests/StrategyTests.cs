@@ -1,31 +1,29 @@
-﻿namespace Betfair.Extensions.Tests
-{
-    using System.Collections.Generic;
-    using System.Threading;
-    using Betfair.Betting;
-    using Betfair.Extensions.Tests.TestDoubles;
-    using Betfair.Stream;
-    using Betfair.Stream.Responses;
-    using Xunit;
+﻿using System.Collections.Generic;
+using System.Threading;
+using Betfair.Betting;
+using Betfair.Extensions.Tests.TestDoubles;
+using Betfair.Stream;
+using Betfair.Stream.Responses;
+using Xunit;
 
+namespace Betfair.Extensions.Tests
+{
     public class StrategyTests : StrategyBase
     {
-        private readonly MarketCache market = new MarketCache("1.2345");
-
-        private readonly ChangeMessageStub change = new ChangeMessageStub();
-
-        private MarketChange mChange;
+        private readonly MarketCache _market = new MarketCache("1.2345");
+        private readonly ChangeMessageStub _change = new ChangeMessageStub();
+        private MarketChange _mChange;
 
         public StrategyTests()
         {
-            this.LinkToMarket(this.market);
+            LinkToMarket(_market);
         }
 
         public override MarketDataFilter DataFilter { get; } = new MarketDataFilter().WithBestPrices();
 
         public override List<LimitOrder> GetOrders(MarketChange marketChange, double stake)
         {
-            this.mChange = marketChange;
+            _mChange = marketChange;
             return new List<LimitOrder>();
         }
 
@@ -38,13 +36,13 @@
         [Fact]
         public void CanBeLinkedToAMarket()
         {
-            Assert.Equal("1.2345", this.Market.MarketId);
+            Assert.Equal("1.2345", Market.MarketId);
         }
 
         [Fact]
         public void StrategyIsAskedForOrdersWhenTheMarketHasBeenUpdated()
         {
-            var orders = this.GetOrders(new MarketChange(), 0);
+            var orders = GetOrders(new MarketChange(), 0);
             Assert.IsType<List<LimitOrder>>(orders);
         }
 
@@ -56,19 +54,19 @@
                 .WithBestAvailableToBack(0, 2.5, 100)
                 .WithBestAvailableToLay(0, 3.0, 200);
             var mc = new MarketChangeStub().WithRunnerChange(rc);
-            this.market.OnChange(this.change.WithMarketChange(mc).Build());
+            _market.OnChange(_change.WithMarketChange(mc).Build());
 
-            this.GetOrders(mc, 0);
-            Assert.Single(this.Market.Runners);
-            Assert.Equal(mc, this.mChange);
+            GetOrders(mc, 0);
+            Assert.Single(Market.Runners);
+            Assert.Equal(mc, _mChange);
         }
 
         [Fact]
         public void PassCancellationToken()
         {
             using var source = new CancellationTokenSource();
-            this.WithCancellationToken(source.Token);
-            Assert.Equal(source.Token, this.CancellationToken);
+            WithCancellationToken(source.Token);
+            Assert.Equal(source.Token, CancellationToken);
         }
     }
 }

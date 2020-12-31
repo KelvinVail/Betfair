@@ -1,43 +1,43 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class MarketChangeStub : MarketChange
     {
         public MarketChangeStub()
         {
-            this.MarketId = "1.2345";
+            MarketId = "1.2345";
         }
 
         public MarketChangeStub WithMarketId(string marketId)
         {
-            this.MarketId = marketId;
+            MarketId = marketId;
             return this;
         }
 
         public MarketChangeStub WithMarketDefinition(MarketDefinition marketDefinition)
         {
-            this.MarketDefinition = marketDefinition;
+            MarketDefinition = marketDefinition;
             return this;
         }
 
         public MarketChangeStub WithTotalMatched(double totalMatched)
         {
-            this.TotalAmountMatched = totalMatched;
+            TotalAmountMatched = totalMatched;
             return this;
         }
 
         public MarketChangeStub WithRunnerChange(RunnerChange runnerChange)
         {
-            this.RunnerChanges ??= new List<RunnerChange>();
-            this.RunnerChanges.Add(runnerChange);
+            RunnerChanges ??= new List<RunnerChange>();
+            RunnerChanges.Add(runnerChange);
             return this;
         }
 
         public MarketChangeStub WithReplaceCache()
         {
-            this.ReplaceCache = true;
+            ReplaceCache = true;
             return this;
         }
     }

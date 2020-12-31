@@ -1,8 +1,8 @@
-﻿namespace Betfair.Extensions.Tests.TestDoubles
-{
-    using System.Threading.Tasks;
-    using Betfair.Identity;
+﻿using System.Threading.Tasks;
+using Betfair.Identity;
 
+namespace Betfair.Extensions.Tests.TestDoubles
+{
     public class SessionStub : ISession
     {
         public string AppKey { get; } = "AppKey";
