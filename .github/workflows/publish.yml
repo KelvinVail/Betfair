@@ -16,14 +16,14 @@ jobs:
       with:
         dotnet-version: 3.1.101
     - name: Build with dotnet
-      run: dotnet build --configuration Release
+      run: dotnet build src --configuration Release
     - name: Test
-      run: dotnet test
+      run: dotnet test src
       # Publish Identity
     - name: publish Betfair.Identity on version change
       uses: brandedoutcast/publish-nuget@v2.5.3
       with:
-        PROJECT_FILE_PATH: Betfair.Identity/Betfair.Identity.csproj
+        PROJECT_FILE_PATH: src/Betfair.Identity/Betfair.Identity.csproj
         TAG_COMMIT: false
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
@@ -31,7 +31,7 @@ jobs:
     - name: publish Betfair.Core on version change
       uses: brandedoutcast/publish-nuget@v2.5.3
       with:
-        PROJECT_FILE_PATH: Betfair.Core/Betfair.Core.csproj
+        PROJECT_FILE_PATH: src/Betfair.Core/Betfair.Core.csproj
         TAG_COMMIT: false
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
@@ -39,7 +39,7 @@ jobs:
     - name: publish Betfair.Stream on version change
       uses: brandedoutcast/publish-nuget@v2.5.3
       with:
-        PROJECT_FILE_PATH: Betfair.Stream/Betfair.Stream.csproj
+        PROJECT_FILE_PATH: src/Betfair.Stream/Betfair.Stream.csproj
         TAG_COMMIT: false
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
@@ -47,7 +47,7 @@ jobs:
     - name: publish Betfair.Betting on version change
       uses: brandedoutcast/publish-nuget@v2.5.3
       with:
-        PROJECT_FILE_PATH: Betfair.Betting/Betfair.Betting.csproj
+        PROJECT_FILE_PATH: src/Betfair.Betting/Betfair.Betting.csproj
         TAG_COMMIT: false
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
@@ -55,7 +55,7 @@ jobs:
     - name: publish Betfair.Interfaces on version change
       uses: brandedoutcast/publish-nuget@v2.5.3
       with:
-        PROJECT_FILE_PATH: Betfair.Exchange.Interfaces/Betfair.Exchange.Interfaces.csproj
+        PROJECT_FILE_PATH: src/Betfair.Exchange.Interfaces/Betfair.Exchange.Interfaces.csproj
         TAG_COMMIT: false
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
@@ -63,7 +63,7 @@ jobs:
     - name: publish Betfair.Extensions on version change
       uses: brandedoutcast/publish-nuget@v2.5.3
       with:
-        PROJECT_FILE_PATH: Betfair.Extensions/Betfair.Extensions.csproj
+        PROJECT_FILE_PATH: src/Betfair.Extensions/Betfair.Extensions.csproj
         TAG_COMMIT: false
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
