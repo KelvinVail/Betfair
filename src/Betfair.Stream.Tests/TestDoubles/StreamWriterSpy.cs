@@ -1,9 +1,9 @@
-﻿namespace Betfair.Stream.Tests.TestDoubles
-{
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
+namespace Betfair.Stream.Tests.TestDoubles
+{
     public sealed class StreamWriterSpy : StreamWriter
     {
         public StreamWriterSpy()
@@ -21,15 +21,15 @@
         {
             await Task.Run(() =>
                 {
-                    this.LastLineWritten = value;
-                    this.AllLinesWritten.Add(value);
+                    LastLineWritten = value;
+                    AllLinesWritten.Add(value);
                 });
         }
 
         public void ClearPreviousResults()
         {
-            this.LastLineWritten = null;
-            this.AllLinesWritten = new List<string>();
+            LastLineWritten = null;
+            AllLinesWritten = new List<string>();
         }
     }
 }

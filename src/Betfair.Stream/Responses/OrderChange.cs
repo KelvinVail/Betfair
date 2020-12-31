@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
 namespace Betfair.Stream.Responses
 {
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-
     [DataContract]
     public class OrderChange
     {

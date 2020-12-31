@@ -1,19 +1,19 @@
-﻿namespace Betfair.Stream.Tests
-{
-    using System;
-    using System.Net.Security;
-    using System.Threading.Tasks;
-    using Betfair.Stream.Tests.TestDoubles;
-    using Xunit;
+﻿using System;
+using System.Net.Security;
+using System.Threading.Tasks;
+using Betfair.Stream.Tests.TestDoubles;
+using Xunit;
 
+namespace Betfair.Stream.Tests
+{
     public sealed class SubscriptionSetupTests : SubscriptionTests
     {
-        private readonly TcpClientSpy tcpClient;
+        private readonly TcpClientSpy _tcpClient;
 
         public SubscriptionSetupTests()
         {
-            this.tcpClient = new TcpClientSpy("stream-api-integration.betfair.com", 443);
-            this.Subscription.WithTcpClient(this.tcpClient);
+            _tcpClient = new TcpClientSpy("stream-api-integration.betfair.com", 443);
+            Subscription.WithTcpClient(_tcpClient);
         }
 
         [Fact]
@@ -25,43 +25,43 @@
         [Fact]
         public void OnWithTcpClientThrowIfNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => this.Subscription.WithTcpClient(null));
+            var exception = Assert.Throws<ArgumentNullException>(() => Subscription.WithTcpClient(null));
             Assert.Equal("client", exception.ParamName);
         }
 
         [Fact]
         public void OnConnectReceiveBufferSizeIsSet()
         {
-            this.Subscription.Connect();
-            Assert.Equal(1024 * 1000 * 2, this.tcpClient.ReceiveBufferSize);
+            Subscription.Connect();
+            Assert.Equal(1024 * 1000 * 2, _tcpClient.ReceiveBufferSize);
         }
 
         [Fact]
         public void OnConnectSendTimeoutIsThirtySeconds()
         {
-            this.Subscription.Connect();
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.tcpClient.SendTimeout);
+            Subscription.Connect();
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, _tcpClient.SendTimeout);
         }
 
         [Fact]
         public void OnConnectReceiveTimeoutIsThirtySeconds()
         {
-            this.Subscription.Connect();
-            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, this.tcpClient.ReceiveTimeout);
+            Subscription.Connect();
+            Assert.Equal(TimeSpan.FromSeconds(30).TotalMilliseconds, _tcpClient.ReceiveTimeout);
         }
 
         [Fact]
         public void OnConnectTcpClientIsConnectedToBetfairHost()
         {
-            this.Subscription.Connect();
-            Assert.Equal("stream-api.betfair.com", this.tcpClient.Host);
+            Subscription.Connect();
+            Assert.Equal("stream-api.betfair.com", _tcpClient.Host);
         }
 
         [Fact]
         public void OnConnectTcpClientIsConnectedToBetfairPort()
         {
-            this.Subscription.Connect();
-            Assert.Equal(443, this.tcpClient.Port);
+            Subscription.Connect();
+            Assert.Equal(443, _tcpClient.Port);
         }
 
         // This test creates a network connection, I haven't been able to figure out
@@ -69,7 +69,7 @@
         [Fact]
         public void OnConnectReaderStreamIsAuthenticated()
         {
-            var connectedSubscription = new Subscription(this.Session);
+            var connectedSubscription = new Subscription(Session);
             connectedSubscription.Connect();
             var sslStream = (SslStream)connectedSubscription.Reader.BaseStream;
             Assert.True(sslStream.IsAuthenticated);
@@ -80,7 +80,7 @@
         [Fact]
         public void OnConnectWriterStreamIsAuthenticated()
         {
-            var connectedSubscription = new Subscription(this.Session);
+            var connectedSubscription = new Subscription(Session);
             connectedSubscription.Connect();
             var sslStream = (SslStream)connectedSubscription.Writer.BaseStream;
             Assert.True(sslStream.IsAuthenticated);
@@ -89,26 +89,26 @@
         [Fact]
         public void OnConnectWriterIsAutoFlushed()
         {
-            this.Subscription.Connect();
-            Assert.True(this.Subscription.Writer.AutoFlush);
+            Subscription.Connect();
+            Assert.True(Subscription.Writer.AutoFlush);
         }
 
         [Fact]
         public async Task OnStopConnectedIsFalse()
         {
-            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-            Assert.True(this.Subscription.Connected);
-            this.Subscription.Disconnect();
-            Assert.False(this.Subscription.Connected);
+            await SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            Assert.True(Subscription.Connected);
+            Subscription.Disconnect();
+            Assert.False(Subscription.Connected);
         }
 
         [Fact]
         public async Task OnStopTcpClientIsClosed()
         {
-            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-            Assert.True(this.Subscription.Connected);
-            this.Subscription.Disconnect();
-            Assert.False(this.tcpClient.Connected);
+            await SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            Assert.True(Subscription.Connected);
+            Subscription.Disconnect();
+            Assert.False(_tcpClient.Connected);
         }
     }
 }

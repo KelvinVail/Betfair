@@ -1,8 +1,8 @@
-﻿namespace Betfair.Stream.Tests.TestDoubles
-{
-    using System.Threading.Tasks;
-    using Betfair.Identity;
+﻿using System.Threading.Tasks;
+using Betfair.Identity;
 
+namespace Betfair.Stream.Tests.TestDoubles
+{
     public class SessionSpy : ISession
     {
         public int TimesGetSessionTokenAsyncCalled { get; private set; }
@@ -13,8 +13,8 @@
 
         public async Task<string> GetTokenAsync()
         {
-            this.TimesGetSessionTokenAsyncCalled++;
-            return await Task.Run(() => this.SessionToken);
+            TimesGetSessionTokenAsyncCalled++;
+            return await Task.Run(() => SessionToken);
         }
     }
 }

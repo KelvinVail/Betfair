@@ -1,16 +1,16 @@
-﻿namespace Betfair.Stream.Tests.TestDoubles
-{
-    using System.Runtime.Serialization;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
+﻿using System.Runtime.Serialization;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
+namespace Betfair.Stream.Tests.TestDoubles
+{
     [DataContract]
     public class SubscriptionMessageStub
     {
         public SubscriptionMessageStub(string operation, int id)
         {
-            this.Operation = operation;
-            this.Id = id;
+            Operation = operation;
+            Id = id;
         }
 
         [DataMember(Name = "op", EmitDefaultValue = false)]
@@ -33,25 +33,25 @@
 
         public SubscriptionMessageStub WithMarketFilter(MarketFilter marketFilter)
         {
-            this.MarketFilter = marketFilter;
+            MarketFilter = marketFilter;
             return this;
         }
 
         public SubscriptionMessageStub WithMarketDateFilter(MarketDataFilter marketDataFilter)
         {
-            this.MarketDataFilter = marketDataFilter;
+            MarketDataFilter = marketDataFilter;
             return this;
         }
 
         public SubscriptionMessageStub WithInitialClock(string initialClock)
         {
-            this.InitialClock = initialClock;
+            InitialClock = initialClock;
             return this;
         }
 
         public SubscriptionMessageStub WithClock(string clock)
         {
-            this.Clock = clock;
+            Clock = clock;
             return this;
         }
 

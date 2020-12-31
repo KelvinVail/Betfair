@@ -1,9 +1,9 @@
-﻿namespace Betfair.Stream
-{
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Stream
+{
     public interface ISubscription
     {
         void Connect();

@@ -1,8 +1,8 @@
+using System;
+using System.Runtime.Serialization;
+
 namespace Betfair.Stream.Responses
 {
-    using System;
-    using System.Runtime.Serialization;
-
     [DataContract]
     public class RunnerDefinition
     {

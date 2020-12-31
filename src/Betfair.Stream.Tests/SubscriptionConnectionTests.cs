@@ -1,18 +1,18 @@
-﻿namespace Betfair.Stream.Tests
-{
-    using System.Threading.Tasks;
-    using Betfair.Stream.Tests.TestDoubles;
-    using Utf8Json;
-    using Xunit;
+﻿using System.Threading.Tasks;
+using Betfair.Stream.Tests.TestDoubles;
+using Utf8Json;
+using Xunit;
 
+namespace Betfair.Stream.Tests
+{
     public sealed class SubscriptionConnectionTests : SubscriptionTests
     {
         [Fact]
         public async Task OnReadConnectionOperationConnectedIsTrue()
         {
-            Assert.False(this.Subscription.Connected);
-            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-            Assert.True(this.Subscription.Connected);
+            Assert.False(Subscription.Connected);
+            await SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            Assert.True(Subscription.Connected);
         }
 
         [Theory]
@@ -21,14 +21,14 @@
         [InlineData("RefreshedConnectionId")]
         public async Task OnReadConnectionOperationConnectionIdIsRecorded(string connectionId)
         {
-            await this.SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"{connectionId}\"}}");
-            Assert.Equal(connectionId, this.Subscription.ConnectionId);
+            await SendLineAsync($"{{\"op\":\"connection\",\"connectionId\":\"{connectionId}\"}}");
+            Assert.Equal(connectionId, Subscription.ConnectionId);
         }
 
         [Fact]
         public async Task OnReadStatusTimeoutOperationConnectedIsFalse()
         {
-            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            await SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
 
             var message =
                 "{\"op\":\"status\"," +
@@ -38,32 +38,32 @@
                 "\"connectionClosed\":true," +
                 "\"connectionId\":\"ConnectionId\"}";
 
-            await this.SendLineAsync(message);
-            Assert.False(this.Subscription.Connected);
+            await SendLineAsync(message);
+            Assert.False(Subscription.Connected);
         }
 
         [Fact]
         public async Task OnReadStatusUpdateConnectionStatusIsUpdated()
         {
-            await this.SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":false}");
-            Assert.True(this.Subscription.Connected);
+            await SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+            await SendLineAsync("{\"op\":\"status\",\"connectionClosed\":false}");
+            Assert.True(Subscription.Connected);
 
-            await this.SendLineAsync("{\"op\":\"status\",\"connectionClosed\":true}");
-            Assert.False(this.Subscription.Connected);
+            await SendLineAsync("{\"op\":\"status\",\"connectionClosed\":true}");
+            Assert.False(Subscription.Connected);
         }
 
         [Fact]
         public async Task OnReadHandleUnknownOperationWithoutThrowing()
         {
-            await this.SendLineAsync("{\"op\":\"unknown\"}");
+            await SendLineAsync("{\"op\":\"unknown\"}");
         }
 
         [Fact]
         public async Task OnAuthenticateGetSessionTokenIsCalled()
         {
-            await this.Subscription.Authenticate();
-            Assert.Equal(1, this.Session.TimesGetSessionTokenAsyncCalled);
+            await Subscription.Authenticate();
+            Assert.Equal(1, Session.TimesGetSessionTokenAsyncCalled);
         }
 
         [Fact]
@@ -71,11 +71,11 @@
         {
             var authMessage = JsonSerializer.ToJsonString(
                 new AuthenticationMessageStub(
-                    this.Session.AppKey,
-                    await this.Session.GetTokenAsync()));
+                    Session.AppKey,
+                    await Session.GetTokenAsync()));
 
-            await this.Subscription.Authenticate();
-            Assert.Equal(authMessage, this.Writer.LastLineWritten);
+            await Subscription.Authenticate();
+            Assert.Equal(authMessage, Writer.LastLineWritten);
         }
     }
 }

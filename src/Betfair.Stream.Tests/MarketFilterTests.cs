@@ -1,43 +1,43 @@
-﻿namespace Betfair.Stream.Tests
-{
-    using Xunit;
+﻿using Xunit;
 
+namespace Betfair.Stream.Tests
+{
     public class MarketFilterTests
     {
-        private readonly MarketFilter marketFilter = new MarketFilter();
+        private readonly MarketFilter _marketFilter = new MarketFilter();
 
         [Fact]
         public void WhenInitializedMarketIdsIsNull()
         {
-            Assert.Null(this.marketFilter.MarketIds);
+            Assert.Null(_marketFilter.MarketIds);
         }
 
         [Fact]
         public void CanBeInitializedWithMarketId()
         {
-            this.marketFilter.WithMarketId("1");
-            Assert.Contains("1", this.marketFilter.MarketIds);
+            _marketFilter.WithMarketId("1");
+            Assert.Contains("1", _marketFilter.MarketIds);
         }
 
         [Fact]
         public void CanBeInitializedWithMultipleMarketIds()
         {
-            this.marketFilter.WithMarketId("1").WithMarketId("2");
-            Assert.Contains("1", this.marketFilter.MarketIds);
-            Assert.Contains("2", this.marketFilter.MarketIds);
+            _marketFilter.WithMarketId("1").WithMarketId("2");
+            Assert.Contains("1", _marketFilter.MarketIds);
+            Assert.Contains("2", _marketFilter.MarketIds);
         }
 
         [Fact]
         public void WhenInitializedDoesNotAddDuplicateMarketIds()
         {
-            this.marketFilter.WithMarketId("1").WithMarketId("1");
-            Assert.Single(this.marketFilter.MarketIds);
+            _marketFilter.WithMarketId("1").WithMarketId("1");
+            Assert.Single(_marketFilter.MarketIds);
         }
 
         [Fact]
         public void WhenInitializedCountryCodesIsNull()
         {
-            Assert.Null(this.marketFilter.CountryCodes);
+            Assert.Null(_marketFilter.CountryCodes);
         }
 
         [Theory]
@@ -46,44 +46,44 @@
         [InlineData("GB")]
         public void CanBeInitializedWithCountryCodes(string countryCode)
         {
-            this.marketFilter.WithCountryCode(countryCode);
-            Assert.Contains(countryCode, this.marketFilter.CountryCodes);
+            _marketFilter.WithCountryCode(countryCode);
+            Assert.Contains(countryCode, _marketFilter.CountryCodes);
         }
 
         [Fact]
         public void CanBeInitializedWithMultipleCountryCodes()
         {
-            this.marketFilter.WithCountryCode("GB");
-            this.marketFilter.WithCountryCode("IE");
-            Assert.Contains("GB", this.marketFilter.CountryCodes);
-            Assert.Contains("IE", this.marketFilter.CountryCodes);
+            _marketFilter.WithCountryCode("GB");
+            _marketFilter.WithCountryCode("IE");
+            Assert.Contains("GB", _marketFilter.CountryCodes);
+            Assert.Contains("IE", _marketFilter.CountryCodes);
         }
 
         [Fact]
         public void WhenInitializedDoesNotAddDuplicateCountryCodes()
         {
-            this.marketFilter.WithCountryCode("GB");
-            this.marketFilter.WithCountryCode("GB");
-            Assert.Single(this.marketFilter.CountryCodes);
+            _marketFilter.WithCountryCode("GB");
+            _marketFilter.WithCountryCode("GB");
+            Assert.Single(_marketFilter.CountryCodes);
         }
 
         [Fact]
         public void WhenInitializedTurnInPlayEnabledIsNullByDefault()
         {
-            Assert.Null(this.marketFilter.TurnInPlayEnabled);
+            Assert.Null(_marketFilter.TurnInPlayEnabled);
         }
 
         [Fact]
         public void CanBeInitializedWithInPlayMarketsOnly()
         {
-            this.marketFilter.WithInPlayMarketsOnly();
-            Assert.True(this.marketFilter.TurnInPlayEnabled);
+            _marketFilter.WithInPlayMarketsOnly();
+            Assert.True(_marketFilter.TurnInPlayEnabled);
         }
 
         [Fact]
         public void WhenInitializedMarketTypesIsNull()
         {
-            Assert.Null(this.marketFilter.MarketTypes);
+            Assert.Null(_marketFilter.MarketTypes);
         }
 
         [Theory]
@@ -92,31 +92,31 @@
         [InlineData("HALF_TIME_SCORE")]
         public void CanBeInitializedWithMarketTypes(string marketType)
         {
-            this.marketFilter.WithMarketType(marketType);
-            Assert.Contains(marketType, this.marketFilter.MarketTypes);
+            _marketFilter.WithMarketType(marketType);
+            Assert.Contains(marketType, _marketFilter.MarketTypes);
         }
 
         [Fact]
         public void CanBeInitializedWithMultipleMarketTypes()
         {
-            this.marketFilter.WithMarketType("MATCH_ODDS");
-            this.marketFilter.WithMarketType("HALF_TIME_SCORE");
-            Assert.Contains("MATCH_ODDS", this.marketFilter.MarketTypes);
-            Assert.Contains("HALF_TIME_SCORE", this.marketFilter.MarketTypes);
+            _marketFilter.WithMarketType("MATCH_ODDS");
+            _marketFilter.WithMarketType("HALF_TIME_SCORE");
+            Assert.Contains("MATCH_ODDS", _marketFilter.MarketTypes);
+            Assert.Contains("HALF_TIME_SCORE", _marketFilter.MarketTypes);
         }
 
         [Fact]
         public void WhenInitializedDoesNotAddDuplicateMarketTypes()
         {
-            this.marketFilter.WithMarketType("MATCH_ODDS");
-            this.marketFilter.WithMarketType("MATCH_ODDS");
-            Assert.Single(this.marketFilter.MarketTypes);
+            _marketFilter.WithMarketType("MATCH_ODDS");
+            _marketFilter.WithMarketType("MATCH_ODDS");
+            Assert.Single(_marketFilter.MarketTypes);
         }
 
         [Fact]
         public void WhenInitializedVenuesIsNull()
         {
-            Assert.Null(this.marketFilter.Venues);
+            Assert.Null(_marketFilter.Venues);
         }
 
         [Theory]
@@ -125,31 +125,31 @@
         [InlineData("Epsom")]
         public void CanBeInitializedWithVenue(string venue)
         {
-            this.marketFilter.WithVenue(venue);
-            Assert.Contains(venue, this.marketFilter.Venues);
+            _marketFilter.WithVenue(venue);
+            Assert.Contains(venue, _marketFilter.Venues);
         }
 
         [Fact]
         public void CanBeInitializedWithMultipleVenues()
         {
-            this.marketFilter.WithVenue("Ascot");
-            this.marketFilter.WithVenue("Epsom");
-            Assert.Contains("Ascot", this.marketFilter.Venues);
-            Assert.Contains("Epsom", this.marketFilter.Venues);
+            _marketFilter.WithVenue("Ascot");
+            _marketFilter.WithVenue("Epsom");
+            Assert.Contains("Ascot", _marketFilter.Venues);
+            Assert.Contains("Epsom", _marketFilter.Venues);
         }
 
         [Fact]
         public void WhenInitializedDoesNotAddDuplicateVenues()
         {
-            this.marketFilter.WithVenue("Ascot");
-            this.marketFilter.WithVenue("Ascot");
-            Assert.Single(this.marketFilter.Venues);
+            _marketFilter.WithVenue("Ascot");
+            _marketFilter.WithVenue("Ascot");
+            Assert.Single(_marketFilter.Venues);
         }
 
         [Fact]
         public void WhenInitializedEventTypeIdsIsNull()
         {
-            Assert.Null(this.marketFilter.EventTypeIds);
+            Assert.Null(_marketFilter.EventTypeIds);
         }
 
         [Theory]
@@ -158,31 +158,31 @@
         [InlineData("7")]
         public void CanBeInitializedWithEventTypeId(string eventTypeId)
         {
-            this.marketFilter.WithEventTypeId(eventTypeId);
-            Assert.Contains(eventTypeId, this.marketFilter.EventTypeIds);
+            _marketFilter.WithEventTypeId(eventTypeId);
+            Assert.Contains(eventTypeId, _marketFilter.EventTypeIds);
         }
 
         [Fact]
         public void CanBeInitializedWithMultipleEventTypeIds()
         {
-            this.marketFilter.WithEventTypeId("1");
-            this.marketFilter.WithEventTypeId("2");
-            Assert.Contains("1", this.marketFilter.EventTypeIds);
-            Assert.Contains("2", this.marketFilter.EventTypeIds);
+            _marketFilter.WithEventTypeId("1");
+            _marketFilter.WithEventTypeId("2");
+            Assert.Contains("1", _marketFilter.EventTypeIds);
+            Assert.Contains("2", _marketFilter.EventTypeIds);
         }
 
         [Fact]
         public void WhenInitializedDoesNotAddDuplicateEventTypeIds()
         {
-            this.marketFilter.WithEventTypeId("1");
-            this.marketFilter.WithEventTypeId("1");
-            Assert.Single(this.marketFilter.EventTypeIds);
+            _marketFilter.WithEventTypeId("1");
+            _marketFilter.WithEventTypeId("1");
+            Assert.Single(_marketFilter.EventTypeIds);
         }
 
         [Fact]
         public void WhenInitializedEventIdsIsNull()
         {
-            Assert.Null(this.marketFilter.EventIds);
+            Assert.Null(_marketFilter.EventIds);
         }
 
         [Theory]
@@ -191,96 +191,96 @@
         [InlineData("98765")]
         public void CanBeInitializedWithEventId(string eventId)
         {
-            this.marketFilter.WithEventId(eventId);
-            Assert.Contains(eventId, this.marketFilter.EventIds);
+            _marketFilter.WithEventId(eventId);
+            Assert.Contains(eventId, _marketFilter.EventIds);
         }
 
         [Fact]
         public void CanBeInitializedWithMultipleEventIds()
         {
-            this.marketFilter.WithEventId("12345");
-            this.marketFilter.WithEventId("98765");
-            Assert.Contains("12345", this.marketFilter.EventIds);
-            Assert.Contains("98765", this.marketFilter.EventIds);
+            _marketFilter.WithEventId("12345");
+            _marketFilter.WithEventId("98765");
+            Assert.Contains("12345", _marketFilter.EventIds);
+            Assert.Contains("98765", _marketFilter.EventIds);
         }
 
         [Fact]
         public void WhenInitializedDoesNotAddDuplicateEventIds()
         {
-            this.marketFilter.WithEventId("12345");
-            this.marketFilter.WithEventId("12345");
-            Assert.Single(this.marketFilter.EventIds);
+            _marketFilter.WithEventId("12345");
+            _marketFilter.WithEventId("12345");
+            Assert.Single(_marketFilter.EventIds);
         }
 
         [Fact]
         public void WhenInitializedBspMarketIsNullByDefault()
         {
-            Assert.Null(this.marketFilter.BspMarket);
+            Assert.Null(_marketFilter.BspMarket);
         }
 
         [Fact]
         public void CanBeInitializedWithBspMarketsOnly()
         {
-            this.marketFilter.WithBspMarketsOnly();
-            Assert.True(this.marketFilter.BspMarket);
+            _marketFilter.WithBspMarketsOnly();
+            Assert.True(_marketFilter.BspMarket);
         }
 
         [Fact]
         public void WhenInitializedBettingTypesIsNull()
         {
-            Assert.Null(this.marketFilter.BettingTypes);
+            Assert.Null(_marketFilter.BettingTypes);
         }
 
         [Fact]
         public void CanBeInitializedWithBettingTypeOdds()
         {
-            this.marketFilter.WithBettingTypeOdds();
-            Assert.Contains("ODDS", this.marketFilter.BettingTypes);
+            _marketFilter.WithBettingTypeOdds();
+            Assert.Contains("ODDS", _marketFilter.BettingTypes);
         }
 
         [Fact]
         public void CanBeInitializedWithBettingTypeLine()
         {
-            this.marketFilter.WithBettingTypeLine();
-            Assert.Contains("LINE", this.marketFilter.BettingTypes);
+            _marketFilter.WithBettingTypeLine();
+            Assert.Contains("LINE", _marketFilter.BettingTypes);
         }
 
         [Fact]
         public void CanBeInitializedWithBettingTypeRange()
         {
-            this.marketFilter.WithBettingTypeRange();
-            Assert.Contains("RANGE", this.marketFilter.BettingTypes);
+            _marketFilter.WithBettingTypeRange();
+            Assert.Contains("RANGE", _marketFilter.BettingTypes);
         }
 
         [Fact]
         public void CanBeInitializedWithBettingTypeAsianHandicapDoubleLine()
         {
-            this.marketFilter.WithBettingTypeAsianHandicapDoubleLine();
-            Assert.Contains("ASIAN_HANDICAP_DOUBLE_LINE", this.marketFilter.BettingTypes);
+            _marketFilter.WithBettingTypeAsianHandicapDoubleLine();
+            Assert.Contains("ASIAN_HANDICAP_DOUBLE_LINE", _marketFilter.BettingTypes);
         }
 
         [Fact]
         public void CanBeInitializedWithBettingTypeAsianHandicapSingleLine()
         {
-            this.marketFilter.WithBettingTypeAsianHandicapSingleLine();
-            Assert.Contains("ASIAN_HANDICAP_SINGLE_LINE", this.marketFilter.BettingTypes);
+            _marketFilter.WithBettingTypeAsianHandicapSingleLine();
+            Assert.Contains("ASIAN_HANDICAP_SINGLE_LINE", _marketFilter.BettingTypes);
         }
 
         [Fact]
         public void CanBeInitializedWithMultipleBettingTypes()
         {
-            this.marketFilter.WithBettingTypeOdds();
-            this.marketFilter.WithBettingTypeLine();
-            Assert.Contains("ODDS", this.marketFilter.BettingTypes);
-            Assert.Contains("LINE", this.marketFilter.BettingTypes);
+            _marketFilter.WithBettingTypeOdds();
+            _marketFilter.WithBettingTypeLine();
+            Assert.Contains("ODDS", _marketFilter.BettingTypes);
+            Assert.Contains("LINE", _marketFilter.BettingTypes);
         }
 
         [Fact]
         public void WhenInitializedDoesNotAddDuplicateBettingTypes()
         {
-            this.marketFilter.WithBettingTypeOdds();
-            this.marketFilter.WithBettingTypeOdds();
-            Assert.Single(this.marketFilter.BettingTypes);
+            _marketFilter.WithBettingTypeOdds();
+            _marketFilter.WithBettingTypeOdds();
+            Assert.Single(_marketFilter.BettingTypes);
         }
     }
 }

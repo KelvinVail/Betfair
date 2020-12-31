@@ -1,29 +1,29 @@
-﻿namespace Betfair.Stream
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net.Security;
-    using System.Net.Sockets;
-    using System.Runtime.Serialization;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Betfair.Identity;
-    using Betfair.Stream.Responses;
-    using Utf8Json;
-    using Utf8Json.Resolvers;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
+using Betfair.Identity;
+using Betfair.Stream.Responses;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
+namespace Betfair.Stream
+{
     public sealed class Subscription : ISubscription
     {
-        private const string HostName = "stream-api.betfair.com";
-        private readonly ISession session;
-        private readonly Dictionary<int, SubscriptionMessage> subscriptionMessages = new Dictionary<int, SubscriptionMessage>();
-        private ITcpClient tcpClient = new ExchangeStreamClient();
-        private int requestId;
+        private const string _hostName = "stream-api.betfair.com";
+        private readonly ISession _session;
+        private readonly Dictionary<int, SubscriptionMessage> _subscriptionMessages = new Dictionary<int, SubscriptionMessage>();
+        private ITcpClient _tcpClient = new ExchangeStreamClient();
+        private int _requestId;
 
         public Subscription(ISession session)
         {
-            this.session = session;
+            _session = session;
         }
 
         public StreamReader Reader { get; set; }
@@ -37,79 +37,79 @@
         private Dictionary<string, Action<ChangeMessage>> ProcessMessageMap =>
             new Dictionary<string, Action<ChangeMessage>>
             {
-                { "connection", this.ProcessConnectionMessage },
-                { "status", this.ProcessStatusMessage },
+                { "connection", ProcessConnectionMessage },
+                { "status", ProcessStatusMessage },
             };
 
         public void WithTcpClient(ITcpClient client)
         {
-            this.tcpClient = client ?? throw new ArgumentNullException(nameof(client));
+            _tcpClient = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         public void Connect()
         {
-            var stream = GetSslStream(this.tcpClient);
-            this.Reader = new StreamReader(stream, Encoding.UTF8, false, this.tcpClient.ReceiveBufferSize);
-            this.Writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
+            var stream = GetSslStream(_tcpClient);
+            Reader = new StreamReader(stream, Encoding.UTF8, false, _tcpClient.ReceiveBufferSize);
+            Writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
         }
 
         public async Task Authenticate()
         {
-            var token = await this.session.GetTokenAsync();
-            this.requestId++;
-            var authMessage = GetAuthenticationMessage(this.session.AppKey, token, this.requestId);
-            await this.Writer.WriteLineAsync(authMessage);
+            var token = await _session.GetTokenAsync();
+            _requestId++;
+            var authMessage = GetAuthenticationMessage(_session.AppKey, token, _requestId);
+            await Writer.WriteLineAsync(authMessage);
         }
 
         public async Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter)
         {
-            this.requestId++;
-            var subscriptionMessage = new SubscriptionMessage("marketSubscription", this.requestId)
+            _requestId++;
+            var subscriptionMessage = new SubscriptionMessage("marketSubscription", _requestId)
                 .WithMarketFilter(marketFilter)
                 .WithMarketDataFilter(dataFilter);
-            await this.Writer.WriteLineAsync(subscriptionMessage.ToJson());
-            this.subscriptionMessages.Add(this.requestId, subscriptionMessage);
+            await Writer.WriteLineAsync(subscriptionMessage.ToJson());
+            _subscriptionMessages.Add(_requestId, subscriptionMessage);
         }
 
         public async Task SubscribeToOrders()
         {
-            this.requestId++;
-            var subscriptionMessage = new SubscriptionMessage("orderSubscription", this.requestId);
-            await this.Writer.WriteLineAsync(subscriptionMessage.ToJson());
-            this.subscriptionMessages.Add(this.requestId, subscriptionMessage);
+            _requestId++;
+            var subscriptionMessage = new SubscriptionMessage("orderSubscription", _requestId);
+            await Writer.WriteLineAsync(subscriptionMessage.ToJson());
+            _subscriptionMessages.Add(_requestId, subscriptionMessage);
         }
 
         public async Task Resubscribe()
         {
-            foreach (var m in this.subscriptionMessages)
-                await this.Writer.WriteLineAsync(m.Value.ToJson());
+            foreach (var m in _subscriptionMessages)
+                await Writer.WriteLineAsync(m.Value.ToJson());
         }
 
         public async IAsyncEnumerable<ChangeMessage> GetChanges()
         {
             string line;
-            while ((line = await this.Reader.ReadLineAsync()) != null)
+            while ((line = await Reader.ReadLineAsync()) != null)
             {
                 var message = JsonSerializer.Deserialize<ChangeMessage>(line);
-                this.ProcessMessage(message);
+                ProcessMessage(message);
                 yield return message;
             }
         }
 
         public void Disconnect()
         {
-            this.Connected = false;
-            this.tcpClient.Close();
+            Connected = false;
+            _tcpClient.Close();
         }
 
-        private static Stream GetSslStream(ITcpClient client)
+        private static System.IO.Stream GetSslStream(ITcpClient client)
         {
             client.ReceiveBufferSize = 1024 * 1000 * 2;
             client.SendTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
             client.ReceiveTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
-            client.Connect(HostName, 443);
+            client.Connect(_hostName, 443);
 
-            return client.GetSslStream(HostName);
+            return client.GetSslStream(_hostName);
         }
 
         private static string GetAuthenticationMessage(string appKey, string token, int requestId)
@@ -120,28 +120,28 @@
         private void ProcessMessage(ChangeMessage message)
         {
             message.SetArrivalTime(DateTime.UtcNow);
-            if (this.ProcessMessageMap.ContainsKey(message.Operation))
-                this.ProcessMessageMap[message.Operation](message);
-            this.SetClocks(message);
+            if (ProcessMessageMap.ContainsKey(message.Operation))
+                ProcessMessageMap[message.Operation](message);
+            SetClocks(message);
         }
 
         private void ProcessConnectionMessage(ChangeMessage message)
         {
-            this.ConnectionId = message.ConnectionId;
-            this.Connected = true;
+            ConnectionId = message.ConnectionId;
+            Connected = true;
         }
 
         private void ProcessStatusMessage(ChangeMessage message)
         {
             if (message.ConnectionClosed != null)
-                this.Connected = message.ConnectionClosed == false;
+                Connected = message.ConnectionClosed == false;
         }
 
         private void SetClocks(ChangeMessage message)
         {
             if (message.Id == null) return;
-            if (!this.subscriptionMessages.ContainsKey((int)message.Id)) return;
-            this.subscriptionMessages[(int)message.Id]
+            if (!_subscriptionMessages.ContainsKey((int)message.Id)) return;
+            _subscriptionMessages[(int)message.Id]
                 .WithInitialClock(message.InitialClock)
                 .WithClock(message.Clock);
         }
@@ -155,8 +155,8 @@
         {
             internal SubscriptionMessage(string operation, int id)
             {
-                this.Operation = operation;
-                this.Id = id;
+                Operation = operation;
+                Id = id;
             }
 
             [DataMember(Name = "op", EmitDefaultValue = false)]
@@ -180,27 +180,27 @@
             internal SubscriptionMessage WithMarketFilter(MarketFilter marketFilter)
             {
                 if (marketFilter != null)
-                    this.MarketFilter = marketFilter;
+                    MarketFilter = marketFilter;
                 return this;
             }
 
             internal SubscriptionMessage WithMarketDataFilter(MarketDataFilter marketDataFilter)
             {
                 if (marketDataFilter != null)
-                    this.MarketDataFilter = marketDataFilter;
+                    MarketDataFilter = marketDataFilter;
                 return this;
             }
 
             internal SubscriptionMessage WithInitialClock(string initialClock)
             {
                 if (initialClock == null) return this;
-                this.InitialClock = initialClock;
+                InitialClock = initialClock;
                 return this;
             }
 
             internal void WithClock(string clock)
             {
-                this.Clock = clock;
+                Clock = clock;
             }
 
             internal string ToJson()
@@ -211,9 +211,9 @@
 
         private sealed class ExchangeStreamClient : TcpClient, ITcpClient
         {
-            public Stream GetSslStream(string host)
+            public System.IO.Stream GetSslStream(string host)
             {
-                var stream = this.GetStream();
+                var stream = GetStream();
                 var sslStream = new SslStream(stream, false);
                 sslStream.AuthenticateAsClient(host);
                 return sslStream;

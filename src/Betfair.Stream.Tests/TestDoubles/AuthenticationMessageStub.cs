@@ -1,14 +1,14 @@
-﻿namespace Betfair.Stream.Tests.TestDoubles
-{
-    using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
+namespace Betfair.Stream.Tests.TestDoubles
+{
     [DataContract]
     public sealed class AuthenticationMessageStub
     {
         public AuthenticationMessageStub(string appKey, string session)
         {
-            this.AppKey = appKey;
-            this.SessionToken = session;
+            AppKey = appKey;
+            SessionToken = session;
         }
 
         [DataMember(Name = "op", EmitDefaultValue = false)]

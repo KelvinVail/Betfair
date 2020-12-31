@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
 namespace Betfair.Stream
 {
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-
     [DataContract]
     public class MarketFilter
     {
@@ -35,90 +35,90 @@ namespace Betfair.Stream
 
         public MarketFilter WithMarketId(string marketId)
         {
-            if (this.MarketIds == null) this.MarketIds = new HashSet<string>();
-            this.MarketIds.Add(marketId);
+            MarketIds ??= new HashSet<string>();
+            MarketIds.Add(marketId);
             return this;
         }
 
         public MarketFilter WithCountryCode(string countryCode)
         {
-            if (this.CountryCodes == null) this.CountryCodes = new HashSet<string>();
-            this.CountryCodes.Add(countryCode);
+            CountryCodes ??= new HashSet<string>();
+            CountryCodes.Add(countryCode);
             return this;
         }
 
         public MarketFilter WithInPlayMarketsOnly()
         {
-            this.TurnInPlayEnabled = true;
+            TurnInPlayEnabled = true;
             return this;
         }
 
         public MarketFilter WithMarketType(string marketType)
         {
-            if (this.MarketTypes == null) this.MarketTypes = new HashSet<string>();
-            this.MarketTypes.Add(marketType);
+            MarketTypes ??= new HashSet<string>();
+            MarketTypes.Add(marketType);
             return this;
         }
 
         public MarketFilter WithVenue(string venue)
         {
-            if (this.Venues == null) this.Venues = new HashSet<string>();
-            this.Venues.Add(venue);
+            Venues ??= new HashSet<string>();
+            Venues.Add(venue);
             return this;
         }
 
         public MarketFilter WithEventTypeId(string eventTypeId)
         {
-            if (this.EventTypeIds == null) this.EventTypeIds = new HashSet<string>();
-            this.EventTypeIds.Add(eventTypeId);
+            EventTypeIds ??= new HashSet<string>();
+            EventTypeIds.Add(eventTypeId);
             return this;
         }
 
         public MarketFilter WithEventId(string eventId)
         {
-            if (this.EventIds == null) this.EventIds = new HashSet<string>();
-            this.EventIds.Add(eventId);
+            EventIds ??= new HashSet<string>();
+            EventIds.Add(eventId);
             return this;
         }
 
         public MarketFilter WithBspMarketsOnly()
         {
-            this.BspMarket = true;
+            BspMarket = true;
             return this;
         }
 
         public MarketFilter WithBettingTypeOdds()
         {
-            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
-            this.BettingTypes.Add("ODDS");
+            BettingTypes ??= new HashSet<string>();
+            BettingTypes.Add("ODDS");
             return this;
         }
 
         public MarketFilter WithBettingTypeLine()
         {
-            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
-            this.BettingTypes.Add("LINE");
+            BettingTypes ??= new HashSet<string>();
+            BettingTypes.Add("LINE");
             return this;
         }
 
         public MarketFilter WithBettingTypeRange()
         {
-            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
-            this.BettingTypes.Add("RANGE");
+            BettingTypes ??= new HashSet<string>();
+            BettingTypes.Add("RANGE");
             return this;
         }
 
         public MarketFilter WithBettingTypeAsianHandicapDoubleLine()
         {
-            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
-            this.BettingTypes.Add("ASIAN_HANDICAP_DOUBLE_LINE");
+            BettingTypes ??= new HashSet<string>();
+            BettingTypes.Add("ASIAN_HANDICAP_DOUBLE_LINE");
             return this;
         }
 
         public MarketFilter WithBettingTypeAsianHandicapSingleLine()
         {
-            if (this.BettingTypes == null) this.BettingTypes = new HashSet<string>();
-            this.BettingTypes.Add("ASIAN_HANDICAP_SINGLE_LINE");
+            BettingTypes ??= new HashSet<string>();
+            BettingTypes.Add("ASIAN_HANDICAP_SINGLE_LINE");
             return this;
         }
     }

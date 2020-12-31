@@ -1,7 +1,7 @@
+using System.Runtime.Serialization;
+
 namespace Betfair.Stream.Responses
 {
-    using System.Runtime.Serialization;
-
     [DataContract]
     public class UnmatchedOrder
     {

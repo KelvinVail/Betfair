@@ -1,11 +1,11 @@
-﻿namespace Betfair.Stream.Tests
-{
-    using System;
-    using System.Globalization;
-    using System.Threading.Tasks;
-    using Betfair.Stream.Responses;
-    using Xunit;
+﻿using System;
+using System.Globalization;
+using System.Threading.Tasks;
+using Betfair.Stream.Responses;
+using Xunit;
 
+namespace Betfair.Stream.Tests
+{
     public sealed class SubscriptionChangeMessageTests : SubscriptionTests
     {
         [Theory]
@@ -19,7 +19,7 @@
         public async Task OnGetChangesChangeMessageIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"{property}\":{value}}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -33,7 +33,7 @@
         public async Task OnGetChangesMarketChangeIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"mc\":[{{\"{property}\":{value}}}]}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -70,7 +70,7 @@
         public async Task OnGetChangesMarketDefinitionIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"mc\":[{{\"marketDefinition\":{{\"{property}\":{value}}}}}]}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -93,7 +93,7 @@
         public async Task OnGetChangesRunnerChangeIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"mc\":[{{\"rc\":[{{\"{property}\":{value}}}]}}]}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -108,7 +108,7 @@
         public async Task OnGetChangesRunnerDefinitionIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"mc\":[{{\"marketDefinition\":{{\"runners\":[{{\"{property}\":{value}}}]}}}}]}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -120,7 +120,7 @@
         public async Task OnGetChangesOrderChangeIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"oc\":[{{\"{property}\":{value}}}]}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -134,7 +134,7 @@
         public async Task OnGetChangesOrderRunnerChangeIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"oc\":[{{\"orc\":[{{\"{property}\":{value}}}]}}]}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -160,7 +160,7 @@
         public async Task OnGetChangesUnmatchedOrdersIsDeserialized(string property, string value)
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"oc\":[{{\"orc\":[{{\"uo\":[{{\"{property}\":{value}}}]}}]}}]}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.StartsWith(receivedLine.Remove(receivedLine.Length - 1), message.ToJson(), StringComparison.CurrentCulture);
         }
 
@@ -177,7 +177,7 @@
         public async Task OnGetChangesArrivalTimeIsSet()
         {
             var receivedLine = $"{{\"op\":\"mcm\",\"pt\":1581707853123}}";
-            var message = await this.SendLineAsync(receivedLine);
+            var message = await SendLineAsync(receivedLine);
             Assert.NotNull(message.ArrivalTime);
         }
     }

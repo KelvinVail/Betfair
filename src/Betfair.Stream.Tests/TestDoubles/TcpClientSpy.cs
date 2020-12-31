@@ -1,13 +1,13 @@
-﻿namespace Betfair.Stream.Tests.TestDoubles
-{
-    using System.IO;
+﻿using System.IO;
 
+namespace Betfair.Stream.Tests.TestDoubles
+{
     public sealed class TcpClientSpy : ITcpClient
     {
         public TcpClientSpy(string host, int port)
         {
-            this.Host = host;
-            this.Port = port;
+            Host = host;
+            Port = port;
         }
 
         public string Host { get; private set; }
@@ -26,19 +26,19 @@
 
         public void Connect(string host, int port)
         {
-            this.Host = host;
-            this.Port = port;
-            this.Connected = true;
+            Host = host;
+            Port = port;
+            Connected = true;
         }
 
         public void Close()
         {
-            this.Connected = false;
+            Connected = false;
         }
 
         public System.IO.Stream GetSslStream(string host)
         {
-            this.TimeGetSslStreamCalled++;
+            TimeGetSslStreamCalled++;
             var ms = new MemoryStream();
             return ms;
         }
