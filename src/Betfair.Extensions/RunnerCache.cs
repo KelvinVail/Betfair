@@ -1,21 +1,19 @@
-﻿namespace Betfair.Extensions
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Betfair.Stream.Responses;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions
+{
     public sealed class RunnerCache
     {
-        private readonly PriceSizeLadder matchedBacks = new PriceSizeLadder();
-
-        private readonly PriceSizeLadder matchedLays = new PriceSizeLadder();
-
-        private readonly UnmatchedOrders unmatchedOrders = new UnmatchedOrders();
+        private readonly PriceSizeLadder _matchedBacks = new PriceSizeLadder();
+        private readonly PriceSizeLadder _matchedLays = new PriceSizeLadder();
+        private readonly UnmatchedOrders _unmatchedOrders = new UnmatchedOrders();
 
         public RunnerCache(long selectionId)
         {
-            this.SelectionId = selectionId;
+            SelectionId = selectionId;
         }
 
         public long SelectionId { get; }
@@ -36,46 +34,46 @@
 
         public double IfWin =>
             Math.Round(
-                this.matchedBacks.TotalReturn() - this.matchedLays.TotalReturn(), 2);
+                _matchedBacks.TotalReturn() - _matchedLays.TotalReturn(), 2);
 
         public double IfLose =>
             Math.Round(
-                this.matchedLays.TotalSize() - this.matchedBacks.TotalSize(), 2);
+                _matchedLays.TotalSize() - _matchedBacks.TotalSize(), 2);
 
         public double Profit { get; internal set; }
 
         public double UnmatchedLiability { get; private set; }
 
-        public IList<UnmatchedOrder> UnmatchedOrders => this.unmatchedOrders.ToList();
+        public IList<UnmatchedOrder> UnmatchedOrders => _unmatchedOrders.ToList();
 
         public void OnRunnerChange(RunnerChange runnerChange, long? lastUpdated)
         {
-            if (runnerChange?.SelectionId != this.SelectionId) return;
+            if (runnerChange?.SelectionId != SelectionId) return;
 
-            this.LastPublishTime = lastUpdated;
-            this.SetLastTradedPrice(runnerChange);
-            this.SetTotalMatched(runnerChange);
-            this.ProcessBestAvailableToBack(runnerChange.BestAvailableToBack);
-            this.ProcessBestAvailableToLay(runnerChange.BestAvailableToLay);
-            this.UpdateTradedLadder(runnerChange);
+            LastPublishTime = lastUpdated;
+            SetLastTradedPrice(runnerChange);
+            SetTotalMatched(runnerChange);
+            ProcessBestAvailableToBack(runnerChange.BestAvailableToBack);
+            ProcessBestAvailableToLay(runnerChange.BestAvailableToLay);
+            UpdateTradedLadder(runnerChange);
         }
 
         public void OnOrderChange(OrderRunnerChange orc)
         {
             if (orc is null) return;
-            if (orc.SelectionId != this.SelectionId) return;
-            this.matchedBacks.Update(orc.MatchedBacks, 0);
-            this.matchedLays.Update(orc.MatchedLays, 0);
-            this.UnmatchedLiability = 0;
-            orc.UnmatchedOrders?.ForEach(o => this.unmatchedOrders.Update(o));
-            this.UnmatchedOrders.ToList().ForEach(this.UpdateUnmatchedLiability);
+            if (orc.SelectionId != SelectionId) return;
+            _matchedBacks.Update(orc.MatchedBacks, 0);
+            _matchedLays.Update(orc.MatchedLays, 0);
+            UnmatchedLiability = 0;
+            orc.UnmatchedOrders?.ForEach(o => _unmatchedOrders.Update(o));
+            UnmatchedOrders.ToList().ForEach(UpdateUnmatchedLiability);
         }
 
         public void SetDefinition(RunnerDefinition definition)
         {
-            if (definition?.SelectionId != this.SelectionId) return;
+            if (definition?.SelectionId != SelectionId) return;
             if (definition.AdjustmentFactor is null) return;
-            this.AdjustmentFactor = (double)definition.AdjustmentFactor;
+            AdjustmentFactor = (double)definition.AdjustmentFactor;
         }
 
         private void UpdateUnmatchedLiability(UnmatchedOrder uo)
@@ -86,45 +84,45 @@
             if (uo.Price is null) return;
             var price = (double)uo.Price;
 
-            this.UnmatchedLiability +=
+            UnmatchedLiability +=
                 uo.Side == "B" ? sr : Math.Round((price * sr) - sr, 2);
         }
 
         private void UpdateTradedLadder(RunnerChange runnerChange)
         {
-            this.TradedLadder.Update(
-                runnerChange.Traded, this.LastPublishTime);
+            TradedLadder.Update(
+                runnerChange.Traded, LastPublishTime);
         }
 
         private void SetTotalMatched(RunnerChange runnerChange)
         {
-            this.TotalMatched = runnerChange.TotalMatched ?? this.TotalMatched;
+            TotalMatched = runnerChange.TotalMatched ?? TotalMatched;
         }
 
         private void SetLastTradedPrice(RunnerChange runnerChange)
         {
-            this.LastTradedPrice = runnerChange.LastTradedPrice ?? this.LastTradedPrice;
+            LastTradedPrice = runnerChange.LastTradedPrice ?? LastTradedPrice;
         }
 
         private void ProcessBestAvailableToBack(List<List<double?>> availableToBacks)
         {
-            availableToBacks?.ForEach(this.UpdateBestAvailableToBack);
+            availableToBacks?.ForEach(UpdateBestAvailableToBack);
         }
 
         private void UpdateBestAvailableToBack(List<double?> availableToBack)
         {
-            this.BestAvailableToBack.ProcessLevel(
+            BestAvailableToBack.ProcessLevel(
                 availableToBack.Select(d => d ?? 0).ToList());
         }
 
         private void ProcessBestAvailableToLay(List<List<double?>> availableToLays)
         {
-            availableToLays?.ForEach(this.UpdateBestAvailableToLay);
+            availableToLays?.ForEach(UpdateBestAvailableToLay);
         }
 
         private void UpdateBestAvailableToLay(List<double?> availableToLay)
         {
-            this.BestAvailableToLay.ProcessLevel(
+            BestAvailableToLay.ProcessLevel(
                 availableToLay.Select(d => d ?? 0).ToList());
         }
     }

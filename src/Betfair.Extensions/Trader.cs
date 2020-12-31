@@ -1,52 +1,50 @@
-﻿namespace Betfair.Extensions
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Betfair.Betting;
-    using Betfair.Stream;
-    using Betfair.Stream.Responses;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Betfair.Betting;
+using Betfair.Stream;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions
+{
     public sealed class Trader
     {
-        private readonly ISubscription subscription;
-
-        private readonly List<StrategyBase> strategies = new List<StrategyBase>();
-
-        private OrderManagerBase orderManager;
+        private readonly ISubscription _subscription;
+        private readonly List<StrategyBase> _strategies = new List<StrategyBase>();
+        private OrderManagerBase _orderManager;
 
         public Trader(ISubscription subscription)
         {
-            this.subscription = subscription;
+            _subscription = subscription;
         }
 
         public void AddStrategy(StrategyBase strategy)
         {
-            this.strategies.Add(strategy);
+            _strategies.Add(strategy);
         }
 
         public void SetOrderManager(OrderManagerBase manager)
         {
-            this.orderManager = manager;
+            _orderManager = manager;
         }
 
         public async Task TradeMarket(
             string marketId, double bank, CancellationToken cancellationToken)
         {
-            var market = this.CreateMarketCache(marketId);
-            this.LinkMarkets(market, cancellationToken);
-            await this.Subscribe(marketId);
-            await foreach (var change in this.subscription.GetChanges())
+            var market = CreateMarketCache(marketId);
+            LinkMarkets(market, cancellationToken);
+            await Subscribe(marketId);
+            await foreach (var change in _subscription.GetChanges())
             {
                 UpdateMarketCache(change, market);
-                await this.PlaceOrdersFromEachStrategy(change, bank + market.Liability);
-                await this.UpdateOrders(change);
+                await PlaceOrdersFromEachStrategy(change, bank + market.Liability);
+                await UpdateOrders(change);
 
                 if (!cancellationToken.IsCancellationRequested) continue;
-                await this.orderManager.OnMarketClose();
-                this.DisconnectStreamIfCancelled(cancellationToken);
+                await _orderManager.OnMarketClose();
+                DisconnectStreamIfCancelled(cancellationToken);
                 break;
             }
         }
@@ -60,9 +58,9 @@
         {
             if (string.IsNullOrEmpty(marketId))
                 throw new ArgumentNullException(nameof(marketId));
-            if (this.strategies.Count == 0)
+            if (_strategies.Count == 0)
                 throw new InvalidOperationException("Trader must contain at least one strategy.");
-            if (this.orderManager is null)
+            if (_orderManager is null)
                 throw new InvalidOperationException("Trader must contain an OrderManager.");
             return new MarketCache(marketId);
         }
@@ -70,20 +68,20 @@
         private void LinkMarkets(
             MarketCache market, CancellationToken cancellationToken)
         {
-            this.strategies.ForEach(s => s.LinkToMarket(market));
-            this.strategies.ForEach(s => s.WithCancellationToken(cancellationToken));
-            this.orderManager.LinkToMarket(market);
+            _strategies.ForEach(s => s.LinkToMarket(market));
+            _strategies.ForEach(s => s.WithCancellationToken(cancellationToken));
+            _orderManager.LinkToMarket(market);
         }
 
         private async Task PlaceOrdersFromEachStrategy(
             ChangeMessage change, double bank)
         {
-            var bankPerStrategy = bank / this.strategies.Count;
+            var bankPerStrategy = bank / _strategies.Count;
             if (change.Operation == "mcm")
             {
                 var allOrders = new List<LimitOrder>();
                 change.MarketChanges.ForEach(
-                    mc => this.strategies.ForEach(
+                    mc => _strategies.ForEach(
                         s =>
                         {
                             var o = s.GetOrders(mc, Math.Round(bankPerStrategy, 2));
@@ -92,35 +90,35 @@
                         }));
 
                 if (allOrders.Count > 0)
-                    await this.orderManager.Place(allOrders);
+                    await _orderManager.Place(allOrders);
             }
         }
 
         private async Task UpdateOrders(ChangeMessage change)
         {
-            await this.orderManager.OnChange(change);
+            await _orderManager.OnChange(change);
         }
 
         private async Task Subscribe(string marketId)
         {
             var marketFilter = new MarketFilter().WithMarketId(marketId);
 
-            this.subscription.Connect();
-            await this.subscription.Authenticate();
-            await this.subscription.Subscribe(marketFilter, this.GetMergedDataFilters());
-            await this.subscription.SubscribeToOrders();
+            _subscription.Connect();
+            await _subscription.Authenticate();
+            await _subscription.Subscribe(marketFilter, GetMergedDataFilters());
+            await _subscription.SubscribeToOrders();
         }
 
         private void DisconnectStreamIfCancelled(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested) this.subscription.Disconnect();
+            if (cancellationToken.IsCancellationRequested) _subscription.Disconnect();
         }
 
         private MarketDataFilter GetMergedDataFilters()
         {
             var dataFiler = new MarketDataFilter();
             foreach (var marketDataFilter in
-                this.strategies.Select(s => s.DataFilter).ToList())
+                _strategies.Select(s => s.DataFilter).ToList())
                 dataFiler.Merge(marketDataFilter);
 
             return dataFiler;

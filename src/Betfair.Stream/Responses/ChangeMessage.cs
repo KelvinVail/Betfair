@@ -53,7 +53,7 @@ namespace Betfair.Stream.Responses
         public void SetArrivalTime(DateTime arrivalTime)
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            this.ArrivalTime = (long)(arrivalTime - epoch).TotalMilliseconds;
+            ArrivalTime = (long)(arrivalTime - epoch).TotalMilliseconds;
         }
 
         public string ToJson()

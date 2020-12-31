@@ -1,25 +1,25 @@
-﻿namespace Betfair.Extensions
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Betfair.Stream.Responses;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions
+{
     public class UnmatchedOrders
     {
-        private readonly Dictionary<string, UnmatchedOrder> unmatchedOrders
+        private readonly Dictionary<string, UnmatchedOrder> _unmatchedOrders
             = new Dictionary<string, UnmatchedOrder>();
 
         public void Update(UnmatchedOrder unmatchedOrder)
         {
             var uo = ValidateOrder(unmatchedOrder);
-            this.AddOrderToCache(uo);
-            this.RemoveOrderIfComplete(uo);
+            AddOrderToCache(uo);
+            RemoveOrderIfComplete(uo);
         }
 
         public IList<UnmatchedOrder> ToList()
         {
-            return this.unmatchedOrders.Values.ToList();
+            return _unmatchedOrders.Values.ToList();
         }
 
         private static UnmatchedOrder ValidateOrder(UnmatchedOrder unmatchedOrder)
@@ -33,15 +33,15 @@
 
         private void AddOrderToCache(UnmatchedOrder uo)
         {
-            if (!this.unmatchedOrders.ContainsKey(uo.BetId))
-                this.unmatchedOrders.Add(uo.BetId, null);
-            this.unmatchedOrders[uo.BetId] = uo;
+            if (!_unmatchedOrders.ContainsKey(uo.BetId))
+                _unmatchedOrders.Add(uo.BetId, null);
+            _unmatchedOrders[uo.BetId] = uo;
         }
 
         private void RemoveOrderIfComplete(UnmatchedOrder uo)
         {
             if (uo.OrderStatus == "EC")
-                this.unmatchedOrders.Remove(uo.BetId);
+                _unmatchedOrders.Remove(uo.BetId);
         }
     }
 }

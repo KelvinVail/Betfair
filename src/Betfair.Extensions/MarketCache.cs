@@ -1,15 +1,15 @@
-﻿namespace Betfair.Extensions
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Betfair.Stream.Responses;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions
+{
     public sealed class MarketCache
     {
         public MarketCache(string marketId)
         {
-            this.MarketId = marketId;
+            MarketId = marketId;
         }
 
         public string MarketId { get; }
@@ -18,9 +18,9 @@
 
         public double? TotalAmountMatched { get; private set; }
 
-        public double Liability => this.Runners.Count == 0 ? 0 :
+        public double Liability => Runners.Count == 0 ? 0 :
             Math.Round(
-                this.Runners.Min(r => r.Value.Profit - r.Value.UnmatchedLiability), 2);
+                Runners.Min(r => r.Value.Profit - r.Value.UnmatchedLiability), 2);
 
         public Dictionary<long, RunnerCache> Runners { get; private set; }
             = new Dictionary<long, RunnerCache>();
@@ -30,8 +30,8 @@
         public void OnChange(ChangeMessage change)
         {
             if (change is null) return;
-            change.MarketChanges?.ForEach(mc => this.OnMarketChange(mc, change.PublishTime));
-            change.OrderChanges?.ForEach(this.OnOrderChange);
+            change.MarketChanges?.ForEach(mc => OnMarketChange(mc, change.PublishTime));
+            change.OrderChanges?.ForEach(OnOrderChange);
         }
 
         private static bool ClearCache(MarketChange marketChange)
@@ -41,25 +41,25 @@
 
         private void OnMarketChange(MarketChange marketChange, long? publishTime)
         {
-            if (marketChange?.MarketId != this.MarketId) return;
+            if (marketChange?.MarketId != MarketId) return;
 
-            this.LastPublishedTime = publishTime;
-            this.ProcessMarketChange(marketChange);
+            LastPublishedTime = publishTime;
+            ProcessMarketChange(marketChange);
         }
 
         private void OnOrderChange(OrderChange orderChange)
         {
             if (orderChange is null) return;
-            if (orderChange.MarketId != this.MarketId) return;
+            if (orderChange.MarketId != MarketId) return;
 
-            orderChange.OrderRunnerChanges.ForEach(this.ProcessOrderRunnerChange);
-            this.UpdateRunnerProfits();
+            orderChange.OrderRunnerChanges.ForEach(ProcessOrderRunnerChange);
+            UpdateRunnerProfits();
         }
 
         private void UpdateRunnerProfits()
         {
-            var totalIfLose = this.Runners.Sum(r => r.Value.IfLose);
-            foreach (var (_, runner) in this.Runners)
+            var totalIfLose = Runners.Sum(r => r.Value.IfLose);
+            foreach (var (_, runner) in Runners)
             {
                 runner.Profit =
                     Math.Round(
@@ -69,61 +69,61 @@
 
         private void ProcessMarketChange(MarketChange marketChange)
         {
-            if (ClearCache(marketChange)) this.NewCache();
+            if (ClearCache(marketChange)) NewCache();
 
             if (marketChange.MarketDefinition != null)
-                this.MarketDefinition = marketChange.MarketDefinition;
+                MarketDefinition = marketChange.MarketDefinition;
 
             if (marketChange.TotalAmountMatched > 0)
-                this.TotalAmountMatched = marketChange.TotalAmountMatched;
+                TotalAmountMatched = marketChange.TotalAmountMatched;
 
-            this.ProcessRunnerChanges(marketChange.RunnerChanges);
-            this.ProcessRunnerDefinitions(marketChange.MarketDefinition?.Runners);
+            ProcessRunnerChanges(marketChange.RunnerChanges);
+            ProcessRunnerDefinitions(marketChange.MarketDefinition?.Runners);
         }
 
         private void ProcessRunnerChanges(List<RunnerChange> runnerChanges)
         {
-            runnerChanges?.ForEach(this.ProcessRunnerChange);
+            runnerChanges?.ForEach(ProcessRunnerChange);
         }
 
         private void ProcessRunnerChange(RunnerChange runnerChange)
         {
             if (runnerChange.SelectionId is null) return;
             var selectionId = (long)runnerChange.SelectionId;
-            if (!this.Runners.ContainsKey(selectionId))
-                this.Runners.Add(selectionId, new RunnerCache(selectionId));
+            if (!Runners.ContainsKey(selectionId))
+                Runners.Add(selectionId, new RunnerCache(selectionId));
 
-            this.Runners[selectionId]
-                .OnRunnerChange(runnerChange, this.LastPublishedTime);
+            Runners[selectionId]
+                .OnRunnerChange(runnerChange, LastPublishedTime);
         }
 
         private void ProcessRunnerDefinitions(List<RunnerDefinition> runners)
         {
-            runners?.ForEach(this.ProcessRunnerDefinition);
+            runners?.ForEach(ProcessRunnerDefinition);
         }
 
         private void ProcessRunnerDefinition(RunnerDefinition runner)
         {
             if (runner.SelectionId is null) return;
-            if (this.Runners.ContainsKey((long)runner.SelectionId))
-                this.Runners[(long)runner.SelectionId].SetDefinition(runner);
+            if (Runners.ContainsKey((long)runner.SelectionId))
+                Runners[(long)runner.SelectionId].SetDefinition(runner);
         }
 
         private void ProcessOrderRunnerChange(OrderRunnerChange orc)
         {
             if (orc.SelectionId is null) return;
             var selectionId = (long)orc.SelectionId;
-            if (!this.Runners.ContainsKey(selectionId))
-                this.Runners.Add(selectionId, new RunnerCache(selectionId));
+            if (!Runners.ContainsKey(selectionId))
+                Runners.Add(selectionId, new RunnerCache(selectionId));
 
-            this.Runners[selectionId].OnOrderChange(orc);
+            Runners[selectionId].OnOrderChange(orc);
         }
 
         private void NewCache()
         {
-            this.Runners = new Dictionary<long, RunnerCache>();
-            this.MarketDefinition = null;
-            this.TotalAmountMatched = 0;
+            Runners = new Dictionary<long, RunnerCache>();
+            MarketDefinition = null;
+            TotalAmountMatched = 0;
         }
     }
 }

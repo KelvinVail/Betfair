@@ -1,16 +1,16 @@
-﻿namespace Betfair.Extensions
-{
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Betfair.Betting;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Betfair.Betting;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions
+{
     public abstract class OrderManagerBase
     {
         protected OrderManagerBase(IOrderService orderService)
         {
-            this.OrderService = orderService;
+            OrderService = orderService;
         }
 
         protected MarketCache Market { get; private set; }
@@ -26,12 +26,12 @@
             if (orders is null) return;
             var limitOrders = orders.ToList();
             if (!limitOrders.Any()) return;
-            await this.OrderService.Place(this.Market.MarketId, limitOrders, strategyRef);
+            await OrderService.Place(Market.MarketId, limitOrders, strategyRef);
         }
 
         public void LinkToMarket(MarketCache marketCache)
         {
-            this.Market = marketCache;
+            Market = marketCache;
         }
     }
 }

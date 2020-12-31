@@ -1,11 +1,11 @@
-﻿namespace Betfair.Extensions
-{
-    using System.Collections.Generic;
-    using System.Threading;
-    using Betfair.Betting;
-    using Betfair.Stream;
-    using Betfair.Stream.Responses;
+﻿using System.Collections.Generic;
+using System.Threading;
+using Betfair.Betting;
+using Betfair.Stream;
+using Betfair.Stream.Responses;
 
+namespace Betfair.Extensions
+{
     public abstract class StrategyBase
     {
         public abstract MarketDataFilter DataFilter { get; }
@@ -16,12 +16,12 @@
 
         public void WithCancellationToken(CancellationToken cancellationToken)
         {
-            this.CancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
         }
 
         public void LinkToMarket(MarketCache marketCache)
         {
-            this.Market = marketCache;
+            Market = marketCache;
         }
 
         public abstract List<LimitOrder> GetOrders(MarketChange marketChange, double stake);

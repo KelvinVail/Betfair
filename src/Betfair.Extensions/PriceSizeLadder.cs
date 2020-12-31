@@ -1,37 +1,37 @@
-﻿namespace Betfair.Extensions
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
+namespace Betfair.Extensions
+{
     public class PriceSizeLadder
     {
-        private readonly Dictionary<double, double> ladder =
+        private readonly Dictionary<double, double> _ladder =
             new Dictionary<double, double>();
 
         public long? LastPublishTime { get; private set; }
 
         public void Update(List<List<double?>> priceSizes, long? unixMilliseconds)
         {
-            this.LastPublishTime = unixMilliseconds;
-            priceSizes?.ForEach(p => this.UpdatePrice(p[0], p[1]));
+            LastPublishTime = unixMilliseconds;
+            priceSizes?.ForEach(p => UpdatePrice(p[0], p[1]));
         }
 
         public double GetSizeForPrice(double price)
         {
-            if (!this.ladder.ContainsKey(price)) return 0;
-            return this.ladder[price];
+            if (!_ladder.ContainsKey(price)) return 0;
+            return _ladder[price];
         }
 
         public double TotalReturn()
         {
-            return this.ladder.Sum(
+            return _ladder.Sum(
                 price => Math.Round((price.Key * price.Value) - price.Value, 2));
         }
 
         public double TotalSize()
         {
-            return this.ladder.Sum(p => p.Value);
+            return _ladder.Sum(p => p.Value);
         }
 
         private void UpdatePrice(double? price, double? size)
@@ -42,10 +42,10 @@
             var p = (double)price;
             var s = (double)size;
 
-            if (!this.ladder.ContainsKey(p))
-                this.ladder.Add(p, 0);
+            if (!_ladder.ContainsKey(p))
+                _ladder.Add(p, 0);
 
-            this.ladder[p] = s;
+            _ladder[p] = s;
         }
     }
 }

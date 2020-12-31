@@ -1,7 +1,7 @@
-﻿namespace Betfair.Extensions
-{
-    using System.Linq;
+﻿using System.Linq;
 
+namespace Betfair.Extensions
+{
     public static class OverroundExtension
     {
         public static double Overround(this MarketCache market)
