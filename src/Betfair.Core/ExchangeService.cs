@@ -15,7 +15,7 @@ namespace Betfair.Core
     {
         private readonly ISession _session;
         private readonly ILogger _log;
-        private readonly ExchangeClient _client = new ExchangeClient(new Uri("https://api.betfair.com/exchange/"));
+        private readonly ExchangeClient _client = new ExchangeClient("api");
 
         public ExchangeService(ISession session, ILogger log)
         {
@@ -52,7 +52,7 @@ namespace Betfair.Core
 
         private async Task<HttpRequestMessage> GetRequest(string endpoint, string method, string parameters)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/json-rpc/v1");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"exchange/{endpoint}/json-rpc/v1");
             request.Headers.Add("X-Authentication", await _session.GetTokenAsync());
             request.Headers.Add("X-Application", _session.AppKey);
 

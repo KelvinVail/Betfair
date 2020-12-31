@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ namespace Betfair.Core.Tests
     public class SessionTests : IDisposable
     {
         private readonly X509Certificate2 _certificate = new X509Certificate2();
+        private readonly HttpClientHandler _handler;
         private HttpMessageHandlerMock _httpMessageHandler = new HttpMessageHandlerMock();
         private Session _session = new Session("AppKey", "Username", "Password");
         private bool _disposedValue;
@@ -20,7 +23,76 @@ namespace Betfair.Core.Tests
         public SessionTests()
         {
             _httpMessageHandler.WithReturnContent(new LoginResponseStub());
+            _handler = _httpMessageHandler.Build();
+            _session.WithHandler(_handler);
+        }
+
+        [Fact]
+        public void OnWithHandlerThrowIfHandlerIsNull()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(() => _session.WithHandler(null));
+            Assert.Equal("newHandler", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task WhenInitializedAcceptHeaderIsApplicationJson()
+        {
+            var applicationJson = new MediaTypeWithQualityHeaderValue("application/json");
+            await _session.GetTokenAsync();
+            _httpMessageHandler.VerifyHeaderValues("Accept", applicationJson.ToString());
+        }
+
+        [Fact]
+        public async Task WhenInitializedHeaderContainsConnectionKeepAlive()
+        {
+            await _session.GetTokenAsync();
+            _httpMessageHandler.VerifyHeaderValues("Connection", "keep-alive");
+        }
+
+        [Fact]
+        public async Task WhenInitializedHeaderContainsAcceptGzip()
+        {
+            await _session.GetTokenAsync();
+            _httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
+        }
+
+        [Fact]
+        public async Task WhenInitializedHeaderContainsAcceptDeflate()
+        {
+            await _session.GetTokenAsync();
+            _httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "deflate");
+        }
+
+        [Theory]
+        [InlineData(HttpStatusCode.BadRequest)]
+        [InlineData(HttpStatusCode.RequestTimeout)]
+        [InlineData(HttpStatusCode.NotFound)]
+        public async Task OnSendThrowIfNotSuccessful(HttpStatusCode statusCode)
+        {
+            _httpMessageHandler.WithStatusCode(statusCode);
             _session.WithHandler(_httpMessageHandler.Build());
+            var exception = await Assert.ThrowsAsync<HttpRequestException>(() => _session.GetTokenAsync());
+            Assert.Equal($"{statusCode}", exception.Message);
+        }
+
+        [Fact]
+        public void WhenInitializedHandlerCheckCertificateRevocationListIsTrue()
+        {
+            Assert.True(_handler.CheckCertificateRevocationList);
+        }
+
+        [Fact]
+        public async Task OnLoginHandlerCheckCertificateRevocationListIsTrue()
+        {
+            await _session.LoginAsync();
+            Assert.True(_handler.CheckCertificateRevocationList);
+        }
+
+        [Fact]
+        public async Task OnLoginRequestHasAutoDecompressIsGzip()
+        {
+            await _session.LoginAsync();
+            _httpMessageHandler.VerifyHeaderValues("Accept-Encoding", "gzip");
         }
 
         [Fact]
@@ -464,6 +536,7 @@ namespace Betfair.Core.Tests
             }
 
             _session.Dispose();
+            _handler.Dispose();
 
             _disposedValue = true;
         }

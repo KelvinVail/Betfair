@@ -12,9 +12,9 @@ namespace Betfair.Core
 {
     public sealed class Session : ISession, IDisposable
     {
-        private readonly ExchangeClient _client = new ExchangeClient(new Uri("https://identitysso.betfair.com"));
         private readonly string _username;
         private readonly string _password;
+        private ExchangeClient _client;
         private string _sessionToken;
         private DateTime _sessionCreateTime;
         private HttpClientHandler _clientHandler;
@@ -25,6 +25,7 @@ namespace Betfair.Core
             AppKey = Validate(appKey, nameof(appKey));
             _username = Validate(username, nameof(username));
             _password = Validate(password, nameof(password));
+            _client = new ExchangeClient("identitysso");
         }
 
         public string AppKey { get; }
@@ -51,6 +52,8 @@ namespace Betfair.Core
         public Session WithCert(X509Certificate2 cert)
         {
             _certificate = cert;
+            _client = new ExchangeClient("identitysso-cert");
+            _client.WithHandler(_clientHandler);
             _clientHandler.ClientCertificates.Add(cert);
             return this;
         }
@@ -98,7 +101,7 @@ namespace Betfair.Core
 
         private HttpRequestMessage GetLoginRequest()
         {
-            var requestUri = _certificate == null ? "api/login" : "https://identitysso-cert.betfair.com/api/certlogin";
+            var requestUri = _certificate == null ? "api/login" : "api/certlogin";
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Add("X-Application", AppKey);
             request.Content = new FormUrlEncodedContent(

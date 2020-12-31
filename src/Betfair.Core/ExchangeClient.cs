@@ -16,9 +16,9 @@ namespace Betfair.Core
         private HttpClient _httpClient;
         private HttpClientHandler _handler;
 
-        internal ExchangeClient(Uri baseAddress)
+        internal ExchangeClient(string urlPrefix)
         {
-            _baseAddress = baseAddress;
+            _baseAddress = new Uri($"https://{urlPrefix}.betfair.com/");
             _handler = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip,
