@@ -30,6 +30,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions", "Betfa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions.Tests", "Betfair.Extensions.Tests\Betfair.Extensions.Tests.csproj", "{6BB31F44-6A4C-405B-9364-6A30338848C9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{72E54657-75BE-4975-898E-176FB66EE9C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{B055FE26-9588-4364-92DF-FDDC28D92099}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Service", "Betfair.Service\Betfair.Service.csproj", "{F59D8E05-020B-4F6C-A309-FED9059C3E36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Service.Tests", "Betfair.Service.Tests\Betfair.Service.Tests.csproj", "{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,9 +88,22 @@ Global
 		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F59D8E05-020B-4F6C-A309-FED9059C3E36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F59D8E05-020B-4F6C-A309-FED9059C3E36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F59D8E05-020B-4F6C-A309-FED9059C3E36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F59D8E05-020B-4F6C-A309-FED9059C3E36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B055FE26-9588-4364-92DF-FDDC28D92099} = {72E54657-75BE-4975-898E-176FB66EE9C5}
+		{F59D8E05-020B-4F6C-A309-FED9059C3E36} = {B055FE26-9588-4364-92DF-FDDC28D92099}
+		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5} = {B055FE26-9588-4364-92DF-FDDC28D92099}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8E0FF9AD-D181-4454-8130-FE0DE96802F9}
