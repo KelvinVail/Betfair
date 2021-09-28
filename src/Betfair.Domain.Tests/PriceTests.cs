@@ -1,21 +1,37 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace Betfair.Domain.Tests
 {
     public class PriceTests
     {
-        [Fact]
-        public void Exists()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(1)]
+        [InlineData(1001)]
+        [InlineData(2.01)]
+        [InlineData(3.02)]
+        [InlineData(4.05)]
+        [InlineData(6.1)]
+        [InlineData(10.3)]
+        public void ThrowIfPriceIsNotValid(decimal value)
         {
-            var price = Price.Of(1.01m);
+            var ex = Assert.Throws<InvalidOperationException>(() => Price.Of(value));
+            Assert.Equal(Errors.InvalidPrice(value).Message, ex.Message);
         }
 
-        [Fact]
-        public void ThrowIfPriceIsNotValid()
+        [Theory]
+        [InlineData(1.01)]
+        [InlineData(1000)]
+        public void ImpliedOddsIsCalculatedCorrectly(decimal value)
         {
-            var price = Price.Of(501);
-            Assert.False(price.IsSuccess);
-            Assert.Equal("'501' is an invalid price.", price.Error);
+            var price = Price.Of(value);
+
+            Assert.Equal(1 / value, price.ImpliedOdds);
         }
+
+        // AddTick
+        // TicksBetween
     }
 }

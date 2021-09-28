@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
 
@@ -43,19 +44,18 @@ namespace Betfair.Domain
             930.0m, 940.0m, 950.0m, 960.0m, 970.0m, 980.0m, 990.0m, 1000.0m,
         };
 
-        private Price(decimal value)
-        {
-            Value = value;
-        }
+        private Price(decimal value) => Value = value;
 
         public decimal Value { get; }
 
-        public static Result<Price> Of(decimal value)
+        public decimal ImpliedOdds => 1 / Value;
+
+        public static Price Of(decimal value)
         {
             if (!_validPrices.Contains(value))
-                return Result.Failure<Price>(Errors.InvalidPrice(value).Message);
+                throw new InvalidOperationException(Errors.InvalidPrice(value).Message);
 
-            return Result.Success(new Price(value));
+            return new Price(value);
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
