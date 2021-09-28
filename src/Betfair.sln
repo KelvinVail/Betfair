@@ -34,9 +34,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{B055FE26-9588-4364-92DF-FDDC28D92099}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Service", "Betfair.Service\Betfair.Service.csproj", "{F59D8E05-020B-4F6C-A309-FED9059C3E36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Service", "Betfair.Service\Betfair.Service.csproj", "{F59D8E05-020B-4F6C-A309-FED9059C3E36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Service.Tests", "Betfair.Service.Tests\Betfair.Service.Tests.csproj", "{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Service.Tests", "Betfair.Service.Tests\Betfair.Service.Tests.csproj", "{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Domain", "Betfair.Domain\Betfair.Domain.csproj", "{5F67C514-E31F-4039-8382-A695D70D4EE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Domain.Tests", "Betfair.Domain.Tests\Betfair.Domain.Tests.csproj", "{D520D836-04BC-4D22-B328-8216B9C9BC1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,6 +100,14 @@ Global
 		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C52D46B-2AC5-4D4D-876D-122B7DD374E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
