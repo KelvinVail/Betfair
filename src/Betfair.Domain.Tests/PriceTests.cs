@@ -17,21 +17,50 @@ namespace Betfair.Domain.Tests
         [InlineData(10.3)]
         public void ThrowIfPriceIsNotValid(decimal value)
         {
-            var ex = Assert.Throws<InvalidOperationException>(() => Price.Of(value));
+            var ex = Assert.Throws<ArgumentException>(() => Price.Of(value));
             Assert.Equal(Errors.InvalidPrice(value).Message, ex.Message);
         }
 
         [Theory]
         [InlineData(1.01)]
         [InlineData(1000)]
-        public void ImpliedOddsIsCalculatedCorrectly(decimal value)
+        public void ChanceIsCalculatedCorrectly(decimal value)
         {
             var price = Price.Of(value);
 
-            Assert.Equal(1 / value, price.ImpliedOdds);
+            Assert.Equal(1 / value, price.Chance);
         }
 
-        // AddTick
+        [Theory]
+        [InlineData(1.01, 1, 1.02)]
+        [InlineData(1.02, 1, 1.03)]
+        [InlineData(1.9, 10, 2.00)]
+        [InlineData(2.02, 1, 2.04)]
+        [InlineData(3.05, 1, 3.1)]
+        [InlineData(4.1, 1, 4.2)]
+        [InlineData(6.2, 1, 6.4)]
+        [InlineData(10.5, 1, 11)]
+        [InlineData(20, 1, 21)]
+        [InlineData(32, 1, 34)]
+        [InlineData(55, 1, 60)]
+        [InlineData(110, 1, 120)]
+        [InlineData(2.0, 1, 2.02)]
+        [InlineData(2.02, -1, 2.0)]
+        [InlineData(1.01, -1, 1.01)]
+        [InlineData(1.01, -10, 1.01)]
+        [InlineData(1000, 1, 1000)]
+        [InlineData(1000, 10, 1000)]
+        [InlineData(1000, -1, 990)]
+        public void AddsTicksCorrectly(decimal start, int ticks, decimal expected)
+        {
+            var price = Price.Of(start);
+
+            var actual = price.AddTicks(ticks);
+
+            Assert.Equal(expected, actual.DecimalOdds);
+        }
+
         // TicksBetween
+        // Minimum Stake
     }
 }
