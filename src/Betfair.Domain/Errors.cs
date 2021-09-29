@@ -2,7 +2,7 @@
 {
     public static class Errors
     {
-        public static Error InvalidPrice(decimal price) =>
+        public static DomainError InvalidPrice(decimal price) =>
             new ("invalid.price", $"'{price}' is an invalid price.");
     }
 }

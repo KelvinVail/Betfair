@@ -3,9 +3,9 @@ using CSharpFunctionalExtensions;
 
 namespace Betfair.Domain
 {
-    public sealed class Error : ValueObject
+    public sealed class DomainError : ValueObject
     {
-        internal Error(string code, string message)
+        internal DomainError(string code, string message)
         {
             Code = code;
             Message = message;

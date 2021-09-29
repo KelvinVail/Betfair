@@ -82,6 +82,15 @@ namespace Betfair.Domain
             return new Price(_validPrices[index + ticks]);
         }
 
+        public int TicksBetween(Price endPrice)
+        {
+            if (endPrice == null) return 0;
+
+            var indexFrom = Array.IndexOf(_validPrices, DecimalOdds);
+            var indexTo = Array.IndexOf(_validPrices, endPrice.DecimalOdds);
+            return indexTo - indexFrom;
+        }
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return DecimalOdds;

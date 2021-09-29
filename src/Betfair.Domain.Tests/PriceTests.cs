@@ -60,7 +60,40 @@ namespace Betfair.Domain.Tests
             Assert.Equal(expected, actual.DecimalOdds);
         }
 
-        // TicksBetween
+        [Theory]
+        [InlineData(1.01, 1.02, 1)]
+        [InlineData(1.02, 1.03, 1)]
+        [InlineData(1.9, 2.00, 10)]
+        [InlineData(2.02, 2.04, 1)]
+        [InlineData(3.05, 3.1, 1)]
+        [InlineData(4.1, 4.2, 1)]
+        [InlineData(6.2, 6.4, 1)]
+        [InlineData(10.5, 11, 1)]
+        [InlineData(20, 21, 1)]
+        [InlineData(32, 34, 1)]
+        [InlineData(55, 60, 1)]
+        [InlineData(110, 120, 1)]
+        [InlineData(2.0, 2.02, 1)]
+        [InlineData(2.02, 2.0, -1)]
+        [InlineData(1000, 990, -1)]
+        public void TicksBetweenIsCalculatedCorrectly(decimal start, decimal end, int expected)
+        {
+            var startPrice = Price.Of(start);
+            var endPrice = Price.Of(end);
+
+            var actual = startPrice.TicksBetween(endPrice);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void TicksBetweenReturnsZeroIfParameterIsNull()
+        {
+            var actual = Price.Of(1.01m).TicksBetween(null);
+
+            Assert.Equal(0, actual);
+        }
+
         // Minimum Stake
     }
 }
