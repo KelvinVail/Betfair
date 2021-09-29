@@ -61,6 +61,8 @@ namespace Betfair.Domain
 
         public decimal Chance => 1 / DecimalOdds;
 
+        public decimal MinimumStake => Math.Min(Math.Ceiling(10 / DecimalOdds * 100) / 100, 2);
+
         public static Price Of(decimal decimalOdds)
         {
             if (!_validPrices.Contains(decimalOdds))

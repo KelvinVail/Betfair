@@ -17,6 +17,7 @@ namespace Betfair.Domain.Tests
         [InlineData(10.3)]
         public void ThrowIfPriceIsNotValid(decimal value)
         {
+            // TODO Return nearest price instead of throwing an exception.
             var ex = Assert.Throws<ArgumentException>(() => Price.Of(value));
             Assert.Equal(Errors.InvalidPrice(value).Message, ex.Message);
         }
@@ -94,6 +95,23 @@ namespace Betfair.Domain.Tests
             Assert.Equal(0, actual);
         }
 
-        // Minimum Stake
+        [Theory]
+        [InlineData(1.01, 2)]
+        [InlineData(2.68, 2)]
+        [InlineData(5, 2)]
+        [InlineData(5.1, 1.97)]
+        [InlineData(6.4, 1.57)]
+        [InlineData(11.5, 0.87)]
+        [InlineData(220, 0.05)]
+        [InlineData(990, 0.02)]
+        [InlineData(1000, 0.01)]
+        public void MinimumStakeIsTwoOrLowerIfReturnIsTenPoundsOrMore(decimal price, decimal expected)
+        {
+            var actual = Price.Of(price).MinimumStake;
+
+            Assert.Equal(expected, actual);
+        }
+
+        // TODO IsStakeValid
     }
 }
