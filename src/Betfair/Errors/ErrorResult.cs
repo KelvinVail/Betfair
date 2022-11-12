@@ -7,7 +7,7 @@ public sealed class ErrorResult : ValueObject
 {
     private static readonly Dictionary<string, string> _descriptions = new ()
     {
-        { "INVALID_USERNAME_OR_PASSWORD" , "The username or password is invalid." },
+        { "INVALID_USERNAME_OR_PASSWORD", "The username or password is invalid." },
     };
 
     private ErrorResult(string code, string message)

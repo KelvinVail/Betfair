@@ -9,7 +9,6 @@ public sealed class Credentials : ValueObject
     private readonly string _username;
     private readonly string _password;
     private readonly string _appKey;
-    private X509Certificate2? _cert;
 
     private Credentials(string username, string password, string appKey)
     {
@@ -17,6 +16,8 @@ public sealed class Credentials : ValueObject
         _password = password;
         _appKey = appKey;
     }
+
+    internal X509Certificate2? Certificate { get; private set; }
 
     public static Result<Credentials, ErrorResult> Create(
         string username,
@@ -42,22 +43,45 @@ public sealed class Credentials : ValueObject
         var cred = Create(username, password, appKey);
         if (cred.IsFailure) return cred.Error;
         if (certificate is null) return ErrorResult.Empty(nameof(certificate));
-        cred.Value._cert = certificate;
+        cred.Value.Certificate = certificate;
 
         return cred;
     }
 
     internal HttpRequestMessage GetLoginRequest()
     {
+        if (Certificate is not null)
+            return GetNonInteractiveLogin();
+        return GetInteractiveLogin();
+    }
+
+    private HttpRequestMessage GetInteractiveLogin()
+    {
         var request = new HttpRequestMessage(
             HttpMethod.Post,
             new Uri("https://identitysso.betfair.com/api/login"));
 
+        AddHeadersAndContent(request);
+
+        return request;
+    }
+
+    private HttpRequestMessage GetNonInteractiveLogin()
+    {
+        var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
+
+        AddHeadersAndContent(request);
+
+        return request;
+    }
+
+    private void AddHeadersAndContent(HttpRequestMessage request)
+    {
         request.Headers.Add("X-Application", _appKey);
         request.Content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", _username }, { "password", _password } });
-
-        return request;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

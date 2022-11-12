@@ -20,13 +20,13 @@ public sealed class BetfairHttpClientTests : IDisposable
         var response = new Response { Token = "Token", Status = "SUCCESS", };
         _handler.SetResponseBody(JsonSerializer.ToJsonString(response, StandardResolver.CamelCase));
 
-        _client = new BetfairHttpClient(_handler);
+        _client = new BetfairHttpClient(_cred, _handler);
     }
 
     [Fact]
     public void TimeoutIsSetToThirtySeconds()
     {
-        using var client = new BetfairHttpClient();
+        using var client = new BetfairHttpClient(_cred, _handler);
 
         Assert.Equal(TimeSpan.FromSeconds(30), client.Timeout);
     }
@@ -34,7 +34,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     [Fact]
     public void AcceptsApplicationJson()
     {
-        using var client = new BetfairHttpClient();
+        using var client = new BetfairHttpClient(_cred, _handler);
 
         Assert.Contains(
             new MediaTypeWithQualityHeaderValue("application/json"),
@@ -44,7 +44,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     [Fact]
     public void ConnectionIsKeptAlive()
     {
-        using var client = new BetfairHttpClient();
+        using var client = new BetfairHttpClient(_cred, _handler);
 
         Assert.Contains(
             "keep-alive",
@@ -54,7 +54,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     [Fact]
     public void AcceptGzipEncoding()
     {
-        using var client = new BetfairHttpClient();
+        using var client = new BetfairHttpClient(_cred, _handler);
 
         Assert.Contains(
             new StringWithQualityHeaderValue("gzip"),
@@ -62,17 +62,18 @@ public sealed class BetfairHttpClientTests : IDisposable
     }
 
     [Fact]
-    public async Task LoginReturnErrorIfCredentialsAreNull()
+    public void CredentialsMustNotBeNull()
     {
-        var result = await _client.Login(null, default);
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new BetfairHttpClient(null));
 
-        AssertError(ErrorResult.Empty("credentials"), result);
+        Assert.Equal("credentials", ex.ParamName);
     }
 
     [Fact]
     public async Task LoginPostsToApiLoginEndpoint()
     {
-        await _client.Login(_cred, default);
+        await _client.Login(default);
 
         _handler.AssertRequestMethod(HttpMethod.Post);
         _handler.AssertRequestUri(new Uri("https://identitysso.betfair.com/api/login"));
@@ -81,7 +82,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     [Fact]
     public async Task LoginAcceptsApplicationJson()
     {
-        await _client.Login(_cred, default);
+        await _client.Login(default);
 
         _handler.AssertRequestHeader("Accept", "application/json");
     }
@@ -92,8 +93,9 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task HeadersContainAppKey(string appKey)
     {
         var cred = Credentials.Create("username", "password", appKey).Value;
+        using var client = new BetfairHttpClient(cred, _handler);
 
-        await _client.Login(cred, default);
+        await client.Login(default);
 
         _handler.AssertRequestHeader("X-Application", appKey);
     }
@@ -101,7 +103,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     [Fact]
     public async Task LoginContentTypeIsFormUrlEncoded()
     {
-        await _client.Login(_cred, default);
+        await _client.Login(default);
 
         _handler.AssertContentType("application/x-www-form-urlencoded");
     }
@@ -112,8 +114,9 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task UsernameIsInFormContent(string username)
     {
         var cred = Credentials.Create(username, "password", "appKey").Value;
+        using var client = new BetfairHttpClient(cred, _handler);
 
-        await _client.Login(cred, default);
+        await client.Login(default);
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", username }, { "password", "password" } });
@@ -126,8 +129,9 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task PasswordIsInFormContent(string password)
     {
         var cred = Credentials.Create("username", password, "appKey").Value;
+        using var client = new BetfairHttpClient(cred, _handler);
 
-        await _client.Login(cred, default);
+        await client.Login(default);
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", "username" }, { "password", password } });
@@ -142,7 +146,7 @@ public sealed class BetfairHttpClientTests : IDisposable
         var response = new Response { Token = token, Status = "SUCCESS", };
         _handler.SetResponseBody(JsonSerializer.ToJsonString(response, StandardResolver.CamelCase));
 
-        var result = await _client.Login(_cred, default);
+        var result = await _client.Login(default);
 
         Assert.Equal(token, result.Value);
     }
@@ -155,7 +159,45 @@ public sealed class BetfairHttpClientTests : IDisposable
         var response = new Response { Status = "FAIL", Error = error };
         _handler.SetResponseBody(JsonSerializer.ToJsonString(response, StandardResolver.CamelCase));
 
-        var result = await _client.Login(_cred, default);
+        var result = await _client.Login(default);
+
+        AssertError(ErrorResult.Create(error), result);
+    }
+
+    [Fact]
+    public async Task LoginCallCertLoginUrlIfCertificateIsPresent()
+    {
+        using var cert = new X509Certificate2Stub();
+        var cred = Credentials.CreateWithCert("username", "password", "appKey", cert).Value;
+        using var client = new BetfairHttpClient(cred, _handler);
+
+        await client.Login(default);
+
+        _handler.AssertRequestUri(new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
+    }
+
+    [Theory]
+    [InlineData("Token")]
+    [InlineData("Other")]
+    public async Task CertLoginRespondsWithSessionToken(string token)
+    {
+        var response = new Response { SessionToken = token, LoginStatus = "SUCCESS", };
+        _handler.SetResponseBody(JsonSerializer.ToJsonString(response, StandardResolver.CamelCase));
+
+        var result = await _client.Login(default);
+
+        Assert.Equal(token, result.Value);
+    }
+
+    [Theory]
+    [InlineData("ERROR_MESSAGE")]
+    [InlineData("INVALID_USERNAME_OR_PASSWORD")]
+    public async Task CertLoginRespondsWithErrorIfNotSuccessful(string error)
+    {
+        var response = new Response { LoginStatus = error };
+        _handler.SetResponseBody(JsonSerializer.ToJsonString(response, StandardResolver.CamelCase));
+
+        var result = await _client.Login(default);
 
         AssertError(ErrorResult.Create(error), result);
     }

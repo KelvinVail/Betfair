@@ -10,32 +10,51 @@ namespace Betfair.Client;
 public sealed class BetfairHttpClient : HttpClient
 {
     private static readonly BetfairClientHandler _handler = new ();
+    private readonly Credentials _credentials;
 
-    public BetfairHttpClient()
-        : base(_handler) =>
+    public BetfairHttpClient(Credentials credentials)
+        : base(_handler)
+    {
+        _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
         Configure();
+    }
 
-    public BetfairHttpClient(HttpMessageHandler handler)
-        : base(handler) =>
+    public BetfairHttpClient(Credentials credentials, HttpMessageHandler handler)
+        : base(handler)
+    {
+        _credentials = credentials;
         Configure();
+    }
 
     public async Task<Result<string, ErrorResult>> Login(
-        Credentials credentials,
         CancellationToken cancellationToken)
     {
-        if (credentials is null) return ErrorResult.Empty(nameof(credentials));
-        using var request = credentials.GetLoginRequest();
+        using var request = _credentials.GetLoginRequest();
 
         var response = await SendAsync(request, cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<Response>(
             response.Content.ReadAsStream(),
             StandardResolver.CamelCase);
 
-        if (result.Status.Equals("success", StringComparison.OrdinalIgnoreCase))
-            return result.Token;
+        if (LoginIsSuccess(result))
+            return TokenFrom(result);
 
-        return ErrorResult.Create(result.Error);
+        return Error(result);
     }
+
+    private static bool LoginIsSuccess(Response result) =>
+        result.Status.Equals("success", StringComparison.OrdinalIgnoreCase)
+        || result.LoginStatus.Equals("Success", StringComparison.OrdinalIgnoreCase);
+
+    private static string TokenFrom(Response result) =>
+        !string.IsNullOrWhiteSpace(result.Token)
+            ? result.Token
+            : result.SessionToken;
+
+    private static ErrorResult Error(Response result) =>
+        ErrorResult.Create(!string.IsNullOrWhiteSpace(result.Error)
+            ? result.Error
+            : result.LoginStatus);
 
     private void Configure()
     {
@@ -46,5 +65,8 @@ public sealed class BetfairHttpClient : HttpClient
             .Add("Connection", "keep-alive");
         DefaultRequestHeaders.AcceptEncoding
             .Add(new StringWithQualityHeaderValue("gzip"));
+
+        if (_credentials.Certificate is not null)
+            _handler.ClientCertificates.Add(_credentials.Certificate);
     }
 }
