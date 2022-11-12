@@ -1,44 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.2.32519.379
+VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair", "Betfair\Betfair.csproj", "{85386913-19B6-4228-9279-79F3E42B1BA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair", "Betfair\Betfair.csproj", "{143B9782-1946-4368-95C8-561BD8C2D20C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5519679B-E931-4F67-AAC8-97EEC7FB5F08}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{57D71139-6FA5-49A6-946F-6C8B028B3FE0}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core", "Betfair.Core\Betfair.Core.csproj", "{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Stream", "Betfair.Stream\Betfair.Stream.csproj", "{34383D76-B58B-451E-BABB-740713299753}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core.Tests", "Betfair.Core.Tests\Betfair.Core.Tests.csproj", "{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Stream.Tests", "Betfair.Stream.Tests\Betfair.Stream.Tests.csproj", "{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Identity", "Betfair.Identity\Betfair.Identity.csproj", "{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Betting.Tests", "Betfair.Betting.Tests\Betfair.Betting.Tests.csproj", "{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Betting", "Betfair.Betting\Betfair.Betting.csproj", "{BD165573-C81F-4D0C-8654-A40C602499E5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Exchange.Interfaces", "Betfair.Exchange.Interfaces\Betfair.Exchange.Interfaces.csproj", "{4373C937-8659-468A-94F9-74403926D6D5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions", "Betfair.Extensions\Betfair.Extensions.csproj", "{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions.Tests", "Betfair.Extensions.Tests\Betfair.Extensions.Tests.csproj", "{6BB31F44-6A4C-405B-9364-6A30338848C9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Domain", "Betfair.Domain\Betfair.Domain.csproj", "{5F67C514-E31F-4039-8382-A695D70D4EE4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Domain.Tests", "Betfair.Domain.Tests\Betfair.Domain.Tests.csproj", "{D520D836-04BC-4D22-B328-8216B9C9BC1D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Legacy", "Legacy", "{559FD5A4-996D-4CB0-A58A-5F4257A0DF97}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.RestApi.Tests", "Betfair.RestApi.Tests\Betfair.RestApi.Tests.csproj", "{02105ADA-F418-4C9F-AB03-E080DAEEBCA9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.RestApi", "Betfair.RestApi\Betfair.RestApi.csproj", "{B30AD5BF-C7B9-4496-8103-DEACDC223D09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,89 +16,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{85386913-19B6-4228-9279-79F3E42B1BA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85386913-19B6-4228-9279-79F3E42B1BA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85386913-19B6-4228-9279-79F3E42B1BA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85386913-19B6-4228-9279-79F3E42B1BA6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{34383D76-B58B-451E-BABB-740713299753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34383D76-B58B-451E-BABB-740713299753}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34383D76-B58B-451E-BABB-740713299753}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34383D76-B58B-451E-BABB-740713299753}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD165573-C81F-4D0C-8654-A40C602499E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD165573-C81F-4D0C-8654-A40C602499E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD165573-C81F-4D0C-8654-A40C602499E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD165573-C81F-4D0C-8654-A40C602499E5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4373C937-8659-468A-94F9-74403926D6D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4373C937-8659-468A-94F9-74403926D6D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4373C937-8659-468A-94F9-74403926D6D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4373C937-8659-468A-94F9-74403926D6D5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6BB31F44-6A4C-405B-9364-6A30338848C9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F67C514-E31F-4039-8382-A695D70D4EE4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D520D836-04BC-4D22-B328-8216B9C9BC1D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02105ADA-F418-4C9F-AB03-E080DAEEBCA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02105ADA-F418-4C9F-AB03-E080DAEEBCA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02105ADA-F418-4C9F-AB03-E080DAEEBCA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02105ADA-F418-4C9F-AB03-E080DAEEBCA9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B30AD5BF-C7B9-4496-8103-DEACDC223D09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B30AD5BF-C7B9-4496-8103-DEACDC223D09}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B30AD5BF-C7B9-4496-8103-DEACDC223D09}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B30AD5BF-C7B9-4496-8103-DEACDC223D09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{143B9782-1946-4368-95C8-561BD8C2D20C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{143B9782-1946-4368-95C8-561BD8C2D20C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{143B9782-1946-4368-95C8-561BD8C2D20C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{143B9782-1946-4368-95C8-561BD8C2D20C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{85386913-19B6-4228-9279-79F3E42B1BA6} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{7A6E87DF-D40F-4616-82A5-70BCCB5AE5A5} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{34383D76-B58B-451E-BABB-740713299753} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{B5FA9B31-AF06-46DE-8C35-E9F2C308A47F} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{6ED6DD0A-881D-44BD-9F18-5D56EDC440AE} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{468B125C-36CD-4F0C-97BD-94C66A3E9BBB} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{9F5987A0-7D4C-4A3A-BE84-D4CBC11D36BB} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{BD165573-C81F-4D0C-8654-A40C602499E5} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{4373C937-8659-468A-94F9-74403926D6D5} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{248D8C5C-8153-4DE7-B4E0-E42D96DE62C4} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{6BB31F44-6A4C-405B-9364-6A30338848C9} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{5F67C514-E31F-4039-8382-A695D70D4EE4} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-		{D520D836-04BC-4D22-B328-8216B9C9BC1D} = {559FD5A4-996D-4CB0-A58A-5F4257A0DF97}
-	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8E0FF9AD-D181-4454-8130-FE0DE96802F9}
-	EndGlobalSection
-	GlobalSection(NDepend) = preSolution
-		Project = ".\Betfair.ndproj"
+		SolutionGuid = {10DDD922-8284-41AC-B52D-D9767964B76C}
 	EndGlobalSection
 EndGlobal
