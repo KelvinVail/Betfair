@@ -11,5 +11,6 @@ public sealed class BetfairClientHandler : HttpClientHandler
     {
         CheckCertificateRevocationList = true;
         AutomaticDecompression = DecompressionMethods.GZip;
+        UseProxy = false;
     }
 }

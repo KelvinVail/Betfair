@@ -8,10 +8,14 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
     private HttpRequestMessage _request = new ();
     private string _requestContent = string.Empty;
     private string _responseBody = string.Empty;
+    private HttpStatusCode _responseCode = HttpStatusCode.OK;
     private string _contentType = string.Empty;
 
     public void SetResponseBody(string body) =>
         _responseBody = body;
+
+    public void SetResponseCode(HttpStatusCode code) =>
+        _responseCode = code;
 
     public void AssertRequestMethod(HttpMethod method) =>
         Assert.Equal(method, _request.Method);
@@ -21,6 +25,9 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
 
     public void AssertRequestHeader(string key, string value) =>
         Assert.Contains(_request.Headers.GetValues(key), x => x == value);
+
+    public void AssertContentHeader(string key, string value) =>
+        Assert.Contains(_request.Content?.Headers.GetValues(key) !, x => x == value);
 
     public void AssertRequestContent(string body) =>
         Assert.Equal(_requestContent, body);
@@ -39,7 +46,7 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
             _contentType = request.Content.Headers.ContentType?.ToString();
         }
 
-        var response = new HttpResponseMessage(HttpStatusCode.OK);
+        var response = new HttpResponseMessage(_responseCode);
         response.Content = new StringContent(_responseBody);
         return response;
     }

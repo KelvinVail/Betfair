@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using Humanizer;
+﻿using Humanizer;
 
 namespace Betfair.Errors;
 

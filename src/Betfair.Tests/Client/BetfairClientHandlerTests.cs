@@ -20,4 +20,12 @@ public sealed class BetfairClientHandlerTests
 
         Assert.Equal(DecompressionMethods.GZip, handler.AutomaticDecompression);
     }
+
+    [Fact]
+    public void UseProxyIsSetToFalse()
+    {
+        using var handler = new BetfairClientHandler();
+
+        Assert.False(handler.UseProxy);
+    }
 }

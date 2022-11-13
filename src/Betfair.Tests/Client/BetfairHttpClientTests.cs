@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net;
+using System.Net.Http.Headers;
 using Betfair.Client;
 using Betfair.Errors;
 using Betfair.Login;
@@ -200,6 +201,114 @@ public sealed class BetfairHttpClientTests : IDisposable
         var result = await _client.Login(default);
 
         AssertError(ErrorResult.Create(error), result);
+    }
+
+    [Fact]
+    public async Task PostReturnsErrorIfUriIsNull()
+    {
+        var result = await _client.Post<dynamic>(
+            null,
+            Maybe<object>.None,
+            "token",
+            default);
+
+        AssertError(ErrorResult.Empty("uri"), result);
+    }
+
+    [Fact]
+    public async Task PostReturnsErrorIfSessionTokenIsNull()
+    {
+        var result = await _client.Post<dynamic>(
+            new Uri("http://test.com/"),
+            Maybe<object>.None,
+            null,
+            default);
+
+        AssertError(ErrorResult.Empty("sessionToken"), result);
+    }
+
+    [Fact]
+    public async Task PostReturnsErrorIfSessionTokenIsEmpty()
+    {
+        var result = await _client.Post<dynamic>(
+            new Uri("http://test.com/"),
+            Maybe<object>.None,
+            string.Empty,
+            default);
+
+        AssertError(ErrorResult.Empty("sessionToken"), result);
+    }
+
+    [Fact]
+    public async Task PostReturnsErrorIfSessionTokenIsWhitespace()
+    {
+        var result = await _client.Post<dynamic>(
+            new Uri("http://test.com/"),
+            Maybe<object>.None,
+            " ",
+            default);
+
+        AssertError(ErrorResult.Empty("sessionToken"), result);
+    }
+
+    [Theory]
+    [InlineData("http://test.com")]
+    [InlineData("http://other.com")]
+    public async Task PostUsesThePassedInUri(string uri)
+    {
+        await _client.Post<dynamic>(
+            new Uri(uri),
+            Maybe<object>.None,
+            "token",
+            default);
+
+        _handler.AssertRequestMethod(HttpMethod.Post);
+        _handler.AssertRequestUri(new Uri(uri));
+    }
+
+    [Theory]
+    [InlineData("AppKey")]
+    [InlineData("OtherKey")]
+    public async Task PostPutsAppKeyIsInRequestHeader(string appKey)
+    {
+        var cred = Credentials.Create("username", "password", appKey).Value;
+        using var client = new BetfairHttpClient(cred, _handler);
+
+        await client.Post<dynamic>(
+            new Uri("http://test.com/"),
+            Maybe<object>.None,
+            "token",
+            default);
+
+        _handler.AssertContentHeader("X-Application", appKey);
+    }
+
+    [Theory]
+    [InlineData("SessionToken")]
+    [InlineData("OtherToken")]
+    public async Task PostPutsSessionTokenIsInRequestHeader(string token)
+    {
+        await _client.Post<dynamic>(
+            new Uri("http://test.com/"),
+            Maybe<object>.None,
+            token,
+            default);
+
+        _handler.AssertContentHeader("X-Authentication", token);
+    }
+
+    [Fact]
+    public async Task ReturnErrorIfPostIsNotOk()
+    {
+        _handler.SetResponseCode(HttpStatusCode.BadRequest);
+
+        var result = await _client.Post<dynamic>(
+            new Uri("http://test.com/"),
+            Maybe<object>.None,
+            "token",
+            default);
+
+        AssertError(ErrorResult.Create(HttpStatusCode.BadRequest.ToString()), result);
     }
 
     public void Dispose()

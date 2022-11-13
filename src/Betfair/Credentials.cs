@@ -1,11 +1,11 @@
 ﻿using System.Security.Cryptography.X509Certificates;
-using Betfair.Errors;
-using CSharpFunctionalExtensions;
 
 namespace Betfair;
 
 public sealed class Credentials : ValueObject
 {
+    private const string _apiLogin = "https://identitysso.betfair.com/api/login";
+    private const string _certLogin = "https://identitysso-cert.betfair.com/api/certlogin";
     private readonly string _username;
     private readonly string _password;
     private readonly string _appKey;
@@ -48,29 +48,38 @@ public sealed class Credentials : ValueObject
         return cred;
     }
 
-    internal HttpRequestMessage GetLoginRequest()
+    internal void AddHeaders(StreamContent request, string sessionToken)
     {
-        if (Certificate is not null)
-            return GetNonInteractiveLogin();
-        return GetInteractiveLogin();
+        request.Headers.Add("X-Application", _appKey);
+        request.Headers.Add("X-Authentication", sessionToken);
     }
 
-    private HttpRequestMessage GetInteractiveLogin()
+    internal HttpRequestMessage GetLoginRequest() =>
+        Certificate is not null ? CertLogin() : ApiLogin();
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return _username;
+        yield return _password;
+        yield return _appKey;
+    }
+
+    private HttpRequestMessage ApiLogin()
     {
         var request = new HttpRequestMessage(
             HttpMethod.Post,
-            new Uri("https://identitysso.betfair.com/api/login"));
+            new Uri(_apiLogin));
 
         AddHeadersAndContent(request);
 
         return request;
     }
 
-    private HttpRequestMessage GetNonInteractiveLogin()
+    private HttpRequestMessage CertLogin()
     {
         var request = new HttpRequestMessage(
             HttpMethod.Post,
-            new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
+            new Uri(_certLogin));
 
         AddHeadersAndContent(request);
 
@@ -82,12 +91,5 @@ public sealed class Credentials : ValueObject
         request.Headers.Add("X-Application", _appKey);
         request.Content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", _username }, { "password", _password } });
-    }
-
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return _username;
-        yield return _password;
-        yield return _appKey;
     }
 }

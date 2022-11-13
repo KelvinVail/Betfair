@@ -1,7 +1,5 @@
 ﻿using System.Net.Http.Headers;
-using Betfair.Errors;
 using Betfair.Login;
-using CSharpFunctionalExtensions;
 using Utf8Json;
 using Utf8Json.Resolvers;
 
@@ -33,13 +31,42 @@ public sealed class BetfairHttpClient : HttpClient
 
         var response = await SendAsync(request, cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<Response>(
-            response.Content.ReadAsStream(),
+            await response.Content.ReadAsStreamAsync(cancellationToken),
             StandardResolver.CamelCase);
 
         if (LoginIsSuccess(result))
             return TokenFrom(result);
 
         return Error(result);
+    }
+
+    public async Task<Result<T, ErrorResult>> Post<T>(
+        Uri uri,
+        Maybe<object> body,
+        string sessionToken,
+        CancellationToken cancellationToken)
+    {
+        if (uri is null) return ErrorResult.Empty(nameof(uri));
+        if (string.IsNullOrWhiteSpace(sessionToken)) return ErrorResult.Empty(nameof(sessionToken));
+
+        var ms = new MemoryStream();
+        if (body.HasValue)
+            await JsonSerializer.SerializeAsync(ms, body.Value);
+        ms.Seek(0, SeekOrigin.Begin);
+        using var request = new HttpRequestMessage(HttpMethod.Post, uri);
+        using var requestContent = new StreamContent(ms);
+        request.Content = requestContent;
+        _credentials.AddHeaders(requestContent, sessionToken);
+
+        using var response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            return ErrorResult.Create(response.StatusCode.ToString());
+
+        var content = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var result = await JsonSerializer.DeserializeAsync<T>(
+            content,
+            StandardResolver.CamelCase);
+        return result;
     }
 
     private static bool LoginIsSuccess(Response result) =>
@@ -58,6 +85,7 @@ public sealed class BetfairHttpClient : HttpClient
 
     private void Configure()
     {
+        DefaultRequestHeaders.Clear();
         Timeout = TimeSpan.FromSeconds(30);
         DefaultRequestHeaders.Accept
             .Add(new MediaTypeWithQualityHeaderValue("application/json"));
