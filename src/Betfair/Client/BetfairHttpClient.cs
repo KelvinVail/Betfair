@@ -5,7 +5,7 @@ using Utf8Json.Resolvers;
 
 namespace Betfair.Client;
 
-public sealed class BetfairHttpClient : HttpClient
+public class BetfairHttpClient : HttpClient
 {
     private static readonly BetfairClientHandler _handler = new ();
     private readonly Credentials _credentials;
@@ -24,6 +24,10 @@ public sealed class BetfairHttpClient : HttpClient
         Configure();
     }
 
+    protected BetfairHttpClient()
+    {
+    }
+
     public async Task<Result<string, ErrorResult>> Login(
         CancellationToken cancellationToken)
     {
@@ -40,11 +44,12 @@ public sealed class BetfairHttpClient : HttpClient
         return Error(result);
     }
 
-    public async Task<Result<T, ErrorResult>> Post<T>(
+    public virtual async Task<Result<T, ErrorResult>> Post<T>(
         Uri uri,
         Maybe<object> body,
         string sessionToken,
         CancellationToken cancellationToken)
+        where T : class
     {
         if (uri is null) return ErrorResult.Empty(nameof(uri));
         if (string.IsNullOrWhiteSpace(sessionToken)) return ErrorResult.Empty(nameof(sessionToken));
