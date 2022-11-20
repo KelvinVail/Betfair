@@ -1,4 +1,5 @@
 ﻿using Betfair.Betting;
+using Betfair.Client;
 using Betfair.Errors;
 using Betfair.Tests.Helpers;
 using Betfair.Tests.TestDoubles;
@@ -16,27 +17,24 @@ public class GetEventTypesTests : IDisposable
         _client = new BettingClient(_httpClient);
 
     [Fact]
-    public async Task SessionTokenMustNotBeNull()
+    public async Task ReturnErrorsFromClient()
     {
-        var result = await _client.EventTypes(null, default);
+        var error = ErrorResult.Empty("sessionToken");
+        _httpClient.SetError = error;
 
-        result.ShouldBe(ErrorResult.Empty("sessionToken"));
+        var result = await _client.EventTypes("token");
+
+        result.ShouldBe(error);
     }
 
-    [Fact]
-    public async Task SessionTokenMustNotBeEmpty()
+    [Theory]
+    [InlineData("token")]
+    [InlineData("newSessionToken")]
+    public async Task SessionTokenIsPassedToClient(string token)
     {
-        var result = await _client.EventTypes(string.Empty, default);
+        await _client.EventTypes(token);
 
-        result.ShouldBe(ErrorResult.Empty("sessionToken"));
-    }
-
-    [Fact]
-    public async Task SessionTokenMustNotBeWhiteSpace()
-    {
-        var result = await _client.EventTypes(" ", default);
-
-        result.ShouldBe(ErrorResult.Empty("sessionToken"));
+        _httpClient.LastSessionTokenUsed.Should().Be(token);
     }
 
     [Fact]
@@ -44,9 +42,32 @@ public class GetEventTypesTests : IDisposable
     {
         var expectedUri = new Uri("https://api.betfair.com/exchange/betting/rest/v1.0/listEventTypes/");
 
-        await _client.EventTypes("token", default);
+        await _client.EventTypes("token");
 
         _httpClient.LastUriCalled.Should().Be(expectedUri);
+    }
+
+    [Fact]
+    public async Task EmptyMarketFilterIsSentToClientAsDefault()
+    {
+        var filter = new RequestBody();
+
+        await _client.EventTypes("token");
+
+        _httpClient.LastBodySent.Should().BeEquivalentTo(filter);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(7)]
+    public async Task MarketFilterIsSentToClient(int eventType)
+    {
+        var body = new RequestBody();
+        body.Filter.EventTypeIds.Add(eventType);
+
+        await _client.EventTypes("token", body.Filter);
+
+        _httpClient.LastBodySent.Should().BeEquivalentTo(body);
     }
 
     public void Dispose()

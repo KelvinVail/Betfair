@@ -50,6 +50,7 @@ public sealed class Credentials : ValueObject
 
     internal void AddHeaders(StreamContent request, string sessionToken)
     {
+        request.Headers.Add("Content-Type", "application/json");
         request.Headers.Add("X-Application", _appKey);
         request.Headers.Add("X-Authentication", sessionToken);
     }

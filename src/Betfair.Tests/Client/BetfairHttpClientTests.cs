@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Dynamic;
+using System.Net;
 using System.Net.Http.Headers;
 using Betfair.Client;
 using Betfair.Errors;
@@ -15,6 +16,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     private readonly HttpMessageHandlerSpy _handler = new ();
     private readonly BetfairHttpClient _client;
     private readonly Credentials _cred = Credentials.Create("username", "password", "appKey").Value;
+    private Uri _uri = new Uri("http://test.com/");
 
     public BetfairHttpClientTests()
     {
@@ -208,9 +210,8 @@ public sealed class BetfairHttpClientTests : IDisposable
     {
         var result = await _client.Post<dynamic>(
             null,
-            Maybe<object>.None,
             "token",
-            default);
+            Maybe<object>.None, default);
 
         AssertError(ErrorResult.Empty("uri"), result);
     }
@@ -219,10 +220,8 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task PostReturnsErrorIfSessionTokenIsNull()
     {
         var result = await _client.Post<dynamic>(
-            new Uri("http://test.com/"),
-            Maybe<object>.None,
-            null,
-            default);
+            _uri,
+            null);
 
         AssertError(ErrorResult.Empty("sessionToken"), result);
     }
@@ -231,10 +230,8 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task PostReturnsErrorIfSessionTokenIsEmpty()
     {
         var result = await _client.Post<dynamic>(
-            new Uri("http://test.com/"),
-            Maybe<object>.None,
-            string.Empty,
-            default);
+            _uri,
+            string.Empty);
 
         AssertError(ErrorResult.Empty("sessionToken"), result);
     }
@@ -243,10 +240,8 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task PostReturnsErrorIfSessionTokenIsWhitespace()
     {
         var result = await _client.Post<dynamic>(
-            new Uri("http://test.com/"),
-            Maybe<object>.None,
-            " ",
-            default);
+            _uri,
+            " ");
 
         AssertError(ErrorResult.Empty("sessionToken"), result);
     }
@@ -258,9 +253,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     {
         await _client.Post<dynamic>(
             new Uri(uri),
-            Maybe<object>.None,
-            "token",
-            default);
+            "token");
 
         _handler.AssertRequestMethod(HttpMethod.Post);
         _handler.AssertRequestUri(new Uri(uri));
@@ -275,10 +268,8 @@ public sealed class BetfairHttpClientTests : IDisposable
         using var client = new BetfairHttpClient(cred, _handler);
 
         await client.Post<dynamic>(
-            new Uri("http://test.com/"),
-            Maybe<object>.None,
-            "token",
-            default);
+            _uri,
+            "token");
 
         _handler.AssertContentHeader("X-Application", appKey);
     }
@@ -289,10 +280,8 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task PostPutsSessionTokenIsInRequestHeader(string token)
     {
         await _client.Post<dynamic>(
-            new Uri("http://test.com/"),
-            Maybe<object>.None,
-            token,
-            default);
+            _uri,
+            token);
 
         _handler.AssertContentHeader("X-Authentication", token);
     }
@@ -302,13 +291,18 @@ public sealed class BetfairHttpClientTests : IDisposable
     {
         _handler.SetResponseCode(HttpStatusCode.BadRequest);
 
-        var result = await _client.Post<dynamic>(
-            new Uri("http://test.com/"),
-            Maybe<object>.None,
-            "token",
-            default);
+        var result = await _client.Post<dynamic>(_uri, "token");
 
         AssertError(ErrorResult.Create(HttpStatusCode.BadRequest.ToString()), result);
+    }
+
+    [Theory]
+    [InlineData("bodyContent")]
+    public async Task PostPutsBodyInTheRequest(string body)
+    {
+        await _client.Post<dynamic>(_uri, "token", body);
+
+        _handler.AssertRequestContent(body);
     }
 
     public void Dispose()

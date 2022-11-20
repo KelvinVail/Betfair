@@ -30,7 +30,7 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
         Assert.Contains(_request.Content?.Headers.GetValues(key) !, x => x == value);
 
     public void AssertRequestContent(string body) =>
-        Assert.Equal(_requestContent, body);
+        Assert.Contains(body, _requestContent, StringComparison.CurrentCultureIgnoreCase);
 
     public void AssertContentType(string type) =>
         Assert.Equal(_contentType, type);

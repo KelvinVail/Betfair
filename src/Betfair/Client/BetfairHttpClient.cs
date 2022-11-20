@@ -46,17 +46,18 @@ public class BetfairHttpClient : HttpClient
 
     public virtual async Task<Result<T, ErrorResult>> Post<T>(
         Uri uri,
-        Maybe<object> body,
         string sessionToken,
-        CancellationToken cancellationToken)
+        object? body = null,
+        CancellationToken cancellationToken = default)
         where T : class
     {
         if (uri is null) return ErrorResult.Empty(nameof(uri));
         if (string.IsNullOrWhiteSpace(sessionToken)) return ErrorResult.Empty(nameof(sessionToken));
 
         var ms = new MemoryStream();
-        if (body.HasValue)
-            await JsonSerializer.SerializeAsync(ms, body.Value);
+        if (body is not null)
+            await JsonSerializer.SerializeAsync(ms, body, StandardResolver.CamelCase);
+
         ms.Seek(0, SeekOrigin.Begin);
         using var request = new HttpRequestMessage(HttpMethod.Post, uri);
         using var requestContent = new StreamContent(ms);

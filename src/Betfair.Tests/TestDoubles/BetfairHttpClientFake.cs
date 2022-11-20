@@ -8,14 +8,26 @@ public class BetfairHttpClientFake : BetfairHttpClient
 {
     public Uri LastUriCalled { get; private set; }
 
+    public string LastSessionTokenUsed { get; private set; }
+
+    public object LastBodySent { get; private set; }
+
+    public object SetResponse { get; set; } = default;
+
+    public ErrorResult SetError { get; set; }
+
     public override async Task<Result<T, ErrorResult>> Post<T>(
         Uri uri,
-        Maybe<object> body,
         string sessionToken,
-        CancellationToken cancellationToken)
+        object? body = null,
+        CancellationToken cancellationToken = default)
     {
         await Task.CompletedTask;
         LastUriCalled = uri;
-        return default;
+        LastSessionTokenUsed = sessionToken;
+        LastBodySent = body;
+
+        if (SetError != null) return SetError;
+        return Result.Success<T, ErrorResult>((T)SetResponse);
     }
 }

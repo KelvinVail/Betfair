@@ -14,7 +14,6 @@ public sealed class AccountClient
         CancellationToken cancellationToken) =>
         await _client.Post<AccountFunds>(
             new Uri("https://api.betfair.com/exchange/account/rest/v1.0/getAccountFunds/"),
-            Maybe<object>.None,
             sessionToken,
-            cancellationToken);
+            Maybe<object>.None, cancellationToken);
 }
