@@ -1,7 +1,7 @@
 ﻿using Betfair.Betting;
 using Betfair.Client;
 using Betfair.Errors;
-using Betfair.Tests.Helpers;
+using Betfair.Tests.Errors;
 using Betfair.Tests.TestDoubles;
 using FluentAssertions;
 
@@ -24,7 +24,7 @@ public class GetEventTypesTests : IDisposable
 
         var result = await _client.EventTypes("token");
 
-        result.ShouldBe(error);
+        result.ShouldBeFailure(error);
     }
 
     [Theory]

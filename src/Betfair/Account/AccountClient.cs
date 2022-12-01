@@ -4,6 +4,7 @@ namespace Betfair.Account;
 
 public sealed class AccountClient
 {
+    private const string _accountFunds = "https://api.betfair.com/exchange/account/rest/v1.0/getAccountFunds/";
     private readonly BetfairHttpClient _client;
 
     public AccountClient(BetfairHttpClient client) =>
@@ -13,7 +14,8 @@ public sealed class AccountClient
         string sessionToken,
         CancellationToken cancellationToken) =>
         await _client.Post<AccountFunds>(
-            new Uri("https://api.betfair.com/exchange/account/rest/v1.0/getAccountFunds/"),
+            new Uri(_accountFunds),
             sessionToken,
-            Maybe<object>.None, cancellationToken);
+            Maybe<object>.None,
+            cancellationToken);
 }

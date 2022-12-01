@@ -5,7 +5,7 @@ namespace Betfair.Tests.TestDoubles;
 
 public class HttpMessageHandlerSpy : HttpMessageHandler
 {
-    private HttpRequestMessage _request = new ();
+    private HttpRequestMessage _request;
     private string _requestContent = string.Empty;
     private string _responseBody = string.Empty;
     private HttpStatusCode _responseCode = HttpStatusCode.OK;

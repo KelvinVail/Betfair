@@ -78,7 +78,7 @@ public sealed class BetfairHttpClientTests : IDisposable
         var result = await _client.Post<dynamic>(
             null,
             "token",
-            Maybe<object>.None, default);
+            Maybe<object>.None);
 
         AssertError(ErrorResult.Empty("uri"), result);
     }
@@ -116,7 +116,9 @@ public sealed class BetfairHttpClientTests : IDisposable
     [Theory]
     [InlineData("http://test.com")]
     [InlineData("http://other.com")]
+#pragma warning disable CA1054 // URI-like parameters should not be strings
     public async Task PostUsesThePassedInUri(string uri)
+#pragma warning restore CA1054 // URI-like parameters should not be strings
     {
         await _client.Post<dynamic>(
             new Uri(uri),

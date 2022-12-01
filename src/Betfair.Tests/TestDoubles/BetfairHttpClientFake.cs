@@ -24,7 +24,7 @@ public class BetfairHttpClientFake : BetfairHttpClient
     public override async Task<Result<T, ErrorResult>> Post<T>(
         Uri uri,
         string sessionToken,
-        object? body = null,
+        object body = null,
         CancellationToken cancellationToken = default)
     {
         await Task.CompletedTask;
