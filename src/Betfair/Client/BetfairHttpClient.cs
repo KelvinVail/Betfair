@@ -24,24 +24,10 @@ public class BetfairHttpClient : HttpClient
         Configure();
     }
 
+#pragma warning disable CS8618 // For mocking
     protected BetfairHttpClient()
+#pragma warning restore CS8618
     {
-    }
-
-    public async Task<Result<string, ErrorResult>> Login(
-        CancellationToken cancellationToken)
-    {
-        using var request = _credentials.GetLoginRequest();
-
-        var response = await SendAsync(request, cancellationToken);
-        var result = await JsonSerializer.DeserializeAsync<Response>(
-            await response.Content.ReadAsStreamAsync(cancellationToken),
-            StandardResolver.CamelCase);
-
-        if (LoginIsSuccess(result))
-            return TokenFrom(result);
-
-        return Error(result);
     }
 
     public virtual async Task<Result<T, ErrorResult>> Post<T>(
@@ -74,20 +60,6 @@ public class BetfairHttpClient : HttpClient
             StandardResolver.CamelCase);
         return result;
     }
-
-    private static bool LoginIsSuccess(Response result) =>
-        result.Status.Equals("success", StringComparison.OrdinalIgnoreCase)
-        || result.LoginStatus.Equals("Success", StringComparison.OrdinalIgnoreCase);
-
-    private static string TokenFrom(Response result) =>
-        !string.IsNullOrWhiteSpace(result.Token)
-            ? result.Token
-            : result.SessionToken;
-
-    private static ErrorResult Error(Response result) =>
-        ErrorResult.Create(!string.IsNullOrWhiteSpace(result.Error)
-            ? result.Error
-            : result.LoginStatus);
 
     private void Configure()
     {

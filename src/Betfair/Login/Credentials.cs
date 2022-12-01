@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 
-namespace Betfair;
+namespace Betfair.Login;
 
 public sealed class Credentials : ValueObject
 {
@@ -34,7 +34,7 @@ public sealed class Credentials : ValueObject
         return new Credentials(username, password, appKey);
     }
 
-    public static Result<Credentials, ErrorResult> CreateWithCert(
+    public static Result<Credentials, ErrorResult> Create(
         string username,
         string password,
         string appKey,

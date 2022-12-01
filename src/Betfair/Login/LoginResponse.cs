@@ -1,6 +1,6 @@
 ﻿namespace Betfair.Login;
 
-public sealed class Response
+public sealed class LoginResponse
 {
     public string Token { get; init; } = string.Empty;
 

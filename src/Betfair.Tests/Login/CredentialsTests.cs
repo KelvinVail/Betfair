@@ -1,8 +1,9 @@
 ﻿using Betfair.Errors;
+using Betfair.Login;
 using Betfair.Tests.TestDoubles;
 using CSharpFunctionalExtensions;
 
-namespace Betfair.Tests;
+namespace Betfair.Tests.Login;
 
 public sealed class CredentialsTests
 {
@@ -126,7 +127,7 @@ public sealed class CredentialsTests
     public void CreateWithCertReturnsErrors()
     {
         using var cert = new X509Certificate2Stub();
-        var result = Credentials.CreateWithCert(
+        var result = Credentials.Create(
             string.Empty,
             "password",
             "appKey",
@@ -138,7 +139,7 @@ public sealed class CredentialsTests
     [Fact]
     public void CertificationMustNotBeNull()
     {
-        var result = Credentials.CreateWithCert(
+        var result = Credentials.Create(
             "username",
             "password",
             "appKey",

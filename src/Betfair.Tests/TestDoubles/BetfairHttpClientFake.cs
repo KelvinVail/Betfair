@@ -1,4 +1,5 @@
-﻿using Betfair.Client;
+﻿using System.Net;
+using Betfair.Client;
 using Betfair.Errors;
 using CSharpFunctionalExtensions;
 
@@ -16,6 +17,10 @@ public class BetfairHttpClientFake : BetfairHttpClient
 
     public ErrorResult SetError { get; set; }
 
+    public HttpResponseMessage SetResponseMessage { get; set; }
+
+    public HttpRequestMessage LastMessageSent { get; private set; }
+
     public override async Task<Result<T, ErrorResult>> Post<T>(
         Uri uri,
         string sessionToken,
@@ -29,5 +34,18 @@ public class BetfairHttpClientFake : BetfairHttpClient
 
         if (SetError != null) return SetError;
         return Result.Success<T, ErrorResult>((T)SetResponse);
+    }
+
+    public override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+        if (request?.Content is not null)
+            LastBodySent = await request.Content.ReadAsStringAsync(cancellationToken);
+
+        LastMessageSent = request;
+
+        return SetResponseMessage ?? new HttpResponseMessage(HttpStatusCode.OK);
     }
 }
