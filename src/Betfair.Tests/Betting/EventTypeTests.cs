@@ -1,5 +1,4 @@
 ﻿using Betfair.Betting;
-using FluentAssertions;
 
 namespace Betfair.Tests.Betting;
 

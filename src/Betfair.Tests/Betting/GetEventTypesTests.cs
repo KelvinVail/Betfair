@@ -3,7 +3,6 @@ using Betfair.Client;
 using Betfair.Errors;
 using Betfair.Tests.Errors;
 using Betfair.Tests.TestDoubles;
-using FluentAssertions;
 
 namespace Betfair.Tests.Betting;
 
