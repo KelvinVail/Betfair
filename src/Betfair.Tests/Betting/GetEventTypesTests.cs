@@ -57,19 +57,6 @@ public class GetEventTypesTests : IDisposable
         _httpClient.LastBodySent.Should().BeEquivalentTo(filter);
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(7)]
-    public async Task MarketFilterIsSentToClient(int eventType)
-    {
-        var body = new RequestBody();
-        body.Filter.EventTypeIds.Add(eventType);
-
-        await _client.EventTypes("token", body.Filter);
-
-        _httpClient.LastBodySent.Should().BeEquivalentTo(body);
-    }
-
     public void Dispose()
     {
         Dispose(disposing: true);
