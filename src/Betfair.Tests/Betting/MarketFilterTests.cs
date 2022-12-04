@@ -9,7 +9,7 @@ public class MarketFilterTests
     {
         var filter = new MarketFilter();
 
-        filter.ToJsonString().Should().Be("\"filter\":{}");
+        filter.ToJsonString().Should().Be("{}");
     }
 
     [Fact]
@@ -17,7 +17,7 @@ public class MarketFilterTests
     {
         var filter = new MarketFilter().WithEventType(null);
 
-        filter.ToJsonString().Should().Be("\"filter\":{}");
+        filter.ToJsonString().Should().Be("{}");
     }
 
     [Theory]
@@ -31,7 +31,7 @@ public class MarketFilterTests
         var filter = new MarketFilter().WithEventType(eventType);
 
         filter.ToJsonString().Should()
-            .Be($"\"filter\":{{\"eventTypeIds\":[{eventId}]}}");
+            .Be($"{{\"eventTypeIds\":[{eventId}]}}");
     }
 
     [Theory]
@@ -47,7 +47,7 @@ public class MarketFilterTests
             .WithEventType(eventType);
 
         filter.ToJsonString().Should()
-            .Be($"\"filter\":{{\"eventTypeIds\":[999,{eventId}]}}");
+            .Be($"{{\"eventTypeIds\":[999,{eventId}]}}");
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class MarketFilterTests
     {
         var filter = new MarketFilter().WithMarketType(null);
 
-        filter.ToJsonString().Should().Be("\"filter\":{}");
+        filter.ToJsonString().Should().Be("{}");
     }
 
     [Theory]
@@ -69,7 +69,7 @@ public class MarketFilterTests
         var filter = new MarketFilter().WithMarketType(marketType);
 
         filter.ToJsonString().Should()
-            .Be($"\"filter\":{{\"marketTypeCodes\":[\"{marketTypeId}\"]}}");
+            .Be($"{{\"marketTypeCodes\":[\"{marketTypeId}\"]}}");
     }
 
     [Theory]
@@ -85,7 +85,7 @@ public class MarketFilterTests
             .WithMarketType(marketType);
 
         filter.ToJsonString().Should()
-            .Be($"\"filter\":{{\"marketTypeCodes\":[\"OTHER_PLACE\",\"{marketTypeId}\"]}}");
+            .Be($"{{\"marketTypeCodes\":[\"OTHER_PLACE\",\"{marketTypeId}\"]}}");
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class MarketFilterTests
     {
         var filter = new MarketFilter().WithCountryCode(null);
 
-        filter.ToJsonString().Should().Be("\"filter\":{}");
+        filter.ToJsonString().Should().Be("{}");
     }
 
     [Theory]
@@ -105,7 +105,7 @@ public class MarketFilterTests
         var filter = new MarketFilter().WithCountryCode(countryCode);
 
         filter.ToJsonString().Should()
-            .Be($"\"filter\":{{\"marketCountries\":[\"{countryCode}\"]}}");
+            .Be($"{{\"marketCountries\":[\"{countryCode}\"]}}");
     }
 
     [Theory]
@@ -119,6 +119,6 @@ public class MarketFilterTests
             .WithCountryCode(countryCode);
 
         filter.ToJsonString().Should()
-            .Be($"\"filter\":{{\"marketCountries\":[\"FR\",\"{countryCode}\"]}}");
+            .Be($"{{\"marketCountries\":[\"FR\",\"{countryCode}\"]}}");
     }
 }

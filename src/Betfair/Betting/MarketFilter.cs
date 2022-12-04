@@ -6,17 +6,16 @@ namespace Betfair.Betting;
 
 public class MarketFilter
 {
-    private readonly Filter _filter = new ();
+    internal Filter Filter { get; } = new ();
 
-    public string ToJsonString() =>
-        $"\"filter\":{Serialize()}";
+    public string ToJsonString() => Serialize();
 
     public MarketFilter WithEventType(EventType eventType)
     {
         if (eventType is null) return this;
-        _filter.EventTypeIds ??= new List<int>();
+        Filter.EventTypeIds ??= new List<int>();
 
-        _filter.EventTypeIds.Add(
+        Filter.EventTypeIds.Add(
             int.Parse(eventType.Id, NumberStyles.Integer, CultureInfo.InvariantCulture));
         return this;
     }
@@ -24,33 +23,23 @@ public class MarketFilter
     public MarketFilter WithMarketType(MarketType marketType)
     {
         if (marketType is null) return this;
-        _filter.MarketTypeCodes ??= new List<string>();
+        Filter.MarketTypeCodes ??= new List<string>();
 
-        _filter.MarketTypeCodes.Add(marketType.Id);
+        Filter.MarketTypeCodes.Add(marketType.Id);
         return this;
     }
 
     public MarketFilter WithCountryCode(string countryCode)
     {
         if (countryCode is null) return this;
-        _filter.MarketCountries ??= new List<string>();
+        Filter.MarketCountries ??= new List<string>();
 
-        _filter.MarketCountries.Add(countryCode);
+        Filter.MarketCountries.Add(countryCode);
         return this;
     }
 
     private string Serialize() =>
         JsonSerializer.ToJsonString(
-            _filter,
+            Filter,
             StandardResolver.AllowPrivateExcludeNullCamelCase);
-
-    // ReSharper disable CollectionNeverQueried.Local
-    private sealed class Filter
-    {
-        public List<int>? EventTypeIds { get; internal set;  }
-
-        public List<string>? MarketTypeCodes { get; internal set; }
-
-        public List<string>? MarketCountries { get; internal set; }
-    }
 }

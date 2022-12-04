@@ -3,6 +3,8 @@ using Betfair.Client;
 using Betfair.Errors;
 using Betfair.Tests.Errors;
 using Betfair.Tests.TestDoubles;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
 namespace Betfair.Tests.Betting;
 
@@ -50,10 +52,13 @@ public class GetEventTypesTests : IDisposable
     public async Task EmptyMarketFilterIsSentToClientAsDefault()
     {
         var filter = new RequestBody();
+        var expected = JsonSerializer.ToJsonString(filter, StandardResolver.AllowPrivateExcludeNullCamelCase);
 
         await _client.EventTypes("token");
 
-        _httpClient.LastBodySent.Should().BeEquivalentTo(filter);
+        var actual =
+            JsonSerializer.ToJsonString(_httpClient.LastBodySent, StandardResolver.AllowPrivateExcludeNullCamelCase);
+        actual.Should().Be(expected);
     }
 
     public void Dispose()

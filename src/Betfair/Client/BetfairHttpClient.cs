@@ -42,7 +42,7 @@ public class BetfairHttpClient : HttpClient
 
         var ms = new MemoryStream();
         if (body is not null)
-            await JsonSerializer.SerializeAsync(ms, body, StandardResolver.CamelCase);
+            await JsonSerializer.SerializeAsync(ms, body, StandardResolver.AllowPrivateExcludeNullCamelCase);
 
         ms.Seek(0, SeekOrigin.Begin);
         using var request = new HttpRequestMessage(HttpMethod.Post, uri);

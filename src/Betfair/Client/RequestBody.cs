@@ -4,5 +4,5 @@ namespace Betfair.Client;
 
 public class RequestBody
 {
-    public MarketFilter Filter { get; set; } = new ();
+    internal Filter Filter { get; set; } = new MarketFilter().Filter;
 }
