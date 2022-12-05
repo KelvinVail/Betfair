@@ -32,5 +32,5 @@ public sealed class MarketDescription
 
     public string RaceType { get; init; } = string.Empty;
 
-    public LadderDescription PriceLadderDescription { get; init; } = new();
+    public LadderDescription PriceLadderDescription { get; init; } = new ();
 }
