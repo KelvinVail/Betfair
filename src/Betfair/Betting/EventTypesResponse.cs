@@ -1,4 +1,6 @@
-﻿namespace Betfair.Betting;
+﻿using Betfair.Betting.Models;
+
+namespace Betfair.Betting;
 
 public class EventTypesResponse
 {

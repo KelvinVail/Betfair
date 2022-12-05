@@ -51,8 +51,7 @@ public class GetEventTypesTests : IDisposable
     [Fact]
     public async Task EmptyMarketFilterIsSentToClientAsDefault()
     {
-        var filter = new RequestBody();
-        var expected = JsonSerializer.ToJsonString(filter, StandardResolver.AllowPrivateExcludeNullCamelCase);
+        const string expected = "{\"filter\":{}}";
 
         await _client.EventTypes("token");
 

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Betfair.Betting;
+namespace Betfair.Betting.Models;
 
 public class MarketType : ValueObject
 {

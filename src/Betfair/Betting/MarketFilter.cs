@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Betfair.Betting.Models;
 using Utf8Json;
 using Utf8Json.Resolvers;
 

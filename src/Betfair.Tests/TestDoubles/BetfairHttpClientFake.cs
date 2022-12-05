@@ -13,6 +13,8 @@ public class BetfairHttpClientFake : BetfairHttpClient
 
     public object LastBodySent { get; private set; }
 
+    public Type ResponseType { get; private set; }
+
     public object SetResponse { get; set; } = default;
 
     public ErrorResult SetError { get; set; }
@@ -31,6 +33,7 @@ public class BetfairHttpClientFake : BetfairHttpClient
         LastUriCalled = uri;
         LastSessionTokenUsed = sessionToken;
         LastBodySent = body;
+        ResponseType = typeof(T);
 
         if (SetError != null) return SetError;
         return Result.Success<T, ErrorResult>((T)SetResponse);

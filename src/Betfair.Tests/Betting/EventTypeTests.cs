@@ -1,4 +1,4 @@
-﻿using Betfair.Betting;
+﻿using Betfair.Betting.Models;
 
 namespace Betfair.Tests.Betting;
 
