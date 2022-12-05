@@ -46,4 +46,10 @@
     <ProjectReference Include="..\Betfair\Betfair.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Betting\Samples\listMarketCatalogue.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

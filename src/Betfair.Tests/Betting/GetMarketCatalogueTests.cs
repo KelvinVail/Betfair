@@ -124,6 +124,19 @@ public class GetMarketCatalogueTests : IDisposable
         _httpClient.ResponseType.Should().Be(typeof(IReadOnlyList<MarketCatalogue>));
     }
 
+    [Fact]
+    public async Task CanDeserializeSample()
+    {
+        var sample = await File.ReadAllTextAsync(Path.Combine("Betting", "Samples", "listMarketCatalogue.json"));
+        var expected = JsonSerializer.Deserialize<IReadOnlyList<MarketCatalogue>>(sample);
+        _httpClient.SetResponse = expected;
+
+        var result = await _client.MarketCatalogue("token");
+
+        result.ShouldBeSuccess();
+        result.Value.Should().BeEquivalentTo(expected);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
