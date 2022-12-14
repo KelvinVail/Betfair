@@ -39,10 +39,6 @@ public sealed class StreamClientTests : IDisposable
     public void StreamIsAuthenticated() =>
         _tcpClient.IsAuthenticated.Should().BeTrue();
 
-    [Fact]
-    public void WriterIsAutoFlushed() =>
-        _client.Writer.AutoFlush.Should().BeTrue();
-
     public void Dispose()
     {
         Dispose(disposing: true);
@@ -59,22 +55,4 @@ public sealed class StreamClientTests : IDisposable
 
         _disposedValue = true;
     }
-
-    //[Fact]
-    //public async Task OnStopConnectedIsFalse()
-    //{
-    //    await SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-    //    Assert.True(Subscription.Connected);
-    //    Subscription.Disconnect();
-    //    Assert.False(Subscription.Connected);
-    //}
-
-    //[Fact]
-    //public async Task OnStopTcpClientIsClosed()
-    //{
-    //    await SendLineAsync("{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
-    //    Assert.True(Subscription.Connected);
-    //    Subscription.Disconnect();
-    //    Assert.False(_tcpClient.Connected);
-    //}
 }

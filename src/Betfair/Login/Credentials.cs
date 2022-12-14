@@ -8,16 +8,17 @@ public sealed class Credentials : ValueObject
     private const string _certLogin = "https://identitysso-cert.betfair.com/api/certlogin";
     private readonly string _username;
     private readonly string _password;
-    private readonly string _appKey;
 
     private Credentials(string username, string password, string appKey)
     {
         _username = username;
         _password = password;
-        _appKey = appKey;
+        AppKey = appKey;
     }
 
     internal X509Certificate2? Certificate { get; private set; }
+
+    internal string AppKey { get; }
 
     public static Result<Credentials, ErrorResult> Create(
         string username,
@@ -51,7 +52,7 @@ public sealed class Credentials : ValueObject
     internal void AddHeaders(StreamContent request, string sessionToken)
     {
         request.Headers.Add("Content-Type", "application/json");
-        request.Headers.Add("X-Application", _appKey);
+        request.Headers.Add("X-Application", AppKey);
         request.Headers.Add("X-Authentication", sessionToken);
     }
 
@@ -62,7 +63,7 @@ public sealed class Credentials : ValueObject
     {
         yield return _username;
         yield return _password;
-        yield return _appKey;
+        yield return AppKey;
     }
 
     private HttpRequestMessage ApiLogin()
@@ -89,7 +90,7 @@ public sealed class Credentials : ValueObject
 
     private void AddHeadersAndContent(HttpRequestMessage request)
     {
-        request.Headers.Add("X-Application", _appKey);
+        request.Headers.Add("X-Application", AppKey);
         request.Content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", _username }, { "password", _password } });
     }

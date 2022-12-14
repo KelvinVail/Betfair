@@ -1,30 +1,50 @@
-﻿using Betfair.Stream;
+﻿using Betfair.Login;
+using Betfair.Stream;
+using Betfair.Stream.Responses;
 using Betfair.Tests.Stream.TestDoubles;
 
 namespace Betfair.Tests.Stream;
 
-public sealed class SubscriptionConnectionTests
+public class SubscriptionConnectionTests : IDisposable
 {
-    private readonly StreamClientStub _client = new ();
+    private readonly TcpClientSpy _tcpClient = new ("test", 999);
+    private readonly StreamClientStub _client;
+    private readonly Credentials _credentials = Credentials.Create("username", "password", "appKey").Value;
     private readonly Subscription _subscription;
+    private bool _disposedValue;
 
-    public SubscriptionConnectionTests() =>
-        _subscription = new Subscription(_client);
+    public SubscriptionConnectionTests()
+    {
+        _client = new StreamClientStub(_tcpClient);
+        _subscription = new Subscription(_client, _credentials);
+    }
 
     [Fact]
     public void StreamClientMustNotBeNull()
     {
-        Action act = () => new Subscription(null);
+        Action act = () => new Subscription(null, _credentials);
 
         act.Should().Throw<ArgumentNullException>()
             .Where(x => x.ParamName == "client");
     }
 
     [Fact]
+    public void CredentialsMustNotBeNull()
+    {
+        Action act = () => new Subscription(_client, null);
+
+        act.Should().Throw<ArgumentNullException>()
+            .Where(x => x.ParamName == "credentials");
+    }
+
+    [Fact]
     public async Task SetConnectedToTrueWhenConnectionMessageIsReceived()
     {
-        _client.SendLine(
-            "{\"op\":\"connection\",\"connectionId\":\"ConnectionId\"}");
+        _client.Response = new ChangeMessage
+        {
+            Operation = "connection",
+            ConnectionId = "ConnectionId",
+        };
 
         await ProcessMessages();
 
@@ -37,8 +57,11 @@ public sealed class SubscriptionConnectionTests
     [InlineData("RefreshedConnectionId")]
     public async Task ConnectionIdIsRecorded(string connectionId)
     {
-        _client.SendLine(
-            $"{{\"op\":\"connection\",\"connectionId\":\"{connectionId}\"}}");
+        _client.Response = new ChangeMessage
+        {
+            Operation = "connection",
+            ConnectionId = connectionId,
+        };
 
         await ProcessMessages();
 
@@ -98,6 +121,26 @@ public sealed class SubscriptionConnectionTests
     //    await Subscription.Authenticate();
     //    Assert.Equal(authMessage, Writer.LastLineWritten);
     //}
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue)
+            return;
+
+        if (disposing)
+        {
+            _client.Dispose();
+            _tcpClient.Dispose();
+        }
+
+        _disposedValue = true;
+    }
 
     private async Task ProcessMessages()
     {

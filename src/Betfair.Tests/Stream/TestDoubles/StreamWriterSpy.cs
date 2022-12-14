@@ -1,31 +1,28 @@
-﻿namespace Betfair.Tests.Stream.TestDoubles
+﻿namespace Betfair.Tests.Stream.TestDoubles;
+
+public sealed class StreamWriterSpy : StreamWriter
 {
-    public sealed class StreamWriterSpy : StreamWriter
-    {
-        public StreamWriterSpy()
+    public StreamWriterSpy()
 #pragma warning disable CA2000 // Dispose objects before losing scope
-            : base(new MemoryStream())
+        : base(new MemoryStream())
 #pragma warning restore CA2000 // Dispose objects before losing scope
-        {
-        }
+    {
+    }
 
-        public string LastLineWritten { get; private set; }
+    public string LastLineWritten { get; private set; }
 
-        public List<string> AllLinesWritten { get; private set; } = new List<string>();
+    public List<string> AllLinesWritten { get; private set; } = new ();
 
-        public override async Task WriteLineAsync(string value)
-        {
-            await Task.Run(() =>
-                {
-                    LastLineWritten = value;
-                    AllLinesWritten.Add(value);
-                });
-        }
+    public override async Task WriteLineAsync(string value)
+    {
+        await Task.CompletedTask;
+        LastLineWritten = value;
+        AllLinesWritten.Add(value);
+    }
 
-        public void ClearPreviousResults()
-        {
-            LastLineWritten = null;
-            AllLinesWritten = new List<string>();
-        }
+    public void ClearPreviousResults()
+    {
+        LastLineWritten = null;
+        AllLinesWritten = new List<string>();
     }
 }

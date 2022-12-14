@@ -2,7 +2,7 @@
 
 namespace Betfair.Stream;
 
-public interface ITcpClient
+public interface ITcpClient : IDisposable
 {
     int ReceiveBufferSize { get; set; }
 

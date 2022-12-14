@@ -1,21 +1,22 @@
-﻿using System.Net.Security;
-using System.Net.Sockets;
-using System.Runtime.Serialization;
-using System.Text;
+﻿using System.Runtime.Serialization;
+using Betfair.Login;
+using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
-using Utf8Json;
-using Utf8Json.Resolvers;
 
 namespace Betfair.Stream;
 
 public sealed class Subscription
 {
     private readonly StreamClient _client;
+    private readonly Credentials _credentials;
     private readonly Dictionary<int, SubscriptionMessage> _subscriptionMessages = new Dictionary<int, SubscriptionMessage>();
     private int _requestId;
 
-    public Subscription(StreamClient client) =>
+    public Subscription(StreamClient client, Credentials credentials)
+    {
         _client = client ?? throw new ArgumentNullException(nameof(client));
+        _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
+    }
 
     public bool Connected { get; private set; }
 
@@ -28,14 +29,26 @@ public sealed class Subscription
             { "status", ProcessStatusMessage },
         };
 
-    public async Task Authenticate(string token, string appKey)
+    public async Task<UnitResult<ErrorResult>> Authenticate(string token)
     {
+        if (string.IsNullOrWhiteSpace(token))
+            return ErrorResult.Empty(nameof(token));
+
         _requestId++;
-        var authMessage = GetAuthenticationMessage(
-            appKey,
-            token,
-            _requestId);
-        await _client.Writer.WriteLineAsync(authMessage);
+        var authMessage = new Authentication
+        {
+            Id = _requestId,
+            AppKey = _credentials.AppKey,
+            Session = token,
+        };
+
+        await _client.SendLine(authMessage);
+        var result = await _client.ReadLine<StatusMessage>();
+        if (result.IsFailure) return result.Error;
+        if (result.Value.Value.StatusCode.Equals("FAILURE", StringComparison.OrdinalIgnoreCase))
+            return ErrorResult.Create(result.Value.Value.ErrorCode!);
+
+        return UnitResult.Success<ErrorResult>();
     }
 
     public async Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter)
@@ -44,7 +57,8 @@ public sealed class Subscription
         var subscriptionMessage = new SubscriptionMessage("marketSubscription", _requestId)
             .WithMarketFilter(marketFilter)
             .WithMarketDataFilter(dataFilter);
-        await _client.Writer.WriteLineAsync(subscriptionMessage.ToJson());
+
+        await _client.SendLine(subscriptionMessage);
         _subscriptionMessages.Add(_requestId, subscriptionMessage);
     }
 
@@ -52,31 +66,30 @@ public sealed class Subscription
     {
         _requestId++;
         var subscriptionMessage = new SubscriptionMessage("orderSubscription", _requestId);
-        await _client.Writer.WriteLineAsync(subscriptionMessage.ToJson());
+        await _client.SendLine(subscriptionMessage);
         _subscriptionMessages.Add(_requestId, subscriptionMessage);
     }
 
     public async Task Resubscribe()
     {
         foreach (var m in _subscriptionMessages)
-            await _client.Writer.WriteLineAsync(m.Value.ToJson());
+            await _client.SendLine(m.Value);
     }
 
     public async IAsyncEnumerable<ChangeMessage> GetChanges()
     {
-        string line;
-        while ((line = await _client.Reader.ReadLineAsync()) != null)
+        while (await _client.ReadLine<ChangeMessage>() is { } line)
         {
-            var message = JsonSerializer.Deserialize<ChangeMessage>(line);
-            ProcessMessage(message);
-            yield return message;
+            if (line.Value.HasNoValue) break;
+            ProcessMessage(line.Value.Value);
+            yield return line.Value.Value;
         }
     }
 
     public void Disconnect()
     {
         Connected = false;
-        //_tcpClient.Close();
+        _client.Disconnect();
     }
 
     private static string GetAuthenticationMessage(string appKey, string token, int requestId)
@@ -168,11 +181,6 @@ public sealed class Subscription
         internal void WithClock(string clock)
         {
             Clock = clock;
-        }
-
-        internal string ToJson()
-        {
-            return JsonSerializer.ToJsonString(this, StandardResolver.AllowPrivateExcludeNull);
         }
     }
 }

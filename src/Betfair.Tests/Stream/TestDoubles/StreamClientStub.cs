@@ -1,25 +1,35 @@
-﻿using System.Text;
+﻿using Betfair.Errors;
 using Betfair.Stream;
+using Betfair.Stream.Responses;
+using CSharpFunctionalExtensions;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
 namespace Betfair.Tests.Stream.TestDoubles;
 
 public class StreamClientStub : StreamClient
 {
-    private static readonly TcpClientSpy _tcpClient = new ("test.com", 999);
-
-    public StreamClientStub()
-    : base(_tcpClient)
+    public StreamClientStub(ITcpClient tcpClient)
+    : base(tcpClient)
     {
     }
 
-    public override StreamWriter Writer => new StreamWriterSpy();
+    public List<object> SentMessages { get; } = new ();
 
-    public override StreamReader Reader { get; protected set; }
+    public object Response { get; set; }
 
-    public void SendLine(string line)
+    public override async Task SendLine(object value)
     {
-        Reader = new StreamReader(
-            new MemoryStream(
-                Encoding.UTF8.GetBytes(line)));
+        await Task.CompletedTask;
+        SentMessages.Add(value);
+    }
+
+    public override async Task<Result<Maybe<T>, ErrorResult>> ReadLine<T>()
+    {
+        await Task.CompletedTask;
+        if (Response is null) return Maybe<T>.None;
+        var str = JsonSerializer.ToJsonString(Response, StandardResolver.ExcludeNullCamelCase);
+        Response = null;
+        return Maybe.From(JsonSerializer.Deserialize<T>(str, StandardResolver.ExcludeNullCamelCase));
     }
 }
