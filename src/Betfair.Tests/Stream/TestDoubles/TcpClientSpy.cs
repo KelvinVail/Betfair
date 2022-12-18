@@ -3,7 +3,7 @@ using Betfair.Stream;
 
 namespace Betfair.Tests.Stream.TestDoubles;
 
-public sealed class TcpClientSpy : ITcpClient, IDisposable
+public sealed class TcpClientSpy : ITcpClient
 {
     private readonly SslStreamStub _sslStream = new ();
     private bool _disposedValue;

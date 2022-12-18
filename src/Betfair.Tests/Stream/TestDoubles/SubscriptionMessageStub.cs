@@ -21,7 +21,7 @@ namespace Betfair.Tests.Stream.TestDoubles
         public int Id { get; private set; }
 
         [DataMember(Name = "marketFilter", EmitDefaultValue = false)]
-        public MarketFilter MarketFilter { get; private set; }
+        public StreamMarketFilter StreamMarketFilter { get; private set; }
 
         [DataMember(Name = "marketDataFilter", EmitDefaultValue = false)]
         public MarketDataFilter MarketDataFilter { get; private set; }
@@ -32,9 +32,9 @@ namespace Betfair.Tests.Stream.TestDoubles
         [DataMember(Name = "clk", EmitDefaultValue = false)]
         public string Clock { get; private set; }
 
-        public SubscriptionMessageStub WithMarketFilter(MarketFilter marketFilter)
+        public SubscriptionMessageStub WithMarketFilter(StreamMarketFilter streamMarketFilter)
         {
-            MarketFilter = marketFilter;
+            StreamMarketFilter = streamMarketFilter;
             return this;
         }
 

@@ -3,16 +3,15 @@ using Betfair.Tests.Stream.TestDoubles;
 
 namespace Betfair.Tests.Stream;
 
-public sealed class StreamClientTests : IDisposable
+public sealed class StreamFactoryTests : IDisposable
 {
     private readonly TcpClientSpy _tcpClient;
-    private readonly StreamClient _client;
     private bool _disposedValue;
 
-    public StreamClientTests()
+    public StreamFactoryTests()
     {
         _tcpClient = new TcpClientSpy("stream-api-integration.betfair.com", 443);
-        _client = new StreamClient(_tcpClient);
+        using var stream = StreamFactory.Open(_tcpClient);
     }
 
     [Fact]

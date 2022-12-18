@@ -1,5 +1,4 @@
 ﻿using Betfair.Errors;
-
 using Betfair.Login;
 using Betfair.Stream;
 using Betfair.Stream.Messages;
@@ -9,47 +8,41 @@ using Betfair.Tests.Stream.TestDoubles;
 
 namespace Betfair.Tests.Stream;
 
-public class AuthenticateTests : IDisposable
+public class AuthenticateTests
 {
-    private readonly TcpClientSpy _tcpClient = new ("test", 999);
-    private readonly StreamClientStub _client;
+    private readonly PipelineSpy _pipe;
     private readonly Credentials _credentials = Credentials.Create("username", "password", "appKey").Value;
     private readonly Subscription _subscription;
-    private bool _disposedValue;
+    private readonly List<ChangeMessage> _messages = new ();
 
     public AuthenticateTests()
     {
-        _client = new StreamClientStub(_tcpClient);
-        _subscription = new Subscription(_client, _credentials);
-        _client.Response = new StatusMessage
-        {
-            Op = "connection",
-            StatusCode = "SUCCESS",
-        };
+        _pipe = new PipelineSpy();
+        _subscription = new Subscription(_pipe, _credentials);
     }
 
     [Fact]
     public async Task TokenMustNotBeNull()
     {
-        var result = await _subscription.Authenticate(null);
+        await _subscription.Authenticate(null);
 
-        result.ShouldBeFailure(ErrorResult.Empty("token"));
+        _subscription.Status.ShouldBeFailure(ErrorResult.Empty("token"));
     }
 
     [Fact]
     public async Task TokenMustNotBeEmpty()
     {
-        var result = await _subscription.Authenticate(string.Empty);
+        await _subscription.Authenticate(string.Empty);
 
-        result.ShouldBeFailure(ErrorResult.Empty("token"));
+        _subscription.Status.ShouldBeFailure(ErrorResult.Empty("token"));
     }
 
     [Fact]
     public async Task TokenMustNotBeWhiteSpace()
     {
-        var result = await _subscription.Authenticate(" ");
+        await _subscription.Authenticate(" ");
 
-        result.ShouldBeFailure(ErrorResult.Empty("token"));
+        _subscription.Status.ShouldBeFailure(ErrorResult.Empty("token"));
     }
 
     [Fact]
@@ -64,7 +57,7 @@ public class AuthenticateTests : IDisposable
 
         await _subscription.Authenticate("token");
 
-        _client.SentMessages.First().Should().BeEquivalentTo(expected);
+        _pipe.WrittenObjects.First().Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -82,7 +75,7 @@ public class AuthenticateTests : IDisposable
 
         await _subscription.Authenticate(token);
 
-        _client.SentMessages.First().Should().BeEquivalentTo(expected);
+        _pipe.WrittenObjects.First().Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -98,59 +91,50 @@ public class AuthenticateTests : IDisposable
             Session = "token",
         };
         var cred = Credentials.Create("username", "password", appKey).Value;
-        var sub = new Subscription(_client, cred);
+        var sub = new Subscription(_pipe, cred);
 
         await sub.Authenticate("token");
 
-        _client.SentMessages.First().Should().BeEquivalentTo(expected);
+        _pipe.WrittenObjects.First().Should().BeEquivalentTo(expected);
     }
 
     [Fact]
     public async Task SuccessResultReturnedIfSuccessful()
     {
-        _client.Response = new StatusMessage
-        {
-            Op = "connection",
-            StatusCode = "SUCCESS",
-        };
+        await _subscription.Authenticate("token");
 
-        var result = await _subscription.Authenticate("token");
-
-        result.ShouldBeSuccess();
+        _subscription.Status.ShouldBeSuccess();
     }
 
     [Fact]
     public async Task ErrorResultReturnedIfError()
     {
-        _client.Response = new StatusMessage
+        _pipe.Responses.Add(new ChangeMessage
         {
-            Op = "connection",
+            Operation = "connection",
             StatusCode = "FAILURE",
             ErrorCode = "NO_APP_KEY",
-        };
+        });
 
-        var result = await _subscription.Authenticate("token");
+        await _subscription.Authenticate("token");
+        await foreach (var line in _subscription.GetChanges())
+            _messages.Add(line);
 
-        result.ShouldBeFailure(ErrorResult.Create("NO_APP_KEY"));
+        _subscription.Status.ShouldBeFailure(ErrorResult.Create("NO_APP_KEY"));
     }
 
-    public void Dispose()
+    [Fact]
+    public async Task ErrorResultReturnedIfStatusCodeIsNull()
     {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposedValue)
-            return;
-
-        if (disposing)
+        _pipe.Responses.Add(new ChangeMessage
         {
-            _client.Dispose();
-            _tcpClient.Dispose();
-        }
+            Operation = "connection",
+        });
 
-        _disposedValue = true;
+        await _subscription.Authenticate("token");
+        await foreach (var line in _subscription.GetChanges())
+            _messages.Add(line);
+
+        _subscription.Status.ShouldBeFailure(ErrorResult.Create("CONNECTION_ERROR"));
     }
 }

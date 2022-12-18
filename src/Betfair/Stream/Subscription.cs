@@ -7,20 +7,19 @@ namespace Betfair.Stream;
 
 public sealed class Subscription
 {
-    private readonly StreamClient _client;
+    private readonly Pipeline _client;
     private readonly Credentials _credentials;
     private readonly Dictionary<int, SubscriptionMessage> _subscriptionMessages = new Dictionary<int, SubscriptionMessage>();
+    private bool _connected;
     private int _requestId;
 
-    public Subscription(StreamClient client, Credentials credentials)
+    public Subscription(Pipeline client, Credentials credentials)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
     }
 
-    public bool Connected { get; private set; }
-
-    public string ConnectionId { get; private set; } = string.Empty;
+    public UnitResult<ErrorResult> Status { get; private set; }
 
     private Dictionary<string, Action<ChangeMessage>> ProcessMessageMap =>
         new ()
@@ -29,10 +28,13 @@ public sealed class Subscription
             { "status", ProcessStatusMessage },
         };
 
-    public async Task<UnitResult<ErrorResult>> Authenticate(string token)
+    public Task Authenticate(string token)
     {
         if (string.IsNullOrWhiteSpace(token))
-            return ErrorResult.Empty(nameof(token));
+        {
+            Status = ErrorResult.Empty(nameof(token));
+            return Task.CompletedTask;
+        }
 
         _requestId++;
         var authMessage = new Authentication
@@ -42,23 +44,18 @@ public sealed class Subscription
             Session = token,
         };
 
-        await _client.SendLine(authMessage);
-        var result = await _client.ReadLine<StatusMessage>();
-        if (result.IsFailure) return result.Error;
-        if (result.Value.Value.StatusCode.Equals("FAILURE", StringComparison.OrdinalIgnoreCase))
-            return ErrorResult.Create(result.Value.Value.ErrorCode!);
-
-        return UnitResult.Success<ErrorResult>();
+        Status = UnitResult.Success<ErrorResult>();
+        return _client.Write(authMessage);
     }
 
-    public async Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter)
+    public async Task Subscribe(StreamMarketFilter streamMarketFilter, MarketDataFilter dataFilter)
     {
         _requestId++;
         var subscriptionMessage = new SubscriptionMessage("marketSubscription", _requestId)
-            .WithMarketFilter(marketFilter)
+            .WithMarketFilter(streamMarketFilter)
             .WithMarketDataFilter(dataFilter);
 
-        await _client.SendLine(subscriptionMessage);
+        await _client.Write(subscriptionMessage);
         _subscriptionMessages.Add(_requestId, subscriptionMessage);
     }
 
@@ -66,40 +63,28 @@ public sealed class Subscription
     {
         _requestId++;
         var subscriptionMessage = new SubscriptionMessage("orderSubscription", _requestId);
-        await _client.SendLine(subscriptionMessage);
+        await _client.Write(subscriptionMessage);
         _subscriptionMessages.Add(_requestId, subscriptionMessage);
     }
 
     public async Task Resubscribe()
     {
         foreach (var m in _subscriptionMessages)
-            await _client.SendLine(m.Value);
+            await _client.Write(m.Value);
     }
 
     public async IAsyncEnumerable<ChangeMessage> GetChanges()
     {
-        while (await _client.ReadLine<ChangeMessage>() is { } line)
+        await foreach (var line in _client.Read())
         {
-            if (line.Value.HasNoValue) break;
-            ProcessMessage(line.Value.Value);
-            yield return line.Value.Value;
+            if (line is null) break;
+            ProcessMessage(line);
+            yield return line;
         }
-    }
-
-    public void Disconnect()
-    {
-        Connected = false;
-        _client.Disconnect();
-    }
-
-    private static string GetAuthenticationMessage(string appKey, string token, int requestId)
-    {
-        return $"{{\"op\":\"authentication\",\"id\":{requestId},\"session\":\"{token}\",\"appKey\":\"{appKey}\"}}";
     }
 
     private void ProcessMessage(ChangeMessage message)
     {
-        message.SetArrivalTime(DateTime.UtcNow);
         if (ProcessMessageMap.ContainsKey(message.Operation))
             ProcessMessageMap[message.Operation](message);
         SetClocks(message);
@@ -107,14 +92,20 @@ public sealed class Subscription
 
     private void ProcessConnectionMessage(ChangeMessage message)
     {
-        ConnectionId = message.ConnectionId;
-        Connected = true;
+        if (message.StatusCode is null || message.StatusCode.Equals("FAILURE", StringComparison.OrdinalIgnoreCase))
+        {
+            Status = ErrorResult.Create(message.ErrorCode ?? "CONNECTION_ERROR");
+            return;
+        }
+
+        _connected = true;
+        Status = UnitResult.Success<ErrorResult>();
     }
 
     private void ProcessStatusMessage(ChangeMessage message)
     {
         if (message.ConnectionClosed != null)
-            Connected = message.ConnectionClosed == false;
+            _connected = message.ConnectionClosed == false;
     }
 
     private void SetClocks(ChangeMessage message)
@@ -126,10 +117,6 @@ public sealed class Subscription
             .WithClock(message.Clock);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.Performance",
-        "CA1812:AvoidUninstantiatedInternalClasses",
-        Justification = "Used to deserialize Json response.")]
     [DataContract]
     private sealed class SubscriptionMessage
     {
@@ -146,7 +133,7 @@ public sealed class Subscription
         internal int Id { get; private set; }
 
         [DataMember(Name = "marketFilter", EmitDefaultValue = false)]
-        internal MarketFilter MarketFilter { get; private set; }
+        internal StreamMarketFilter StreamMarketFilter { get; private set; }
 
         [DataMember(Name = "marketDataFilter", EmitDefaultValue = false)]
         internal MarketDataFilter MarketDataFilter { get; private set; }
@@ -157,10 +144,10 @@ public sealed class Subscription
         [DataMember(Name = "clk", EmitDefaultValue = false)]
         internal string Clock { get; private set; }
 
-        internal SubscriptionMessage WithMarketFilter(MarketFilter marketFilter)
+        internal SubscriptionMessage WithMarketFilter(StreamMarketFilter streamMarketFilter)
         {
-            if (marketFilter != null)
-                MarketFilter = marketFilter;
+            if (streamMarketFilter != null)
+                StreamMarketFilter = streamMarketFilter;
             return this;
         }
 

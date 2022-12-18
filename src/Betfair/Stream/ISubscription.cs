@@ -10,7 +10,7 @@ namespace Betfair.Stream
 
         Task Authenticate();
 
-        Task Subscribe(MarketFilter marketFilter, MarketDataFilter dataFilter);
+        Task Subscribe(StreamMarketFilter streamMarketFilter, MarketDataFilter dataFilter);
 
         Task SubscribeToOrders();
 

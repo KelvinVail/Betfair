@@ -1,4 +1,5 @@
-﻿namespace Betfair.Betting;
+﻿#nullable enable
+namespace Betfair.Betting;
 
 internal sealed class Filter
 {
