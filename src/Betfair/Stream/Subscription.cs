@@ -9,7 +9,6 @@ public sealed class Subscription
 {
     private readonly Pipeline _client;
     private readonly Credentials _credentials;
-    private readonly Dictionary<int, SubscriptionMessage> _subscriptionMessages = new Dictionary<int, SubscriptionMessage>();
     private bool _connected;
     private int _requestId;
 
@@ -48,29 +47,34 @@ public sealed class Subscription
         return _client.Write(authMessage);
     }
 
-    public async Task Subscribe(StreamMarketFilter streamMarketFilter, MarketDataFilter dataFilter)
+    public Task Subscribe(StreamMarketFilter marketFilter, MarketDataFilter dataFilter)
     {
-        _requestId++;
-        var subscriptionMessage = new SubscriptionMessage("marketSubscription", _requestId)
-            .WithMarketFilter(streamMarketFilter)
-            .WithMarketDataFilter(dataFilter);
+        if (marketFilter is null) Status = ErrorResult.Empty(nameof(marketFilter));
+        if (dataFilter is null) Status = ErrorResult.Empty(nameof(dataFilter));
+        if (Status.IsFailure) return Task.CompletedTask;
 
-        await _client.Write(subscriptionMessage);
-        _subscriptionMessages.Add(_requestId, subscriptionMessage);
+        _requestId++;
+        var subscriptionMessage = new SubscriptionMessage
+        {
+            Op = "marketSubscription",
+            Id = _requestId,
+            MarketFilter = marketFilter,
+            MarketDataFilter = dataFilter,
+        };
+
+        return _client.Write(subscriptionMessage);
     }
 
-    public async Task SubscribeToOrders()
+    public Task SubscribeToOrders()
     {
         _requestId++;
-        var subscriptionMessage = new SubscriptionMessage("orderSubscription", _requestId);
-        await _client.Write(subscriptionMessage);
-        _subscriptionMessages.Add(_requestId, subscriptionMessage);
-    }
+        var subscriptionMessage = new SubscriptionMessage
+        {
+            Op = "orderSubscription",
+            Id = _requestId,
+        };
 
-    public async Task Resubscribe()
-    {
-        foreach (var m in _subscriptionMessages)
-            await _client.Write(m.Value);
+        return _client.Write(subscriptionMessage);
     }
 
     public async IAsyncEnumerable<ChangeMessage> GetChanges()
@@ -87,7 +91,6 @@ public sealed class Subscription
     {
         if (ProcessMessageMap.ContainsKey(message.Operation))
             ProcessMessageMap[message.Operation](message);
-        SetClocks(message);
     }
 
     private void ProcessConnectionMessage(ChangeMessage message)
@@ -106,68 +109,5 @@ public sealed class Subscription
     {
         if (message.ConnectionClosed != null)
             _connected = message.ConnectionClosed == false;
-    }
-
-    private void SetClocks(ChangeMessage message)
-    {
-        if (message.Id == null) return;
-        if (!_subscriptionMessages.ContainsKey((int)message.Id)) return;
-        _subscriptionMessages[(int)message.Id]
-            .WithInitialClock(message.InitialClock)
-            .WithClock(message.Clock);
-    }
-
-    [DataContract]
-    private sealed class SubscriptionMessage
-    {
-        internal SubscriptionMessage(string operation, int id)
-        {
-            Operation = operation;
-            Id = id;
-        }
-
-        [DataMember(Name = "op", EmitDefaultValue = false)]
-        internal string Operation { get; private set; }
-
-        [DataMember(Name = "id", EmitDefaultValue = false)]
-        internal int Id { get; private set; }
-
-        [DataMember(Name = "marketFilter", EmitDefaultValue = false)]
-        internal StreamMarketFilter StreamMarketFilter { get; private set; }
-
-        [DataMember(Name = "marketDataFilter", EmitDefaultValue = false)]
-        internal MarketDataFilter MarketDataFilter { get; private set; }
-
-        [DataMember(Name = "initialClk", EmitDefaultValue = false)]
-        internal string InitialClock { get; private set; }
-
-        [DataMember(Name = "clk", EmitDefaultValue = false)]
-        internal string Clock { get; private set; }
-
-        internal SubscriptionMessage WithMarketFilter(StreamMarketFilter streamMarketFilter)
-        {
-            if (streamMarketFilter != null)
-                StreamMarketFilter = streamMarketFilter;
-            return this;
-        }
-
-        internal SubscriptionMessage WithMarketDataFilter(MarketDataFilter marketDataFilter)
-        {
-            if (marketDataFilter != null)
-                MarketDataFilter = marketDataFilter;
-            return this;
-        }
-
-        internal SubscriptionMessage WithInitialClock(string initialClock)
-        {
-            if (initialClock == null) return this;
-            InitialClock = initialClock;
-            return this;
-        }
-
-        internal void WithClock(string clock)
-        {
-            Clock = clock;
-        }
     }
 }
