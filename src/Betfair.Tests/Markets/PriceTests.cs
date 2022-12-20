@@ -87,4 +87,45 @@ public class PriceTests
 
         price.Chance.Should().BeApproximately(chance, 0.001m);
     }
+
+    [Theory]
+    [InlineData(1.01, 1, 1.02)]
+    [InlineData(3.05, 12, 3.65)]
+    public void TicksCanBeAdded(decimal start, int ticks, decimal target)
+    {
+        var price = Price.Of(start);
+
+        var result = price.AddTicks(ticks);
+
+        result.DecimalOdds.Should().Be(target);
+    }
+
+    [Theory]
+    [InlineData(1.02, -1, 1.01)]
+    [InlineData(110, -20, 32)]
+    public void TicksCanBeSubtracted(decimal start, int ticks, decimal target) =>
+        TicksCanBeAdded(start, ticks, target);
+
+    [Theory]
+    [InlineData(1.01, -1, 1.01)]
+    [InlineData(1000, 1, 1000)]
+    public void TicksStayInBounds(decimal start, int ticks, decimal target) =>
+        TicksCanBeAdded(start, ticks, target);
+
+    [Theory]
+    [InlineData(1.01, 1.02, 1)]
+    [InlineData(3.05, 3.65, 12)]
+    [InlineData(32, 110, 20)]
+    [InlineData(1.02, 1.01, -1)]
+    [InlineData(3.65, 3.05, -12)]
+    [InlineData(110, 32, -20)]
+    public void TicksBetweenTwoPricesCanBeCalculated(decimal start, decimal end, int diff)
+    {
+        var price1 = Price.Of(start);
+        var price2 = Price.Of(end);
+
+        var result = price1.TicksBetween(price2);
+
+        result.Should().Be(diff);
+    }
 }
