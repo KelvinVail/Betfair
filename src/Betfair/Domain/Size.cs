@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Betfair.Markets;
+namespace Betfair.Domain;
 
 public sealed class Size : ValueObject
 {

@@ -1,6 +1,6 @@
-﻿using Betfair.Markets;
+﻿using Betfair.Domain;
 
-namespace Betfair.Tests.Markets;
+namespace Betfair.Tests.Domain;
 
 public class SizeTests
 {

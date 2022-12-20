@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Betfair.Markets;
+namespace Betfair.Domain;
 
 public sealed class Price : ValueObject
 {
@@ -128,6 +128,6 @@ public sealed class Price : ValueObject
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
-        yield return DecimalOdds;
+        yield return _intOdds;
     }
 }
