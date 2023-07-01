@@ -47,4 +47,8 @@
     <ProjectReference Include="..\Betfair.Stream\Betfair.Stream.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestDoubles\" />
+  </ItemGroup>
+
 </Project>
