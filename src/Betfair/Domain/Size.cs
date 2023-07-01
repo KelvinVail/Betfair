@@ -59,7 +59,7 @@ public sealed class Size : ValueObject
         return -1;
     }
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected override IEnumerable<IComparable> GetEqualityComponents()
     {
         yield return Value;
     }

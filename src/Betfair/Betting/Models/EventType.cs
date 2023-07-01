@@ -6,7 +6,7 @@ public class EventType : ValueObject
 
     public string Name { get; init; } = string.Empty;
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected override IEnumerable<IComparable> GetEqualityComponents()
     {
         yield return Id;
     }

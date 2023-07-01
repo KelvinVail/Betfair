@@ -59,7 +59,7 @@ public sealed class Credentials : ValueObject
     internal HttpRequestMessage GetLoginRequest() =>
         Certificate is not null ? CertLogin() : ApiLogin();
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected override IEnumerable<IComparable> GetEqualityComponents()
     {
         yield return _username;
         yield return _password;

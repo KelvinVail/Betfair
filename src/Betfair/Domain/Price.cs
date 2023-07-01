@@ -126,7 +126,7 @@ public sealed class Price : ValueObject
 
     public override string ToString() => $"{DecimalOdds}";
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected override IEnumerable<IComparable> GetEqualityComponents()
     {
         yield return _intOdds;
     }

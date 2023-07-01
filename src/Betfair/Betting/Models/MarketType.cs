@@ -9,7 +9,7 @@ public class MarketType : ValueObject
 
     public int MarketCount { get; set; }
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected override IEnumerable<IComparable> GetEqualityComponents()
     {
         yield return Id;
     }

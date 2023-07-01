@@ -31,7 +31,7 @@ public sealed class ErrorResult : ValueObject
             "value.must.not.be.empty",
             $"'{Humanize(paramName)}' must not be empty.");
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected override IEnumerable<IComparable> GetEqualityComponents()
     {
         yield return Code;
     }
