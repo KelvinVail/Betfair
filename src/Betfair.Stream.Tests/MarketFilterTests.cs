@@ -1,8 +1,10 @@
-﻿namespace Betfair.Stream.Tests;
+﻿using Betfair.Stream.Messages;
 
-public class StreamMarketFilterTests
+namespace Betfair.Stream.Tests;
+
+public class MarketFilterTests
 {
-    private readonly StreamMarketFilter _filter = new ();
+    private readonly MarketFilter _filter = new ();
 
     [Fact]
     public void WhenInitializedMarketIdsIsNull() =>

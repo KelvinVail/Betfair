@@ -1,4 +1,5 @@
-﻿using Utf8Json;
+﻿using Betfair.Stream.Messages;
+using Utf8Json;
 using Utf8Json.Resolvers;
 
 namespace Betfair.Stream.Tests;
@@ -48,6 +49,94 @@ public class StreamClientTests : IDisposable
         result.Should().ContainKey("session").WhoseValue.Should().Be(sessionToken);
     }
 
+    [Fact]
+    public async Task EachCallToAuthenticateIncrementsTheConnectionId()
+    {
+        await _client.Authenticate("appKey", "sessionToken");
+        var result = await ReadStream();
+        result.Should().ContainKey("id").WhoseValue.Should().Be(1);
+
+        await _client.Authenticate("appKey", "sessionToken");
+        var result2 = await ReadStream();
+        result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task SubscribeWritesAMarketSubscriptionMessageToTheStream()
+    {
+        await _client.Subscribe(new MarketFilter(), new DataFilter());
+
+        var result = await ReadStream();
+
+        result.Should().ContainKey("op").WhoseValue.Should().Be("marketSubscription");
+    }
+
+    [Fact]
+    public async Task EachCallToSubscribeIncrementsTheConnectionId()
+    {
+        await _client.Subscribe(new MarketFilter(), new DataFilter());
+        var result = await ReadStream();
+        result.Should().ContainKey("id").WhoseValue.Should().Be(1);
+
+        await _client.Subscribe(new MarketFilter(), new DataFilter());
+        var result2 = await ReadStream();
+        result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
+    }
+
+    [Theory]
+    [InlineData("marketId")]
+    [InlineData("1.23456789")]
+    public async Task SubscribeWritesTheMarketFilterToTheStream(string marketId)
+    {
+        var marketFilter = new MarketFilter().WithMarketId(marketId);
+        await _client.Subscribe(marketFilter, new DataFilter());
+
+        var result = await ReadStream();
+
+        result.Should().ContainKey("marketFilter")
+            .WhoseValue.Should().BeAssignableTo<Dictionary<string, object>>()
+            .Which.Should().ContainKey("marketIds")
+            .WhoseValue.Should().BeAssignableTo<List<object>>()
+            .Which.Should().Contain(marketId);
+    }
+
+    [Fact]
+    public async Task SubscribeWritesTheDataFilterToTheStream()
+    {
+        var dataFilter = new DataFilter().WithBestPrices();
+        await _client.Subscribe(new MarketFilter(), dataFilter);
+
+        var result = await ReadStream();
+
+        result.Should().ContainKey("marketDataFilter")
+            .WhoseValue.Should().BeAssignableTo<Dictionary<string, object>>()
+            .Which.Should().ContainKey("fields")
+            .WhoseValue.Should().BeAssignableTo<List<object>>()
+            .Which.Should().BeEquivalentTo(dataFilter.Fields);
+    }
+
+    [Fact]
+    public async Task SubscribeToOrdersWritesAnOrderSubscriptionMessageToTheStream()
+    {
+        await _client.SubscribeToOrders();
+
+        var result = await ReadStream();
+
+        result.Should().ContainKey("op").WhoseValue.Should().Be("orderSubscription");
+    }
+
+    [Fact]
+    public async Task EachCallToSubscribeToOrdersIncrementsTheConnectionId()
+    {
+        await _client.SubscribeToOrders();
+        var result = await ReadStream();
+        result.Should().ContainKey("id").WhoseValue.Should().Be(1);
+
+        await _client.SubscribeToOrders();
+        var result2 = await ReadStream();
+        result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
@@ -65,5 +154,5 @@ public class StreamClientTests : IDisposable
     private Task<Dictionary<string, object>> ReadStream() =>
         JsonSerializer.DeserializeAsync<Dictionary<string, object>>(
             _ms,
-            StandardResolver.AllowPrivateExcludeNullCamelCase);
+            StandardResolver.AllowPrivateCamelCase);
 }

@@ -87,8 +87,8 @@ internal class Pipeline : IDisposable
         {
             var result = await reader.ReadAsync();
             var buffer = result.Buffer;
-            SequencePosition? position = null;
 
+            SequencePosition? position;
             do
             {
                 position = buffer.PositionOf((byte)'\n');

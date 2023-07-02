@@ -1,8 +1,10 @@
-﻿namespace Betfair.Stream.Tests;
+﻿using Betfair.Stream.Messages;
 
-public class MarketDataFilterTests
+namespace Betfair.Stream.Tests;
+
+public class DataFilterTests
 {
-    private readonly MarketDataFilter _filter = new ();
+    private readonly DataFilter _filter = new ();
 
     [Fact]
     public void WhenInitializedLadderLevelsIsThree() =>

@@ -1,6 +1,6 @@
-namespace Betfair.Stream;
+namespace Betfair.Stream.Messages;
 
-public class StreamMarketFilter
+public class MarketFilter
 {
     public HashSet<string>? CountryCodes { get; private set; }
 
@@ -20,61 +20,61 @@ public class StreamMarketFilter
 
     public bool? BspMarket { get; private set; }
 
-    public StreamMarketFilter WithMarketId(string marketId)
+    public MarketFilter WithMarketId(string marketId)
     {
         MarketIds ??= new HashSet<string>();
         MarketIds.Add(marketId);
         return this;
     }
 
-    public StreamMarketFilter WithCountryCode(string countryCode)
+    public MarketFilter WithCountryCode(string countryCode)
     {
         CountryCodes ??= new HashSet<string>();
         CountryCodes.Add(countryCode);
         return this;
     }
 
-    public StreamMarketFilter WithInPlayMarketsOnly()
+    public MarketFilter WithInPlayMarketsOnly()
     {
         TurnInPlayEnabled = true;
         return this;
     }
 
-    public StreamMarketFilter WithMarketType(string marketType)
+    public MarketFilter WithMarketType(string marketType)
     {
         MarketTypes ??= new HashSet<string>();
         MarketTypes.Add(marketType);
         return this;
     }
 
-    public StreamMarketFilter WithVenue(string venue)
+    public MarketFilter WithVenue(string venue)
     {
         Venues ??= new HashSet<string>();
         Venues.Add(venue);
         return this;
     }
 
-    public StreamMarketFilter WithEventTypeId(string eventTypeId)
+    public MarketFilter WithEventTypeId(string eventTypeId)
     {
         EventTypeIds ??= new HashSet<string>();
         EventTypeIds.Add(eventTypeId);
         return this;
     }
 
-    public StreamMarketFilter WithEventId(string eventId)
+    public MarketFilter WithEventId(string eventId)
     {
         EventIds ??= new HashSet<string>();
         EventIds.Add(eventId);
         return this;
     }
 
-    public StreamMarketFilter WithBspMarketsOnly()
+    public MarketFilter WithBspMarketsOnly()
     {
         BspMarket = true;
         return this;
     }
 
-    public StreamMarketFilter WithBettingType(string bettingType)
+    public MarketFilter WithBettingType(string bettingType)
     {
         BettingTypes ??= new HashSet<string>();
         BettingTypes.Add(bettingType);
