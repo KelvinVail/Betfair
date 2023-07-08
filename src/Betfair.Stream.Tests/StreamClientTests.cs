@@ -1,4 +1,6 @@
-﻿using Betfair.Stream.Messages;
+﻿using System.Runtime.CompilerServices;
+using Betfair.Stream.Messages;
+using Betfair.Stream.Responses;
 using Utf8Json;
 using Utf8Json.Resolvers;
 
@@ -137,6 +139,39 @@ public class StreamClientTests : IDisposable
         result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
     }
 
+    [Fact]
+    public void DisposesTheStreamWhenDisposed()
+    {
+        _client.Dispose();
+
+        _ms.Should().NotBeWritable();
+    }
+
+    [Fact]
+    public async Task ChangeMessagesAreReadFromTheStream()
+    {
+        var message = new ChangeMessage { Operation = "Test" };
+        await SendChange(message);
+
+        var read = await ReadMessages();
+
+        read.Should().ContainEquivalentOf(message);
+    }
+
+    [Fact]
+    public async Task MultipleChangeMessagesAreReadFromTheStream()
+    {
+        var message1 = new ChangeMessage { Operation = "Test1" };
+        await SendChange(message1);
+        var message2 = new ChangeMessage { Operation = "Test2" };
+        await SendChange(message2);
+
+        var read = await ReadMessages();
+
+        read.Should().ContainEquivalentOf(message1);
+        read.Should().ContainEquivalentOf(message2);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
@@ -155,4 +190,18 @@ public class StreamClientTests : IDisposable
         JsonSerializer.DeserializeAsync<Dictionary<string, object>>(
             _ms,
             StandardResolver.AllowPrivateCamelCase);
+
+    private Task SendChange(ChangeMessage message) =>
+        JsonSerializer.SerializeAsync(_ms, message, StandardResolver.AllowPrivateExcludeNullCamelCase)
+            .ContinueWith(_ => _ms.WriteByte((byte)'\n'));
+
+    private async Task<List<ChangeMessage>> ReadMessages()
+    {
+        _ms.Position = 0;
+        List<ChangeMessage> read = new ();
+        await foreach (var change in _client.GetChanges())
+            read.Add(change);
+
+        return read;
+    }
 }

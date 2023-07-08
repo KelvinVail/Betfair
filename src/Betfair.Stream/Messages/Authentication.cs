@@ -1,12 +1,15 @@
 ﻿namespace Betfair.Stream.Messages;
 
-internal class Authentication
+internal class Authentication : MessageBase
 {
-    public string Op { get; } = "authentication";
+    public Authentication(int id, string sessionToken, string appKey)
+        : base("authentication", id)
+    {
+        Session = sessionToken;
+        AppKey = appKey;
+    }
 
-    public int Id { get; init; }
+    public string Session { get; }
 
-    public string Session { get; init; } = string.Empty;
-
-    public string AppKey { get; init; } = string.Empty;
+    public string AppKey { get; }
 }

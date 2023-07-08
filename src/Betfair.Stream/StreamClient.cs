@@ -1,4 +1,7 @@
 ﻿using Betfair.Stream.Messages;
+using Betfair.Stream.Responses;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
 namespace Betfair.Stream;
 
@@ -17,12 +20,7 @@ public class StreamClient : IDisposable
     public Task Authenticate(string appKey, string sessionToken)
     {
         _requestId++;
-        var authMessage = new Authentication
-        {
-            Id = _requestId,
-            AppKey = appKey,
-            Session = sessionToken,
-        };
+        var authMessage = new Authentication(_requestId, sessionToken, appKey);
 
         return _client.Write(authMessage);
     }
@@ -30,27 +28,28 @@ public class StreamClient : IDisposable
     public Task Subscribe(MarketFilter marketFilter, DataFilter dataFilter)
     {
         _requestId++;
-        var subscriptionMessage = new SubscriptionMessage
-        {
-            Op = "marketSubscription",
-            Id = _requestId,
-            MarketFilter = marketFilter,
-            MarketDataFilter = dataFilter,
-        };
+        var marketSubscription = new MarketSubscription(
+            _requestId,
+            marketFilter,
+            dataFilter);
 
-        return _client.Write(subscriptionMessage);
+        return _client.Write(marketSubscription);
     }
 
     public Task SubscribeToOrders()
     {
         _requestId++;
-        var subscriptionMessage = new SubscriptionMessage
-        {
-            Op = "orderSubscription",
-            Id = _requestId,
-        };
 
-        return _client.Write(subscriptionMessage);
+        return _client.Write(new OrderSubscription(_requestId));
+    }
+
+    public async IAsyncEnumerable<ChangeMessage> GetChanges()
+    {
+        await foreach (var line in _client.Read())
+        {
+            if (line is null) break;
+            yield return JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.AllowPrivateExcludeNullCamelCase);
+        }
     }
 
     public void Dispose()

@@ -31,18 +31,17 @@ internal class Pipeline : IDisposable
     public Pipeline(System.IO.Stream stream) =>
         _stream = stream;
 
-    public virtual Task Write(object value) =>
+    public Task Write(object value) =>
         JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase)
             .ContinueWith(_ => _stream.WriteByte((byte)'\n'));
 
-    public virtual async IAsyncEnumerable<byte[]> Read()
+    public async IAsyncEnumerable<byte[]> Read()
     {
         Task writer = FillPipe(_stream, _pipe.Writer);
         await foreach (var line in ReadPipe(_pipe.Reader))
-        {
             yield return line;
-            if (writer.IsCompleted) yield break;
-        }
+
+        await writer;
     }
 
     public void Dispose()
@@ -67,16 +66,17 @@ internal class Pipeline : IDisposable
     {
         const int minimumBufferSize = 512;
 
-        while (true)
+        int bytesRead;
+        FlushResult result;
+        do
         {
             Memory<byte> memory = writer.GetMemory(minimumBufferSize);
 
-            var bytesRead = await stream.ReadAsync(memory);
-            if (bytesRead == 0) break;
+            bytesRead = await stream.ReadAsync(memory);
             writer.Advance(bytesRead);
-            var result = await writer.FlushAsync();
-            if (result.IsCompleted) break;
+            result = await writer.FlushAsync();
         }
+        while (bytesRead != 0 && !result.IsCompleted);
 
         await writer.CompleteAsync();
     }
@@ -92,8 +92,7 @@ internal class Pipeline : IDisposable
             do
             {
                 position = buffer.PositionOf((byte)'\n');
-                if (position == null)
-                    continue;
+                if (position == null) continue;
 
                 var bytes = buffer.Slice(0, position.Value).ToArray();
                 yield return bytes;

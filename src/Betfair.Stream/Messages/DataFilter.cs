@@ -71,7 +71,7 @@ public class DataFilter
 
     public DataFilter WithLadderLevels(int levels)
     {
-        LadderLevels = levels > 10 ? 10 : levels;
+        LadderLevels = levels >= 11 ? 10 : levels;
         return this;
     }
 }

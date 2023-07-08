@@ -33,11 +33,11 @@ public class DataFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleDataFields()
     {
-        _filter.WithMarketDefinition();
         _filter.WithBestPricesIncludingVirtual();
+        _filter.WithMarketDefinition();
 
-        _filter.Fields.Should().Contain("EX_MARKET_DEF");
         _filter.Fields.Should().Contain("EX_BEST_OFFERS_DISP");
+        _filter.Fields.Should().Contain("EX_MARKET_DEF");
     }
 
     [Fact]
@@ -94,6 +94,23 @@ public class DataFilterTests
         _filter.WithStartingPriceProjection();
 
         _filter.Fields.Should().Contain("SP_PROJECTED");
+    }
+
+    [Fact]
+    public void CanBeInitializedWithAllDataFields()
+    {
+        _filter.WithMarketDefinition();
+        _filter.WithBestPricesIncludingVirtual();
+        _filter.WithBestPrices();
+        _filter.WithFullOffersLadder();
+        _filter.WithFullTradedLadder();
+        _filter.WithTradedVolume();
+        _filter.WithLastTradedPrice();
+        _filter.WithStartingPriceLadder();
+        _filter.WithStartingPriceProjection();
+
+        _filter.Fields.Should().NotBeNull();
+        _filter.Fields?.Count.Should().Be(9);
     }
 
     [Theory]

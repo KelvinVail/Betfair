@@ -254,6 +254,16 @@ public class MarketFilterTests
     }
 
     [Fact]
+    public void CanBeInitializedWithMultipleBettingTypeOdds()
+    {
+        _filter.WithBettingType("ODDS");
+        _filter.WithBettingType("LINE");
+
+        _filter.BettingTypes.Should().Contain("ODDS");
+        _filter.BettingTypes.Should().Contain("LINE");
+    }
+
+    [Fact]
     public void WhenInitializedDoesNotAddDuplicateBettingTypes()
     {
         _filter.WithBettingType("ODDS");
