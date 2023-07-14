@@ -17,11 +17,12 @@ jobs:
       run: dotnet test src
       # Publish Stream
     - name: publish Betfair.Stream on version change
-      uses: brandedoutcast/publish-nuget@v2.5.3
+      uses: brandedoutcast/publish-nuget@v2.5.5
       with:
         PROJECT_FILE_PATH: src/Betfair.Stream/Betfair.Stream.csproj
         TAG_COMMIT: false
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    
 
 
