@@ -12,6 +12,7 @@
     <Authors>Kelvin Vail</Authors>
     <Product>Betfair.Stream</Product>
     <Description>Connect and consume data from the Betfair Streaming API</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
     <PackageTags>Betfair Stream API</PackageTags>
