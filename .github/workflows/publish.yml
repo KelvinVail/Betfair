@@ -15,52 +15,13 @@ jobs:
       run: dotnet build src --configuration Release
     - name: Test
       run: dotnet test src
-#      # Publish Identity
-#    - name: publish Betfair.Identity on version change
-#      uses: brandedoutcast/publish-nuget@v2.5.3
-#      with:
-#        PROJECT_FILE_PATH: src/Betfair.Identity/Betfair.Identity.csproj
-#        TAG_COMMIT: false
-#        VERSION_REGEX: <Version>(.*)<\/Version>
-#        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-#      # Publish Core
-#    - name: publish Betfair.Core on version change
-#      uses: brandedoutcast/publish-nuget@v2.5.3
-#      with:
-#        PROJECT_FILE_PATH: src/Betfair.Core/Betfair.Core.csproj
-#        TAG_COMMIT: false
-#        VERSION_REGEX: <Version>(.*)<\/Version>
-#        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-#      # Publish Stream
-#    - name: publish Betfair.Stream on version change
-#      uses: brandedoutcast/publish-nuget@v2.5.3
-#      with:
-#        PROJECT_FILE_PATH: src/Betfair.Stream/Betfair.Stream.csproj
-#        TAG_COMMIT: false
-#        VERSION_REGEX: <Version>(.*)<\/Version>
-#        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-#      # Publish Betting
-#    - name: publish Betfair.Betting on version change
-#      uses: brandedoutcast/publish-nuget@v2.5.3
-#      with:
-#        PROJECT_FILE_PATH: src/Betfair.Betting/Betfair.Betting.csproj
-#        TAG_COMMIT: false
-#        VERSION_REGEX: <Version>(.*)<\/Version>
-#        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-#      # Publish Exchange Interfaces
-#    - name: publish Betfair.Interfaces on version change
-#      uses: brandedoutcast/publish-nuget@v2.5.3
-#      with:
-#        PROJECT_FILE_PATH: src/Betfair.Exchange.Interfaces/Betfair.Exchange.Interfaces.csproj
-#        TAG_COMMIT: false
-#        VERSION_REGEX: <Version>(.*)<\/Version>
-#        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-#      # Publish Betfair Extensions
-#    - name: publish Betfair.Extensions on version change
-#      uses: brandedoutcast/publish-nuget@v2.5.3
-#      with:
-#        PROJECT_FILE_PATH: src/Betfair.Extensions/Betfair.Extensions.csproj
-#        TAG_COMMIT: false
-#        VERSION_REGEX: <Version>(.*)<\/Version>
-#        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+      # Publish Stream
+    - name: publish Betfair.Stream on version change
+      uses: brandedoutcast/publish-nuget@v2.5.3
+      with:
+        PROJECT_FILE_PATH: src/Betfair.Stream/Betfair.Stream.csproj
+        TAG_COMMIT: false
+        VERSION_REGEX: <Version>(.*)<\/Version>
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
 
