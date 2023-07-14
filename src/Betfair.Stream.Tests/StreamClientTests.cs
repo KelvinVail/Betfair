@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Betfair.Stream.Messages;
+﻿using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 using Utf8Json;
 using Utf8Json.Resolvers;
@@ -150,12 +149,12 @@ public class StreamClientTests : IDisposable
     [Fact]
     public async Task ChangeMessagesAreReadFromTheStream()
     {
-        var message = new ChangeMessage { Operation = "Test" };
+        var message = new ChangeMessage { Operation = "Test"};
         await SendChange(message);
 
         var read = await ReadMessages();
 
-        read.Should().ContainEquivalentOf(message);
+        read.Should().ContainEquivalentOf(message, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
     }
 
     [Fact]
@@ -168,8 +167,8 @@ public class StreamClientTests : IDisposable
 
         var read = await ReadMessages();
 
-        read.Should().ContainEquivalentOf(message1);
-        read.Should().ContainEquivalentOf(message2);
+        read.Should().ContainEquivalentOf(message1, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
+        read.Should().ContainEquivalentOf(message2, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
     }
 
     public void Dispose()

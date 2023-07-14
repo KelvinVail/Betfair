@@ -50,6 +50,9 @@ public sealed class ChangeMessage
     [DataMember(Name = "oc", EmitDefaultValue = false)]
     public List<OrderChange>? OrderChanges { get; init; }
 
-    [DataMember(Name = "arrivalTick", EmitDefaultValue = false)]
-    public long ArrivalTick { get; init; } = DateTime.UtcNow.Ticks;
+    [DataMember(Name = "rt", EmitDefaultValue = false)]
+    public long ReceivedTick { get; internal set; }
+
+    [DataMember(Name = "dt", EmitDefaultValue = false)]
+    public long DeserializedTick { get; internal set; }
 }

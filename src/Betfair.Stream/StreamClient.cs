@@ -47,8 +47,11 @@ public class StreamClient : IDisposable
     {
         await foreach (var line in _client.Read())
         {
-            if (line is null) break;
-            yield return JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.AllowPrivateExcludeNullCamelCase);
+            var received = DateTimeOffset.UtcNow.Ticks;
+            var changeMessage = JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.ExcludeNullCamelCase);
+            changeMessage.ReceivedTick = received;
+            changeMessage.DeserializedTick = DateTimeOffset.UtcNow.Ticks;
+            yield return changeMessage;
         }
     }
 
