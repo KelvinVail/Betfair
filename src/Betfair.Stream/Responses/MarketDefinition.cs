@@ -57,7 +57,7 @@ public class MarketDefinition
     public int? NumberOfActiveRunners { get; init; }
 
     [DataMember(Name = "eventId", EmitDefaultValue = false)]
-    public string EventId { get; init; }
+    public string? EventId { get; init; }
 
     [DataMember(Name = "crossMatching", EmitDefaultValue = false)]
     public bool? CrossMatching { get; init; }

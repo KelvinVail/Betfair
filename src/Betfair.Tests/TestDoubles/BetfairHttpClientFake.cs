@@ -7,32 +7,32 @@ namespace Betfair.Tests.TestDoubles;
 
 public class BetfairHttpClientFake : BetfairHttpClient
 {
-    public Uri LastUriCalled { get; private set; }
+    public Uri LastUriCalled { get; private set; } = null!;
 
-    public string LastSessionTokenUsed { get; private set; }
+    public string LastSessionTokenUsed { get; private set; } = null!;
 
-    public object LastBodySent { get; private set; }
+    public object LastBodySent { get; private set; } = null!;
 
-    public Type ResponseType { get; private set; }
+    public Type ResponseType { get; private set; } = null!;
 
-    public object SetResponse { get; set; } = default;
+    public object SetResponse { get; set; } = default!;
 
-    public ErrorResult SetError { get; set; }
+    public ErrorResult SetError { get; set; } = null!;
 
-    public HttpResponseMessage SetResponseMessage { get; set; }
+    public HttpResponseMessage SetResponseMessage { get; set; } = null!;
 
-    public HttpRequestMessage LastMessageSent { get; private set; }
+    public HttpRequestMessage LastMessageSent { get; private set; } = null!;
 
     public override async Task<Result<T, ErrorResult>> Post<T>(
         Uri uri,
         string sessionToken,
-        object body = null,
+        object? body = null,
         CancellationToken cancellationToken = default)
     {
         await Task.CompletedTask;
         LastUriCalled = uri;
         LastSessionTokenUsed = sessionToken;
-        LastBodySent = body;
+        LastBodySent = body!;
         ResponseType = typeof(T);
 
         if (SetError != null) return SetError;
@@ -47,7 +47,7 @@ public class BetfairHttpClientFake : BetfairHttpClient
         if (request?.Content is not null)
             LastBodySent = await request.Content.ReadAsStringAsync(cancellationToken);
 
-        LastMessageSent = request;
+        LastMessageSent = request!;
 
         return SetResponseMessage ?? new HttpResponseMessage(HttpStatusCode.OK);
     }

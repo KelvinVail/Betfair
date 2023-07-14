@@ -1,11 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
-using System.Security.Cryptography.X509Certificates;
 using Betfair.Errors;
 using Betfair.Login;
 using Betfair.Tests.Errors;
 using Betfair.Tests.TestDoubles;
-using FluentAssertions;
 using Utf8Json;
 using Utf8Json.Resolvers;
 
@@ -33,7 +31,7 @@ public class TokenProviderTests : IDisposable
     public void ClientMustNotBeNull()
     {
         var ex = Assert.Throws<ArgumentNullException>(() =>
-            new TokenProvider(null, _cred));
+            new TokenProvider(null!, _cred));
 
         Assert.Equal("client", ex.ParamName);
     }
@@ -42,7 +40,7 @@ public class TokenProviderTests : IDisposable
     public void CredentialsMustNotBeNull()
     {
         var ex = Assert.Throws<ArgumentNullException>(() =>
-            new TokenProvider(_client, null));
+            new TokenProvider(_client, null!));
 
         Assert.Equal("credentials", ex.ParamName);
     }

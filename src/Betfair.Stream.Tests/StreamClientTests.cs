@@ -149,7 +149,7 @@ public class StreamClientTests : IDisposable
     [Fact]
     public async Task ChangeMessagesAreReadFromTheStream()
     {
-        var message = new ChangeMessage { Operation = "Test"};
+        var message = new ChangeMessage { Operation = "Test" };
         await SendChange(message);
 
         var read = await ReadMessages();

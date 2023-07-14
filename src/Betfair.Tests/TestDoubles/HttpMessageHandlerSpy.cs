@@ -5,7 +5,7 @@ namespace Betfair.Tests.TestDoubles;
 
 public class HttpMessageHandlerSpy : HttpMessageHandler
 {
-    private HttpRequestMessage _request;
+    private HttpRequestMessage? _request;
     private string _requestContent = string.Empty;
     private string _responseBody = string.Empty;
     private HttpStatusCode _responseCode = HttpStatusCode.OK;
@@ -18,16 +18,16 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
         _responseCode = code;
 
     public void AssertRequestMethod(HttpMethod method) =>
-        Assert.Equal(method, _request.Method);
+        Assert.Equal(method, _request?.Method);
 
     public void AssertRequestUri(Uri uri) =>
-        Assert.Equal(uri, _request.RequestUri);
+        Assert.Equal(uri, _request?.RequestUri);
 
     public void AssertRequestHeader(string key, string value) =>
-        Assert.Contains(_request.Headers.GetValues(key), x => x == value);
+        Assert.Contains(_request!.Headers.GetValues(key), x => x == value);
 
     public void AssertContentHeader(string key, string value) =>
-        Assert.Contains(_request.Content?.Headers.GetValues(key) !, x => x == value);
+        Assert.Contains(_request?.Content?.Headers.GetValues(key) !, x => x == value);
 
     public void AssertRequestContent(string body) =>
         Assert.Contains(body, _requestContent, StringComparison.CurrentCultureIgnoreCase);
@@ -43,7 +43,7 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
         if (request.Content is not null)
         {
             _requestContent = await request.Content.ReadAsStringAsync(cancellationToken);
-            _contentType = request.Content.Headers.ContentType?.ToString();
+            _contentType = request.Content?.Headers.ContentType?.ToString() ?? string.Empty;
         }
 
         var response = new HttpResponseMessage(_responseCode);

@@ -10,7 +10,7 @@ public sealed class CredentialsTests
     [Fact]
     public void UsernameMustNotBeNull()
     {
-        var result = Credentials.Create(null, "password", "appKey");
+        var result = Credentials.Create(null!, "password", "appKey");
 
         AssertError(ErrorResult.Empty("username"), result);
     }
@@ -34,7 +34,7 @@ public sealed class CredentialsTests
     [Fact]
     public void PasswordMustNotBeNull()
     {
-        var result = Credentials.Create("username", null, "appKey");
+        var result = Credentials.Create("username", null!, "appKey");
 
         AssertError(ErrorResult.Empty("password"), result);
     }
@@ -58,7 +58,7 @@ public sealed class CredentialsTests
     [Fact]
     public void AppKeyMustNotBeNull()
     {
-        var result = Credentials.Create("username", "password", null);
+        var result = Credentials.Create("username", "password", null!);
 
         AssertError(ErrorResult.Empty("appKey"), result);
     }
@@ -143,7 +143,7 @@ public sealed class CredentialsTests
             "username",
             "password",
             "appKey",
-            null);
+            null!);
 
         AssertError(ErrorResult.Empty("certificate"), result);
     }

@@ -67,7 +67,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     public void CredentialsMustNotBeNull()
     {
         var ex = Assert.Throws<ArgumentNullException>(() =>
-            new BetfairHttpClient(null));
+            new BetfairHttpClient(null!));
 
         Assert.Equal("credentials", ex.ParamName);
     }
@@ -76,7 +76,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     public async Task PostReturnsErrorIfUriIsNull()
     {
         var result = await _client.Post<dynamic>(
-            null,
+            null!,
             "token",
             Maybe<object>.None);
 
@@ -88,7 +88,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     {
         var result = await _client.Post<dynamic>(
             _uri,
-            null);
+            null!);
 
         AssertError(ErrorResult.Empty("sessionToken"), result);
     }
@@ -176,8 +176,8 @@ public sealed class BetfairHttpClientTests : IDisposable
 
     public void Dispose()
     {
-        _handler?.Dispose();
-        _client?.Dispose();
+        _handler.Dispose();
+        _client.Dispose();
     }
 
     private static void AssertError(ErrorResult expected, Result<object, ErrorResult> result)

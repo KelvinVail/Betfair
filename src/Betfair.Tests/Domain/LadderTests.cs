@@ -9,7 +9,7 @@ public class LadderTests
     {
         var ladder = Ladder.Create();
 
-        ladder.Size(null).Value.Should().Be(0);
+        ladder.Size(null!).Value.Should().Be(0);
     }
 
     [Fact]

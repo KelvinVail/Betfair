@@ -16,7 +16,7 @@ public class MarketFilterTests
     [Fact]
     public void IsEmptyIfEventTypeIsNull()
     {
-        var filter = new MarketFilter().WithEventType(null);
+        var filter = new MarketFilter().WithEventType(null!);
 
         filter.ToJsonString().Should().Be("{}");
     }
@@ -54,7 +54,7 @@ public class MarketFilterTests
     [Fact]
     public void IsEmptyIfMarketTypeIsNull()
     {
-        var filter = new MarketFilter().WithMarketType(null);
+        var filter = new MarketFilter().WithMarketType(null!);
 
         filter.ToJsonString().Should().Be("{}");
     }
@@ -92,7 +92,7 @@ public class MarketFilterTests
     [Fact]
     public void IsEmptyIfCountryCodeIsNull()
     {
-        var filter = new MarketFilter().WithCountryCode(null);
+        var filter = new MarketFilter().WithCountryCode(null!);
 
         filter.ToJsonString().Should().Be("{}");
     }
