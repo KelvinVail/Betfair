@@ -10,19 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3.5.3
     - name: Build with dotnet
       run: dotnet build src --configuration Release
     - name: Test
       run: dotnet test src
       # Publish Stream
-    - name: publish Betfair.Stream on version change
-      uses: brandedoutcast/publish-nuget@v2.5.5
-      with:
-        PROJECT_FILE_PATH: src/Betfair.Stream/Betfair.Stream.csproj
-        TAG_COMMIT: false
-        VERSION_REGEX: <Version>(.*)<\/Version>
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    - name: Package
+      run: dotnet pack -c Release -o . src/Betfair.Stream/Betfair.Stream.csproj
+    - name: Publish
+      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
     
 
 
