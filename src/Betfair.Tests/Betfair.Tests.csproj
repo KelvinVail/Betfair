@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Account\**" />
+    <EmbeddedResource Remove="Account\**" />
+    <None Remove="Account\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AdditionalFiles Include="..\.config\CodeMetricsConfig.txt" Link="CodeMetricsConfig.txt" />
     <AdditionalFiles Include="..\.config\StyleCop.json" Link="StyleCop.json" />
   </ItemGroup>
@@ -50,10 +56,6 @@
     <None Update="Betting\Samples\listMarketCatalogue.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Account\" />
   </ItemGroup>
 
 </Project>
