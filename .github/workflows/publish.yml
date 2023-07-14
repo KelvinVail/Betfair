@@ -16,10 +16,13 @@ jobs:
     - name: Test
       run: dotnet test src
       # Publish Stream
-    - name: Package
-      run: dotnet pack -c Release -o . src/Betfair.Stream/Betfair.Stream.csproj
-    - name: Publish
-      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json
+    - name: publish Betfair.Stream on version change
+      uses: Jacup/publish-nuget@v2.6.0
+      with:
+        PROJECT_FILE_PATH: src/Betfair.Stream/Betfair.Stream.csproj
+        TAG_COMMIT: false
+        VERSION_REGEX: <Version>(.*)<\/Version>
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
     
 
 
