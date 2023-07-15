@@ -1,7 +1,7 @@
 # Betfair.Stream
 
 ## Example use
-```
+```csharp
 using var client = new StreamClient();
 await client.Authenticate("YOUR_APP_KEY", "SESSION_TOKEN");
 await client.Subscribe(
