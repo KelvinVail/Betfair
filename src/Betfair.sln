@@ -16,9 +16,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Stream", "Betfair.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Stream.Tests", "Betfair.Stream.Tests\Betfair.Stream.Tests.csproj", "{E66E20CB-41B9-41EF-837A-139875AFDDA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Core", "Betfair.Core\Betfair.Core.csproj", "{830C30CC-0D23-4F83-A084-0EA11792EE1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core", "Betfair.Core\Betfair.Core.csproj", "{830C30CC-0D23-4F83-A084-0EA11792EE1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Core.Tests", "Betfair.Core.Tests\Betfair.Core.Tests.csproj", "{5931BCB9-8EED-41E1-888C-59044243B9E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core.Tests", "Betfair.Core.Tests\Betfair.Core.Tests.csproj", "{5931BCB9-8EED-41E1-888C-59044243B9E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Domain.Tests", "Betfair.Domain.Tests\Betfair.Domain.Tests.csproj", "{44D6F1FF-DB01-46B8-B622-3468CC1ED72C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Domain", "Betfair.Domain\Betfair.Domain.csproj", "{065C8FC2-4C58-494C-8A48-6BA6C0C1BD3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,6 +54,14 @@ Global
 		{5931BCB9-8EED-41E1-888C-59044243B9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5931BCB9-8EED-41E1-888C-59044243B9E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5931BCB9-8EED-41E1-888C-59044243B9E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44D6F1FF-DB01-46B8-B622-3468CC1ED72C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44D6F1FF-DB01-46B8-B622-3468CC1ED72C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44D6F1FF-DB01-46B8-B622-3468CC1ED72C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44D6F1FF-DB01-46B8-B622-3468CC1ED72C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{065C8FC2-4C58-494C-8A48-6BA6C0C1BD3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{065C8FC2-4C58-494C-8A48-6BA6C0C1BD3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{065C8FC2-4C58-494C-8A48-6BA6C0C1BD3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{065C8FC2-4C58-494C-8A48-6BA6C0C1BD3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
