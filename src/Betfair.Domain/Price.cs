@@ -50,8 +50,17 @@ public class Price : ValueObject
         910.0, 920.0, 930.0, 940.0, 950.0, 960.0, 970.0, 980.0, 990.0, 1000.0,
     };
 
-    private Price(double decimalOdds) =>
+    private static readonly Dictionary<double, Price> _prices = _validPrices.ToDictionary(x => x, y => new Price(y));
+
+    private static readonly Dictionary<int, Price> _indexes = _validPrices.ToDictionary(x => Array.IndexOf(_validPrices, x), y => new Price(y));
+
+    private Price(double decimalOdds)
+    {
         DecimalOdds = decimalOdds;
+        Tick = Array.IndexOf(_validPrices, decimalOdds);
+    }
+
+    public int Tick { get; }
 
     public double DecimalOdds { get; }
 
@@ -61,36 +70,32 @@ public class Price : ValueObject
 
     public static Price Of(double decimalOdds)
     {
-        if (!_validPrices.Contains(decimalOdds))
-            throw new ArgumentException("Invalid Price");
+        _prices.TryGetValue(decimalOdds, out var price);
+        if (price is not null) return price;
 
-        return new Price(decimalOdds);
+        throw new ArgumentException("Invalid Price");
     }
 
     public Price AddTicks(int ticks)
     {
-        var index = Array.IndexOf(_validPrices, DecimalOdds);
+        var newIndex = Tick + ticks;
+        if (newIndex >= 350) return _prices[1000];
+        if (newIndex < 0) return _prices[1.01];
 
-        if (index + ticks >= _validPrices.Length)
-            return new Price(1000);
-
-        if (index + ticks < 0)
-            return new Price(1.01);
-
-        return new Price(_validPrices[index + ticks]);
+        return _indexes[newIndex];
     }
 
     public int TicksBetween(Price endPrice)
     {
         if (endPrice == null) return 0;
 
-        var indexFrom = Array.IndexOf(_validPrices, DecimalOdds);
-        var indexTo = Array.IndexOf(_validPrices, endPrice.DecimalOdds);
-        return indexTo - indexFrom;
+        return endPrice.Tick - Tick;
     }
+
+    public override string ToString() => $"{DecimalOdds}";
 
     protected override IEnumerable<IComparable> GetEqualityComponents()
     {
-        yield return DecimalOdds;
+        yield return Tick;
     }
 }

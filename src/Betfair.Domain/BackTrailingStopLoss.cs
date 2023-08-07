@@ -1,41 +1,52 @@
-﻿namespace Betfair.Domain;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Betfair.Domain;
 
 public class BackTrailingStopLoss
 {
-    private readonly Price _entryPrice;
+    private readonly int _entryTick;
     private readonly int _stopTicks;
-    private Price _stop;
+    private int _stopTick;
+    private bool _open = true;
 
     private BackTrailingStopLoss(
-        Price price,
+        int tick,
         int stopTicks)
     {
-        IsOpen = true;
-        _entryPrice = price;
+        _entryTick = tick;
         _stopTicks = stopTicks;
-        _stop = price.AddTicks(stopTicks);
+        _stopTick = tick + stopTicks;
     }
 
-    public bool IsOpen { get; private set; }
+    public bool IsOpen => _open;
 
     public int Result { get; private set; }
 
     public static BackTrailingStopLoss Enter(
-        double decimalOdds,
+        [NotNull]Price price,
         int stopTicks) =>
-        new (Price.Of(decimalOdds), stopTicks);
+        new (price.Tick, stopTicks);
 
-    public void CurrentLayPrice(double price)
+    public void CurrentLayPrice([NotNull]Price currentLay)
     {
-        if (!IsOpen) return;
+        if (!_open) return;
+        var currentLayTick = currentLay.Tick;
 
-        var currentLay = Price.Of(price);
-        if (_stop.TicksBetween(currentLay) >= 0)
-        {
-            Result = currentLay.TicksBetween(_entryPrice);
-            IsOpen = false;
-        }
+        var newStop = currentLayTick + _stopTicks;
+        if (newStop == _stopTick) return;
+        if (newStop < _stopTick) _stopTick = newStop;
 
-        _stop = currentLay.AddTicks(_stopTicks);
+        if (StopIsTriggeredBy(currentLayTick))
+            CloseTheTrade(currentLayTick);
+    }
+
+    public override string ToString() => $"Stop: {_stopTick}";
+
+    private bool StopIsTriggeredBy(int currentTick) => currentTick >= _stopTick;
+
+    private void CloseTheTrade(int currentTick)
+    {
+        Result = _entryTick - currentTick;
+        _open = false;
     }
 }
