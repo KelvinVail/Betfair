@@ -87,7 +87,7 @@ public class PriceTests
     [Fact]
     public void TicksBetweenReturnsZeroIfParameterIsNull()
     {
-        var actual = Price.Of(1.01).TicksBetween(null);
+        var actual = Price.Of(1.01).TicksBetween(null!);
 
         Assert.Equal(0, actual);
     }
