@@ -40,8 +40,4 @@
     <AdditionalFiles Include="..\.config\StyleCop.json" Link="StyleCop.json" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Betfair.Domain\Betfair.Domain.csproj" />
-  </ItemGroup>
-
 </Project>
