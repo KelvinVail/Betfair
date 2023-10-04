@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -12,7 +12,6 @@
     <Authors>Kelvin Core</Authors>
     <Product>Betfair.Core</Product>
     <Description>Core components need in other Betfair packages.</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
     <PackageTags>Betfair API</PackageTags>
