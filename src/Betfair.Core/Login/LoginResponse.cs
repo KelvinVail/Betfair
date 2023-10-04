@@ -1,6 +1,8 @@
-﻿namespace Betfair.Login;
+﻿namespace Betfair.Core.Login;
 
-public sealed class LoginResponse
+#pragma warning disable CA1812
+internal sealed class LoginResponse
+#pragma warning restore CA1812
 {
     public string Token { get; init; } = string.Empty;
 

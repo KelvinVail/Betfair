@@ -29,8 +29,11 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
         HeadersSent = request.Headers;
         if (request.Content is not null)
         {
-            ContentSent = await JsonSerializer.DeserializeAsync<object>(await request.Content.ReadAsStreamAsync(cancellationToken), StandardResolver.ExcludeNullCamelCase);
             ContentHeadersSent = request.Content.Headers;
+            if (IsFormUrlEncoded(request))
+                ContentSent = await request.Content.ReadAsStringAsync(cancellationToken);
+            else
+                ContentSent = await JsonSerializer.DeserializeAsync<object>(await request.Content.ReadAsStreamAsync(cancellationToken), StandardResolver.AllowPrivateExcludeNullCamelCase);
         }
 
         var response = new HttpResponseMessage(RespondsWitHttpStatusCode);
@@ -42,4 +45,7 @@ public class HttpMessageHandlerSpy : HttpMessageHandler
 
         return response;
     }
+
+    private static bool IsFormUrlEncoded(HttpRequestMessage request) =>
+        Equals(request.Content?.Headers.ContentType, new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
 }

@@ -1,8 +1,6 @@
-﻿using Betfair.Client;
-using Utf8Json;
-using Utf8Json.Resolvers;
+﻿using Betfair.Core.Client;
 
-namespace Betfair.Login;
+namespace Betfair.Core.Login;
 
 public class TokenProvider
 {
@@ -15,19 +13,19 @@ public class TokenProvider
         _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
     }
 
-    public async Task<Result<string, ErrorResult>> GetToken(CancellationToken cancellationToken)
+    public async Task<string> GetToken(CancellationToken cancellationToken)
     {
         using var request = _credentials.GetLoginRequest();
 
         var response = await _client.SendAsync(request, cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<LoginResponse>(
             await response.Content.ReadAsStreamAsync(cancellationToken),
-            StandardResolver.CamelCase);
+            StandardResolver.AllowPrivateExcludeNullCamelCase);
 
         if (LoginIsSuccess(result))
             return TokenFrom(result);
 
-        return Error(result);
+        throw Error(result);
     }
 
     private static bool LoginIsSuccess(LoginResponse result) =>
@@ -39,8 +37,9 @@ public class TokenProvider
             ? result.Token
             : result.SessionToken;
 
-    private static ErrorResult Error(LoginResponse result) =>
-        ErrorResult.Create(!string.IsNullOrWhiteSpace(result.Error)
+    private static BetfairRequestException Error(LoginResponse result) =>
+        new (
+            !string.IsNullOrWhiteSpace(result.Error)
             ? result.Error
             : result.LoginStatus);
 }

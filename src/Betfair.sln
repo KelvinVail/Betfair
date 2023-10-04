@@ -3,14 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair", "Betfair\Betfair.csproj", "{143B9782-1946-4368-95C8-561BD8C2D20C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{57D71139-6FA5-49A6-946F-6C8B028B3FE0}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Tests", "Betfair.Tests\Betfair.Tests.csproj", "{664416AA-D614-451A-96CC-05AF9BB6F9D4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Stream", "Betfair.Stream\Betfair.Stream.csproj", "{9590C26B-287B-4563-8C1F-25CBABA96449}"
 EndProject
@@ -26,14 +22,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{143B9782-1946-4368-95C8-561BD8C2D20C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{143B9782-1946-4368-95C8-561BD8C2D20C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{143B9782-1946-4368-95C8-561BD8C2D20C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{143B9782-1946-4368-95C8-561BD8C2D20C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{664416AA-D614-451A-96CC-05AF9BB6F9D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{664416AA-D614-451A-96CC-05AF9BB6F9D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{664416AA-D614-451A-96CC-05AF9BB6F9D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{664416AA-D614-451A-96CC-05AF9BB6F9D4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9590C26B-287B-4563-8C1F-25CBABA96449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9590C26B-287B-4563-8C1F-25CBABA96449}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9590C26B-287B-4563-8C1F-25CBABA96449}.Release|Any CPU.ActiveCfg = Release|Any CPU

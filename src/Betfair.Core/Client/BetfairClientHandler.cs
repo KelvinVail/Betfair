@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace Betfair.Core.Client;
+﻿namespace Betfair.Core.Client;
 
 public sealed class BetfairClientHandler : HttpClientHandler
 {
