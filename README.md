@@ -53,8 +53,8 @@ Create a stream client. Then use a MarketFilter and DataFilter to start a stream
 
 ```csharp
 using var streamClient = new StreamClient();
-await client.Authenticate([APPKEY], token);
-await client.Subscribe(
+await streamClient.Authenticate([APPKEY], token);
+await sreamClient.Subscribe(
 	new MarketFilter().WithMarketId("MARKET_ID"),
 	new DataFilter().WithBestPrices());
 
