@@ -58,7 +58,7 @@ await streamClient.Subscribe(
 	new MarketFilter().WithMarketId("MARKET_ID"),
 	new DataFilter().WithBestPrices());
 
-await foreach (var change in client.GetChanges())
+await foreach (var change in streamClient.GetChanges())
 {
 	// Do stuff..
 }
