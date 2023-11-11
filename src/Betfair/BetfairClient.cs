@@ -29,7 +29,6 @@ public class BetfairClient
 
         return await _client.Post<IReadOnlyList<MarketCatalogue>>(
             new Uri($"{_base}/listMarketCatalogue/"),
-            sessionToken,
             body,
             cancellationToken);
     }
