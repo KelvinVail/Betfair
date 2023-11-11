@@ -7,22 +7,22 @@ namespace Betfair.Stream;
 
 public class StreamClient : IDisposable
 {
-    private readonly Pipeline _client;
+    private readonly Pipeline _pipe;
     private int _requestId;
     private bool _disposedValue;
 
     public StreamClient() =>
-        _client = new Pipeline();
+        _pipe = new Pipeline();
 
     public StreamClient(System.IO.Stream stream) =>
-        _client = new Pipeline(stream);
+        _pipe = new Pipeline(stream);
 
     public Task Authenticate(string appKey, string sessionToken)
     {
         _requestId++;
         var authMessage = new Authentication(_requestId, sessionToken, appKey);
 
-        return _client.Write(authMessage);
+        return _pipe.Write(authMessage);
     }
 
     public Task Subscribe(MarketFilter marketFilter, DataFilter dataFilter)
@@ -33,19 +33,19 @@ public class StreamClient : IDisposable
             marketFilter,
             dataFilter);
 
-        return _client.Write(marketSubscription);
+        return _pipe.Write(marketSubscription);
     }
 
     public Task SubscribeToOrders()
     {
         _requestId++;
 
-        return _client.Write(new OrderSubscription(_requestId));
+        return _pipe.Write(new OrderSubscription(_requestId));
     }
 
     public async IAsyncEnumerable<ChangeMessage> GetChanges()
     {
-        await foreach (var line in _client.Read())
+        await foreach (var line in _pipe.Read())
         {
             var received = DateTimeOffset.UtcNow.Ticks;
             var changeMessage = JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.ExcludeNullCamelCase);
@@ -64,7 +64,7 @@ public class StreamClient : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _client.Dispose();
+        if (disposing) _pipe.Dispose();
 
         _disposedValue = true;
     }

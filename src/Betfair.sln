@@ -16,6 +16,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core", "Betfair.Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Core.Tests", "Betfair.Core.Tests\Betfair.Core.Tests.csproj", "{5931BCB9-8EED-41E1-888C-59044243B9E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair", "Betfair\Betfair.csproj", "{6D67AAD3-B758-4A4C-BBF1-DBABD8EE0B46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Tests", "Betfair.Tests\Betfair.Tests.csproj", "{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,14 @@ Global
 		{5931BCB9-8EED-41E1-888C-59044243B9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5931BCB9-8EED-41E1-888C-59044243B9E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5931BCB9-8EED-41E1-888C-59044243B9E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D67AAD3-B758-4A4C-BBF1-DBABD8EE0B46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D67AAD3-B758-4A4C-BBF1-DBABD8EE0B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D67AAD3-B758-4A4C-BBF1-DBABD8EE0B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D67AAD3-B758-4A4C-BBF1-DBABD8EE0B46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
