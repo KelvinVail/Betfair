@@ -21,7 +21,7 @@ jobs:
       uses: Jacup/publish-nuget@v2.6.0
       with:
         PROJECT_FILE_PATH: src/Betfair.Core/Betfair.Core.csproj
-        TAG_COMMIT: false
+        TAG_COMMIT: true
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -30,7 +30,7 @@ jobs:
       uses: Jacup/publish-nuget@v2.6.0
       with:
         PROJECT_FILE_PATH: src/Betfair.Stream/Betfair.Stream.csproj
-        TAG_COMMIT: false
+        TAG_COMMIT: true
         VERSION_REGEX: <Version>(.*)<\/Version>
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
     
