@@ -1,4 +1,6 @@
-﻿using Betfair.Stream.Messages;
+﻿using Betfair.Core.Client;
+using Betfair.Core.Login;
+using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 using Utf8Json;
 using Utf8Json.Resolvers;
@@ -8,21 +10,29 @@ namespace Betfair.Stream;
 public class StreamClient : IDisposable
 {
     private readonly Pipeline _pipe;
+    private readonly BetfairHttpClient _httpClient;
     private int _requestId;
     private bool _disposedValue;
 
-    public StreamClient() =>
+    public StreamClient(Credentials credentials)
+    {
         _pipe = new Pipeline();
+        _httpClient = new BetfairHttpClient(credentials);
+    }
 
-    public StreamClient(System.IO.Stream stream) =>
+    public StreamClient(System.IO.Stream stream, BetfairHttpClient client)
+    {
         _pipe = new Pipeline(stream);
+        _httpClient = client;
+    }
 
-    public Task Authenticate(string appKey, string sessionToken)
+    public async Task Authenticate(CancellationToken cancellationToken = default)
     {
         _requestId++;
-        var authMessage = new Authentication(_requestId, sessionToken, appKey);
+        var token = await _httpClient.GetToken(cancellationToken);
+        var authMessage = new Authentication(_requestId, token, _httpClient.AppKey);
 
-        return _pipe.Write(authMessage);
+        await _pipe.Write(authMessage);
     }
 
     public Task Subscribe(MarketFilter marketFilter, DataFilter dataFilter)
@@ -64,7 +74,11 @@ public class StreamClient : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _pipe.Dispose();
+        if (disposing)
+        {
+            _pipe.Dispose();
+            _httpClient.Dispose();
+        }
 
         _disposedValue = true;
     }

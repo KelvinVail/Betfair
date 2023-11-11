@@ -36,24 +36,12 @@ var cert = X509Certificate2.CreateFrom...;
 var credentials = new Credential([USERNAME], [PASSWORD], [APPKEY], cert);
 ```
 
-### Session Tokens
-Every call to Betfair requires a session token. To Retrieve a token create a TokenProvider object.
-```csharp
-var client = new BetfairHttpClient([APPKEY]);
-var tokenProvider = new TokenProvider(client, credentials);
-
-var token = await tokenProvider.GetToken(cancellationToken);
-```
-Session tokens expire based on your Logout Preferences in [Betfair Security Settings](https://myaccount.betfair.com/accountdetails/mysecurity?showAPI=1).
-
-Session tokens can be reused until they expire.
-
 ### Subscribe to a Market Stream
 Create a stream client. Then use a MarketFilter and DataFilter to start a stream.
 
 ```csharp
-using var streamClient = new StreamClient();
-await streamClient.Authenticate([APPKEY], token);
+using var streamClient = new StreamClient(credentials);
+await streamClient.Authenticate();
 await streamClient.Subscribe(
 	new MarketFilter().WithMarketId("MARKET_ID"),
 	new DataFilter().WithBestPrices());

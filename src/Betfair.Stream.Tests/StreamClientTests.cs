@@ -1,5 +1,6 @@
 ﻿using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
+using Betfair.Stream.Tests.TestDoubles;
 using Utf8Json;
 using Utf8Json.Resolvers;
 
@@ -8,19 +9,19 @@ namespace Betfair.Stream.Tests;
 public class StreamClientTests : IDisposable
 {
     private readonly MemoryStream _ms = new ();
+    private readonly BetfairHttpClientStub _httpClient = new ();
     private readonly StreamClient _client;
     private bool _disposedValue;
 
     public StreamClientTests() =>
-        _client = new StreamClient(_ms);
+        _client = new StreamClient(_ms, _httpClient);
 
     [Fact]
     public async Task AuthenticateWritesMessageToStream()
     {
-        await _client.Authenticate("appKey", "sessionToken");
+        await _client.Authenticate();
 
         var result = await ReadStream();
-
         result.Should().ContainKey("op").WhoseValue.Should().Be("authentication");
     }
 
@@ -30,10 +31,11 @@ public class StreamClientTests : IDisposable
     [InlineData("other")]
     public async Task AuthenticateWritesAppKeyToStream(string appKey)
     {
-        await _client.Authenticate(appKey, "sessionToken");
+        _httpClient.ReturnsAppKey = appKey;
+
+        await _client.Authenticate();
 
         var result = await ReadStream();
-
         result.Should().ContainKey("appKey").WhoseValue.Should().Be(appKey);
     }
 
@@ -43,21 +45,22 @@ public class StreamClientTests : IDisposable
     [InlineData("other")]
     public async Task AuthenticateWritesSessionTokenToStream(string sessionToken)
     {
-        await _client.Authenticate("appKey", sessionToken);
+        _httpClient.ReturnsToken = sessionToken;
+
+        await _client.Authenticate();
 
         var result = await ReadStream();
-
         result.Should().ContainKey("session").WhoseValue.Should().Be(sessionToken);
     }
 
     [Fact]
     public async Task EachCallToAuthenticateIncrementsTheConnectionId()
     {
-        await _client.Authenticate("appKey", "sessionToken");
+        await _client.Authenticate();
         var result = await ReadStream();
         result.Should().ContainKey("id").WhoseValue.Should().Be(1);
 
-        await _client.Authenticate("appKey", "sessionToken");
+        await _client.Authenticate();
         var result2 = await ReadStream();
         result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
     }
@@ -180,7 +183,11 @@ public class StreamClientTests : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _client.Dispose();
+        if (disposing)
+        {
+            _client.Dispose();
+            _httpClient.Dispose();
+        }
 
         _disposedValue = true;
     }

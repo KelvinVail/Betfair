@@ -1,4 +1,5 @@
-﻿using Betfair.Core.Login;
+﻿using System.Diagnostics.CodeAnalysis;
+using Betfair.Core.Login;
 
 namespace Betfair.Core.Client;
 
@@ -18,13 +19,22 @@ public class BetfairHttpClient : HttpClient
         Configure(_handler);
     }
 
-    public BetfairHttpClient(HttpClientHandler handler, Credentials credentials)
+    public BetfairHttpClient([NotNull]HttpClientHandler handler, Credentials credentials)
         : base(handler)
     {
         _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
         _tokenProvider = new TokenProvider(this, _credentials);
         Configure(handler);
     }
+
+    // For testing
+    protected BetfairHttpClient()
+    {
+        _credentials = null!;
+        _tokenProvider = null!;
+    }
+
+    public virtual string AppKey => _credentials.AppKey;
 
     public virtual async Task<T> Post<T>(
         Uri uri,
@@ -57,7 +67,7 @@ public class BetfairHttpClient : HttpClient
         return result;
     }
 
-    public async Task<string> GetToken(CancellationToken cancellationToken = default)
+    public virtual async Task<string> GetToken(CancellationToken cancellationToken = default)
     {
         await SetToken(cancellationToken);
         return _token;
