@@ -4,7 +4,7 @@ using Utf8Json.Resolvers;
 
 namespace Betfair.Core.Tests.Client.TestDoubles;
 
-public class HttpMessageHandlerSpy : HttpMessageHandler
+public class HttpMessageHandlerSpy : HttpClientHandler
 {
     public HttpStatusCode RespondsWitHttpStatusCode { get; set; } = HttpStatusCode.OK;
 

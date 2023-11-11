@@ -1,4 +1,5 @@
 ﻿using Betfair.Core.Client;
+using Betfair.Core.Login;
 using Betfair.Core.Tests.Client.TestDoubles;
 
 namespace Betfair.Core.Tests.Client;
@@ -6,6 +7,7 @@ namespace Betfair.Core.Tests.Client;
 public sealed class BetfairHttpClientTests : IDisposable
 {
     private readonly HttpMessageHandlerSpy _handler = new ();
+    private readonly Credentials _credentials = new Credentials("username", "password", "appKey");
     private readonly BetfairHttpClient _client;
     private readonly Uri _uri = new ("http://test.com/");
 
@@ -14,7 +16,7 @@ public sealed class BetfairHttpClientTests : IDisposable
         var response = new { Token = "Token", Status = "SUCCESS", };
         _handler.RespondsWithBody = response;
 
-        _client = new BetfairHttpClient(_handler, "appKey");
+        _client = new BetfairHttpClient(_handler, _credentials);
     }
 
     [Fact]
@@ -36,81 +38,40 @@ public sealed class BetfairHttpClientTests : IDisposable
             new StringWithQualityHeaderValue("gzip"));
 
     [Fact]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1806:Do not ignore method results", Justification = "This is a test method.")]
-    public void AppKeyMustNotBeNull()
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Performance",
+        "CA1806:Do not ignore method results",
+        Justification = "This is a test method.")]
+    public void CredentialsMustNotBeNull()
     {
         Action ctor = () => new BetfairHttpClient(null!);
-        ctor.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("appKey");
+        ctor.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("credentials");
 
         Action ctor2 = () => new BetfairHttpClient(_handler, null!);
-        ctor2.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("appKey");
-    }
-
-    [Fact]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1806:Do not ignore method results", Justification = "This is a test method.")]
-    public void AppKeyMustNotBeEmpty()
-    {
-        Action ctor = () => new BetfairHttpClient(string.Empty);
-        ctor.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("appKey");
-
-        Action ctor2 = () => new BetfairHttpClient(_handler, string.Empty);
-        ctor2.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("appKey");
-    }
-
-    [Fact]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1806:Do not ignore method results", Justification = "This is a test method.")]
-    public void AppKeyMustNotBeWhiteSpace()
-    {
-        Action ctor = () => new BetfairHttpClient(" ");
-        ctor.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("appKey");
-
-        Action ctor2 = () => new BetfairHttpClient(_handler, " ");
-        ctor2.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("appKey");
+        ctor2.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("credentials");
     }
 
     [Fact]
     public async Task UriMustNotBeNull()
     {
-        var ex = await _client.Invoking(x => x.Post<object>(null!, "token"))
+        var ex = await _client.Invoking(x => x.Post<object>(null!))
             .Should().ThrowAsync<ArgumentNullException>();
 
         ex.And.ParamName.Should().Be("uri");
     }
 
-    [Fact]
-    public async Task SessionTokenMustNotBeNull()
-    {
-        var ex = await _client.Invoking(x => x.Post<object>(_uri, null!))
-            .Should().ThrowAsync<ArgumentNullException>();
-
-        ex.And.ParamName.Should().Be("sessionToken");
-    }
-
-    [Fact]
-    public async Task SessionTokenMustNotBeEmpty()
-    {
-        var ex = await _client.Invoking(x => x.Post<object>(_uri, string.Empty))
-            .Should().ThrowAsync<ArgumentNullException>();
-
-        ex.And.ParamName.Should().Be("sessionToken");
-    }
-
-    [Fact]
-    public async Task SessionTokenMustNotBeWhiteSpace()
-    {
-        var ex = await _client.Invoking(x => x.Post<object>(_uri, " "))
-            .Should().ThrowAsync<ArgumentNullException>();
-
-        ex.And.ParamName.Should().Be("sessionToken");
-    }
-
     [Theory]
     [InlineData("http://test.com")]
     [InlineData("http://other.com")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:URI-like parameters should not be strings", Justification = "This is a test method.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Design",
+        "CA1054:URI-like parameters should not be strings",
+        Justification = "This is a test method.")]
     public async Task PostUsesThePassedInUri(string uri)
     {
-        await _client.Post<object>(new Uri(uri), "token");
+        await _client.Post<object>(new Uri(uri));
 
         _handler.MethodUsed.Should().Be(HttpMethod.Post);
         _handler.UriCalled.Should().Be(new Uri(uri));
@@ -119,7 +80,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     [Fact]
     public async Task PostPutsContentTypeInContentHeader()
     {
-        await _client.Post<dynamic>(_uri, "token");
+        await _client.Post<dynamic>(_uri);
 
         _handler.ContentHeadersSent.Should().ContainKey("Content-Type")
             .WhoseValue.Should().Contain("application/json");
@@ -130,9 +91,10 @@ public sealed class BetfairHttpClientTests : IDisposable
     [InlineData("OtherKey")]
     public async Task PostPutsAppKeyIsInContentHeader(string appKey)
     {
-        using var client = new BetfairHttpClient(_handler, appKey);
+        var credentials = new Credentials("username", "password", appKey);
+        using var client = new BetfairHttpClient(_handler, credentials);
 
-        await client.Post<dynamic>(_uri, "token");
+        await client.Post<dynamic>(_uri);
 
         _handler.ContentHeadersSent.Should().ContainKey("X-Application")
             .WhoseValue.Should().Contain(appKey);
@@ -143,7 +105,9 @@ public sealed class BetfairHttpClientTests : IDisposable
     [InlineData("OtherToken")]
     public async Task PostPutsSessionTokenIsInContentHeader(string token)
     {
-        await _client.Post<dynamic>(_uri, token);
+        _handler.RespondsWithBody = new { Token = token, Status = "SUCCESS", };
+
+        await _client.Post<dynamic>(_uri);
 
         _handler.ContentHeadersSent.Should().ContainKey("X-Authentication")
             .WhoseValue.Should().Contain(token);
@@ -154,7 +118,7 @@ public sealed class BetfairHttpClientTests : IDisposable
     {
         _handler.RespondsWitHttpStatusCode = HttpStatusCode.BadRequest;
 
-        var ex = await _client.Invoking(x => x.Post<object>(_uri, "token"))
+        var ex = await _client.Invoking(x => x.Post<object>(_uri))
             .Should().ThrowAsync<BetfairRequestException>();
 
         ex.And.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -165,17 +129,34 @@ public sealed class BetfairHttpClientTests : IDisposable
     [InlineData("other")]
     public async Task PostPutsBodyInTheRequest(object body)
     {
-        await _client.Post<dynamic>(_uri, "token", body);
+        await _client.Post<dynamic>(_uri, body);
 
         _handler.ContentSent.Should().Be(body);
     }
 
     [Fact]
-    public void DefaultHeadersAreConfigure()
+    public void DefaultHeadersAreConfigured()
     {
-        using var client = new BetfairHttpClient("appKey");
+        using var client = new BetfairHttpClient(_credentials);
 
         client.Timeout.Should().Be(TimeSpan.FromSeconds(30));
+        client.DefaultRequestHeaders.Should().ContainKey("Accept")
+            .WhoseValue.Should().Contain("application/json");
+        client.DefaultRequestHeaders.Should().ContainKey("Connection")
+            .WhoseValue.Should().Contain("keep-alive");
+        client.DefaultRequestHeaders.Should().ContainKey("Accept-Encoding")
+            .WhoseValue.Should().Contain("gzip");
+    }
+
+    [Fact]
+    public void CertShouldBeAddedToThenHandler()
+    {
+        using var cert = new X509Certificate2Stub();
+        var credentials = new Credentials("username", "password", "appKey", cert);
+
+        using var client = new BetfairHttpClient(_handler, credentials);
+
+        _handler.ClientCertificates.Contains(cert).Should().BeTrue();
     }
 
     public void Dispose()

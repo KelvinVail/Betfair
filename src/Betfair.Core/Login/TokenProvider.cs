@@ -2,7 +2,7 @@
 
 namespace Betfair.Core.Login;
 
-public class TokenProvider
+internal sealed class TokenProvider
 {
     private readonly BetfairHttpClient _client;
     private readonly Credentials _credentials;

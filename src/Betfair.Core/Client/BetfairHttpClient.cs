@@ -1,37 +1,39 @@
-﻿namespace Betfair.Core.Client;
+﻿using Betfair.Core.Login;
+
+namespace Betfair.Core.Client;
 
 public class BetfairHttpClient : HttpClient
 {
     private static readonly BetfairClientHandler _handler = new ();
-    private readonly string _appKey;
+    private readonly Credentials _credentials;
+    private readonly TokenProvider _tokenProvider;
+    private string _token = string.Empty;
 
-    public BetfairHttpClient(string appKey)
+    public BetfairHttpClient(Credentials credentials)
         : base(_handler)
     {
-        if (string.IsNullOrWhiteSpace(appKey))
-            throw new ArgumentNullException(nameof(appKey));
-        _appKey = appKey;
-        Configure();
+        _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
+        _tokenProvider = new TokenProvider(this, _credentials);
+
+        Configure(_handler);
     }
 
-    public BetfairHttpClient(HttpMessageHandler handler, string appKey)
+    public BetfairHttpClient(HttpClientHandler handler, Credentials credentials)
         : base(handler)
     {
-        if (string.IsNullOrWhiteSpace(appKey))
-            throw new ArgumentNullException(nameof(appKey));
-        _appKey = appKey;
-        Configure();
+        _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
+        _tokenProvider = new TokenProvider(this, _credentials);
+        Configure(handler);
     }
 
     public virtual async Task<T> Post<T>(
         Uri uri,
-        string sessionToken,
         object? body = null,
         CancellationToken cancellationToken = default)
         where T : class
     {
         if (uri is null) throw new ArgumentNullException(nameof(uri));
-        if (string.IsNullOrWhiteSpace(sessionToken)) throw new ArgumentNullException(nameof(sessionToken));
+        await SetToken(cancellationToken);
 
         var ms = new MemoryStream();
         if (body is not null)
@@ -41,8 +43,8 @@ public class BetfairHttpClient : HttpClient
         using var requestContent = new StreamContent(ms);
         request.Content = requestContent;
         requestContent.Headers.Add("Content-Type", "application/json");
-        requestContent.Headers.Add("X-Authentication", sessionToken);
-        requestContent.Headers.Add("X-Application", _appKey);
+        requestContent.Headers.Add("X-Authentication", _token);
+        requestContent.Headers.Add("X-Application", _credentials.AppKey);
 
         using var response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
@@ -55,7 +57,19 @@ public class BetfairHttpClient : HttpClient
         return result;
     }
 
-    private void Configure()
+    public async Task<string> GetToken(CancellationToken cancellationToken = default)
+    {
+        await SetToken(cancellationToken);
+        return _token;
+    }
+
+    private async Task SetToken(CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_token))
+            _token = await _tokenProvider.GetToken(cancellationToken);
+    }
+
+    private void Configure(HttpClientHandler handler)
     {
         Timeout = TimeSpan.FromSeconds(30);
         DefaultRequestHeaders.Accept
@@ -64,5 +78,8 @@ public class BetfairHttpClient : HttpClient
             .Add("Connection", "keep-alive");
         DefaultRequestHeaders.AcceptEncoding
             .Add(new StringWithQualityHeaderValue("gzip"));
+
+        if (_credentials.Certificate != null)
+            handler.ClientCertificates.Add(_credentials.Certificate);
     }
 }
