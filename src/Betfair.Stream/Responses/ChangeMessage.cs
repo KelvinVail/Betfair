@@ -6,7 +6,7 @@ namespace Betfair.Stream.Responses;
 public sealed class ChangeMessage
 {
     [DataMember(Name = "op", EmitDefaultValue = false)]
-    public string Operation { get; init; } = string.Empty;
+    public string? Operation { get; init; }
 
     [DataMember(Name = "id", EmitDefaultValue = false)]
     public int Id { get; init; }

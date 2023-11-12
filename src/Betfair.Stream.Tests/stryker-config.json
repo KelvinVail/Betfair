@@ -1,0 +1,11 @@
+{
+    "stryker-config":
+    {
+        "solution": "../Betfair.sln",
+        "project": "Betfair.Stream.csproj",
+        "ignore-methods": [
+            "GC.SuppressFinalize*",
+            "GetAuthenticatedSslStream*"
+        ]
+    }
+}

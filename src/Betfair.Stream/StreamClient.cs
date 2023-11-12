@@ -2,8 +2,6 @@
 using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
-using Utf8Json;
-using Utf8Json.Resolvers;
 
 namespace Betfair.Stream;
 
@@ -16,8 +14,8 @@ public class StreamClient : IDisposable
 
     public StreamClient(Credentials credentials)
     {
-        _pipe = new Pipeline();
         _httpClient = new BetfairHttpClient(credentials);
+        _pipe = new Pipeline(new BetfairTcpClient());
     }
 
     public StreamClient(System.IO.Stream stream, BetfairHttpClient client)

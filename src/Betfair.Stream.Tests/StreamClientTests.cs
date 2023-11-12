@@ -151,6 +151,30 @@ public class StreamClientTests : IDisposable
     }
 
     [Fact]
+    public void DisposesTheHttpClientWhenDisposed()
+    {
+        _client.Dispose();
+
+        _httpClient.IsDisposed.Should().BeTrue();
+
+        var act = () => _httpClient.Send(new HttpRequestMessage());
+
+        act.Should().Throw<InvalidOperationException>()
+            .And.Message.Should().StartWith("Cannot access a disposed object.");
+    }
+
+    [Fact]
+    public void DisposeShouldBeIdempotent()
+    {
+        _client.Dispose();
+#pragma warning disable S3966
+        _client.Dispose();
+#pragma warning restore S3966
+
+        _httpClient.TimesDisposed.Should().Be(1);
+    }
+
+    [Fact]
     public async Task ChangeMessagesAreReadFromTheStream()
     {
         var message = new ChangeMessage { Operation = "Test" };
@@ -173,6 +197,15 @@ public class StreamClientTests : IDisposable
 
         read.Should().ContainEquivalentOf(message1, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
         read.Should().ContainEquivalentOf(message2, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
+    }
+
+    [Fact]
+    public void CredentialShouldNotBeNull()
+    {
+        var act = () => new StreamClient(null!);
+
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("credentials");
     }
 
     public void Dispose()

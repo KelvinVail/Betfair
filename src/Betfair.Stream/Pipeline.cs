@@ -1,35 +1,24 @@
-﻿using System.Buffers;
-using System.IO.Pipelines;
-using System.Net.Security;
-using System.Net.Sockets;
-using Utf8Json;
-using Utf8Json.Resolvers;
-
-namespace Betfair.Stream;
+﻿namespace Betfair.Stream;
 
 internal class Pipeline : IDisposable
 {
-    private const string _hostName = "stream-api.betfair.com";
     private readonly System.IO.Stream _stream;
     private readonly Pipe _pipe = new ();
-    private readonly TcpClient _tcp = new ();
+    private readonly BetfairTcpClient _tcp;
     private bool _disposedValue;
 
-    public Pipeline()
+    public Pipeline(BetfairTcpClient tcp)
     {
-        _tcp.ReceiveBufferSize = 1024 * 1000 * 2;
-        _tcp.SendTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
-        _tcp.ReceiveTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
-        _tcp.Connect(_hostName, 443);
-
-        var sslStream = new SslStream(_tcp.GetStream(), false);
-        sslStream.AuthenticateAsClient(_hostName);
-
-        _stream = sslStream;
+        _tcp = tcp;
+        _tcp.Configure();
+        _stream = _tcp.GetAuthenticatedSslStream();
     }
 
-    public Pipeline(System.IO.Stream stream) =>
+    public Pipeline(System.IO.Stream stream)
+    {
         _stream = stream;
+        _tcp = new BetfairTcpClient();
+    }
 
     public Task Write(object value) =>
         JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase)
