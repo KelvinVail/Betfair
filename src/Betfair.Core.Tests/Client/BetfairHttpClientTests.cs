@@ -119,7 +119,7 @@ public sealed class BetfairHttpClientTests : IDisposable
         _handler.RespondsWitHttpStatusCode = HttpStatusCode.BadRequest;
 
         var ex = await _client.Invoking(x => x.Post<object>(_uri))
-            .Should().ThrowAsync<BetfairRequestException>();
+            .Should().ThrowAsync<HttpRequestException>();
 
         ex.And.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -157,6 +157,37 @@ public sealed class BetfairHttpClientTests : IDisposable
         using var client = new BetfairHttpClient(_handler, credentials);
 
         _handler.ClientCertificates.Contains(cert).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("appKey")]
+    [InlineData("new-key")]
+    public void AppKeyFromCredentialsIsExposed(string appKey)
+    {
+        var credentials = new Credentials("username", "password", appKey);
+
+        using var client = new BetfairHttpClient(_handler, credentials);
+
+        client.AppKey.Should().Be(appKey);
+    }
+
+    [Fact]
+    public async Task GetTokenCallsBetfairLoginOnFirstExecution()
+    {
+        await _client.GetToken();
+
+        _handler.UriCalled.Should().Be(new Uri("https://identitysso.betfair.com/api/login"));
+    }
+
+    [Fact]
+    public async Task GetTokenOnlyCallsBetfairLoginOnFirstCall()
+    {
+        await _client.GetToken();
+        await _client.GetToken();
+
+        _handler.TimesUriCalled
+            .Should().ContainKey(new Uri("https://identitysso.betfair.com/api/login"))
+            .WhoseValue.Should().Be(1);
     }
 
     public void Dispose()

@@ -9,8 +9,8 @@ internal sealed class TokenProvider
 
     public TokenProvider(BetfairHttpClient client, Credentials credentials)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
+        _client = client;
+        _credentials = credentials;
     }
 
     public async Task<string> GetToken(CancellationToken cancellationToken)
@@ -37,7 +37,7 @@ internal sealed class TokenProvider
             ? result.Token
             : result.SessionToken;
 
-    private static BetfairRequestException Error(LoginResponse result) =>
+    private static HttpRequestException Error(LoginResponse result) =>
         new (
             !string.IsNullOrWhiteSpace(result.Error)
             ? result.Error

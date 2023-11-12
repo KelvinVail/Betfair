@@ -29,7 +29,7 @@ public class TokenProviderTests : IDisposable
     [Fact]
     public async Task GetTokenPostsToApiLoginEndpoint()
     {
-        await _client.GetToken(default);
+        await _client.GetToken();
 
         _handler.MethodUsed.Should().Be(HttpMethod.Post);
         _handler.UriCalled.Should().Be(new Uri("https://identitysso.betfair.com/api/login"));
@@ -38,7 +38,7 @@ public class TokenProviderTests : IDisposable
     [Fact]
     public async Task LoginContentTypeIsFormUrlEncoded()
     {
-        await _client.GetToken(default);
+        await _client.GetToken();
 
         _handler.ContentHeadersSent?.ContentType.Should().Be(
             new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
@@ -52,7 +52,22 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", "password", appKey);
         using var provider = new BetfairHttpClient(_handler, cred);
 
-        await provider.GetToken(default);
+        await provider.GetToken();
+
+        _handler.HeadersSent.Should().ContainKey("X-Application")
+            .WhoseValue.Should().BeEquivalentTo(appKey);
+    }
+
+    [Theory]
+    [InlineData("AppKey")]
+    [InlineData("Other")]
+    public async Task CertHeadersContainAppKey(string appKey)
+    {
+        using var cert = new X509Certificate2Stub();
+        var cred = new Credentials("username", "password", appKey, cert);
+        using var provider = new BetfairHttpClient(_handler, cred);
+
+        await provider.GetToken();
 
         _handler.HeadersSent.Should().ContainKey("X-Application")
             .WhoseValue.Should().BeEquivalentTo(appKey);
@@ -66,7 +81,25 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials(username, "password", "appKey");
         using var provider = new BetfairHttpClient(_handler, cred);
 
-        await provider.GetToken(default);
+        await provider.GetToken();
+
+        using var content = new FormUrlEncodedContent(
+            new Dictionary<string, string> { { "username", username }, { "password", "password" } });
+        var expected = await content.ReadAsStringAsync();
+
+        _handler.ContentSent.Should().BeEquivalentTo(expected);
+    }
+
+    [Theory]
+    [InlineData("Username")]
+    [InlineData("Other")]
+    public async Task CertLoginUsernameIsInFormContent(string username)
+    {
+        using var cert = new X509Certificate2Stub();
+        var cred = new Credentials(username, "password", "appKey", cert);
+        using var provider = new BetfairHttpClient(_handler, cred);
+
+        await provider.GetToken();
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", username }, { "password", "password" } });
@@ -83,7 +116,25 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", password, "appKey");
         using var provider = new BetfairHttpClient(_handler, cred);
 
-        await provider.GetToken(default);
+        await provider.GetToken();
+
+        using var content = new FormUrlEncodedContent(
+            new Dictionary<string, string> { { "username", "username" }, { "password", password } });
+        var expected = await content.ReadAsStringAsync();
+
+        _handler.ContentSent.Should().BeEquivalentTo(expected);
+    }
+
+    [Theory]
+    [InlineData("Password")]
+    [InlineData("Other")]
+    public async Task CertLoginPasswordIsInFormContent(string password)
+    {
+        using var cert = new X509Certificate2Stub();
+        var cred = new Credentials("username", password, "appKey", cert);
+        using var provider = new BetfairHttpClient(_handler, cred);
+
+        await provider.GetToken();
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", "username" }, { "password", password } });
@@ -99,7 +150,7 @@ public class TokenProviderTests : IDisposable
     {
         _handler.RespondsWithBody = new { Token = token, Status = "SUCCESS", };
 
-        var result = await _client.GetToken(default);
+        var result = await _client.GetToken();
 
         result.Should().Be(token);
     }
@@ -111,8 +162,8 @@ public class TokenProviderTests : IDisposable
     {
         _handler.RespondsWithBody = new { Status = "FAIL", Error = error };
 
-        var ex = await Assert.ThrowsAsync<BetfairRequestException>(() =>
-            _client.GetToken(default));
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
+            _client.GetToken());
 
         ex.Message.Should().Be(error);
     }
@@ -124,7 +175,7 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", "password", "appKey", cert);
         using var provider = new BetfairHttpClient(_handler, cred);
 
-        await provider.GetToken(default);
+        await provider.GetToken();
 
         _handler.UriCalled.Should().Be(
             new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
@@ -137,7 +188,7 @@ public class TokenProviderTests : IDisposable
     {
         _handler.RespondsWithBody = new { SessionToken = token, LoginStatus = "SUCCESS", };
 
-        var result = await _client.GetToken(default);
+        var result = await _client.GetToken();
 
         result.Should().Be(token);
     }
@@ -149,10 +200,22 @@ public class TokenProviderTests : IDisposable
     {
         _handler.RespondsWithBody = new { LoginStatus = error };
 
-        var ex = await Assert.ThrowsAsync<BetfairRequestException>(() =>
-            _client.GetToken(default));
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
+            _client.GetToken());
 
         ex.Message.Should().Be(error);
+    }
+
+    [Fact]
+    public void LoginResponseIsCreatedWithDefaultEmptyStrings()
+    {
+        var loginResponse = new LoginResponse();
+
+        loginResponse.Token.Should().BeEmpty();
+        loginResponse.Status.Should().BeEmpty();
+        loginResponse.Error.Should().BeEmpty();
+        loginResponse.SessionToken.Should().BeEmpty();
+        loginResponse.LoginStatus.Should().BeEmpty();
     }
 
     public void Dispose()
@@ -167,7 +230,10 @@ public class TokenProviderTests : IDisposable
             return;
 
         if (disposing)
+        {
             _client.Dispose();
+            _handler.Dispose();
+        }
 
         _disposedValue = true;
     }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Betfair.Core.Login;
+﻿using Betfair.Core.Login;
 
 namespace Betfair.Core.Client;
 
@@ -27,13 +26,6 @@ public class BetfairHttpClient : HttpClient
         Configure(handler);
     }
 
-    // For testing
-    protected BetfairHttpClient()
-    {
-        _credentials = null!;
-        _tokenProvider = null!;
-    }
-
     public virtual string AppKey => _credentials.AppKey;
 
     public virtual async Task<T> Post<T>(
@@ -58,7 +50,7 @@ public class BetfairHttpClient : HttpClient
 
         using var response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
-            throw new BetfairRequestException(response.StatusCode);
+            throw new HttpRequestException(null, null, statusCode: response.StatusCode);
 
         var content = await response.Content.ReadAsStreamAsync(cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<T>(

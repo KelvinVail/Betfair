@@ -14,6 +14,8 @@ public class HttpMessageHandlerSpy : HttpClientHandler
 
     public Uri? UriCalled { get; private set; }
 
+    public Dictionary<Uri, int> TimesUriCalled { get; private set; } = new ();
+
     public HttpRequestHeaders? HeadersSent { get; private set; }
 
     public HttpContentHeaders? ContentHeadersSent { get; private set; }
@@ -26,6 +28,11 @@ public class HttpMessageHandlerSpy : HttpClientHandler
     {
         MethodUsed = request.Method;
         UriCalled = request.RequestUri;
+        if (!TimesUriCalled.ContainsKey(request.RequestUri!))
+            TimesUriCalled.Add(request.RequestUri!, 0);
+
+        TimesUriCalled[request.RequestUri!] += 1;
+
         HeadersSent = request.Headers;
         if (request.Content is not null)
         {

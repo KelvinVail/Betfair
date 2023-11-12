@@ -1,6 +1,6 @@
 ﻿namespace Betfair.Core.Client;
 
-public sealed class BetfairClientHandler : HttpClientHandler
+internal sealed class BetfairClientHandler : HttpClientHandler
 {
     public BetfairClientHandler(X509Certificate2? cert = null)
     {

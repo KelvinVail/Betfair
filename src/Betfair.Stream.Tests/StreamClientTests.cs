@@ -1,4 +1,5 @@
-﻿using Betfair.Stream.Messages;
+﻿using Betfair.Core.Login;
+using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 using Betfair.Stream.Tests.TestDoubles;
 using Utf8Json;
@@ -9,7 +10,7 @@ namespace Betfair.Stream.Tests;
 public class StreamClientTests : IDisposable
 {
     private readonly MemoryStream _ms = new ();
-    private readonly BetfairHttpClientStub _httpClient = new ();
+    private readonly BetfairHttpClientStub _httpClient = new (new Credentials("u", "p", "a"));
     private readonly StreamClient _client;
     private bool _disposedValue;
 
