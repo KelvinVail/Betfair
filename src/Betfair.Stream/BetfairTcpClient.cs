@@ -6,7 +6,7 @@ internal class BetfairTcpClient : TcpClient
 
     public void Configure()
     {
-        ReceiveBufferSize = 4048;
+        ReceiveBufferSize = 1024 * 1000 * 2;
         SendTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
         ReceiveTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
         ConnectToHost(_hostName, 443);

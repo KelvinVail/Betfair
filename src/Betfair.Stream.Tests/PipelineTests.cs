@@ -13,7 +13,7 @@ public class PipelineTests : IDisposable
 
     [Fact]
     public void TcpClientReceiveBufferSizeIsCorrect() =>
-        _tcp.ReceiveBufferSize.Should().Be(4048);
+        _tcp.ReceiveBufferSize.Should().Be(1024 * 1000 * 2);
 
     [Fact]
     public void TcpSendTimeoutIsCorrect() =>
