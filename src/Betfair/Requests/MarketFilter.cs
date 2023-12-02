@@ -1,13 +1,10 @@
-﻿using System.Globalization;
-using Betfair.Responses;
-using Utf8Json;
-using Utf8Json.Resolvers;
+﻿using Betfair.Responses;
 
 namespace Betfair.Requests;
 
 public class MarketFilter
 {
-    internal Filter Filter { get; } = new();
+    internal Filter Filter { get; } = new ();
 
     public string ToJsonString() => Serialize();
 
