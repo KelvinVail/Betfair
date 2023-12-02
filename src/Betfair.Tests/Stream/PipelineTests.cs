@@ -12,7 +12,7 @@ public class PipelineTests : IDisposable
     public PipelineTests() =>
         _pipe = new Pipeline(_tcp);
 
-    [Fact (Skip = "Changes based on environment")]
+    [Fact(Skip = "Changes based on environment")]
     public void TcpClientReceiveBufferSizeIsCorrect() =>
         _tcp.ReceiveBufferSize.Should().Be(1024 * 1000 * 2);
 

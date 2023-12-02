@@ -4,12 +4,13 @@ using Betfair.Tests.Core.Client.TestDoubles;
 
 namespace Betfair.Tests.Core.Client;
 
-public sealed class BetfairHttpClientTests : IDisposable
+public class BetfairHttpClientTests : IDisposable
 {
     private readonly HttpMessageHandlerSpy _handler = new ();
-    private readonly Credentials _credentials = new Credentials("username", "password", "appKey");
+    private readonly Credentials _credentials = new ("username", "password", "appKey");
     private readonly BetfairHttpClient _client;
     private readonly Uri _uri = new ("http://test.com/");
+    private bool _disposedValue;
 
     public BetfairHttpClientTests()
     {
@@ -192,7 +193,20 @@ public sealed class BetfairHttpClientTests : IDisposable
 
     public void Dispose()
     {
-        _handler.Dispose();
-        _client.Dispose();
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue) return;
+
+        if (disposing)
+        {
+            _client.Dispose();
+            _handler.Dispose();
+        }
+
+        _disposedValue = true;
     }
 }

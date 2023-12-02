@@ -5,30 +5,37 @@ using Betfair.Stream.Responses;
 using Betfair.Tests.Stream.TestDoubles;
 using Utf8Json;
 using Utf8Json.Resolvers;
+using Xunit.Abstractions;
 
 namespace Betfair.Tests.Stream;
 
 public class StreamClientTests : IDisposable
 {
+    private readonly ITestOutputHelper _output;
     private readonly MemoryStream _ms = new ();
     private readonly BetfairHttpClientStub _httpClient = new (new Credentials("u", "p", "a"));
     private readonly StreamClient _client;
+    private readonly StreamReader _sr;
     private bool _disposedValue;
 
-    public StreamClientTests() =>
+    public StreamClientTests(ITestOutputHelper output)
+    {
+        _output = output;
         _client = new StreamClient(_ms, _httpClient);
+        _sr = new StreamReader(_ms);
+    }
 
     [Fact]
     public async Task AuthenticateWritesMessageToStream()
     {
         await _client.Authenticate();
 
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
         result.Should().ContainKey("op").WhoseValue.Should().Be("authentication");
     }
 
     [Theory]
-    [InlineData("appKey2")]
+    [InlineData("appKey")]
     [InlineData("newKey")]
     [InlineData("other")]
     public async Task AuthenticateWritesAppKeyToStream(string appKey)
@@ -37,7 +44,8 @@ public class StreamClientTests : IDisposable
 
         await _client.Authenticate();
 
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
+
         result.Should().ContainKey("appKey").WhoseValue.Should().Be(appKey);
     }
 
@@ -51,7 +59,7 @@ public class StreamClientTests : IDisposable
 
         await _client.Authenticate();
 
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
         result.Should().ContainKey("session").WhoseValue.Should().Be(sessionToken);
     }
 
@@ -59,11 +67,11 @@ public class StreamClientTests : IDisposable
     public async Task EachCallToAuthenticateIncrementsTheConnectionId()
     {
         await _client.Authenticate();
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
         result.Should().ContainKey("id").WhoseValue.Should().Be(1);
 
         await _client.Authenticate();
-        var result2 = await ReadStream();
+        var result2 = await ReadLastLineInStream();
         result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
     }
 
@@ -72,7 +80,7 @@ public class StreamClientTests : IDisposable
     {
         await _client.Subscribe(new MarketFilter(), new DataFilter());
 
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
 
         result.Should().ContainKey("op").WhoseValue.Should().Be("marketSubscription");
     }
@@ -81,11 +89,11 @@ public class StreamClientTests : IDisposable
     public async Task EachCallToSubscribeIncrementsTheConnectionId()
     {
         await _client.Subscribe(new MarketFilter(), new DataFilter());
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
         result.Should().ContainKey("id").WhoseValue.Should().Be(1);
 
         await _client.Subscribe(new MarketFilter(), new DataFilter());
-        var result2 = await ReadStream();
+        var result2 = await ReadLastLineInStream();
         result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
     }
 
@@ -97,7 +105,7 @@ public class StreamClientTests : IDisposable
         var marketFilter = new MarketFilter().WithMarketId(marketId);
         await _client.Subscribe(marketFilter, new DataFilter());
 
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
 
         result.Should().ContainKey("marketFilter")
             .WhoseValue.Should().BeAssignableTo<Dictionary<string, object>>()
@@ -112,7 +120,7 @@ public class StreamClientTests : IDisposable
         var dataFilter = new DataFilter().WithBestPrices();
         await _client.Subscribe(new MarketFilter(), dataFilter);
 
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
 
         result.Should().ContainKey("marketDataFilter")
             .WhoseValue.Should().BeAssignableTo<Dictionary<string, object>>()
@@ -126,7 +134,7 @@ public class StreamClientTests : IDisposable
     {
         await _client.SubscribeToOrders();
 
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
 
         result.Should().ContainKey("op").WhoseValue.Should().Be("orderSubscription");
     }
@@ -135,11 +143,11 @@ public class StreamClientTests : IDisposable
     public async Task EachCallToSubscribeToOrdersIncrementsTheConnectionId()
     {
         await _client.SubscribeToOrders();
-        var result = await ReadStream();
+        var result = await ReadLastLineInStream();
         result.Should().ContainKey("id").WhoseValue.Should().Be(1);
 
         await _client.SubscribeToOrders();
-        var result2 = await ReadStream();
+        var result2 = await ReadLastLineInStream();
         result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
     }
 
@@ -223,15 +231,24 @@ public class StreamClientTests : IDisposable
             _client.Dispose();
             _httpClient.Dispose();
             _ms.Dispose();
+            _sr.Dispose();
         }
 
         _disposedValue = true;
     }
 
-    private Task<Dictionary<string, object>> ReadStream() =>
-        JsonSerializer.DeserializeAsync<Dictionary<string, object>>(
-            _ms,
-            StandardResolver.AllowPrivateCamelCase);
+    private async Task<Dictionary<string, object>> ReadLastLineInStream()
+    {
+        _ms.Position = 0;
+        var line = string.Empty;
+        while (!_sr.EndOfStream)
+        {
+            line = await _sr.ReadLineAsync();
+            _output.WriteLine(line);
+        }
+
+        return JsonSerializer.Deserialize<Dictionary<string, object>>(line, StandardResolver.AllowPrivateCamelCase);
+    }
 
     private Task SendChange(ChangeMessage message) =>
         JsonSerializer.SerializeAsync(_ms, message, StandardResolver.AllowPrivateExcludeNullCamelCase)
