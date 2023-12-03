@@ -6,17 +6,17 @@
 A dotnet core package for interacting with Betfair
 
 ## Betfair.Stream
-[![NuGet downloads](https://img.shields.io/nuget/v/Betfair.Stream.svg)](https://www.nuget.org/packages/Betfair.Stream/)
+[![NuGet downloads](https://img.shields.io/nuget/v/Betfair.svg)](https://www.nuget.org/packages/Betfair/)
 
 ## Installation
 
-Available on [NuGet](https://www.nuget.org/packages/Betfair.Stream/)
+Available on [NuGet](https://www.nuget.org/packages/Betfair/)
 ```bash
-dotnet add package Betfair.Stream
+dotnet add package Betfair
 ```
 or
 ```powershell
-PM> Install-Package Betfair.Stream
+PM> Install-Package Betfair
 ```
 
 ## Getting Started
