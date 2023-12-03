@@ -1,8 +1,8 @@
-﻿using Betfair.Core.Client;
-using Betfair.Requests;
-using Betfair.Responses;
+﻿using Betfair.Api.Requests;
+using Betfair.Api.Responses;
+using Betfair.Core.Client;
 
-namespace Betfair;
+namespace Betfair.Api;
 
 public class BetfairClient
 {

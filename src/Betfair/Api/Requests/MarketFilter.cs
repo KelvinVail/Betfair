@@ -1,10 +1,10 @@
-﻿using Betfair.Responses;
+﻿using Betfair.Api.Responses;
 
-namespace Betfair.Requests;
+namespace Betfair.Api.Requests;
 
 public class MarketFilter
 {
-    internal Filter Filter { get; } = new ();
+    internal Filter Filter { get; } = new();
 
     public string ToJsonString() => Serialize();
 

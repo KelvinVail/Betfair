@@ -1,4 +1,4 @@
-﻿namespace Betfair.Requests;
+﻿namespace Betfair.Api.Requests;
 
 internal class RequestBody
 {

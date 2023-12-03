@@ -1,4 +1,4 @@
-﻿namespace Betfair.Requests;
+﻿namespace Betfair.Api.Requests;
 
 public class MarketProjection : List<string>
 {

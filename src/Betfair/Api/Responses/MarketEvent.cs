@@ -1,4 +1,4 @@
-﻿namespace Betfair.Responses;
+﻿namespace Betfair.Api.Responses;
 
 public sealed class MarketEvent
 {

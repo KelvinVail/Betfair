@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Betfair.Responses;
+namespace Betfair.Api.Responses;
 
 public class MarketType
 {

@@ -1,4 +1,4 @@
-﻿namespace Betfair.Requests;
+﻿namespace Betfair.Api.Requests;
 
 internal sealed class Filter
 {

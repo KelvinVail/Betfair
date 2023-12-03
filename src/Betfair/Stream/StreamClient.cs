@@ -63,6 +63,16 @@ public class StreamClient : IDisposable
         }
     }
 
+    public async Task CopyToStream([NotNull]System.IO.Stream stream, CancellationToken cancellationToken)
+    {
+        await foreach (var line in _pipe.Read().WithCancellation(cancellationToken))
+        {
+            await stream.WriteAsync(line, cancellationToken);
+            stream.WriteByte((byte)'\n');
+            await stream.FlushAsync(cancellationToken);
+        }
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

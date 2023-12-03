@@ -26,8 +26,8 @@ internal class Pipeline : IDisposable
 
     public async IAsyncEnumerable<byte[]> Read()
     {
-        Task writer = FillPipe(_stream, _pipe.Writer);
-        await foreach (var line in ReadPipe(_pipe.Reader))
+        Task writer = StreamToPipe(_stream, _pipe.Writer);
+        await foreach (var line in ReadFromPipe(_pipe.Reader))
             yield return line;
 
         await writer;
@@ -51,7 +51,7 @@ internal class Pipeline : IDisposable
         _disposedValue = true;
     }
 
-    private static async Task FillPipe(System.IO.Stream stream, PipeWriter writer)
+    private static async Task StreamToPipe(System.IO.Stream stream, PipeWriter writer)
     {
         const int minimumBufferSize = 512;
 
@@ -70,7 +70,7 @@ internal class Pipeline : IDisposable
         await writer.CompleteAsync();
     }
 
-    private static async IAsyncEnumerable<byte[]> ReadPipe(PipeReader reader)
+    private static async IAsyncEnumerable<byte[]> ReadFromPipe(PipeReader reader)
     {
         while (true)
         {

@@ -217,6 +217,27 @@ public class StreamClientTests : IDisposable
             .And.ParamName.Should().Be("credentials");
     }
 
+    [Fact]
+    public async Task BetfairStreamCanBeCopiedToAStream()
+    {
+        var message1 = new ChangeMessage { Operation = "Test1" };
+        await SendChange(message1);
+        var message2 = new ChangeMessage { Operation = "Test2" };
+        await SendChange(message2);
+        _ms.Position = 0;
+
+        using var ms = new MemoryStream();
+        await _client.CopyToStream(ms, default);
+
+        ms.Position = 0;
+        using var reader = new StreamReader(ms);
+        var lines = new List<string>();
+        while (!reader.EndOfStream)
+            lines.Add(await reader.ReadLineAsync());
+
+        lines.Count.Should().Be(2);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
