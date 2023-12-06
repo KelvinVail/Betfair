@@ -33,6 +33,9 @@ internal class Pipeline : IDisposable
         await writer;
     }
 
+    public void Close() =>
+        _tcp.Close();
+
     public void Dispose()
     {
         Dispose(disposing: true);

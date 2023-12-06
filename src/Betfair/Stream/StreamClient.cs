@@ -73,6 +73,9 @@ public class StreamClient : IDisposable
         }
     }
 
+    public void Close() =>
+        _pipe.Close();
+
     public void Dispose()
     {
         Dispose(disposing: true);
