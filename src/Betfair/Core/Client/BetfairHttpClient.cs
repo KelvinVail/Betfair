@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
-using System.Text.Json;
+﻿using System.Net.Http.Json;
 using Betfair.Core.Login;
 using JsonSerializer = Utf8Json.JsonSerializer;
 
@@ -41,14 +39,9 @@ public class BetfairHttpClient : HttpClient
         if (uri is null) throw new ArgumentNullException(nameof(uri));
         await SetToken(cancellationToken);
 
-        var ms = new MemoryStream();
-        if (body is not null)
-            await JsonSerializer.SerializeAsync(ms, body, StandardResolver.AllowPrivateExcludeNullCamelCase);
-
         using var request = new HttpRequestMessage(HttpMethod.Post, uri);
-        using var requestContent = new StreamContent(ms);
+        using var requestContent = JsonContent.Create(body);
         request.Content = requestContent;
-        requestContent.Headers.Add("Content-Type", "application/json");
         requestContent.Headers.Add("X-Authentication", _token);
         requestContent.Headers.Add("X-Application", _credentials.AppKey);
 
@@ -56,10 +49,11 @@ public class BetfairHttpClient : HttpClient
         if (!response.IsSuccessStatusCode)
             throw new HttpRequestException(null, null, statusCode: response.StatusCode);
 
-        var content = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var result = await JsonSerializer.DeserializeAsync<T>(
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var result = JsonSerializer.Deserialize<T>(
             content,
-            StandardResolver.CamelCase);
+            StandardResolver.AllowPrivateCamelCase);
+
         return result;
     }
 

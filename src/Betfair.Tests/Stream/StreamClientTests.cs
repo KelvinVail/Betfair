@@ -1,8 +1,7 @@
-﻿using Betfair.Core.Login;
-using Betfair.Stream;
+﻿using Betfair.Stream;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
-using Betfair.Tests.Stream.TestDoubles;
+using Betfair.Tests.TestDoubles;
 using Utf8Json;
 using Utf8Json.Resolvers;
 using Xunit.Abstractions;
@@ -13,7 +12,7 @@ public class StreamClientTests : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly MemoryStream _ms = new ();
-    private readonly BetfairHttpClientStub _httpClient = new (new Credentials("u", "p", "a"));
+    private readonly BetfairHttpClientStub _httpClient = new ();
     private readonly StreamClient _client;
     private readonly StreamReader _sr;
     private bool _disposedValue;

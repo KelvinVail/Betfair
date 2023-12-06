@@ -40,7 +40,7 @@ public class HttpMessageHandlerSpy : HttpClientHandler
             if (IsFormUrlEncoded(request))
                 ContentSent = await request.Content.ReadAsStringAsync(cancellationToken);
             else
-                ContentSent = await JsonSerializer.DeserializeAsync<object>(await request.Content.ReadAsStreamAsync(cancellationToken), StandardResolver.AllowPrivateExcludeNullCamelCase);
+                ContentSent = JsonSerializer.Deserialize<object>(await request.Content.ReadAsStreamAsync(cancellationToken), StandardResolver.AllowPrivateExcludeNullCamelCase);
         }
 
         var response = new HttpResponseMessage(RespondsWitHttpStatusCode);
@@ -50,6 +50,7 @@ public class HttpMessageHandlerSpy : HttpClientHandler
         var bodyString = JsonSerializer.ToJsonString(RespondsWithBody, StandardResolver.CamelCase);
         response.Content = new StringContent(bodyString);
 
+        request.Dispose();
         return response;
     }
 
