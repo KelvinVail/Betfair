@@ -26,15 +26,18 @@ internal class Pipeline : IDisposable
 
     public async IAsyncEnumerable<byte[]> Read()
     {
-        Task writer = StreamToPipe(_stream, _pipe.Writer);
-        await foreach (var line in ReadFromPipe(_pipe.Reader))
-            yield return line;
+        Task writing = FillPipeAsync(_stream, _pipe.Writer);
+        await foreach (var line in ReadPipeAsync(_pipe.Reader))
+            yield return line.Slice(0, line.Length).ToArray();
 
-        await writer;
+        await writing;
     }
 
-    public void Close() =>
+    public void Close()
+    {
         _tcp.Close();
+        _stream.Close();
+    }
 
     public void Dispose()
     {
@@ -54,43 +57,59 @@ internal class Pipeline : IDisposable
         _disposedValue = true;
     }
 
-    private static async Task StreamToPipe(System.IO.Stream stream, PipeWriter writer)
+    private static async Task FillPipeAsync(System.IO.Stream socket, PipeWriter writer)
     {
         const int minimumBufferSize = 512;
 
-        int bytesRead;
-        FlushResult result;
-        do
+        while (true)
         {
             Memory<byte> memory = writer.GetMemory(minimumBufferSize);
+            try
+            {
+                int bytesRead = await socket.ReadAsync(memory);
+                if (bytesRead == 0) break;
 
-            bytesRead = await stream.ReadAsync(memory);
-            writer.Advance(bytesRead);
-            result = await writer.FlushAsync();
+                writer.Advance(bytesRead);
+            }
+            catch (IOException)
+            {
+                break;
+            }
+
+            FlushResult result = await writer.FlushAsync();
+
+            if (result.IsCompleted) break;
         }
-        while (bytesRead != 0 && !result.IsCompleted);
 
         await writer.CompleteAsync();
     }
 
-    private static async IAsyncEnumerable<byte[]> ReadFromPipe(PipeReader reader)
+    private static bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
+    {
+        SequencePosition? position = buffer.PositionOf((byte)'\n');
+
+        if (position == null)
+        {
+            line = default;
+            return false;
+        }
+
+        line = buffer.Slice(0, position.Value);
+        buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
+        return true;
+    }
+
+    private static async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPipeAsync(PipeReader reader)
     {
         while (true)
         {
-            var result = await reader.ReadAsync();
-            var buffer = result.Buffer;
+            ReadResult result = await reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = result.Buffer;
 
-            SequencePosition? position;
-            do
+            while (TryReadLine(ref buffer, out ReadOnlySequence<byte> line))
             {
-                position = buffer.PositionOf((byte)'\n');
-                if (position == null) continue;
-
-                var bytes = buffer.Slice(0, position.Value).ToArray();
-                yield return bytes;
-                buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
+                yield return line;
             }
-            while (position != null);
 
             reader.AdvanceTo(buffer.Start, buffer.End);
 
