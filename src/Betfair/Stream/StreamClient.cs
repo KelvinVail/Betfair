@@ -63,15 +63,23 @@ public class StreamClient : IDisposable
         }
     }
 
+    public IAsyncEnumerable<byte[]> ReadLines() =>
+        _pipe.Read();
+
     public async Task CopyToStream([NotNull]System.IO.Stream stream, CancellationToken cancellationToken)
     {
-        await foreach (var line in _pipe.Read().WithCancellation(cancellationToken))
+        try
         {
-            await stream.WriteAsync(line, cancellationToken);
-            stream.WriteByte((byte)'\n');
+            await foreach (var line in _pipe.Read().WithCancellation(cancellationToken))
+            {
+                await stream.WriteAsync(line, cancellationToken);
+                stream.WriteByte((byte)'\n');
+            }
         }
-
-        await stream.FlushAsync(cancellationToken);
+        finally
+        {
+            await stream.FlushAsync(cancellationToken);
+        }
     }
 
     public void Close() =>

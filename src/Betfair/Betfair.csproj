@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>8.0.6</Version>
+    <Version>8.0.7</Version>
     <Authors>Kelvin Vail</Authors>
     <Product>Betfair</Product>
     <Description>Simple and fast client classes for interacting with the Betfair API and Stream.</Description>
