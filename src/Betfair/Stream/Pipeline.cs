@@ -51,7 +51,7 @@ internal class Pipeline : IDisposable
         if (_disposedValue) return;
         if (disposing)
         {
-            if (_tcp.Client.Connected)
+            if (_tcp.Client != null && _tcp.Client.Connected)
                 _tcp.Client.Shutdown(SocketShutdown.Both);
             _stream.Dispose();
             _tcp.Dispose();
