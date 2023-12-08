@@ -6,9 +6,11 @@
     <Nullable>enable</Nullable>
     <Version>8.0.10</Version>
     <Authors>Kelvin Vail</Authors>
+    <Company>Kelvin Vail</Company>
     <Product>Betfair</Product>
     <Description>Simple and fast client classes for interacting with the Betfair API and Stream.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/KelvinVail/Betfair</PackageProjectUrl>
     <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
     <PackageTags>Betfair API;Betfair Stream;Betfair</PackageTags>
   </PropertyGroup>
