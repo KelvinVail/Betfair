@@ -5,7 +5,6 @@ internal class Pipeline : IDisposable
     private readonly System.IO.Stream _stream;
     private readonly Pipe _pipe = new ();
     private readonly BetfairTcpClient _tcp;
-    private bool _isClosing = false;
     private bool _disposedValue;
 
     public Pipeline(BetfairTcpClient tcp)
@@ -52,7 +51,8 @@ internal class Pipeline : IDisposable
         if (_disposedValue) return;
         if (disposing)
         {
-            _tcp.Client.Shutdown(SocketShutdown.Both);
+            if (_tcp.Client.Connected)
+                _tcp.Client.Shutdown(SocketShutdown.Both);
             _stream.Dispose();
             _tcp.Dispose();
         }

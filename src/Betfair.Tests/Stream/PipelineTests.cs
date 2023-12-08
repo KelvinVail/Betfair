@@ -9,8 +9,7 @@ public class PipelineTests : IDisposable
     private readonly Pipeline _pipe;
     private bool _disposedValue;
 
-    public PipelineTests() =>
-        _pipe = new Pipeline(_tcp);
+    public PipelineTests() => _pipe = new Pipeline(_tcp);
 
     [Fact(Skip = "Changes based on environment")]
     public void TcpClientReceiveBufferSizeIsCorrect() =>
