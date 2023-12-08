@@ -5,6 +5,7 @@ internal class Pipeline : IDisposable
     private readonly System.IO.Stream _stream;
     private readonly Pipe _pipe = new ();
     private readonly BetfairTcpClient _tcp;
+    private bool _isClosing = false;
     private bool _disposedValue;
 
     public Pipeline(BetfairTcpClient tcp)
@@ -35,8 +36,9 @@ internal class Pipeline : IDisposable
 
     public void Close()
     {
-        _tcp.Close();
+        _tcp.Client.Shutdown(SocketShutdown.Both);
         _stream.Close();
+        _tcp.Close();
     }
 
     public void Dispose()
@@ -57,7 +59,7 @@ internal class Pipeline : IDisposable
         _disposedValue = true;
     }
 
-    private static async Task FillPipeAsync(System.IO.Stream socket, PipeWriter writer)
+    private static async Task FillPipeAsync(System.IO.Stream stream, PipeWriter writer)
     {
         const int minimumBufferSize = 512;
 
@@ -66,10 +68,14 @@ internal class Pipeline : IDisposable
             Memory<byte> memory = writer.GetMemory(minimumBufferSize);
             try
             {
-                int bytesRead = await socket.ReadAsync(memory);
+                int bytesRead = await stream.ReadAsync(memory);
                 if (bytesRead == 0) break;
 
                 writer.Advance(bytesRead);
+            }
+            catch (SocketException)
+            {
+                break;
             }
             catch (IOException)
             {
@@ -82,6 +88,24 @@ internal class Pipeline : IDisposable
         }
 
         await writer.CompleteAsync();
+    }
+
+    private static async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPipeAsync(PipeReader reader)
+    {
+        while (true)
+        {
+            ReadResult result = await reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = result.Buffer;
+
+            while (TryReadLine(ref buffer, out ReadOnlySequence<byte> line))
+                yield return line;
+
+            reader.AdvanceTo(buffer.Start, buffer.End);
+
+            if (result.IsCompleted) break;
+        }
+
+        await reader.CompleteAsync();
     }
 
     private static bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
@@ -97,25 +121,5 @@ internal class Pipeline : IDisposable
         line = buffer.Slice(0, position.Value);
         buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
         return true;
-    }
-
-    private static async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPipeAsync(PipeReader reader)
-    {
-        while (true)
-        {
-            ReadResult result = await reader.ReadAsync();
-            ReadOnlySequence<byte> buffer = result.Buffer;
-
-            while (TryReadLine(ref buffer, out ReadOnlySequence<byte> line))
-            {
-                yield return line;
-            }
-
-            reader.AdvanceTo(buffer.Start, buffer.End);
-
-            if (result.IsCompleted) break;
-        }
-
-        await reader.CompleteAsync();
     }
 }

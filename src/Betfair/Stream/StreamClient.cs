@@ -69,8 +69,9 @@ public class StreamClient : IDisposable
         {
             await stream.WriteAsync(line, cancellationToken);
             stream.WriteByte((byte)'\n');
-            await stream.FlushAsync(cancellationToken);
         }
+
+        await stream.FlushAsync(cancellationToken);
     }
 
     public void Close() =>
