@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Version>8.0.6</Version>
-    <Authors>Kelvin Core</Authors>
+    <Authors>Kelvin Vail</Authors>
     <Product>Betfair</Product>
     <Description>Simple and fast client classes for interacting with the Betfair API and Stream.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
