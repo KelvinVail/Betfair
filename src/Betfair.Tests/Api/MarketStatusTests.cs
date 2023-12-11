@@ -4,15 +4,15 @@ using Betfair.Tests.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
-public class GetMarketStatusTests : IDisposable
+public class MarketStatusTests : IDisposable
 {
     private readonly BetfairHttpClientStub _httpClient = new ();
 
-    private readonly BetfairClient _client;
+    private readonly BetfairApiClient _client;
     private bool _disposedValue;
 
-    public GetMarketStatusTests() =>
-        _client = new BetfairClient(_httpClient);
+    public MarketStatusTests() =>
+        _client = new BetfairApiClient(_httpClient);
 
     [Fact]
     public async Task CallsTheCorrectEndpoint()

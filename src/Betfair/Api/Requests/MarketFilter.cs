@@ -4,17 +4,17 @@ namespace Betfair.Api.Requests;
 
 public class MarketFilter
 {
-    internal Filter Filter { get; } = new();
+    internal Filter Filter { get; } = new ();
 
     public string ToJsonString() => Serialize();
 
     public MarketFilter WithEventType(EventType eventType)
     {
         if (eventType is null) return this;
-        Filter.EventTypeIds ??= new List<int>();
+        Filter.EventTypeIds ??= new HashSet<int>();
 
-        Filter.EventTypeIds.Add(
-            int.Parse(eventType.Id, NumberStyles.Integer, CultureInfo.InvariantCulture));
+        //Filter.EventTypeIds.Add(
+        //    int.Parse(eventType.Id, NumberStyles.Integer, CultureInfo.InvariantCulture));
         return this;
     }
 

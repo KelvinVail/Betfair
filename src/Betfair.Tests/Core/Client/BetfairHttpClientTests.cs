@@ -84,7 +84,7 @@ public class BetfairHttpClientTests : IDisposable
         await _client.Post<dynamic>(_uri);
 
         _handler.ContentHeadersSent.Should().ContainKey("Content-Type")
-            .WhoseValue.Should().Contain("application/json; charset=utf-8");
+            .WhoseValue.Should().Contain("application/json");
     }
 
     [Theory]

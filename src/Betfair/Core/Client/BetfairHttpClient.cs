@@ -40,18 +40,19 @@ public class BetfairHttpClient : HttpClient
         await SetToken(cancellationToken);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, uri);
-        using var requestContent = JsonContent.Create(body);
-        request.Content = requestContent;
+        var json = JsonSerializer.ToJsonString(body, StandardResolver.AllowPrivateExcludeNullCamelCase);
+        using var requestContent = new StringContent(json);
         requestContent.Headers.Add("X-Authentication", _token);
         requestContent.Headers.Add("X-Application", _credentials.AppKey);
+        request.Content = requestContent;
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
         using var response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
             throw new HttpRequestException(null, null, statusCode: response.StatusCode);
 
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
         var result = JsonSerializer.Deserialize<T>(
-            content,
+            await response.Content.ReadAsStringAsync(cancellationToken),
             StandardResolver.AllowPrivateCamelCase);
 
         return result;

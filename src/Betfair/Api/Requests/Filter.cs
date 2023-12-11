@@ -2,7 +2,7 @@
 
 internal sealed class Filter
 {
-    public List<int>? EventTypeIds { get; internal set; }
+    public HashSet<int>? EventTypeIds { get; internal set; }
 
     public List<string>? MarketTypeCodes { get; internal set; }
 
