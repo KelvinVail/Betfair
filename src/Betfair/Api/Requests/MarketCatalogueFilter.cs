@@ -1,5 +1,4 @@
 ﻿using Betfair.Core;
-using MarketFilter = Betfair.Core.MarketFilter<Betfair.Api.Requests.MarketCatalogueFilter>;
 
 namespace Betfair.Api.Requests;
 
