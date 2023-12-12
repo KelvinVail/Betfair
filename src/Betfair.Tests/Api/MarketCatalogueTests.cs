@@ -1,5 +1,6 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests;
+using Betfair.Core;
 using Betfair.Tests.TestDoubles;
 using Utf8Json;
 using Utf8Json.Resolvers;

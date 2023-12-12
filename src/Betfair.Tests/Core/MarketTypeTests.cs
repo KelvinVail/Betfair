@@ -1,6 +1,6 @@
-﻿using Betfair.Api;
+﻿using Betfair.Core;
 
-namespace Betfair.Tests.Api;
+namespace Betfair.Tests.Core;
 
 public class MarketTypeTests
 {

@@ -1,6 +1,9 @@
-﻿namespace Betfair.Api.Requests;
+﻿using Betfair.Core;
+using MarketFilter = Betfair.Core.MarketFilter<Betfair.Api.Requests.MarketCatalogueFilter>;
 
-public class MarketCatalogueFilter
+namespace Betfair.Api.Requests;
+
+public class MarketCatalogueFilter : MarketFilter<MarketCatalogueFilter>
 {
     internal Filter Filter { get; } = new ();
 

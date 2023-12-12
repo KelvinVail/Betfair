@@ -1,4 +1,6 @@
-﻿namespace Betfair.Api.Responses;
+﻿using Betfair.Core;
+
+namespace Betfair.Api.Responses;
 
 public sealed class MarketCatalogue
 {

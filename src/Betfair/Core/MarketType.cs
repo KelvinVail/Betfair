@@ -1,4 +1,4 @@
-﻿namespace Betfair.Api;
+﻿namespace Betfair.Core;
 
 public class MarketType
 {

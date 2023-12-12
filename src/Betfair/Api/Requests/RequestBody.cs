@@ -2,7 +2,7 @@
 
 internal class RequestBody
 {
-    internal Filter Filter { get; set; } = new MarketFilter().Filter;
+    //internal Filter Filter { get; set; } = new MarketFilter().Filter;
 
     internal IEnumerable<string>? MarketProjection { get; set; }
 
