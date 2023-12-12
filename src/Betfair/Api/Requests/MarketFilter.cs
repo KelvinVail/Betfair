@@ -1,6 +1,4 @@
-﻿using Betfair.Api.Responses;
-
-namespace Betfair.Api.Requests;
+﻿namespace Betfair.Api.Requests;
 
 public class MarketFilter
 {

@@ -67,6 +67,18 @@ public class MarketCatalogueTests : IDisposable
         json.Should().Be($"{{\"filter\":{{\"eventTypeIds\":[{id},10]}},\"maxResults\":1000}}");
     }
 
+    [Fact]
+    public void EventTypeCanBeAddedToTheFilter()
+    {
+        var filter = new MarketCatalogueFilter()
+            .WithEventType(EventType.HorseRacing)
+            .WithEventTypeId(10);
+
+        var json = JsonSerializer.ToJsonString(filter, StandardResolver.AllowPrivateExcludeNullCamelCase);
+
+        json.Should().Be($"{{\"filter\":{{\"eventTypeIds\":[7,10]}},\"maxResults\":1000}}");
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

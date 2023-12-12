@@ -16,4 +16,11 @@ public class MarketCatalogueFilter
         Filter.EventTypeIds.Add(id);
         return this;
     }
+
+    public MarketCatalogueFilter WithEventType(EventType eventType)
+    {
+        Filter.EventTypeIds ??= new ();
+        Filter.EventTypeIds.Add(eventType.Id);
+        return this;
+    }
 }
