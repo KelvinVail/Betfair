@@ -117,7 +117,7 @@ public class MarketTypeTests
     [InlineData("ANTEPOST_WIN")]
     public void CustomMarketTypesCanBeCreated(string id)
     {
-        var type = MarketType.Create(id);
+        var type = MarketType.Of(id);
 
         type.Id.Should().Be(id);
     }

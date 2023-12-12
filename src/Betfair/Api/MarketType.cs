@@ -61,8 +61,6 @@ public class MarketType
     [DataMember(Name = "marketType")]
     public string Id { get; init; }
 
-    public int MarketCount { get; init; } = -1;
-
-    public static MarketType Create(string id) =>
+    public static MarketType Of(string id) =>
         new (id);
 }

@@ -217,7 +217,7 @@ public class EventTypeTests
     [InlineData(777)]
     public void CustomEventTypeCanBeCreated(int id)
     {
-        var type = EventType.Create(id);
+        var type = EventType.Of(id);
 
         type.Id.Should().Be(id);
     }
