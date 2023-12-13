@@ -28,7 +28,7 @@ public class MarketCatalogueTests : IDisposable
     [Fact]
     public void DefaultFilterIncludesEmptyFilterAndMaxResults()
     {
-        var filter = new MarketCatalogueFilter();
+        var filter = new MarketCatalogueQuery();
 
         filter.Filter.Should().NotBeNull();
         filter.MaxResults.Should().Be(1000);
@@ -37,7 +37,7 @@ public class MarketCatalogueTests : IDisposable
     [Fact]
     public void DefaultFilterIsSerializedCorrectly()
     {
-        var filter = new MarketCatalogueFilter();
+        var filter = new MarketCatalogueQuery();
 
         var json = JsonSerializer.ToJsonString(filter, StandardResolver.AllowPrivateExcludeNullCamelCase);
 
@@ -50,7 +50,7 @@ public class MarketCatalogueTests : IDisposable
         await _client.MarketCatalogue();
 
         _httpClient.LastPostedBody.Should().BeEquivalentTo(
-            new MarketCatalogueFilter());
+            new MarketCatalogueQuery());
     }
 
     public void Dispose()
