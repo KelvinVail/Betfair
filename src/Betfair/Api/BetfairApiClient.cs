@@ -13,33 +13,15 @@ public class BetfairApiClient
         _client = client;
 
     public async Task<IReadOnlyList<MarketCatalogue>> MarketCatalogue(
-        MarketCatalogueQuery? filter = null,
+        MarketCatalogueQuery? query = null,
         CancellationToken cancellationToken = default)
     {
-        filter ??= new MarketCatalogueQuery();
+        query ??= new MarketCatalogueQuery();
         return await _client.Post<IReadOnlyList<MarketCatalogue>>(
             new Uri($"{_betting}/listMarketCatalogue/"),
-            filter,
+            query,
             cancellationToken);
     }
-
-    //public async Task<IReadOnlyList<MarketCatalogue>> MarketCatalogue(
-    //    MarketFilter? marketFilter = null,
-    //    MarketProjection? marketProjection = null,
-    //    MarketSort? marketSort = null,
-    //    int maxResults = 1000,
-    //    CancellationToken cancellationToken = default)
-    //{
-    //    var body = new RequestBody { MaxResults = maxResults };
-    //    if (marketFilter is not null) body.Filter = marketFilter.Filter;
-    //    if (marketProjection is not null) body.MarketProjection = marketProjection;
-    //    if (marketSort is not null) body.Sort = marketSort.Value;
-
-    //    return await _client.Post<IReadOnlyList<MarketCatalogue>>(
-    //        new Uri($"{_base}/listMarketCatalogue/"),
-    //        body,
-    //        cancellationToken);
-    //}
 
     public async Task<string> MarketStatus(
         string marketId,

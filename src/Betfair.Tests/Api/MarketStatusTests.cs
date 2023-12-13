@@ -49,7 +49,7 @@ public class MarketStatusTests : IDisposable
     [InlineData("CLOSED")]
     public async Task ReturnStatusFromResponse(string status)
     {
-        _httpClient.ReturnsBody = new List<MarketStatus> { new () { Status = status }};
+        _httpClient.ReturnsBody = new List<MarketStatus> { new () { Status = status } };
 
         var response = await _client.MarketStatus("1.2345", default);
 
