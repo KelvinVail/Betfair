@@ -46,5 +46,5 @@ public abstract class MarketFilter<T>
         return This();
     }
 
-    private T This() => this as T ?? new T();
+    private T This() => (this as T) !;
 }

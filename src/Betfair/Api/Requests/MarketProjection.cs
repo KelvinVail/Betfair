@@ -1,51 +1,30 @@
 ﻿namespace Betfair.Api.Requests;
 
-public class MarketProjection : List<string>
+public class MarketProjection
 {
-    public MarketProjection WithMarketStartTime()
-    {
-        AddUnique("MARKET_START_TIME");
-        return this;
-    }
+    private MarketProjection(string value) =>
+        Value = value;
 
-    public MarketProjection WithCompetition()
-    {
-        AddUnique("COMPETITION");
-        return this;
-    }
+    public static MarketProjection MarketStartTime =>
+        new ("MARKET_START_TIME");
 
-    public MarketProjection WithEvent()
-    {
-        AddUnique("EVENT");
-        return this;
-    }
+    public static MarketProjection Competition =>
+        new ("COMPETITION");
 
-    public MarketProjection WithEventType()
-    {
-        AddUnique("EVENT_TYPE");
-        return this;
-    }
+    public static MarketProjection Event =>
+        new ("EVENT");
 
-    public MarketProjection WithMarketDescription()
-    {
-        AddUnique("MARKET_DESCRIPTION");
-        return this;
-    }
+    public static MarketProjection EventType =>
+        new ("EVENT_TYPE");
 
-    public MarketProjection WithRunnerDescription()
-    {
-        AddUnique("RUNNER_DESCRIPTION");
-        return this;
-    }
+    public static MarketProjection MarketDescription =>
+        new ("MARKET_DESCRIPTION");
 
-    public MarketProjection WithRunnerMetadata()
-    {
-        AddUnique("RUNNER_METADATA");
-        return this;
-    }
+    public static MarketProjection RunnerDescription =>
+        new ("RUNNER_DESCRIPTION");
 
-    private void AddUnique(string value)
-    {
-        if (!Contains(value)) Add(value);
-    }
+    public static MarketProjection RunnerMetadata =>
+        new ("RUNNER_METADATA");
+
+    public string Value { get; }
 }

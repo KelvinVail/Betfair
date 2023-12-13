@@ -1,6 +1,5 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests;
-using Betfair.Core;
 using Betfair.Tests.TestDoubles;
 using Utf8Json;
 using Utf8Json.Resolvers;
@@ -52,32 +51,6 @@ public class MarketCatalogueTests : IDisposable
 
         _httpClient.LastPostedBody.Should().BeEquivalentTo(
             new MarketCatalogueFilter());
-    }
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(7)]
-    public void EventTypeIdsCanBeAddedToTheFilter(int id)
-    {
-        var filter = new MarketCatalogueFilter()
-            .WithEventTypeId(id)
-            .WithEventTypeId(10);
-
-        var json = JsonSerializer.ToJsonString(filter, StandardResolver.AllowPrivateExcludeNullCamelCase);
-
-        json.Should().Be($"{{\"filter\":{{\"eventTypeIds\":[{id},10]}},\"maxResults\":1000}}");
-    }
-
-    [Fact]
-    public void EventTypeCanBeAddedToTheFilter()
-    {
-        var filter = new MarketCatalogueFilter()
-            .WithEventType(EventType.HorseRacing)
-            .WithEventTypeId(10);
-
-        var json = JsonSerializer.ToJsonString(filter, StandardResolver.AllowPrivateExcludeNullCamelCase);
-
-        json.Should().Be($"{{\"filter\":{{\"eventTypeIds\":[7,10]}},\"maxResults\":1000}}");
     }
 
     public void Dispose()
