@@ -13,13 +13,21 @@ public class BetfairApiClient
         _client = client;
 
     public async Task<IReadOnlyList<MarketCatalogue>> MarketCatalogue(
+        ApiMarketFilter? filter = null,
         MarketCatalogueQuery? query = null,
         CancellationToken cancellationToken = default)
     {
+        filter ??= new ApiMarketFilter();
         query ??= new MarketCatalogueQuery();
         return await _client.Post<IReadOnlyList<MarketCatalogue>>(
             new Uri($"{_betting}/listMarketCatalogue/"),
-            query,
+            new
+            {
+                filter,
+                query.MarketProjection,
+                query.Sort,
+                query.MaxResults,
+            },
             cancellationToken);
     }
 

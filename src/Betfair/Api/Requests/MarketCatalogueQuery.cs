@@ -4,8 +4,6 @@ public class MarketCatalogueQuery
 {
     private HashSet<string>? _projection;
 
-    public ApiMarketFilter Filter { get; } = new ();
-
     public IReadOnlyCollection<string>? MarketProjection => _projection;
 
     public string? Sort { get; private set; }

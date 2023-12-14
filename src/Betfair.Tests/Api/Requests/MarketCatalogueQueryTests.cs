@@ -1,19 +1,10 @@
 ﻿using Betfair.Api.Requests;
-using Betfair.Core;
 
 namespace Betfair.Tests.Api.Requests;
 
 public class MarketCatalogueQueryTests
 {
     private readonly MarketCatalogueQuery _query = new ();
-
-    [Fact]
-    public void CanAddAMarketFilter()
-    {
-        _query.Filter.WithEventType(EventType.HorseRacing);
-
-        _query.Filter.EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
-    }
 
     [Fact]
     public void IsCreatedWithNullMarketProjection() =>

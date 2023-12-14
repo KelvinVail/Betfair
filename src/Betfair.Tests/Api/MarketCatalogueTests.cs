@@ -1,8 +1,6 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests;
 using Betfair.Tests.TestDoubles;
-using Utf8Json;
-using Utf8Json.Resolvers;
 
 namespace Betfair.Tests.Api;
 
@@ -23,25 +21,6 @@ public class MarketCatalogueTests : IDisposable
 
         _httpClient.LastPostedUri.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketCatalogue/");
-    }
-
-    [Fact]
-    public void DefaultFilterIncludesEmptyFilterAndMaxResults()
-    {
-        var filter = new MarketCatalogueQuery();
-
-        filter.Filter.Should().NotBeNull();
-        filter.MaxResults.Should().Be(1000);
-    }
-
-    [Fact]
-    public void DefaultFilterIsSerializedCorrectly()
-    {
-        var filter = new MarketCatalogueQuery();
-
-        var json = JsonSerializer.ToJsonString(filter, StandardResolver.AllowPrivateExcludeNullCamelCase);
-
-        json.Should().Be("{\"filter\":{},\"maxResults\":1000}");
     }
 
     [Fact]
