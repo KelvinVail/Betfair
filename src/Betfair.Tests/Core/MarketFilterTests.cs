@@ -182,4 +182,28 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
         CountryCodes.Should().Contain("XX");
         CountryCodes.Should().Contain("ZZ");
     }
+
+    [Fact]
+    public void AddingNullCountryHasNoEffect()
+    {
+        WithCountry((Country)null!)
+            .WithCountry(Country.Ireland);
+
+        MarketCountries.Should().Contain(Country.Ireland.Id);
+        MarketCountries.Should().NotContainNulls();
+        CountryCodes.Should().Contain(Country.Ireland.Id);
+        CountryCodes.Should().NotContainNulls();
+    }
+
+    [Fact]
+    public void AddingNullCountryCodeHasNoEffect()
+    {
+        WithCountry((string)null!)
+            .WithCountry("XX");
+
+        MarketCountries.Should().Contain("XX");
+        MarketCountries.Should().NotContainNulls();
+        CountryCodes.Should().Contain("XX");
+        CountryCodes.Should().NotContainNulls();
+    }
 }
