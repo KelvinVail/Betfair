@@ -134,4 +134,52 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
         MarketIds.Should().Contain("1.999");
         MarketIds.Should().NotContainNulls();
     }
+
+    [Fact]
+    public void IsCreatedWithNullMarketCountries() =>
+        MarketCountries.Should().BeNull();
+
+    [Fact]
+    public void CountryCodesAreAddedToMarketCountries()
+    {
+        WithCountry(Country.Algeria)
+            .WithCountry(Country.Argentina);
+
+        MarketCountries.Should().Contain(Country.Algeria.Id);
+        MarketCountries.Should().Contain(Country.Argentina.Id);
+    }
+
+    [Fact]
+    public void TextCountryCodesAreAddedToMarketTypes()
+    {
+        WithCountry("XX")
+            .WithCountry("ZZ");
+
+        MarketCountries.Should().Contain("XX");
+        MarketCountries.Should().Contain("ZZ");
+    }
+
+    [Fact]
+    public void IsCreatedWithNullCountryCodes() =>
+        CountryCodes.Should().BeNull();
+
+    [Fact]
+    public void CountryCodesAreAddedToCountryCodes()
+    {
+        WithCountry(Country.Algeria)
+            .WithCountry(Country.Argentina);
+
+        CountryCodes.Should().Contain(Country.Algeria.Id);
+        CountryCodes.Should().Contain(Country.Argentina.Id);
+    }
+
+    [Fact]
+    public void TextCountryCodesAreAddedToCountryCodes()
+    {
+        WithCountry("XX")
+            .WithCountry("ZZ");
+
+        CountryCodes.Should().Contain("XX");
+        CountryCodes.Should().Contain("ZZ");
+    }
 }

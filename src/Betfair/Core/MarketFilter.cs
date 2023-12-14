@@ -11,6 +11,10 @@ public abstract class MarketFilter<T>
 
     public HashSet<string>? MarketIds { get; private set; }
 
+    public HashSet<string>? MarketCountries { get; private set; }
+
+    public HashSet<string>? CountryCodes { get; private set; }
+
     public T WithMarketType(MarketType marketType) =>
         marketType is null ? This() : WithMarketType(marketType.Id);
 
@@ -43,6 +47,22 @@ public abstract class MarketFilter<T>
 
         MarketIds ??= new ();
         MarketIds.Add(marketId);
+        return This();
+    }
+
+    public T WithCountry(Country country) =>
+        country is null ? This() : WithCountry(country.Id);
+
+    public T WithCountry(string isoCode)
+    {
+        if (isoCode is null) return This();
+
+        MarketCountries ??= new ();
+        MarketCountries.Add(isoCode);
+
+        CountryCodes ??= new ();
+        CountryCodes.Add(isoCode);
+
         return This();
     }
 
