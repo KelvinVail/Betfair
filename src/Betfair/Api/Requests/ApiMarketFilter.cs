@@ -20,6 +20,17 @@ public class ApiMarketFilter : MarketFilter<ApiMarketFilter>
         return this;
     }
 
+    public ApiMarketFilter TodaysCard()
+    {
+        WithEventType(EventType.HorseRacing);
+        WithCountry(Country.UnitedKingdom);
+        WithCountry(Country.Ireland);
+        FromMarketStart(DateTime.Today);
+        ToMarketStart(DateTime.Today.AddDays(1));
+
+        return this;
+    }
+
     private static string ToUtcString(DateTimeOffset dateTime) =>
         dateTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", DateTimeFormatInfo.InvariantInfo);
 }
