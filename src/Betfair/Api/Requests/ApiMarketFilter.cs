@@ -22,6 +22,7 @@ public class ApiMarketFilter : MarketFilter<ApiMarketFilter>
 
     public ApiMarketFilter TodaysCard()
     {
+        WithMarketType(MarketType.Win);
         WithEventType(EventType.HorseRacing);
         WithCountry(Country.UnitedKingdom);
         WithCountry(Country.Ireland);

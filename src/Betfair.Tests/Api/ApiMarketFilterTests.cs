@@ -46,6 +46,9 @@ public class ApiMarketFilterTests
 
         card.EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
 
+        card.MarketTypeCodes.Should().Contain(MarketType.Win.Id);
+        card.MarketTypes.Should().Contain(MarketType.Win.Id);
+
         card.MarketCountries.Should().Contain(Country.UnitedKingdom.Id);
         card.MarketCountries.Should().Contain(Country.Ireland.Id);
 
