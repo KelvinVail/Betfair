@@ -1,12 +1,11 @@
-![.NET Core](https://github.com/KelvinVail/Betfair/workflows/.NET%20Core/badge.svg)
+![Build](https://github.com/KelvinVail/Betfair/workflows/.NET%20Core/badge.svg)
 [![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/kelvinvail/Betfair/blob/master/LICENSE)
-
+[![NuGet downloads](https://img.shields.io/nuget/v/Betfair.svg)](https://www.nuget.org/packages/Betfair/)
 
 # Betfair
-A dotnet core package for interacting with Betfair
+Fast and simple classes for interacting with the Betfair API and Stream.
 
-## Betfair.Stream
-[![NuGet downloads](https://img.shields.io/nuget/v/Betfair.svg)](https://www.nuget.org/packages/Betfair/)
+Full documentation [here](/docs/README.md).
 
 ## Installation
 

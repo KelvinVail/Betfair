@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using Betfair.Core.Login;
+﻿using Betfair.Core.Login;
 using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace Betfair.Core.Client;
