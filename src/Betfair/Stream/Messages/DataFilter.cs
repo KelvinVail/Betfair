@@ -1,13 +1,22 @@
 namespace Betfair.Stream.Messages;
 
+/// <summary>
+/// Used to restrict data received in a Betfair stream.
+/// </summary>
 public class DataFilter
 {
     public int LadderLevels { get; private set; } = 3;
 
+    // TODO make internal or readonly
     public HashSet<string>? Fields { get; private set; }
 
+    /// <summary>
+    /// Include market definitions and updates in the stream data.
+    /// </summary>
+    /// <returns>This DataFilter.</returns>
     public DataFilter WithMarketDefinition()
     {
+        // TODO rename With... to Include...
         Fields ??= new HashSet<string>();
         Fields.Add("EX_MARKET_DEF");
         return this;
@@ -20,6 +29,10 @@ public class DataFilter
         return this;
     }
 
+    /// <summary>
+    /// Include the best available back and lay prices not including virtual prices. The number of ladder levels to receive can be set using .WithLadderLevels(), if undefined the default is 3 ladder levels.
+    /// </summary>
+    /// <returns>This DataFilter.</returns>
     public DataFilter WithBestPrices()
     {
         Fields ??= new HashSet<string>();
