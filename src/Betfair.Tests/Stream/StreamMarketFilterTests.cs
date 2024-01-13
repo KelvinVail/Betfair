@@ -89,6 +89,14 @@ public class StreamMarketFilterTests
     }
 
     [Fact]
+    public void CanBeInitializedToExcludeInPlayMarkets()
+    {
+        _filter.ExcludeInPlayMarkets();
+
+        _filter.TurnInPlayEnabled.Should().BeFalse();
+    }
+
+    [Fact]
     public void WhenInitializedMarketTypesIsNull() =>
         _filter.MarketTypes.Should().BeNull();
 
@@ -127,13 +135,56 @@ public class StreamMarketFilterTests
     public void WhenInitializedVenuesIsNull() =>
         _filter.Venues.Should().BeNull();
 
+    [Fact]
+    public void CanBeInitializedWithVenues()
+    {
+        _filter.IncludeVenues(Venue.Albany, Venue.AliceSprings);
+
+        _filter.Venues.Should().Contain(Venue.Albany.Id);
+        _filter.Venues.Should().Contain(Venue.AliceSprings.Id);
+    }
+
+    [Fact]
+    public void AddingNullVenueHasNoEffect()
+    {
+        _filter.IncludeVenues(Venue.Albany, null!);
+
+        _filter.Venues.Should().Contain(Venue.Albany.Id);
+        _filter.Venues.Should().NotContainNulls();
+    }
+
+    [Fact]
+    public void AddingNullVenueIdHasNoEffect()
+    {
+        _filter.IncludeVenues("Albany", null!);
+
+        _filter.Venues.Should().Contain("Albany");
+        _filter.Venues.Should().NotContainNulls();
+    }
+
+    [Fact]
+    public void AddingNullVenueArray()
+    {
+        _filter.IncludeVenues((Venue[])null!);
+
+        _filter.Venues.Should().BeNull();
+    }
+
+    [Fact]
+    public void AddingNullVenueIdArrayHasNoEffect()
+    {
+        _filter.IncludeVenues((string[])null!);
+
+        _filter.Venues.Should().BeNull();
+    }
+
     [Theory]
     [InlineData("Venue")]
     [InlineData("Ascot")]
     [InlineData("Epsom")]
-    public void CanBeInitializedWithVenue(string venue)
+    public void CanBeInitializedWithVenueId(string venue)
     {
-        _filter.WithVenue(venue);
+        _filter.IncludeVenues(venue);
 
         _filter.Venues.Should().Contain(venue);
     }
@@ -141,8 +192,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleVenues()
     {
-        _filter.WithVenue("Ascot");
-        _filter.WithVenue("Epsom");
+        _filter.IncludeVenues("Ascot");
+        _filter.IncludeVenues("Epsom");
 
         _filter.Venues.Should().Contain("Ascot");
         _filter.Venues.Should().Contain("Epsom");
@@ -151,8 +202,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateVenues()
     {
-        _filter.WithVenue("Ascot");
-        _filter.WithVenue("Ascot");
+        _filter.IncludeVenues("Ascot");
+        _filter.IncludeVenues("Ascot");
 
         _filter.Venues?.Count.Should().Be(1);
         _filter.Venues.Should().Contain("Ascot");
@@ -196,13 +247,30 @@ public class StreamMarketFilterTests
     public void WhenInitializedEventIdsIsNull() =>
         _filter.EventIds.Should().BeNull();
 
+    [Fact]
+    public void AddingNullEventIdsHasNoEffect()
+    {
+        _filter.IncludeEventIds("12345", null!);
+
+        _filter.EventIds.Should().Contain("12345");
+        _filter.EventIds.Should().NotContainNulls();
+    }
+
+    [Fact]
+    public void AddingNullEventIdArrayHasNoEffect()
+    {
+        _filter.IncludeEventIds(null!);
+
+        _filter.EventIds.Should().BeNull();
+    }
+
     [Theory]
     [InlineData("EventId")]
     [InlineData("12345")]
     [InlineData("98765")]
     public void CanBeInitializedWithEventId(string eventId)
     {
-        _filter.WithEventId(eventId);
+        _filter.IncludeEventIds(eventId);
 
         _filter.EventIds.Should().Contain(eventId);
     }
@@ -210,8 +278,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleEventIds()
     {
-        _filter.WithEventId("12345");
-        _filter.WithEventId("98765");
+        _filter.IncludeEventIds("12345");
+        _filter.IncludeEventIds("98765");
 
         _filter.EventIds.Should().Contain("12345");
         _filter.EventIds.Should().Contain("98765");
@@ -220,8 +288,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateEventIds()
     {
-        _filter.WithEventId("12345");
-        _filter.WithEventId("12345");
+        _filter.IncludeEventIds("12345");
+        _filter.IncludeEventIds("12345");
 
         _filter.EventIds?.Count.Should().Be(1);
         _filter.EventIds.Should().Contain("12345");

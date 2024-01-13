@@ -15,9 +15,15 @@ public abstract class MarketFilter<T>
 
     public HashSet<string>? CountryCodes { get; private set; }
 
+    /// <summary>
+    /// Restrict to markets that match the type of the market.
+    /// </summary>
+    /// <param name="marketTypes">Market Types to include.</param>
+    /// <returns>This <typeparamref name="T"/>.</returns>
     public T IncludeMarketTypes(params MarketType[] marketTypes) =>
         marketTypes is null ? This() : IncludeMarketTypes(marketTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
+    /// <inheritdoc cref="MarketFilter{T}.IncludeMarketTypes"/>
     public T IncludeMarketTypes(params string[] marketTypes)
     {
         if (marketTypes is null) return This();
@@ -33,9 +39,15 @@ public abstract class MarketFilter<T>
         return This();
     }
 
+    /// <summary>
+    /// Restrict markets by event type associated with the market.
+    /// </summary>
+    /// <param name="eventTypes">Event Types to include.</param>
+    /// <returns>This <typeparamref name="T"/>.</returns>
     public T IncludeEventTypes(params EventType[] eventTypes) =>
         eventTypes is null ? This() : IncludeEventTypes(eventTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
+    /// <inheritdoc cref="MarketFilter{T}.IncludeEventTypes"/>
     public T IncludeEventTypes(params int[] eventTypes)
     {
         if (eventTypes is null) return This();
@@ -47,6 +59,11 @@ public abstract class MarketFilter<T>
         return This();
     }
 
+    /// <summary>
+    /// Restrict markets by market id associated with the market.
+    /// </summary>
+    /// <param name="marketIds">MarketIds to include.</param>
+    /// <returns>This <typeparamref name="T"/>.</returns>
     public T IncludeMarketIds(params string[] marketIds)
     {
         if (marketIds is null) return This();
@@ -58,9 +75,15 @@ public abstract class MarketFilter<T>
         return This();
     }
 
+    /// <summary>
+    /// Restrict to markets that are in the specified country or countries.
+    /// </summary>
+    /// <param name="countries">Countries to include.</param>
+    /// <returns>This <typeparamref name="T"/>.</returns>
     public T IncludeCountries(params Country[] countries) =>
         countries is null ? This() : IncludeCountries(countries.Where(x => x is not null).Select(x => x.Id).ToArray());
 
+    /// <inheritdoc cref="MarketFilter{T}.IncludeCountries"/>
     public T IncludeCountries(params string[] isoCodes)
     {
         if (isoCodes is null) return This();

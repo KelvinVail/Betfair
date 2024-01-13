@@ -14,23 +14,59 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
 
     public bool? BspMarket { get; private set; }
 
+    /// <summary>
+    /// Restrict to markets that will turn in play.
+    /// </summary>
+    /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
     public StreamMarketFilter IncludeInPlayMarketsOnly()
     {
         TurnInPlayEnabled = true;
         return this;
     }
 
-    public StreamMarketFilter WithVenue(string venue)
+    /// <summary>
+    /// Restrict to markets that will not turn in play.
+    /// </summary>
+    /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
+    public StreamMarketFilter ExcludeInPlayMarkets()
     {
-        Venues ??=[];
-        Venues.Add(venue);
+        TurnInPlayEnabled = false;
         return this;
     }
 
-    public StreamMarketFilter WithEventId(string eventId)
+    /// <summary>
+    /// Restrict markets by the venue associated with the market. Currently, only Horse Racing markets have venues.
+    /// </summary>
+    /// <param name="venues">List of Venue to include.</param>
+    /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
+    public StreamMarketFilter IncludeVenues(params Venue[] venues) =>
+        venues is null ? this : IncludeVenues(venues.Where(x => x is not null).Select(x => x.Id).ToArray());
+
+    /// <inheritdoc cref="StreamMarketFilter.IncludeVenues"/>
+    public StreamMarketFilter IncludeVenues(params string[] venues)
     {
+        if (venues is null) return this;
+
+        Venues ??=[];
+        foreach (var venue in venues.Where(x => x is not null))
+            Venues.Add(venue);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Restrict markets by the event id associated with the market.
+    /// </summary>
+    /// <param name="eventIds">List of EventIds to include.</param>
+    /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
+    public StreamMarketFilter IncludeEventIds(params string[] eventIds)
+    {
+        if (eventIds is null) return this;
+
         EventIds ??=[];
-        EventIds.Add(eventId);
+        foreach (var eventId in eventIds.Where(x => x is not null))
+            EventIds.Add(eventId);
+
         return this;
     }
 
@@ -62,11 +98,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     public StreamMarketFilter IncludeBettingTypes(params BettingType[] bettingTypes) =>
         bettingTypes is null ? this : IncludeBettingTypes(bettingTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    /// <summary>
-    /// Restrict to markets that match the betting type of the market (i.e. Odds, Asian Handicap Singles, or Asian Handicap Doubles).
-    /// </summary>
-    /// <param name="bettingTypes">The betting type to include.</param>
-    /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
+    /// <inheritdoc cref="StreamMarketFilter.IncludeBettingTypes"/>
     public StreamMarketFilter IncludeBettingTypes(params string[] bettingTypes)
     {
         if (bettingTypes is null) return this;
