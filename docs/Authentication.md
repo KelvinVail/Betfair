@@ -17,5 +17,5 @@ var cert = X509Certificate2.CreateFrom...;
 var credentials = new Credential([USERNAME], [PASSWORD], [APPKEY], cert);
 ```
 
-## Code
-You can view the Credential classes code [here](/src/Betfair/Core/Login/Credentials.cs)
+## Class
+You can view the Credential class [here](/src/Betfair/Core/Login/Credentials.cs)

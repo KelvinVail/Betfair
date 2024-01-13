@@ -16,6 +16,7 @@ Use the DataFilter object to restrict data received in a Betfair stream.
     - [Starting Price Ladder](#starting-price-ladder)
     - [Starting Price Projection](#starting-price-projection)
     - [Ladder Levels](#ladder-levels)
+  - [Class](#class)
 
 ## Chaining data filters
 The DataFilter class can be used to build up a list of data required in your Betfair stream.
@@ -88,3 +89,6 @@ For depth-based ladders the number of levels to send (1 to 10). 1 is best price 
 ```csharp
 var dataFilter = new DataFilter().WithLadderLevels();
 ```
+
+## Class
+You can view the DataFilter class [here](/src/Betfair/Stream/Messages/DataFilter.cs)
