@@ -52,7 +52,7 @@ public abstract class MarketFilter<T>
         if (marketIds is null) return This();
 
         MarketIds ??=[];
-        foreach (var marketId in marketIds)
+        foreach (var marketId in marketIds.Where(x => x is not null))
             MarketIds.Add(marketId);
 
         return This();

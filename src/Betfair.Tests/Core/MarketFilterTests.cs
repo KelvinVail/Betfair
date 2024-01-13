@@ -11,8 +11,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void MarketTypeIdsAreAddedToMarketTypes()
     {
-        IncludeMarketTypes(MarketType.Win)
-            .IncludeMarketTypes(MarketType.CorrectScore);
+        IncludeMarketTypes(MarketType.Win, MarketType.CorrectScore);
 
         MarketTypes.Should().Contain(MarketType.Win.Id);
         MarketTypes.Should().Contain(MarketType.CorrectScore.Id);
@@ -21,8 +20,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void TextMarketTypeIdsAreAddedToMarketTypes()
     {
-        IncludeMarketTypes("WIN")
-            .IncludeMarketTypes("CORRECT_SCORE");
+        IncludeMarketTypes("WIN", "CORRECT_SCORE");
 
         MarketTypes.Should().Contain(MarketType.Win.Id);
         MarketTypes.Should().Contain(MarketType.CorrectScore.Id);
@@ -35,8 +33,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void MarketTypeIdsAreAddedToMarketTypeCodes()
     {
-        IncludeMarketTypes(MarketType.Win)
-            .IncludeMarketTypes(MarketType.CorrectScore);
+        IncludeMarketTypes(MarketType.Win, MarketType.CorrectScore);
 
         MarketTypeCodes.Should().Contain(MarketType.Win.Id);
         MarketTypeCodes.Should().Contain(MarketType.CorrectScore.Id);
@@ -45,8 +42,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void TextMarketTypeIdsAreAddedToMarketTypeCodes()
     {
-        IncludeMarketTypes("WIN")
-            .IncludeMarketTypes("CORRECT_SCORE");
+        IncludeMarketTypes("WIN", "CORRECT_SCORE");
 
         MarketTypeCodes.Should().Contain(MarketType.Win.Id);
         MarketTypeCodes.Should().Contain(MarketType.CorrectScore.Id);
@@ -55,8 +51,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void AddingNullMarketTypeHasNoEffect()
     {
-        IncludeMarketTypes(MarketType.Win)
-            .IncludeMarketTypes((MarketType)null!);
+        IncludeMarketTypes(MarketType.Win, null!);
 
         MarketTypes.Should().Contain(MarketType.Win.Id);
         MarketTypes.Should().NotContainNulls();
@@ -67,8 +62,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void AddingNullMarketTypeStringHasNoEffect()
     {
-        IncludeMarketTypes("WIN")
-            .IncludeMarketTypes((string)null!);
+        IncludeMarketTypes("WIN", null!);
 
         MarketTypes.Should().Contain(MarketType.Win.Id);
         MarketTypes.Should().NotContainNulls();
@@ -83,8 +77,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void EventTypesAreAddedToEventTypesIds()
     {
-        IncludeEventTypes(EventType.HorseRacing)
-            .IncludeEventTypes(EventType.AmericanFootball);
+        IncludeEventTypes(EventType.HorseRacing, EventType.AmericanFootball);
 
         EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
         EventTypeIds.Should().Contain(EventType.AmericanFootball.Id);
@@ -93,8 +86,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void TextEventTypeIdsAreAddedToEventTypes()
     {
-        IncludeEventTypes(1)
-            .IncludeEventTypes(7);
+        IncludeEventTypes(1, 7);
 
         EventTypeIds.Should().Contain(1);
         EventTypeIds.Should().Contain(7);
@@ -103,8 +95,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void AddingNullEventTypeHasNoEffect()
     {
-        IncludeEventTypes(EventType.HorseRacing)
-            .IncludeEventTypes((EventType)null!);
+        IncludeEventTypes(EventType.HorseRacing, null!);
 
         EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
         EventTypeIds.Should().NotContainNulls();
@@ -113,11 +104,9 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void AddingNullEventTypeIdHasNoEffect()
     {
-        IncludeEventTypes(7)
-            .IncludeEventTypes((int[])null!);
+        IncludeEventTypes((int[])null!);
 
-        EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
-        EventTypeIds.Should().NotContainNulls();
+        EventTypeIds.Should().BeNull();
     }
 
     [Fact]
@@ -128,8 +117,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [InlineData("1.23456789")]
     public void MarketIdIsAddedToMarketIds(string marketId)
     {
-        IncludeMarketIds(marketId)
-            .IncludeMarketIds("1.999");
+        IncludeMarketIds(marketId, "1.999");
 
         MarketIds.Should().Contain(marketId);
         MarketIds.Should().Contain("1.999");
@@ -138,8 +126,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void AddingNullMarketIdHasNoEffect()
     {
-        IncludeMarketIds(null!)
-            .IncludeMarketIds("1.999");
+        IncludeMarketIds("1.999", null!);
 
         MarketIds.Should().Contain("1.999");
         MarketIds.Should().NotContainNulls();
@@ -152,8 +139,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void CountryCodesAreAddedToMarketCountries()
     {
-        IncludeCountries(Country.Algeria)
-            .IncludeCountries(Country.Argentina);
+        IncludeCountries(Country.Algeria, Country.Argentina);
 
         MarketCountries.Should().Contain(Country.Algeria.Id);
         MarketCountries.Should().Contain(Country.Argentina.Id);
@@ -162,8 +148,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void TextCountryCodesAreAddedToMarketTypes()
     {
-        IncludeCountries("XX")
-            .IncludeCountries("ZZ");
+        IncludeCountries("XX", "ZZ");
 
         MarketCountries.Should().Contain("XX");
         MarketCountries.Should().Contain("ZZ");
@@ -176,8 +161,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void CountryCodesAreAddedToCountryCodes()
     {
-        IncludeCountries(Country.Algeria)
-            .IncludeCountries(Country.Argentina);
+        IncludeCountries(Country.Algeria, Country.Argentina);
 
         CountryCodes.Should().Contain(Country.Algeria.Id);
         CountryCodes.Should().Contain(Country.Argentina.Id);
@@ -186,8 +170,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void TextCountryCodesAreAddedToCountryCodes()
     {
-        IncludeCountries("XX")
-            .IncludeCountries("ZZ");
+        IncludeCountries("XX", "ZZ");
 
         CountryCodes.Should().Contain("XX");
         CountryCodes.Should().Contain("ZZ");
@@ -196,8 +179,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void AddingNullCountryHasNoEffect()
     {
-        IncludeCountries((Country)null!)
-            .IncludeCountries(Country.Ireland);
+        IncludeCountries(Country.Ireland, null!);
 
         MarketCountries.Should().Contain(Country.Ireland.Id);
         MarketCountries.Should().NotContainNulls();
@@ -208,8 +190,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     [Fact]
     public void AddingNullCountryCodeHasNoEffect()
     {
-        IncludeCountries((string)null!)
-            .IncludeCountries("XX");
+        IncludeCountries("XX", null!);
 
         MarketCountries.Should().Contain("XX");
         MarketCountries.Should().NotContainNulls();

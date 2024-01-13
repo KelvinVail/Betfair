@@ -1,4 +1,5 @@
-﻿using Betfair.Stream.Messages;
+﻿using Betfair.Core;
+using Betfair.Stream.Messages;
 
 namespace Betfair.Tests.Stream;
 
@@ -82,7 +83,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithInPlayMarketsOnly()
     {
-        _filter.WithInPlayMarketsOnly();
+        _filter.IncludeInPlayMarketsOnly();
 
         _filter.TurnInPlayEnabled.Should().BeTrue();
     }
@@ -233,21 +234,72 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithBspMarketsOnly()
     {
-        _filter.WithBspMarketsOnly();
+        _filter.IncludeBspMarketsOnly();
 
         _filter.BspMarket.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CanBeInitializedWithExcludingBspMarkets()
+    {
+        _filter.ExcludeBspMarkets();
+
+        _filter.BspMarket.Should().BeFalse();
     }
 
     [Fact]
     public void WhenInitializedBettingTypesIsNull() =>
         _filter.BettingTypes.Should().BeNull();
 
+    [Fact]
+    public void CanBeInitializedWithBettingTypes()
+    {
+        _filter.IncludeBettingTypes(BettingType.Odds, BettingType.Line);
+
+        _filter.BettingTypes.Should().Contain(BettingType.Odds.Id);
+        _filter.BettingTypes.Should().Contain(BettingType.Line.Id);
+    }
+
+    [Fact]
+    public void AddNullBettingTypeHasNoEffect()
+    {
+        _filter.IncludeBettingTypes(BettingType.Odds, null!);
+
+        _filter.BettingTypes.Should().Contain(BettingType.Odds.Id);
+        _filter.BettingTypes.Should().NotContainNulls();
+    }
+
+    [Fact]
+    public void AddNullBettingTypeIdHasNoEffect()
+    {
+        _filter.IncludeBettingTypes("ODDS", null!);
+
+        _filter.BettingTypes.Should().Contain("ODDS");
+        _filter.BettingTypes.Should().NotContainNulls();
+    }
+
+    [Fact]
+    public void AddNullBettingTypeArrayHasNoEffect()
+    {
+        _filter.IncludeBettingTypes((BettingType[])null!);
+
+        _filter.BettingTypes.Should().BeNull();
+    }
+
+    [Fact]
+    public void AddNullBettingTypeIdArrayHasNoEffect()
+    {
+        _filter.IncludeBettingTypes((string[])null!);
+
+        _filter.BettingTypes.Should().BeNull();
+    }
+
     [Theory]
     [InlineData("ODDS")]
     [InlineData("LINE")]
-    public void CanBeInitializedWithBettingTypeOdds(string bettingType)
+    public void CanBeInitializedWithBettingTypeOddsIds(string bettingType)
     {
-        _filter.WithBettingType(bettingType);
+        _filter.IncludeBettingTypes(bettingType);
 
         _filter.BettingTypes.Should().Contain(bettingType);
     }
@@ -255,8 +307,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleBettingTypeOdds()
     {
-        _filter.WithBettingType("ODDS");
-        _filter.WithBettingType("LINE");
+        _filter.IncludeBettingTypes("ODDS");
+        _filter.IncludeBettingTypes("LINE");
 
         _filter.BettingTypes.Should().Contain("ODDS");
         _filter.BettingTypes.Should().Contain("LINE");
@@ -265,8 +317,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateBettingTypes()
     {
-        _filter.WithBettingType("ODDS");
-        _filter.WithBettingType("ODDS");
+        _filter.IncludeBettingTypes("ODDS");
+        _filter.IncludeBettingTypes("ODDS");
 
         _filter.BettingTypes?.Count.Should().Be(1);
         _filter.BettingTypes.Should().Contain("ODDS");

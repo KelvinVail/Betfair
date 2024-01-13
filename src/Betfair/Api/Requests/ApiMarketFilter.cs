@@ -2,20 +2,20 @@
 
 namespace Betfair.Api.Requests;
 
-public class ApiMarketFilter : MarketFilter<ApiMarketFilter>
+public sealed class ApiMarketFilter : MarketFilter<ApiMarketFilter>
 {
     public DateRange? MarketStartTime { get; private set; }
 
     public ApiMarketFilter FromMarketStart(DateTimeOffset dateTime)
     {
-        MarketStartTime ??= new ();
+        MarketStartTime ??= new DateRange();
         MarketStartTime.From = ToUtcString(dateTime);
         return this;
     }
 
     public ApiMarketFilter ToMarketStart(DateTimeOffset dateTime)
     {
-        MarketStartTime ??= new ();
+        MarketStartTime ??= new DateRange();
         MarketStartTime.To = ToUtcString(dateTime);
         return this;
     }
