@@ -51,7 +51,7 @@ public class StreamClient : IDisposable
     /// Define and subscribe to a market stream.
     /// </summary>
     /// <param name="marketFilter">Used to define which markets to subscribe to.</param>
-    /// <param name="dataFilter">Used to define what data we want returned in the market stream.</param>
+    /// <param name="dataFilter">Used to define what data to include in the market stream.</param>
     /// <returns>An awaitable task.</returns>
     public async Task Subscribe(MarketFilter marketFilter, DataFilter dataFilter)
     {

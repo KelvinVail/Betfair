@@ -4,7 +4,7 @@ namespace Betfair.Tests.Stream;
 
 public class DataFilterTests
 {
-    private readonly DataFilter _filter = new ();
+    private readonly DataFilter _filter = new();
 
     [Fact]
     public void WhenInitializedLadderLevelsIsThree() =>
@@ -51,7 +51,7 @@ public class DataFilterTests
     [Fact]
     public void CanBeInitializedWithFullOffersLadder()
     {
-        _filter.WithFullOffersLadder();
+        _filter.WithFullOffersLadder;
 
         _filter.Fields.Should().Contain("EX_ALL_OFFERS");
     }
@@ -102,7 +102,7 @@ public class DataFilterTests
         _filter.WithMarketDefinition();
         _filter.WithBestPricesIncludingVirtual();
         _filter.WithBestPrices();
-        _filter.WithFullOffersLadder();
+        _filter.WithFullOffersLadder;
         _filter.WithFullTradedLadder();
         _filter.WithTradedVolume();
         _filter.WithLastTradedPrice();
