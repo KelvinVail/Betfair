@@ -1,8 +1,8 @@
 ﻿namespace Betfair.Core;
 
-public class MarketType
+public sealed class MarketType
 {
-    public MarketType(string id) => Id = id;
+    private MarketType(string id) => Id = id;
 
     public static MarketType AltTotalGoals => new ("ALT_TOTAL_GOALS");
 

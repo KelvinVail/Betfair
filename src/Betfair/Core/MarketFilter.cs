@@ -15,53 +15,63 @@ public abstract class MarketFilter<T>
 
     public HashSet<string>? CountryCodes { get; private set; }
 
-    public T WithMarketType(MarketType marketType) =>
-        marketType is null ? This() : WithMarketType(marketType.Id);
+    public T IncludeMarketTypes(params MarketType[] marketTypes) =>
+        marketTypes is null ? This() : IncludeMarketTypes(marketTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    public T WithMarketType(string marketType)
+    public T IncludeMarketTypes(params string[] marketTypes)
     {
-        if (marketType is null) return This();
+        if (marketTypes is null) return This();
 
-        MarketTypes ??= new ();
-        MarketTypes.Add(marketType);
-
-        MarketTypeCodes ??= new ();
-        MarketTypeCodes.Add(marketType);
+        MarketTypes ??=[];
+        MarketTypeCodes ??=[];
+        foreach (var marketType in marketTypes.Where(x => x is not null))
+        {
+            MarketTypes.Add(marketType);
+            MarketTypeCodes.Add(marketType);
+        }
 
         return This();
     }
 
-    public T WithEventType(EventType eventType) =>
-        eventType is null ? This() : WithEventType(eventType.Id);
+    public T IncludeEventTypes(params EventType[] eventTypes) =>
+        eventTypes is null ? This() : IncludeEventTypes(eventTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    public T WithEventType(int eventType)
+    public T IncludeEventTypes(params int[] eventTypes)
     {
-        EventTypeIds ??= new ();
-        EventTypeIds.Add(eventType);
+        if (eventTypes is null) return This();
+
+        EventTypeIds ??=[];
+        foreach (var eventType in eventTypes)
+            EventTypeIds.Add(eventType);
+
         return This();
     }
 
-    public T WithMarketId(string marketId)
+    public T IncludeMarketIds(params string[] marketIds)
     {
-        if (marketId is null) return This();
+        if (marketIds is null) return This();
 
-        MarketIds ??= new ();
-        MarketIds.Add(marketId);
+        MarketIds ??=[];
+        foreach (var marketId in marketIds)
+            MarketIds.Add(marketId);
+
         return This();
     }
 
-    public T WithCountry(Country country) =>
-        country is null ? This() : WithCountry(country.Id);
+    public T IncludeCountries(params Country[] countries) =>
+        countries is null ? This() : IncludeCountries(countries.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    public T WithCountry(string isoCode)
+    public T IncludeCountries(params string[] isoCodes)
     {
-        if (isoCode is null) return This();
+        if (isoCodes is null) return This();
 
-        MarketCountries ??= new ();
-        MarketCountries.Add(isoCode);
-
-        CountryCodes ??= new ();
-        CountryCodes.Add(isoCode);
+        MarketCountries ??=[];
+        CountryCodes ??=[];
+        foreach (var isoCode in isoCodes.Where(x => x is not null))
+        {
+            MarketCountries.Add(isoCode);
+            CountryCodes.Add(isoCode);
+        }
 
         return This();
     }

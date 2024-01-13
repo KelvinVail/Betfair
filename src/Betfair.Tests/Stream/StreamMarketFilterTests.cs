@@ -15,7 +15,7 @@ public class StreamMarketFilterTests
     [InlineData("1.234567")]
     public void CanBeInitializedWithMarketId(string marketId)
     {
-        _filter.WithMarketId(marketId);
+        _filter.IncludeMarketIds(marketId);
 
         _filter.MarketIds.Should().Contain(marketId);
     }
@@ -25,7 +25,7 @@ public class StreamMarketFilterTests
     [InlineData("1.234567")]
     public void CanBeInitializedWithMultipleMarketIds(string marketId)
     {
-        _filter.WithMarketId(marketId).WithMarketId("2");
+        _filter.IncludeMarketIds(marketId).IncludeMarketIds("2");
 
         _filter.MarketIds.Should().Contain(marketId);
         _filter.MarketIds.Should().Contain("2");
@@ -34,7 +34,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateMarketIds()
     {
-        _filter.WithMarketId("1").WithMarketId("1");
+        _filter.IncludeMarketIds("1").IncludeMarketIds("1");
 
         _filter.MarketIds?.Count.Should().Be(1);
         _filter.MarketIds.Should().Contain("1");
@@ -50,7 +50,7 @@ public class StreamMarketFilterTests
     [InlineData("GB")]
     public void CanBeInitializedWithCountryCodes(string countryCode)
     {
-        _filter.WithCountry(countryCode);
+        _filter.IncludeCountries(countryCode);
 
         _filter.CountryCodes.Should().Contain(countryCode);
     }
@@ -58,8 +58,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleCountryCodes()
     {
-        _filter.WithCountry("GB");
-        _filter.WithCountry("IE");
+        _filter.IncludeCountries("GB");
+        _filter.IncludeCountries("IE");
 
         _filter.CountryCodes.Should().Contain("GB");
         _filter.CountryCodes.Should().Contain("IE");
@@ -68,8 +68,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateCountryCodes()
     {
-        _filter.WithCountry("GB");
-        _filter.WithCountry("GB");
+        _filter.IncludeCountries("GB");
+        _filter.IncludeCountries("GB");
 
         _filter.CountryCodes?.Count.Should().Be(1);
         _filter.CountryCodes.Should().Contain("GB");
@@ -97,7 +97,7 @@ public class StreamMarketFilterTests
     [InlineData("HALF_TIME_SCORE")]
     public void CanBeInitializedWithMarketTypes(string marketType)
     {
-        _filter.WithMarketType(marketType);
+        _filter.IncludeMarketTypes(marketType);
 
         _filter.MarketTypes.Should().Contain(marketType);
     }
@@ -105,8 +105,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleMarketTypes()
     {
-        _filter.WithMarketType("MATCH_ODDS");
-        _filter.WithMarketType("HALF_TIME_SCORE");
+        _filter.IncludeMarketTypes("MATCH_ODDS");
+        _filter.IncludeMarketTypes("HALF_TIME_SCORE");
 
         _filter.MarketTypes.Should().Contain("MATCH_ODDS");
         _filter.MarketTypes.Should().Contain("HALF_TIME_SCORE");
@@ -115,8 +115,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateMarketTypes()
     {
-        _filter.WithMarketType("MATCH_ODDS");
-        _filter.WithMarketType("MATCH_ODDS");
+        _filter.IncludeMarketTypes("MATCH_ODDS");
+        _filter.IncludeMarketTypes("MATCH_ODDS");
 
         _filter.MarketTypes?.Count.Should().Be(1);
         _filter.MarketTypes.Should().Contain("MATCH_ODDS");
@@ -166,7 +166,7 @@ public class StreamMarketFilterTests
     [InlineData(7)]
     public void CanBeInitializedWithEventTypeId(int eventTypeId)
     {
-        _filter.WithEventType(eventTypeId);
+        _filter.IncludeEventTypes(eventTypeId);
 
         _filter.EventTypeIds.Should().Contain(eventTypeId);
     }
@@ -174,8 +174,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleEventTypeIds()
     {
-        _filter.WithEventType(1);
-        _filter.WithEventType(2);
+        _filter.IncludeEventTypes(1);
+        _filter.IncludeEventTypes(2);
 
         _filter.EventTypeIds.Should().Contain(1);
         _filter.EventTypeIds.Should().Contain(2);
@@ -184,8 +184,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateEventTypeIds()
     {
-        _filter.WithEventType(1);
-        _filter.WithEventType(1);
+        _filter.IncludeEventTypes(1);
+        _filter.IncludeEventTypes(1);
 
         _filter.EventTypeIds?.Count.Should().Be(1);
         _filter.EventTypeIds.Should().Contain(1);

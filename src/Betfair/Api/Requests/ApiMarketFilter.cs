@@ -22,10 +22,10 @@ public class ApiMarketFilter : MarketFilter<ApiMarketFilter>
 
     public ApiMarketFilter TodaysCard()
     {
-        WithMarketType(MarketType.Win);
-        WithEventType(EventType.HorseRacing);
-        WithCountry(Country.UnitedKingdom);
-        WithCountry(Country.Ireland);
+        IncludeMarketTypes(MarketType.Win);
+        IncludeEventTypes(EventType.HorseRacing);
+        IncludeCountries(Country.UnitedKingdom);
+        IncludeCountries(Country.Ireland);
         FromMarketStart(DateTime.Today);
         ToMarketStart(DateTime.Today.AddDays(1));
 
