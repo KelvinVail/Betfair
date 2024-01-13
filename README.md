@@ -1,4 +1,4 @@
-![Build](https://github.com/KelvinVail/Betfair/workflows/.NET%20Core/badge.svg)
+![.NET Core](https://github.com/KelvinVail/Betfair/workflows/.NET%20Core/badge.svg)
 [![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/kelvinvail/Betfair/blob/master/LICENSE)
 [![NuGet downloads](https://img.shields.io/nuget/v/Betfair.svg)](https://www.nuget.org/packages/Betfair/)
 
@@ -47,6 +47,6 @@ await streamClient.Subscribe(
 
 await foreach (var change in streamClient.GetChanges())
 {
-	// Do stuff..
+	// Handle changes
 }
 ```
