@@ -4,7 +4,7 @@ internal class MarketSubscription : MessageBase
 {
     public MarketSubscription(
         int id,
-        MarketFilter marketFiler,
+        StreamMarketFilter marketFiler,
         DataFilter dataFilter)
         : base("marketSubscription", id)
     {
@@ -12,7 +12,7 @@ internal class MarketSubscription : MessageBase
         MarketDataFilter = dataFilter;
     }
 
-    public MarketFilter MarketFilter { get; }
+    public StreamMarketFilter MarketFilter { get; }
 
     public DataFilter MarketDataFilter { get; }
 }

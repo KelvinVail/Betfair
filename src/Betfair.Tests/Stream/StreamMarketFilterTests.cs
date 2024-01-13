@@ -2,9 +2,9 @@
 
 namespace Betfair.Tests.Stream;
 
-public class MarketFilterTests
+public class StreamMarketFilterTests
 {
-    private readonly MarketFilter _filter = new ();
+    private readonly StreamMarketFilter _filter = new ();
 
     [Fact]
     public void WhenInitializedMarketIdsIsNull() =>
@@ -50,7 +50,7 @@ public class MarketFilterTests
     [InlineData("GB")]
     public void CanBeInitializedWithCountryCodes(string countryCode)
     {
-        _filter.WithCountryCode(countryCode);
+        _filter.WithCountry(countryCode);
 
         _filter.CountryCodes.Should().Contain(countryCode);
     }
@@ -58,8 +58,8 @@ public class MarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleCountryCodes()
     {
-        _filter.WithCountryCode("GB");
-        _filter.WithCountryCode("IE");
+        _filter.WithCountry("GB");
+        _filter.WithCountry("IE");
 
         _filter.CountryCodes.Should().Contain("GB");
         _filter.CountryCodes.Should().Contain("IE");
@@ -68,8 +68,8 @@ public class MarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateCountryCodes()
     {
-        _filter.WithCountryCode("GB");
-        _filter.WithCountryCode("GB");
+        _filter.WithCountry("GB");
+        _filter.WithCountry("GB");
 
         _filter.CountryCodes?.Count.Should().Be(1);
         _filter.CountryCodes.Should().Contain("GB");
@@ -162,12 +162,11 @@ public class MarketFilterTests
         _filter.EventTypeIds.Should().BeNull();
 
     [Theory]
-    [InlineData("EventTypeId")]
-    [InlineData("1")]
-    [InlineData("7")]
-    public void CanBeInitializedWithEventTypeId(string eventTypeId)
+    [InlineData(1)]
+    [InlineData(7)]
+    public void CanBeInitializedWithEventTypeId(int eventTypeId)
     {
-        _filter.WithEventTypeId(eventTypeId);
+        _filter.WithEventType(eventTypeId);
 
         _filter.EventTypeIds.Should().Contain(eventTypeId);
     }
@@ -175,21 +174,21 @@ public class MarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleEventTypeIds()
     {
-        _filter.WithEventTypeId("1");
-        _filter.WithEventTypeId("2");
+        _filter.WithEventType(1);
+        _filter.WithEventType(2);
 
-        _filter.EventTypeIds.Should().Contain("1");
-        _filter.EventTypeIds.Should().Contain("2");
+        _filter.EventTypeIds.Should().Contain(1);
+        _filter.EventTypeIds.Should().Contain(2);
     }
 
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateEventTypeIds()
     {
-        _filter.WithEventTypeId("1");
-        _filter.WithEventTypeId("1");
+        _filter.WithEventType(1);
+        _filter.WithEventType(1);
 
         _filter.EventTypeIds?.Count.Should().Be(1);
-        _filter.EventTypeIds.Should().Contain("1");
+        _filter.EventTypeIds.Should().Contain(1);
     }
 
     [Fact]

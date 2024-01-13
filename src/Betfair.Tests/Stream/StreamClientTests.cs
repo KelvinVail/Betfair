@@ -77,7 +77,7 @@ public class StreamClientTests : IDisposable
     [Fact]
     public async Task SubscribeWritesAMarketSubscriptionMessageToTheStream()
     {
-        await _client.Subscribe(new MarketFilter(), new DataFilter());
+        await _client.Subscribe(new StreamMarketFilter(), new DataFilter());
 
         var result = await ReadLastLineInStream();
 
@@ -87,11 +87,11 @@ public class StreamClientTests : IDisposable
     [Fact]
     public async Task EachCallToSubscribeIncrementsTheConnectionId()
     {
-        await _client.Subscribe(new MarketFilter(), new DataFilter());
+        await _client.Subscribe(new StreamMarketFilter(), new DataFilter());
         var result = await ReadLastLineInStream();
         result.Should().ContainKey("id").WhoseValue.Should().Be(1);
 
-        await _client.Subscribe(new MarketFilter(), new DataFilter());
+        await _client.Subscribe(new StreamMarketFilter(), new DataFilter());
         var result2 = await ReadLastLineInStream();
         result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
     }
@@ -101,7 +101,7 @@ public class StreamClientTests : IDisposable
     [InlineData("1.23456789")]
     public async Task SubscribeWritesTheMarketFilterToTheStream(string marketId)
     {
-        var marketFilter = new MarketFilter().WithMarketId(marketId);
+        var marketFilter = new StreamMarketFilter().WithMarketId(marketId);
         await _client.Subscribe(marketFilter, new DataFilter());
 
         var result = await ReadLastLineInStream();
@@ -117,7 +117,7 @@ public class StreamClientTests : IDisposable
     public async Task SubscribeWritesTheDataFilterToTheStream()
     {
         var dataFilter = new DataFilter().WithBestPrices();
-        await _client.Subscribe(new MarketFilter(), dataFilter);
+        await _client.Subscribe(new StreamMarketFilter(), dataFilter);
 
         var result = await ReadLastLineInStream();
 

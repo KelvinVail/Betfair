@@ -53,7 +53,7 @@ public class StreamClient : IDisposable
     /// <param name="marketFilter">Used to define which markets to subscribe to.</param>
     /// <param name="dataFilter">Used to define what data to include in the market stream.</param>
     /// <returns>An awaitable task.</returns>
-    public async Task Subscribe(MarketFilter marketFilter, DataFilter dataFilter)
+    public async Task Subscribe(StreamMarketFilter marketFilter, DataFilter dataFilter)
     {
         // TODO Add cancellation support.
         _requestId++;
