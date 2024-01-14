@@ -101,7 +101,7 @@ public class StreamClientTests : IDisposable
     [InlineData("1.23456789")]
     public async Task SubscribeWritesTheMarketFilterToTheStream(string marketId)
     {
-        var marketFilter = new StreamMarketFilter().IncludeMarketIds(marketId);
+        var marketFilter = new StreamMarketFilter().WithMarketIds(marketId);
         await _client.Subscribe(marketFilter, new DataFilter());
 
         var result = await ReadLastLineInStream();

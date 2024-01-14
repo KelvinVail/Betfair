@@ -16,7 +16,7 @@ public class StreamMarketFilterTests
     [InlineData("1.234567")]
     public void CanBeInitializedWithMarketId(string marketId)
     {
-        _filter.IncludeMarketIds(marketId);
+        _filter.WithMarketIds(marketId);
 
         _filter.MarketIds.Should().Contain(marketId);
     }
@@ -26,7 +26,7 @@ public class StreamMarketFilterTests
     [InlineData("1.234567")]
     public void CanBeInitializedWithMultipleMarketIds(string marketId)
     {
-        _filter.IncludeMarketIds(marketId).IncludeMarketIds("2");
+        _filter.WithMarketIds(marketId).WithMarketIds("2");
 
         _filter.MarketIds.Should().Contain(marketId);
         _filter.MarketIds.Should().Contain("2");
@@ -35,7 +35,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateMarketIds()
     {
-        _filter.IncludeMarketIds("1").IncludeMarketIds("1");
+        _filter.WithMarketIds("1").WithMarketIds("1");
 
         _filter.MarketIds?.Count.Should().Be(1);
         _filter.MarketIds.Should().Contain("1");
@@ -51,7 +51,7 @@ public class StreamMarketFilterTests
     [InlineData("GB")]
     public void CanBeInitializedWithCountryCodes(string countryCode)
     {
-        _filter.IncludeCountries(countryCode);
+        _filter.WithCountries(countryCode);
 
         _filter.CountryCodes.Should().Contain(countryCode);
     }
@@ -59,8 +59,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleCountryCodes()
     {
-        _filter.IncludeCountries("GB");
-        _filter.IncludeCountries("IE");
+        _filter.WithCountries("GB");
+        _filter.WithCountries("IE");
 
         _filter.CountryCodes.Should().Contain("GB");
         _filter.CountryCodes.Should().Contain("IE");
@@ -69,8 +69,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateCountryCodes()
     {
-        _filter.IncludeCountries("GB");
-        _filter.IncludeCountries("GB");
+        _filter.WithCountries("GB");
+        _filter.WithCountries("GB");
 
         _filter.CountryCodes?.Count.Should().Be(1);
         _filter.CountryCodes.Should().Contain("GB");
@@ -83,7 +83,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithInPlayMarketsOnly()
     {
-        _filter.IncludeInPlayMarketsOnly();
+        _filter.WithInPlayMarketsOnly();
 
         _filter.TurnInPlayEnabled.Should().BeTrue();
     }
@@ -106,7 +106,7 @@ public class StreamMarketFilterTests
     [InlineData("HALF_TIME_SCORE")]
     public void CanBeInitializedWithMarketTypes(string marketType)
     {
-        _filter.IncludeMarketTypes(marketType);
+        _filter.WithMarketTypes(marketType);
 
         _filter.MarketTypes.Should().Contain(marketType);
     }
@@ -114,8 +114,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleMarketTypes()
     {
-        _filter.IncludeMarketTypes("MATCH_ODDS");
-        _filter.IncludeMarketTypes("HALF_TIME_SCORE");
+        _filter.WithMarketTypes("MATCH_ODDS");
+        _filter.WithMarketTypes("HALF_TIME_SCORE");
 
         _filter.MarketTypes.Should().Contain("MATCH_ODDS");
         _filter.MarketTypes.Should().Contain("HALF_TIME_SCORE");
@@ -124,8 +124,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateMarketTypes()
     {
-        _filter.IncludeMarketTypes("MATCH_ODDS");
-        _filter.IncludeMarketTypes("MATCH_ODDS");
+        _filter.WithMarketTypes("MATCH_ODDS");
+        _filter.WithMarketTypes("MATCH_ODDS");
 
         _filter.MarketTypes?.Count.Should().Be(1);
         _filter.MarketTypes.Should().Contain("MATCH_ODDS");
@@ -138,7 +138,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithVenues()
     {
-        _filter.IncludeVenues(Venue.Albany, Venue.AliceSprings);
+        _filter.WithVenues(Venue.Albany, Venue.AliceSprings);
 
         _filter.Venues.Should().Contain(Venue.Albany.Id);
         _filter.Venues.Should().Contain(Venue.AliceSprings.Id);
@@ -147,7 +147,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullVenueHasNoEffect()
     {
-        _filter.IncludeVenues(Venue.Albany, null!);
+        _filter.WithVenues(Venue.Albany, null!);
 
         _filter.Venues.Should().Contain(Venue.Albany.Id);
         _filter.Venues.Should().NotContainNulls();
@@ -156,7 +156,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullVenueIdHasNoEffect()
     {
-        _filter.IncludeVenues("Albany", null!);
+        _filter.WithVenues("Albany", null!);
 
         _filter.Venues.Should().Contain("Albany");
         _filter.Venues.Should().NotContainNulls();
@@ -165,7 +165,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullVenueArray()
     {
-        _filter.IncludeVenues((Venue[])null!);
+        _filter.WithVenues((Venue[])null!);
 
         _filter.Venues.Should().BeNull();
     }
@@ -173,7 +173,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullVenueIdArrayHasNoEffect()
     {
-        _filter.IncludeVenues((string[])null!);
+        _filter.WithVenues((string[])null!);
 
         _filter.Venues.Should().BeNull();
     }
@@ -184,7 +184,7 @@ public class StreamMarketFilterTests
     [InlineData("Epsom")]
     public void CanBeInitializedWithVenueId(string venue)
     {
-        _filter.IncludeVenues(venue);
+        _filter.WithVenues(venue);
 
         _filter.Venues.Should().Contain(venue);
     }
@@ -192,8 +192,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleVenues()
     {
-        _filter.IncludeVenues("Ascot");
-        _filter.IncludeVenues("Epsom");
+        _filter.WithVenues("Ascot");
+        _filter.WithVenues("Epsom");
 
         _filter.Venues.Should().Contain("Ascot");
         _filter.Venues.Should().Contain("Epsom");
@@ -202,8 +202,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanNotBeCreatedWithDuplicateVenues()
     {
-        _filter.IncludeVenues("Ascot");
-        _filter.IncludeVenues("Ascot");
+        _filter.WithVenues("Ascot");
+        _filter.WithVenues("Ascot");
 
         _filter.Venues?.Count.Should().Be(1);
         _filter.Venues.Should().Contain("Ascot");
@@ -218,7 +218,7 @@ public class StreamMarketFilterTests
     [InlineData(7)]
     public void CanBeInitializedWithEventTypeId(int eventTypeId)
     {
-        _filter.IncludeEventTypes(eventTypeId);
+        _filter.WithEventTypes(eventTypeId);
 
         _filter.EventTypeIds.Should().Contain(eventTypeId);
     }
@@ -226,8 +226,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleEventTypeIds()
     {
-        _filter.IncludeEventTypes(1);
-        _filter.IncludeEventTypes(2);
+        _filter.WithEventTypes(1);
+        _filter.WithEventTypes(2);
 
         _filter.EventTypeIds.Should().Contain(1);
         _filter.EventTypeIds.Should().Contain(2);
@@ -236,8 +236,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateEventTypeIds()
     {
-        _filter.IncludeEventTypes(1);
-        _filter.IncludeEventTypes(1);
+        _filter.WithEventTypes(1);
+        _filter.WithEventTypes(1);
 
         _filter.EventTypeIds?.Count.Should().Be(1);
         _filter.EventTypeIds.Should().Contain(1);
@@ -250,7 +250,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullEventIdsHasNoEffect()
     {
-        _filter.IncludeEventIds("12345", null!);
+        _filter.WithEventIds("12345", null!);
 
         _filter.EventIds.Should().Contain("12345");
         _filter.EventIds.Should().NotContainNulls();
@@ -259,7 +259,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullEventIdArrayHasNoEffect()
     {
-        _filter.IncludeEventIds(null!);
+        _filter.WithEventIds(null!);
 
         _filter.EventIds.Should().BeNull();
     }
@@ -270,7 +270,7 @@ public class StreamMarketFilterTests
     [InlineData("98765")]
     public void CanBeInitializedWithEventId(string eventId)
     {
-        _filter.IncludeEventIds(eventId);
+        _filter.WithEventIds(eventId);
 
         _filter.EventIds.Should().Contain(eventId);
     }
@@ -278,8 +278,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleEventIds()
     {
-        _filter.IncludeEventIds("12345");
-        _filter.IncludeEventIds("98765");
+        _filter.WithEventIds("12345");
+        _filter.WithEventIds("98765");
 
         _filter.EventIds.Should().Contain("12345");
         _filter.EventIds.Should().Contain("98765");
@@ -288,8 +288,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateEventIds()
     {
-        _filter.IncludeEventIds("12345");
-        _filter.IncludeEventIds("12345");
+        _filter.WithEventIds("12345");
+        _filter.WithEventIds("12345");
 
         _filter.EventIds?.Count.Should().Be(1);
         _filter.EventIds.Should().Contain("12345");
@@ -302,7 +302,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithBspMarketsOnly()
     {
-        _filter.IncludeBspMarketsOnly();
+        _filter.WithBspMarketsOnly();
 
         _filter.BspMarket.Should().BeTrue();
     }
@@ -322,7 +322,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithBettingTypes()
     {
-        _filter.IncludeBettingTypes(BettingType.Odds, BettingType.Line);
+        _filter.WithBettingTypes(BettingType.Odds, BettingType.Line);
 
         _filter.BettingTypes.Should().Contain(BettingType.Odds.Id);
         _filter.BettingTypes.Should().Contain(BettingType.Line.Id);
@@ -331,7 +331,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddNullBettingTypeHasNoEffect()
     {
-        _filter.IncludeBettingTypes(BettingType.Odds, null!);
+        _filter.WithBettingTypes(BettingType.Odds, null!);
 
         _filter.BettingTypes.Should().Contain(BettingType.Odds.Id);
         _filter.BettingTypes.Should().NotContainNulls();
@@ -340,7 +340,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddNullBettingTypeIdHasNoEffect()
     {
-        _filter.IncludeBettingTypes("ODDS", null!);
+        _filter.WithBettingTypes("ODDS", null!);
 
         _filter.BettingTypes.Should().Contain("ODDS");
         _filter.BettingTypes.Should().NotContainNulls();
@@ -349,7 +349,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddNullBettingTypeArrayHasNoEffect()
     {
-        _filter.IncludeBettingTypes((BettingType[])null!);
+        _filter.WithBettingTypes((BettingType[])null!);
 
         _filter.BettingTypes.Should().BeNull();
     }
@@ -357,7 +357,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddNullBettingTypeIdArrayHasNoEffect()
     {
-        _filter.IncludeBettingTypes((string[])null!);
+        _filter.WithBettingTypes((string[])null!);
 
         _filter.BettingTypes.Should().BeNull();
     }
@@ -367,7 +367,7 @@ public class StreamMarketFilterTests
     [InlineData("LINE")]
     public void CanBeInitializedWithBettingTypeOddsIds(string bettingType)
     {
-        _filter.IncludeBettingTypes(bettingType);
+        _filter.WithBettingTypes(bettingType);
 
         _filter.BettingTypes.Should().Contain(bettingType);
     }
@@ -375,8 +375,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleBettingTypeOdds()
     {
-        _filter.IncludeBettingTypes("ODDS");
-        _filter.IncludeBettingTypes("LINE");
+        _filter.WithBettingTypes("ODDS");
+        _filter.WithBettingTypes("LINE");
 
         _filter.BettingTypes.Should().Contain("ODDS");
         _filter.BettingTypes.Should().Contain("LINE");
@@ -385,8 +385,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateBettingTypes()
     {
-        _filter.IncludeBettingTypes("ODDS");
-        _filter.IncludeBettingTypes("ODDS");
+        _filter.WithBettingTypes("ODDS");
+        _filter.WithBettingTypes("ODDS");
 
         _filter.BettingTypes?.Count.Should().Be(1);
         _filter.BettingTypes.Should().Contain("ODDS");

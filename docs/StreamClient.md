@@ -27,11 +27,11 @@ await streamClient.Authenticate();
 To avoid a timeout you must subscribe to either a market or order stream within 15 seconds of authenticating the StreamClient.
 
 ## Subscribe to a Market Stream
-To subscribe to a market stream we need to define which markets to subscribe to and what data we want returned in the stream. For more information on filters see [MarketFilter](/docs/MarketFilter.md) and [DataFilter](/docs/MarketFilter.md). In this example we are subscribing to a single market and requesting that only the best available prices are return in the data stream.
+To subscribe to a market stream we need to define which markets to subscribe to and what data we want returned in the stream. For more information on filters see [StreamMarketFilter](/docs/StreamMarketFilter.md) and [DataFilter](/docs/MarketFilter.md). In this example we are subscribing to a single market and requesting that only the best available prices are return in the data stream.
 
-A recommended tip is to use the MarketFilter to subscribe to all markets you are interested in for the duration of your programs execution. This eliminates the need to close and recreate StreamClients for each new market you need. To improve speed, limit the DataFilter to only the data you need. 
+A recommended tip is to use the StreamMarketFilter to subscribe to all markets you are interested in for the duration of your programs execution. This eliminates the need to close and recreate StreamClients for each new market you need. To improve speed, limit the DataFilter to only the data you need. 
 ```csharp
-var marketFilter = new MarketFilter().WithMarketId("1.23456789");
+var marketFilter = new StreamMarketFilter().WithMarketId("1.23456789");
 var dataFilter = new DataFilter().WithBestPrices();
 ```
 

@@ -18,7 +18,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     /// Restrict to markets that will turn in play.
     /// </summary>
     /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
-    public StreamMarketFilter IncludeInPlayMarketsOnly()
+    public StreamMarketFilter WithInPlayMarketsOnly()
     {
         TurnInPlayEnabled = true;
         return this;
@@ -39,11 +39,11 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     /// </summary>
     /// <param name="venues">List of Venue to include.</param>
     /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
-    public StreamMarketFilter IncludeVenues(params Venue[] venues) =>
-        venues is null ? this : IncludeVenues(venues.Where(x => x is not null).Select(x => x.Id).ToArray());
+    public StreamMarketFilter WithVenues(params Venue[] venues) =>
+        venues is null ? this : WithVenues(venues.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    /// <inheritdoc cref="StreamMarketFilter.IncludeVenues"/>
-    public StreamMarketFilter IncludeVenues(params string[] venues)
+    /// <inheritdoc cref="StreamMarketFilter.WithVenues"/>
+    public StreamMarketFilter WithVenues(params string[] venues)
     {
         if (venues is null) return this;
 
@@ -59,7 +59,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     /// </summary>
     /// <param name="eventIds">List of EventIds to include.</param>
     /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
-    public StreamMarketFilter IncludeEventIds(params string[] eventIds)
+    public StreamMarketFilter WithEventIds(params string[] eventIds)
     {
         if (eventIds is null) return this;
 
@@ -74,7 +74,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     /// Restrict to Bsp markets only.
     /// </summary>
     /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
-    public StreamMarketFilter IncludeBspMarketsOnly()
+    public StreamMarketFilter WithBspMarketsOnly()
     {
         BspMarket = true;
         return this;
@@ -95,11 +95,11 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     /// </summary>
     /// <param name="bettingTypes">The betting type to include.</param>
     /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
-    public StreamMarketFilter IncludeBettingTypes(params BettingType[] bettingTypes) =>
-        bettingTypes is null ? this : IncludeBettingTypes(bettingTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
+    public StreamMarketFilter WithBettingTypes(params BettingType[] bettingTypes) =>
+        bettingTypes is null ? this : WithBettingTypes(bettingTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    /// <inheritdoc cref="StreamMarketFilter.IncludeBettingTypes"/>
-    public StreamMarketFilter IncludeBettingTypes(params string[] bettingTypes)
+    /// <inheritdoc cref="StreamMarketFilter.WithBettingTypes"/>
+    public StreamMarketFilter WithBettingTypes(params string[] bettingTypes)
     {
         if (bettingTypes is null) return this;
 

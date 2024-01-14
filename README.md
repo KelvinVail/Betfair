@@ -42,7 +42,7 @@ Create a stream client. Then use a MarketFilter and DataFilter to start a stream
 using var streamClient = new StreamClient(credentials);
 await streamClient.Authenticate();
 await streamClient.Subscribe(
-	new MarketFilter().WithMarketId("MARKET_ID"),
+	new StreamMarketFilter().WithMarketIds("MARKET_ID"),
 	new DataFilter().WithBestPrices());
 
 await foreach (var change in streamClient.GetChanges())
