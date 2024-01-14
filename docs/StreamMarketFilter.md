@@ -1,6 +1,19 @@
 # StreamMarketFilter
 Use the StreamMarketFilter to define which markets to subscribe to in a Betfair market stream.
 
+- [StreamMarketFilter](#streammarketfilter)
+  - [Chaining market filters](#chaining-market-filters)
+  - [Available Market Filters](#available-market-filters)
+    - [MarketId](#marketid)
+    - [Event Type (Horse Racing, Soccer...)](#event-type-horse-racing-soccer)
+    - [Market Type (Win, Place, Match Odds...)](#market-type-win-place-match-odds)
+    - [Country](#country)
+    - [Venue (Lingfield, Wolverhampton...)](#venue-lingfield-wolverhampton)
+    - [Events (Lingfield 14th Jan, Kelso 14th Jan...)](#events-lingfield-14th-jan-kelso-14th-jan)
+    - [Turn In Play](#turn-in-play)
+    - [Betfair Starting Price Markets (BSP)](#betfair-starting-price-markets-bsp)
+    - [Betting Types (Asian Handicap Singles, Asian Handicap Doubles...)](#betting-types-asian-handicap-singles-asian-handicap-doubles)
+
 ## Chaining market filters
 The StreamMarketFilter class can be used to build up a list of criteria to filter the markets you subscribe
 to in the Betfair stream. Only markets that meet all your filtered requirements will be subscribed to.
