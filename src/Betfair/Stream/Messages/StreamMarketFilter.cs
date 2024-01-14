@@ -59,7 +59,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     /// </summary>
     /// <param name="eventIds">List of EventIds to include.</param>
     /// <returns>This <see cref="StreamMarketFilter"/>.</returns>
-    public StreamMarketFilter WithEventIds(params string[] eventIds)
+    public StreamMarketFilter WithEventsIds(params string[] eventIds)
     {
         if (eventIds is null) return this;
 
@@ -98,8 +98,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     public StreamMarketFilter WithBettingTypes(params BettingType[] bettingTypes) =>
         bettingTypes is null ? this : WithBettingTypes(bettingTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    /// <inheritdoc cref="StreamMarketFilter.WithBettingTypes"/>
-    public StreamMarketFilter WithBettingTypes(params string[] bettingTypes)
+    private StreamMarketFilter WithBettingTypes(params string[] bettingTypes)
     {
         if (bettingTypes is null) return this;
 

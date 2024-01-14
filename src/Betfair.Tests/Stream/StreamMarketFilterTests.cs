@@ -250,7 +250,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullEventIdsHasNoEffect()
     {
-        _filter.WithEventIds("12345", null!);
+        _filter.WithEventsIds("12345", null!);
 
         _filter.EventIds.Should().Contain("12345");
         _filter.EventIds.Should().NotContainNulls();
@@ -259,7 +259,7 @@ public class StreamMarketFilterTests
     [Fact]
     public void AddingNullEventIdArrayHasNoEffect()
     {
-        _filter.WithEventIds(null!);
+        _filter.WithEventsIds(null!);
 
         _filter.EventIds.Should().BeNull();
     }
@@ -270,7 +270,7 @@ public class StreamMarketFilterTests
     [InlineData("98765")]
     public void CanBeInitializedWithEventId(string eventId)
     {
-        _filter.WithEventIds(eventId);
+        _filter.WithEventsIds(eventId);
 
         _filter.EventIds.Should().Contain(eventId);
     }
@@ -278,8 +278,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void CanBeInitializedWithMultipleEventIds()
     {
-        _filter.WithEventIds("12345");
-        _filter.WithEventIds("98765");
+        _filter.WithEventsIds("12345");
+        _filter.WithEventsIds("98765");
 
         _filter.EventIds.Should().Contain("12345");
         _filter.EventIds.Should().Contain("98765");
@@ -288,8 +288,8 @@ public class StreamMarketFilterTests
     [Fact]
     public void WhenInitializedDoesNotAddDuplicateEventIds()
     {
-        _filter.WithEventIds("12345");
-        _filter.WithEventIds("12345");
+        _filter.WithEventsIds("12345");
+        _filter.WithEventsIds("12345");
 
         _filter.EventIds?.Count.Should().Be(1);
         _filter.EventIds.Should().Contain("12345");
@@ -338,57 +338,10 @@ public class StreamMarketFilterTests
     }
 
     [Fact]
-    public void AddNullBettingTypeIdHasNoEffect()
-    {
-        _filter.WithBettingTypes("ODDS", null!);
-
-        _filter.BettingTypes.Should().Contain("ODDS");
-        _filter.BettingTypes.Should().NotContainNulls();
-    }
-
-    [Fact]
     public void AddNullBettingTypeArrayHasNoEffect()
     {
-        _filter.WithBettingTypes((BettingType[])null!);
+        _filter.WithBettingTypes(null!);
 
         _filter.BettingTypes.Should().BeNull();
-    }
-
-    [Fact]
-    public void AddNullBettingTypeIdArrayHasNoEffect()
-    {
-        _filter.WithBettingTypes((string[])null!);
-
-        _filter.BettingTypes.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData("ODDS")]
-    [InlineData("LINE")]
-    public void CanBeInitializedWithBettingTypeOddsIds(string bettingType)
-    {
-        _filter.WithBettingTypes(bettingType);
-
-        _filter.BettingTypes.Should().Contain(bettingType);
-    }
-
-    [Fact]
-    public void CanBeInitializedWithMultipleBettingTypeOdds()
-    {
-        _filter.WithBettingTypes("ODDS");
-        _filter.WithBettingTypes("LINE");
-
-        _filter.BettingTypes.Should().Contain("ODDS");
-        _filter.BettingTypes.Should().Contain("LINE");
-    }
-
-    [Fact]
-    public void WhenInitializedDoesNotAddDuplicateBettingTypes()
-    {
-        _filter.WithBettingTypes("ODDS");
-        _filter.WithBettingTypes("ODDS");
-
-        _filter.BettingTypes?.Count.Should().Be(1);
-        _filter.BettingTypes.Should().Contain("ODDS");
     }
 }
