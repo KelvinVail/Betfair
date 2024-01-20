@@ -1,17 +1,10 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace Betfair.Core.Login;
+﻿namespace Betfair.Core.Login;
 
 /// <summary>
 /// Used to store all information need to authenticate to Betfair.
 /// </summary>
 public sealed class Credentials
 {
-    private const string _apiLogin = "https://identitysso.betfair.com/api/login";
-    private const string _certLogin = "https://identitysso-cert.betfair.com/api/certlogin";
-    private readonly string _username;
-    private readonly string _password;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="Credentials"/> class.
     /// Used to store all information need to authenticate to Betfair.
@@ -34,45 +27,17 @@ public sealed class Credentials
         if (string.IsNullOrWhiteSpace(appKey))
             throw new ArgumentNullException(nameof(appKey));
 
-        _username = username;
-        _password = password;
+        Username = username;
+        Password = password;
         AppKey = appKey;
         Certificate = cert;
     }
 
-    internal X509Certificate2? Certificate { get; private set; }
+    internal string Username { get; }
+
+    internal string Password { get; }
 
     internal string AppKey { get; }
 
-    internal HttpRequestMessage GetLoginRequest() =>
-        Certificate is not null ? CertLogin() : ApiLogin();
-
-    private HttpRequestMessage ApiLogin()
-    {
-        var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            new Uri(_apiLogin));
-
-        AddHeadersAndContent(request);
-
-        return request;
-    }
-
-    private HttpRequestMessage CertLogin()
-    {
-        var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            new Uri(_certLogin));
-
-        AddHeadersAndContent(request);
-
-        return request;
-    }
-
-    private void AddHeadersAndContent(HttpRequestMessage request)
-    {
-        request.Headers.Add("X-Application", AppKey);
-        request.Content = new FormUrlEncodedContent(
-            new Dictionary<string, string> { { "username", _username }, { "password", _password } });
-    }
+    internal X509Certificate2? Certificate { get; }
 }

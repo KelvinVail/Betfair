@@ -84,12 +84,4 @@ public sealed class CredentialsTests
 
         ex.ParamName.Should().Be("appKey");
     }
-
-    [Fact]
-    public void GetLoginRequestShould()
-    {
-        var credentials = new Credentials("username", "password", "appKey");
-
-        credentials.GetLoginRequest();
-    }
 }
