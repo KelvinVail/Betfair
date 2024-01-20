@@ -3,7 +3,7 @@ using Betfair.Core.Login;
 
 namespace Betfair.Tests.TestDoubles;
 
-public class BetfairHttpClientStub : BetfairHttpClient
+internal class BetfairHttpClientStub : BetfairHttpClient
 {
     public BetfairHttpClientStub()
         : base(new Credentials("u", "p", "a"))

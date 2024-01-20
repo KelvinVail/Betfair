@@ -15,7 +15,7 @@ public class BetfairApiClient : IDisposable
     public BetfairApiClient(Credentials credentials) =>
         _client = new BetfairHttpClient(credentials);
 
-    public BetfairApiClient(BetfairHttpClient client)
+    internal BetfairApiClient(BetfairHttpClient client)
     {
         _client = client;
         _disposeClient = false;

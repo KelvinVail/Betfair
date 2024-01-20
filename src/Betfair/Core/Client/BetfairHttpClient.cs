@@ -3,7 +3,7 @@ using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace Betfair.Core.Client;
 
-public class BetfairHttpClient : HttpClient
+internal class BetfairHttpClient : HttpClient
 {
     private static readonly BetfairClientHandler _handler = new ();
     private readonly Credentials _credentials;
