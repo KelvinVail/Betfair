@@ -23,6 +23,9 @@ public sealed class ChangeMessage
     [DataMember(Name = "connectionClosed", EmitDefaultValue = false)]
     public bool? ConnectionClosed { get; init; }
 
+    [DataMember(Name = "connectionsAvailable", EmitDefaultValue = false)]
+    public int? ConnectionsAvailable { get; init; }
+
     [DataMember(Name = "initialClk", EmitDefaultValue = false)]
     public string? InitialClock { get; init; }
 
