@@ -21,35 +21,24 @@ internal sealed class TokenProvider
 
         var response = await GetLoginResponse(request, cancellationToken);
 
-        if (!LoginIsSuccess(response)) throw Error(response);
+        if (!LoginIsSuccess(response)) throw new HttpRequestException(response.Error);
 
-        return TokenFrom(response);
+        return response.Token;
     }
 
-    private static bool LoginIsSuccess(LoginResponse result) =>
-        result.Status.Equals("success", StringComparison.OrdinalIgnoreCase)
-        || result.LoginStatus.Equals("Success", StringComparison.OrdinalIgnoreCase);
-
-    private static string TokenFrom(LoginResponse result) =>
-        !string.IsNullOrWhiteSpace(result.Token)
-            ? result.Token
-            : result.SessionToken;
-
-    private static HttpRequestException Error(LoginResponse result) =>
-        new (
-            !string.IsNullOrWhiteSpace(result.Error)
-            ? result.Error
-            : result.LoginStatus);
+    private static bool LoginIsSuccess(MergedResponse result) =>
+        result.Status.Equals("success", StringComparison.OrdinalIgnoreCase);
 
     private HttpRequestMessage GetLoginRequest() =>
         _credentials.Certificate is not null ? CertLogin() : ApiLogin();
 
-    private async Task<LoginResponse> GetLoginResponse(HttpRequestMessage request, CancellationToken cancellationToken)
+    private async Task<MergedResponse> GetLoginResponse(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var response = await _client.SendAsync(request, cancellationToken);
-        return await JsonSerializer.DeserializeAsync<LoginResponse>(
+        var result = await JsonSerializer.DeserializeAsync<LoginResponse>(
             await response.Content.ReadAsStreamAsync(cancellationToken),
             StandardResolver.AllowPrivateExcludeNullCamelCase);
+        return new MergedResponse(result);
     }
 
     private HttpRequestMessage ApiLogin()
@@ -79,5 +68,35 @@ internal sealed class TokenProvider
         request.Headers.Add("X-Application", _credentials.AppKey);
         request.Content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", _credentials.Username }, { "password", _credentials.Password } });
+    }
+
+    // ReSharper disable once ClassNeverInstantiated.Local
+    private sealed class LoginResponse
+    {
+        public string Token { get; init; } = string.Empty;
+
+        public string Status { get; init; } = string.Empty;
+
+        public string Error { get; init; } = string.Empty;
+
+        public string SessionToken { get; init; } = string.Empty;
+
+        public string LoginStatus { get; init; } = string.Empty;
+    }
+
+    private sealed class MergedResponse
+    {
+        public MergedResponse(LoginResponse response)
+        {
+            Token = response.Token + response.SessionToken;
+            Status = response.Status + response.LoginStatus;
+            Error = response.Error + response.LoginStatus;
+        }
+
+        public string Token { get; }
+
+        public string Status { get; }
+
+        public string Error { get; }
     }
 }

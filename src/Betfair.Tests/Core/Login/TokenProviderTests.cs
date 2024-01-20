@@ -166,9 +166,12 @@ public class TokenProviderTests : IDisposable
     [InlineData("Other")]
     public async Task CertLoginRespondsWithSessionToken(string token)
     {
+        using var cert = new X509Certificate2Stub();
+        var cred = new Credentials("username", "password", "appKey", cert);
+        var provider = new TokenProvider(_client, cred);
         _handler.RespondsWithBody = new { SessionToken = token, LoginStatus = "SUCCESS", };
 
-        var result = await _provider.GetToken(default);
+        var result = await provider.GetToken(default);
 
         result.Should().Be(token);
     }
@@ -191,24 +194,15 @@ public class TokenProviderTests : IDisposable
     [InlineData("INVALID_USERNAME_OR_PASSWORD")]
     public async Task CertLoginRespondsWithErrorIfNotSuccessful(string error)
     {
+        using var cert = new X509Certificate2Stub();
+        var cred = new Credentials("username", "password", "appKey", cert);
+        var provider = new TokenProvider(_client, cred);
         _handler.RespondsWithBody = new { LoginStatus = error };
 
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
-            _provider.GetToken(default));
+            provider.GetToken(default));
 
         ex.Message.Should().Be(error);
-    }
-
-    [Fact]
-    public void LoginResponseIsCreatedWithDefaultEmptyStrings()
-    {
-        var loginResponse = new LoginResponse();
-
-        loginResponse.Token.Should().BeEmpty();
-        loginResponse.Status.Should().BeEmpty();
-        loginResponse.Error.Should().BeEmpty();
-        loginResponse.SessionToken.Should().BeEmpty();
-        loginResponse.LoginStatus.Should().BeEmpty();
     }
 
     public void Dispose()
