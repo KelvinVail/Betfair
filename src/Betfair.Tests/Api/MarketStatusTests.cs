@@ -1,25 +1,31 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Responses;
+using Betfair.Tests.Core.Client.TestDoubles;
 using Betfair.Tests.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
 public class MarketStatusTests : IDisposable
 {
-    private readonly BetfairHttpClientStub _httpClient = new ();
+    private readonly TokenProviderStub _provider = new ();
+    private readonly HttpMessageHandlerSpy _handler = new();
+    private readonly HttpClientStub _httpClient;
 
     private readonly BetfairApiClient _client;
     private bool _disposedValue;
 
-    public MarketStatusTests() =>
-        _client = new BetfairApiClient(_httpClient);
+    public MarketStatusTests()
+    {
+        _httpClient = new HttpClientStub(_handler);
+        _client = new BetfairApiClient(_httpClient, _provider);
+    }
 
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
         await _client.MarketStatus("1.23456789", default);
 
-        _httpClient.LastPostedUri.Should().Be("https://api.betfair.com/exchange/betting/rest/v1.0/listMarketBook/");
+        _handler.UriCalled.Should().Be("https://api.betfair.com/exchange/betting/rest/v1.0/listMarketBook/");
     }
 
     [Theory]
@@ -29,13 +35,13 @@ public class MarketStatusTests : IDisposable
     {
         await _client.MarketStatus(marketId, default);
 
-        _httpClient.LastPostedBody.Should().BeEquivalentTo(new { MarketIds = new List<string> { marketId } });
+        _handler.ContentSent.Should().BeEquivalentTo(new { MarketIds = new List<string> { marketId } });
     }
 
     [Fact]
     public async Task IfResponseIsEmptyReturnNone()
     {
-        _httpClient.ReturnsBody = new List<MarketStatus>();
+        _handler.RespondsWithBody = new List<MarketStatus>();
 
         var response = await _client.MarketStatus("1.2345", default);
 
@@ -49,7 +55,7 @@ public class MarketStatusTests : IDisposable
     [InlineData("CLOSED")]
     public async Task ReturnStatusFromResponse(string status)
     {
-        _httpClient.ReturnsBody = new List<MarketStatus> { new () { Status = status } };
+        _handler.RespondsWithBody = new List<MarketStatus> { new () { Status = status } };
 
         var response = await _client.MarketStatus("1.2345", default);
 

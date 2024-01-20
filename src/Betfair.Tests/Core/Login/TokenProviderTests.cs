@@ -14,7 +14,7 @@ public class TokenProviderTests : IDisposable
 
     public TokenProviderTests()
     {
-        _client = new BetfairHttpClient(_handler, _cred);
+        _client = new BetfairHttpClient(_handler);
         _provider = new TokenProvider(_client, _cred);
         _handler.RespondsWithBody = new { Token = "Token", Status = "SUCCESS", };
     }

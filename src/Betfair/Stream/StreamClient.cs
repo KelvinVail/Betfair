@@ -11,7 +11,9 @@ namespace Betfair.Stream;
 public class StreamClient : IDisposable
 {
     private readonly Pipeline _pipe;
-    private readonly BetfairHttpClient _httpClient;
+    private readonly HttpClient _httpClient;
+    private readonly TokenProvider _provider;
+    private string _appKey;
     private int _requestId;
     private bool _disposedValue;
 
@@ -22,11 +24,13 @@ public class StreamClient : IDisposable
     /// <param name="credentials">The <see cref="Credentials"/> object need to authenticate with Betfair.</param>
     public StreamClient(Credentials credentials)
     {
-        _httpClient = new BetfairHttpClient(credentials);
+        _httpClient = new BetfairHttpClient(credentials.Certificate);
+        _provider = new TokenProvider(_httpClient, credentials);
+        _appKey = credentials.AppKey;
         _pipe = new Pipeline(new BetfairTcpClient());
     }
 
-    internal StreamClient(System.IO.Stream stream, BetfairHttpClient client)
+    internal StreamClient(System.IO.Stream stream, HttpClient client)
     {
         _pipe = new Pipeline(stream);
         _httpClient = client;
@@ -41,8 +45,8 @@ public class StreamClient : IDisposable
     {
         // TODO Hide this method call.
         _requestId++;
-        var token = await _httpClient.GetToken(cancellationToken);
-        var authMessage = new Authentication(_requestId, token, _httpClient.AppKey);
+        var token = await _provider.GetToken(cancellationToken);
+        var authMessage = new Authentication(_requestId, token, _appKey);
 
         await _pipe.Write(authMessage);
     }

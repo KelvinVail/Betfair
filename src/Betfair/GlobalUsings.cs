@@ -12,3 +12,4 @@ global using System.Runtime.Serialization;
 global using System.Security.Cryptography.X509Certificates;
 global using Utf8Json;
 global using Utf8Json.Resolvers;
+global using JsonSerializer = Utf8Json.JsonSerializer;

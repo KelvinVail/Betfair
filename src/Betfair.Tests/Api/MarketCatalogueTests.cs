@@ -1,25 +1,31 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests;
+using Betfair.Tests.Core.Client.TestDoubles;
 using Betfair.Tests.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
 public class MarketCatalogueTests : IDisposable
 {
-    private readonly BetfairHttpClientStub _httpClient = new ();
+    private readonly TokenProviderStub _provider = new ();
+    private readonly HttpMessageHandlerSpy _handler = new ();
+    private readonly HttpClientStub _httpClient;
 
     private readonly BetfairApiClient _client;
     private bool _disposedValue;
 
-    public MarketCatalogueTests() =>
-        _client = new BetfairApiClient(_httpClient);
+    public MarketCatalogueTests()
+    {
+        _httpClient = new HttpClientStub(_handler);
+        _client = new BetfairApiClient(_httpClient, _provider);
+    }
 
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
         await _client.MarketCatalogue();
 
-        _httpClient.LastPostedUri.Should().Be(
+        _handler.UriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketCatalogue/");
     }
 
@@ -28,7 +34,7 @@ public class MarketCatalogueTests : IDisposable
     {
         await _client.MarketCatalogue();
 
-        _httpClient.LastPostedBody.Should().BeEquivalentTo(
+        _handler.ContentSent.Should().BeEquivalentTo(
             new MarketCatalogueQuery());
     }
 

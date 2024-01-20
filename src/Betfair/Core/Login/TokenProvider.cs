@@ -1,26 +1,28 @@
-﻿using Betfair.Core.Client;
+﻿namespace Betfair.Core.Login;
 
-namespace Betfair.Core.Login;
-
-internal sealed class TokenProvider
+internal class TokenProvider
 {
     private const string _apiLogin = "https://identitysso.betfair.com/api/login";
     private const string _certLogin = "https://identitysso-cert.betfair.com/api/certlogin";
-    private readonly BetfairHttpClient _client;
+    private readonly HttpClient _client;
     private readonly Credentials _credentials;
 
-    internal TokenProvider(BetfairHttpClient client, Credentials credentials)
+    internal TokenProvider(HttpClient client, Credentials credentials)
     {
         _client = client;
         _credentials = credentials;
     }
 
-    internal async Task<string> GetToken(CancellationToken cancellationToken)
+    internal TokenProvider()
+    {
+        _client = null!;
+        _credentials = null!;
+    }
+
+    internal virtual async Task<string> GetToken(CancellationToken cancellationToken)
     {
         using var request = GetLoginRequest();
-
         var response = await GetLoginResponse(request, cancellationToken);
-
         if (!LoginIsSuccess(response)) throw new HttpRequestException(response.Error);
 
         return response.Token;
