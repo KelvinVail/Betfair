@@ -5,29 +5,21 @@ using Betfair.Core.Login;
 
 namespace Betfair.Api;
 
-public class BetfairApiClient : IDisposable
+public class BetfairApiClient
 {
     private const string _betting = "https://api.betfair.com/exchange/betting/rest/v1.0";
-    private readonly HttpClient _client;
-    private readonly TokenProvider _provider;
-    private string _appKey;
-    private string _token = string.Empty;
-    private readonly bool _disposeClient = true;
-    private bool _disposedValue;
+    private readonly BetfairClient _client;
 
     public BetfairApiClient(Credentials credentials)
     {
-        _client = new BetfairHttpClient(credentials.Certificate);
-        _provider = new TokenProvider(_client, credentials);
-        _appKey = credentials.AppKey;
+        ArgumentNullException.ThrowIfNull(credentials);
+        var httpClient = new BetfairHttpClient(credentials.Certificate);
+        var provider = new TokenProvider(httpClient, credentials);
+        _client = new BetfairClient(httpClient, provider, credentials.AppKey);
     }
 
-    internal BetfairApiClient(HttpClient client, TokenProvider provider)
-    {
+    internal BetfairApiClient(BetfairClient client) =>
         _client = client;
-        _provider = provider;
-        _disposeClient = false;
-    }
 
     public async Task<IReadOnlyList<MarketCatalogue>> MarketCatalogue(
         ApiMarketFilter? filter = null,
@@ -36,7 +28,7 @@ public class BetfairApiClient : IDisposable
     {
         filter ??= new ApiMarketFilter();
         query ??= new MarketCatalogueQuery();
-        return await Post<IReadOnlyList<MarketCatalogue>>(
+        return await _client.Post<IReadOnlyList<MarketCatalogue>>(
             new Uri($"{_betting}/listMarketCatalogue/"),
             new
             {
@@ -52,61 +44,11 @@ public class BetfairApiClient : IDisposable
         string marketId,
         CancellationToken cancellationToken)
     {
-        var response = await Post<List<MarketStatus>>(
+        var response = await _client.Post<List<MarketStatus>>(
             new Uri($"{_betting}/listMarketBook/"),
             new { MarketIds = new List<string> { marketId } },
             cancellationToken);
 
         return response?.FirstOrDefault()?.Status ?? "NONE";
-    }
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposedValue) return;
-
-        if (disposing && _disposeClient)
-            _client.Dispose();
-
-        _disposedValue = true;
-    }
-
-    public virtual async Task<T> Post<T>(
-        Uri uri,
-        object? body = null,
-        CancellationToken cancellationToken = default)
-        where T : class
-    {
-        if (uri is null) throw new ArgumentNullException(nameof(uri));
-        await SetToken(cancellationToken);
-
-        using var request = new HttpRequestMessage(HttpMethod.Post, uri);
-        var json = JsonSerializer.ToJsonString(body, StandardResolver.AllowPrivateExcludeNullCamelCase);
-        using var requestContent = new StringContent(json);
-        requestContent.Headers.Add("X-Authentication", _token);
-        requestContent.Headers.Add("X-Application", _appKey);
-        request.Content = requestContent;
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-        using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException(null, null, statusCode: response.StatusCode);
-
-        var result = JsonSerializer.Deserialize<T>(
-            await response.Content.ReadAsStringAsync(cancellationToken),
-            StandardResolver.AllowPrivateCamelCase);
-
-        return result;
-    }
-
-    private async Task SetToken(CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(_token))
-            _token = await _provider.GetToken(cancellationToken);
     }
 }

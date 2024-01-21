@@ -1,63 +1,22 @@
 ﻿namespace Betfair.Stream;
 
-internal class Pipeline : IDisposable
+internal class Pipeline
 {
     private readonly System.IO.Stream _stream;
     private readonly Pipe _pipe = new ();
-    private readonly BetfairTcpClient _tcp;
-    private bool _disposedValue;
 
-    public Pipeline(BetfairTcpClient tcp)
-    {
-        _tcp = tcp;
-        _tcp.Configure();
-        _stream = _tcp.GetAuthenticatedSslStream();
-    }
-
-    public Pipeline(System.IO.Stream stream)
-    {
+    public Pipeline(System.IO.Stream stream) =>
         _stream = stream;
-        _tcp = new BetfairTcpClient();
-    }
 
     public Task Write(object value) =>
         JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase)
-            .ContinueWith(_ => _stream.WriteByte((byte)'\n'));
+            .ContinueWith(_ => _stream.WriteByte((byte)'\n'))
+            .ContinueWith(_ => FillPipeAsync(_stream, _pipe.Writer));
 
     public async IAsyncEnumerable<byte[]> Read()
     {
-        Task writing = FillPipeAsync(_stream, _pipe.Writer);
         await foreach (var line in ReadPipeAsync(_pipe.Reader))
             yield return line.Slice(0, line.Length).ToArray();
-
-        await writing;
-    }
-
-    public void Close()
-    {
-        _tcp.Client.Shutdown(SocketShutdown.Both);
-        _stream.Close();
-        _tcp.Close();
-    }
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposedValue) return;
-        if (disposing)
-        {
-            if (_tcp.Client != null && _tcp.Client.Connected)
-                _tcp.Client.Shutdown(SocketShutdown.Both);
-            _stream.Dispose();
-            _tcp.Dispose();
-        }
-
-        _disposedValue = true;
     }
 
     private static async Task FillPipeAsync(System.IO.Stream stream, PipeWriter writer)

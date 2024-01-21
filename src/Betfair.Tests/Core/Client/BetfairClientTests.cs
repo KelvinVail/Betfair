@@ -16,7 +16,7 @@ public class BetfairClientTests : IDisposable
     public BetfairClientTests()
     {
         _httpClient = new BetfairHttpClient(_handler);
-        _client = new BetfairClient(_provider, "appKey", _httpClient);
+        _client = new BetfairClient(_httpClient, _provider, "appKey");
     }
 
     [Theory]
@@ -44,7 +44,7 @@ public class BetfairClientTests : IDisposable
     [InlineData("OtherKey")]
     public async Task PostPutsAppKeyIsInContentHeader(string appKey)
     { 
-        var client = new BetfairClient(_provider, appKey, _httpClient);
+        var client = new BetfairClient(_httpClient, _provider, appKey);
 
         await client.Post<dynamic>(_uri);
 

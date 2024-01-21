@@ -11,6 +11,7 @@ namespace Betfair.Stream;
 public class StreamClient : IDisposable
 {
     private readonly Pipeline _pipe;
+    private readonly System.IO.Stream _stream = new BetfairTcpClient().GetAuthenticatedSslStream();
     private readonly HttpClient _httpClient;
     private readonly TokenProvider _provider;
     private string _appKey;
@@ -27,14 +28,14 @@ public class StreamClient : IDisposable
         _httpClient = new BetfairHttpClient(credentials.Certificate);
         _provider = new TokenProvider(_httpClient, credentials);
         _appKey = credentials.AppKey;
-        _pipe = new Pipeline(new BetfairTcpClient());
+        _pipe = new Pipeline(_stream);
     }
 
-    internal StreamClient(System.IO.Stream stream, HttpClient client)
-    {
-        _pipe = new Pipeline(stream);
-        _httpClient = client;
-    }
+    //internal StreamClient(System.IO.Stream stream, HttpClient client)
+    //{
+    //    _pipe = new Pipeline(stream);
+    //    _httpClient = client;
+    //}
 
     /// <summary>
     /// Authenticates the StreamClient with Betfair. Only needs to be performed once on StreamClient creation.
@@ -125,7 +126,7 @@ public class StreamClient : IDisposable
     /// Close the stream to stop receiving change messages.
     /// </summary>
     public void Close() =>
-        _pipe.Close();
+        _stream.Close();
 
     public void Dispose()
     {
@@ -138,7 +139,7 @@ public class StreamClient : IDisposable
         if (_disposedValue) return;
         if (disposing)
         {
-            _pipe.Dispose();
+            _stream.Dispose();
             _httpClient.Dispose();
         }
 
