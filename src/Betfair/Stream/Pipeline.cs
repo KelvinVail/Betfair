@@ -19,7 +19,7 @@ internal class Pipeline
             yield return line.Slice(0, line.Length).ToArray();
     }
 
-    private static async Task FillPipeAsync(System.IO.Stream stream, PipeWriter writer)
+    private async Task FillPipeAsync(System.IO.Stream stream, PipeWriter writer)
     {
         const int minimumBufferSize = 512;
 

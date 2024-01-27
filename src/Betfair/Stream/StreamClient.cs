@@ -12,9 +12,9 @@ public class StreamClient : IDisposable
 {
     private readonly Pipeline _pipe;
     private readonly System.IO.Stream _stream = new BetfairTcpClient().GetAuthenticatedSslStream();
-    private readonly HttpClient _httpClient;
+    private readonly BetfairHttpClient _httpClient;
     private readonly TokenProvider _provider;
-    private string _appKey;
+    private readonly string _appKey;
     private int _requestId;
     private bool _disposedValue;
 

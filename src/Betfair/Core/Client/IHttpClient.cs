@@ -1,6 +1,7 @@
 ﻿namespace Betfair.Core.Client;
 
-public interface IHttpClient
+internal interface IHttpClient
 {
-    Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken);
+    Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)
+        where T : class;
 }

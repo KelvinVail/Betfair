@@ -8,17 +8,15 @@ namespace Betfair.Api;
 public class BetfairApiClient
 {
     private const string _betting = "https://api.betfair.com/exchange/betting/rest/v1.0";
-    private readonly BetfairClient _client;
+    private readonly HttpAdapter _client;
 
     public BetfairApiClient(Credentials credentials)
     {
         ArgumentNullException.ThrowIfNull(credentials);
-        var httpClient = new BetfairHttpClient(credentials.Certificate);
-        var provider = new TokenProvider(httpClient, credentials);
-        _client = new BetfairClient(httpClient, provider, credentials.AppKey);
+        _client = BetfairHttpFactory.Create(credentials);
     }
 
-    internal BetfairApiClient(BetfairClient client) =>
+    internal BetfairApiClient(HttpAdapter client) =>
         _client = client;
 
     public async Task<IReadOnlyList<MarketCatalogue>> MarketCatalogue(
@@ -28,7 +26,7 @@ public class BetfairApiClient
     {
         filter ??= new ApiMarketFilter();
         query ??= new MarketCatalogueQuery();
-        return await _client.Post<IReadOnlyList<MarketCatalogue>>(
+        return await _client.PostAsync<IReadOnlyList<MarketCatalogue>>(
             new Uri($"{_betting}/listMarketCatalogue/"),
             new
             {
@@ -44,7 +42,7 @@ public class BetfairApiClient
         string marketId,
         CancellationToken cancellationToken)
     {
-        var response = await _client.Post<List<MarketStatus>>(
+        var response = await _client.PostAsync<List<MarketStatus>>(
             new Uri($"{_betting}/listMarketBook/"),
             new { MarketIds = new List<string> { marketId } },
             cancellationToken);

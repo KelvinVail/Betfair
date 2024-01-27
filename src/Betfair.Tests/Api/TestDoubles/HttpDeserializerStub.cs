@@ -2,7 +2,7 @@
 
 namespace Betfair.Tests.Api.TestDoubles;
 
-public class BetfairClientStub : BetfairClient
+internal class HttpAdapterStub : HttpAdapter
 {
     public Uri? LastUriCalled { get; private set; }
 
@@ -10,7 +10,7 @@ public class BetfairClientStub : BetfairClient
 
     public object? RespondsWithBody { get; set; }
 
-    internal override Task<T> Post<T>(Uri uri, object? body = null, CancellationToken cancellationToken = default)
+    public override Task<T> PostAsync<T>(Uri uri, object body, CancellationToken ct = default)
     {
         LastUriCalled = uri;
         LastContentSent = body;

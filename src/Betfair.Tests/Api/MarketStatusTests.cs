@@ -6,7 +6,7 @@ namespace Betfair.Tests.Api;
 
 public class MarketStatusTests
 {
-    private readonly BetfairClientStub _client = new ();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
 
     public MarketStatusTests() =>
