@@ -10,10 +10,16 @@ public class HttpClientStub : IHttpClient
 
     public string? ThrowsError { get; set; }
 
+    public int TimesToThrowError { get; set; } = 1;
+
     public async Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)
         where T : class
     {
-        if (ThrowsError is not null) throw new HttpRequestException(ThrowsError);
+        if (ThrowsError is not null && TimesToThrowError > 0)
+        {
+            TimesToThrowError--;
+            throw new HttpRequestException(ThrowsError);
+        }
 
         HttpContentSent = content;
         if (content is not null)

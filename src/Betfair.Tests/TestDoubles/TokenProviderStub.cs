@@ -4,13 +4,16 @@ namespace Betfair.Tests.TestDoubles;
 
 internal class TokenProviderStub : TokenProvider
 {
-    internal string RespondsWithToken { get; set; } = "token";
+    internal List<string> RespondsWithToken { get; set; } = new ();
 
     internal int TokensUsed { get; private set; }
 
     internal override Task<string> GetToken(CancellationToken cancellationToken)
     {
         TokensUsed++;
-        return Task.FromResult(RespondsWithToken);
+        if (RespondsWithToken.Count == 0)
+            return Task.FromResult("Token");
+
+        return Task.FromResult(RespondsWithToken[TokensUsed - 1]);
     }
 }

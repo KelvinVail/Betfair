@@ -1,4 +1,5 @@
-﻿using Betfair.Core.Client;
+﻿using System.Security.AccessControl;
+using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 using Betfair.Tests.TestDoubles;
 
@@ -34,7 +35,7 @@ public class HttpTokenInjectorTests : IDisposable
     [InlineData("OtherToken")]
     public async Task PostPutsSessionTokenIsInContentHeader(string token)
     {
-        _tokenProvider.RespondsWithToken = token;
+        _tokenProvider.RespondsWithToken.Add(token);
 
         await _tokenInjector.PostAsync<dynamic>(_uri, _content);
 
@@ -61,6 +62,35 @@ public class HttpTokenInjectorTests : IDisposable
         _tokenProvider.TokensUsed.Should().Be(2);
     }
 
+    [Theory]
+    [InlineData("FirstToken", "SecondToken")]
+    [InlineData("OtherToken", "NewToken")]
+    public async Task IfSessionIsInvalidANewTokenIsAddedToTheRequest(string first, string second)
+    {
+        _tokenProvider.RespondsWithToken.Add(first);
+        _tokenProvider.RespondsWithToken.Add(second);
+        _httpClient.ThrowsError = "INVALID_SESSION_INFORMATION";
+
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content);
+
+        _httpClient.HttpContentSent?.Headers.Should().ContainKey("X-Authentication")
+            .WhoseValue.Should().NotContain(first);
+        _httpClient.HttpContentSent?.Headers.Should().ContainKey("X-Authentication")
+            .WhoseValue.Should().Contain(second);
+    }
+
+    [Fact]
+    public async Task DoNotRefreshTheTokenAndRethrowTheErrorIfInvalidSessionIsNotThrown()
+    {
+        _httpClient.ThrowsError = "OTHER_ERROR";
+
+        var act = async () => { await _tokenInjector.PostAsync<dynamic>(_uri, _content); };
+
+        (await act.Should().ThrowAsync<HttpRequestException>())
+            .WithMessage("OTHER_ERROR");
+        _tokenProvider.TokensUsed.Should().Be(1);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
@@ -73,23 +103,5 @@ public class HttpTokenInjectorTests : IDisposable
         if (disposing) _content.Dispose();
 
         _disposedValue = true;
-    }
-
-    private sealed class BadRequestResponse
-    {
-        public BadRequestResponse(string errorCode) =>
-            Detail.ApiNgException.ErrorCode = errorCode;
-
-        public Detail Detail { get; } = new ();
-    }
-
-    private sealed class Detail
-    {
-        public ApiNgException ApiNgException { get; } = new ();
-    }
-
-    private sealed class ApiNgException
-    {
-        public string? ErrorCode { get; set; }
     }
 }
