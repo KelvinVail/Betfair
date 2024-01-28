@@ -5,19 +5,28 @@ using Betfair.Core.Login;
 
 namespace Betfair.Api;
 
-public class BetfairApiClient
+public class BetfairApiClient : IDisposable
 {
     private const string _betting = "https://api.betfair.com/exchange/betting/rest/v1.0";
+    private readonly BetfairHttpClient _httpClient;
     private readonly HttpAdapter _client;
+    private readonly bool _disposeHttpClient = true;
+    private bool _disposedValue;
 
     public BetfairApiClient(Credentials credentials)
     {
         ArgumentNullException.ThrowIfNull(credentials);
-        _client = BetfairHttpFactory.Create(credentials);
+        _httpClient = new BetfairHttpClient(credentials.Certificate);
+        var tokenProvider = new TokenProvider(_httpClient, credentials);
+        _client = BetfairHttpFactory.Create(credentials, tokenProvider, _httpClient);
     }
 
-    internal BetfairApiClient(HttpAdapter client) =>
-        _client = client;
+    internal BetfairApiClient(HttpAdapter adapter)
+    {
+        _disposeHttpClient = false;
+        _httpClient = null!;
+        _client = adapter;
+    }
 
     public async Task<IReadOnlyList<MarketCatalogue>> MarketCatalogue(
         ApiMarketFilter? filter = null,
@@ -48,5 +57,19 @@ public class BetfairApiClient
             cancellationToken);
 
         return response?.FirstOrDefault()?.Status ?? "NONE";
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue) return;
+        if (disposing && _disposeHttpClient) _httpClient.Dispose();
+
+        _disposedValue = true;
     }
 }

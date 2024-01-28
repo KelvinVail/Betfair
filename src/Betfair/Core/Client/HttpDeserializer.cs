@@ -11,13 +11,30 @@ internal class HttpDeserializer : IHttpClient
         where T : class
     {
         var response = await _httpClient.PostAsync(uri, content, ct);
-        if (!response.IsSuccessStatusCode) Throw(response);
+        if (!response.IsSuccessStatusCode) await Throw(response);
 
         return await Deserialize<T>(response, ct);
     }
 
-    private static void Throw(HttpResponseMessage response) =>
-        throw new HttpRequestException(null, null, statusCode: response.StatusCode);
+    private static async Task Throw(HttpResponseMessage response) =>
+        throw new HttpRequestException(
+            await ErrorCode(response),
+            null,
+            statusCode: response.StatusCode);
+
+    private static async Task<dynamic> ErrorCode(HttpResponseMessage response)
+    {
+        var error = await Deserialize<dynamic>(response, default);
+        try
+        {
+            var errorCode = error["detail"]["apiNgException"]["errorCode"];
+            return errorCode;
+        }
+        catch (KeyNotFoundException)
+        {
+            return "An HttpRequestException Occurred.";
+        }
+    }
 
     private static async Task<T> Deserialize<T>(HttpResponseMessage response, CancellationToken ct)
         where T : class =>

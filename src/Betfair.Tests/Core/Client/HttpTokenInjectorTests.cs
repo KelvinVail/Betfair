@@ -1,6 +1,6 @@
 ﻿using Betfair.Core.Client;
+using Betfair.Tests.Core.Client.TestDoubles;
 using Betfair.Tests.TestDoubles;
-using HttpClientStub = Betfair.Tests.Core.Client.TestDoubles.HttpClientStub;
 
 namespace Betfair.Tests.Core.Client;
 
@@ -9,7 +9,7 @@ public class HttpTokenInjectorTests : IDisposable
     private readonly HttpClientStub _httpClient = new ();
     private readonly HttpContent _content = new StringContent("content");
     private readonly TokenProviderStub _tokenProvider = new ();
-    private readonly Uri _uri = new Uri("http://test.com");
+    private readonly Uri _uri = new ("http://test.com");
     private readonly HttpTokenInjector _tokenInjector;
     private bool _disposedValue;
 
@@ -25,7 +25,7 @@ public class HttpTokenInjectorTests : IDisposable
 
         await client.PostAsync<dynamic>(_uri, _content);
 
-        _httpClient.HttpContentSent.Headers.Should().ContainKey("X-Application")
+        _httpClient.HttpContentSent?.Headers.Should().ContainKey("X-Application")
             .WhoseValue.Should().Contain(appKey);
     }
 
@@ -38,7 +38,7 @@ public class HttpTokenInjectorTests : IDisposable
 
         await _tokenInjector.PostAsync<dynamic>(_uri, _content);
 
-        _httpClient.HttpContentSent.Headers.Should().ContainKey("X-Authentication")
+        _httpClient.HttpContentSent?.Headers.Should().ContainKey("X-Authentication")
             .WhoseValue.Should().Contain(token);
     }
 
@@ -51,16 +51,15 @@ public class HttpTokenInjectorTests : IDisposable
         _tokenProvider.TokensUsed.Should().Be(1);
     }
 
-    //[Fact]
-    //public async Task TokenIsRefreshedIfSessionIsInvalid()
-    //{
-    //    _handler.RespondsWitHttpStatusCode = HttpStatusCode.BadRequest;
-    //    _handler.RespondsWithBody = new BadRequestResponse("INVALID_SESSION_INFORMATION");
+    [Fact]
+    public async Task TokenIsRefreshedIfSessionIsInvalid()
+    {
+        _httpClient.ThrowsError = "INVALID_SESSION_INFORMATION";
 
-    //    await _client.PostAsync<dynamic>(_uri);
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content);
 
-    //    _provider.TokensUsed.Should().Be(2);
-    //}
+        _tokenProvider.TokensUsed.Should().Be(2);
+    }
 
     public void Dispose()
     {

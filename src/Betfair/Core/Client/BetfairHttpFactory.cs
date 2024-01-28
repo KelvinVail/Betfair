@@ -4,11 +4,12 @@ namespace Betfair.Core.Client;
 
 internal static class BetfairHttpFactory
 {
-    internal static HttpAdapter Create(Credentials credentials)
+    internal static HttpAdapter Create(
+        Credentials credentials,
+        TokenProvider tokenProvider,
+        BetfairHttpClient client)
     {
-        var baseClient = new BetfairHttpClient(credentials.Certificate);
-        var deserializer = new HttpDeserializer(baseClient);
-        var tokenProvider = new TokenProvider(baseClient, credentials);
+        var deserializer = new HttpDeserializer(client);
         var tokenInjector = new HttpTokenInjector(deserializer, tokenProvider, credentials.AppKey);
         return new HttpAdapter(tokenInjector);
     }

@@ -4,10 +4,11 @@ using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
-public class MarketCatalogueTests
+public class MarketCatalogueTests : IDisposable
 {
     private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
+    private bool _disposedValue;
 
     public MarketCatalogueTests() =>
         _api = new BetfairApiClient(_client);
@@ -28,5 +29,19 @@ public class MarketCatalogueTests
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new MarketCatalogueQuery());
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue) return;
+        if (disposing) _api.Dispose();
+
+        _disposedValue = true;
     }
 }

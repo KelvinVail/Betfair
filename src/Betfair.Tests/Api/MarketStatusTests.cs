@@ -1,13 +1,14 @@
-﻿using Betfair.Api;
-using Betfair.Api.Responses;
-using Betfair.Tests.Api.TestDoubles;
+﻿﻿using Betfair.Api;
+﻿using Betfair.Api.Responses;
+﻿using Betfair.Tests.Api.TestDoubles;
 
-namespace Betfair.Tests.Api;
+﻿namespace Betfair.Tests.Api;
 
-public class MarketStatusTests
+public class MarketStatusTests : IDisposable
 {
     private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
+    private bool _disposedValue;
 
     public MarketStatusTests() =>
         _api = new BetfairApiClient(_client);
@@ -52,5 +53,19 @@ public class MarketStatusTests
         var response = await _api.MarketStatus("1.2345", default);
 
         response.Should().Be(status);
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue) return;
+        if (disposing) _api.Dispose();
+
+        _disposedValue = true;
     }
 }

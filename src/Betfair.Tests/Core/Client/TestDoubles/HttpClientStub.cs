@@ -8,9 +8,13 @@ public class HttpClientStub : IHttpClient
 
     public object? ContentSent { get; private set; }
 
+    public string? ThrowsError { get; set; }
+
     public async Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)
         where T : class
     {
+        if (ThrowsError is not null) throw new HttpRequestException(ThrowsError);
+
         HttpContentSent = content;
         if (content is not null)
             ContentSent = await content.ReadAsByteArrayAsync(ct);
