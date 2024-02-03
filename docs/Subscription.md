@@ -44,6 +44,14 @@ await subscription.SubscribeToOrders();
 The order stream can not be filtered, you will receive updates to all orders placed in your account.  
 You will only receive updates to new orders or orders that are open at the time you subscribe to the order stream. Historical fully matched orders are not included in the order stream. If needed, you should use the BetfairApiClient to retrieve them. 
 
+## Conflate the Subscription
+Either the market or order subscription can be conflated. Data will be rolled up and sent on each increment of the interval specified.
+```charp
+var conflate = TimeSpan.FromSeconds(1);
+await subscription.Subscribe(marketFilter, dataFilter, conflate: conflate);
+await subscription.SubscribeToOrders(conflate: conflate);
+```
+
 ## Consume Change Messages
 After you have subscribed to a market and/or an order stream you can iterate each [ChangeMessage](/docs/ChangeMessage.md) asynchronously as they become available on the stream. 
 ```csharp

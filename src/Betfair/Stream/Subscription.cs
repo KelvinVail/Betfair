@@ -49,31 +49,34 @@ public class Subscription : IDisposable
     /// <param name="marketFilter">Used to define which markets to subscribe to.</param>
     /// <param name="dataFilter">Optional: Used to define what data to include in the market stream.
     /// If null Best Available Prices are returned.</param>
+    /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
     /// <param name="cancellationToken">CancellationToken.</param>
     /// <returns>An awaitable task.</returns>
     public async Task Subscribe(
         StreamMarketFilter marketFilter,
         DataFilter? dataFilter = null,
+        TimeSpan? conflate = null,
         CancellationToken cancellationToken = default)
     {
         await Authenticate(cancellationToken);
 
         _requestId++;
-        var marketSubscription = new MarketSubscription(_requestId, marketFilter, dataFilter);
+        var marketSubscription = new MarketSubscription(_requestId, marketFilter, dataFilter, conflate);
         await _pipe.Write(marketSubscription, cancellationToken);
     }
 
     /// <summary>
     /// Subscribe to new and open orders. To retrieve historical orders use the <see cref="Api.BetfairApiClient"/> class.
     /// </summary>
+    /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
     /// <param name="cancellationToken">CancellationToken.</param>
     /// <returns>An awaitable task.</returns>
-    public async Task SubscribeToOrders(CancellationToken cancellationToken = default)
+    public async Task SubscribeToOrders(TimeSpan? conflate = null, CancellationToken cancellationToken = default)
     {
         await Authenticate(cancellationToken);
 
         _requestId++;
-        await _pipe.Write(new OrderSubscription(_requestId), cancellationToken);
+        await _pipe.Write(new OrderSubscription(_requestId, conflate), cancellationToken);
     }
 
     /// <summary>

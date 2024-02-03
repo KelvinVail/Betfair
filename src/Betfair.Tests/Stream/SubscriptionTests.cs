@@ -127,6 +127,21 @@ public class SubscriptionTests
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(1000)]
+    [InlineData(9999)]
+    public async Task SubscribeWritesTheConflateRateToTheStream(int conflateMs)
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var marketFilter = new StreamMarketFilter().WithMarketIds("1.2345");
+
+        await sub.Subscribe(marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs));
+
+        var subMessage = new MarketSubscription(2, marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs));
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
+    }
+
     [Fact]
     public async Task SubscribeToOrdersWritesAnOrderSubscriptionMessageToTheStream()
     {
@@ -135,6 +150,21 @@ public class SubscriptionTests
         await sub.SubscribeToOrders();
 
         var subMessage = new OrderSubscription(2);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(1000)]
+    [InlineData(9999)]
+    public async Task SubscribeToOrderWritesTheConflateRateToTheStream(int conflateMs)
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var marketFilter = new StreamMarketFilter().WithMarketIds("1.2345");
+
+        await sub.SubscribeToOrders(conflate: TimeSpan.FromMilliseconds(conflateMs));
+
+        var subMessage = new OrderSubscription(2, conflate: TimeSpan.FromMilliseconds(conflateMs));
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
     }
 
