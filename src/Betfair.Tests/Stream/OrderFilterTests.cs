@@ -1,4 +1,4 @@
-﻿using Betfair.Stream;
+﻿using Betfair.Stream.Messages;
 
 namespace Betfair.Tests.Stream;
 

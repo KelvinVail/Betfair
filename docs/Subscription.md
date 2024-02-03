@@ -41,7 +41,12 @@ To include updates to new and open orders in your stream, subscribe to the order
 ```csharp
 await subscription.SubscribeToOrders();
 ```
-The order stream can not be filtered, you will receive updates to all orders placed in your account.  
+The order stream can optionally by shaped and filtered using the [OrderFilter](/docs/OrderFilter.md).
+```csharp
+var orderFilter = new DataFilter().WithStrategyRefs("myRef");
+await subscription.SubscribeToOrders(orderFilter);
+```
+
 You will only receive updates to new orders or orders that are open at the time you subscribe to the order stream. Historical fully matched orders are not included in the order stream. If needed, you should use the BetfairApiClient to retrieve them. 
 
 ## Conflate the Subscription

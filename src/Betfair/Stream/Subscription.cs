@@ -68,15 +68,16 @@ public class Subscription : IDisposable
     /// <summary>
     /// Subscribe to new and open orders. To retrieve historical orders use the <see cref="Api.BetfairApiClient"/> class.
     /// </summary>
+    /// <param name="orderFilter">Optional: Used to shape and filter the order data returned on the stream.</param>
     /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
     /// <param name="cancellationToken">CancellationToken.</param>
     /// <returns>An awaitable task.</returns>
-    public async Task SubscribeToOrders(TimeSpan? conflate = null, CancellationToken cancellationToken = default)
+    public async Task SubscribeToOrders(OrderFilter? orderFilter = null, TimeSpan? conflate = null, CancellationToken cancellationToken = default)
     {
         await Authenticate(cancellationToken);
 
         _requestId++;
-        await _pipe.Write(new OrderSubscription(_requestId, conflate), cancellationToken);
+        await _pipe.Write(new OrderSubscription(_requestId, orderFilter, conflate), cancellationToken);
     }
 
     /// <summary>

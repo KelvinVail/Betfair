@@ -1,7 +1,7 @@
 namespace Betfair.Stream.Messages;
 
 /// <summary>
-/// Used to restrict data received in a Betfair stream.
+/// Used to restrict data received in a Betfair market stream.
 /// </summary>
 public class DataFilter
 {

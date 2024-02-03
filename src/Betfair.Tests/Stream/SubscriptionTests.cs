@@ -154,13 +154,26 @@ public class SubscriptionTests
     }
 
     [Theory]
+    [InlineData("myRef")]
+    [InlineData("Ref001")]
+    public async Task SubscribeToOrderWritesOrderFilterToTheStream(string strategyRef)
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var orderFilter = new OrderFilter().WithStrategyRefs(strategyRef);
+
+        await sub.SubscribeToOrders(orderFilter);
+
+        var subMessage = new OrderSubscription(2, orderFilter);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
+    }
+
+    [Theory]
     [InlineData(1)]
     [InlineData(1000)]
     [InlineData(9999)]
     public async Task SubscribeToOrderWritesTheConflateRateToTheStream(int conflateMs)
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
-        var marketFilter = new StreamMarketFilter().WithMarketIds("1.2345");
 
         await sub.SubscribeToOrders(conflate: TimeSpan.FromMilliseconds(conflateMs));
 

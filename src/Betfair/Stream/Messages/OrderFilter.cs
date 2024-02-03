@@ -1,5 +1,8 @@
-﻿namespace Betfair.Stream;
+﻿namespace Betfair.Stream.Messages;
 
+/// <summary>
+/// Used to shape and filter the order data returned on the stream.
+/// </summary>
 public class OrderFilter
 {
     private HashSet<string>? _strategyRefs;
