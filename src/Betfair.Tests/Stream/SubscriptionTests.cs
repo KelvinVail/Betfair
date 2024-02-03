@@ -25,10 +25,10 @@ public class SubscriptionTests
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var filter = new StreamMarketFilter().WithMarketIds("1.2345");
-        var authMessage = new Authentication(1, "Token", "a");
 
         await sub.Subscribe(filter);
 
+        var authMessage = new Authentication(1, "Token", "a");
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
     }
 
@@ -36,10 +36,10 @@ public class SubscriptionTests
     public async Task AuthenticatesWhenFirstOrderSubscriptionIsMade()
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
-        var authMessage = new Authentication(1, "Token", "a");
 
         await sub.SubscribeToOrders();
 
+        var authMessage = new Authentication(1, "Token", "a");
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
     }
 
@@ -56,122 +56,101 @@ public class SubscriptionTests
         _pipe.ObjectsWritten.Should().ContainSingle(x => x.GetType() == typeof(Authentication));
     }
 
-    //    [Theory]
-    //    [InlineData("appKey")]
-    //    [InlineData("newKey")]
-    //    [InlineData("other")]
-    //    public async Task AuthenticateWritesAppKeyToStream(string appKey)
-    //    {
-    //        _httpClient.ReturnsAppKey = appKey;
+    [Theory]
+    [InlineData("appKey")]
+    [InlineData("newKey")]
+    [InlineData("other")]
+    public async Task AuthenticateWritesAppKeyToStream(string appKey)
+    {
+        using var sub = new Subscription(_tokenProvider, appKey, _pipe);
 
-    //        await _client.Authenticate();
+        await sub.SubscribeToOrders();
 
-    //        var result = await ReadLastLineInStream();
+        var authMessage = new Authentication(1, "Token", appKey);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
+    }
 
-    //        result.Should().ContainKey("appKey").WhoseValue.Should().Be(appKey);
-    //    }
+    [Theory]
+    [InlineData("sessionToken")]
+    [InlineData("newToken")]
+    [InlineData("other")]
+    public async Task AuthenticateWritesSessionTokenToStream(string sessionToken)
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        _tokenProvider.RespondsWithToken.Add(sessionToken);
 
-    //    [Theory]
-    //    [InlineData("sessionToken")]
-    //    [InlineData("newToken")]
-    //    [InlineData("other")]
-    //    public async Task AuthenticateWritesSessionTokenToStream(string sessionToken)
-    //    {
-    //        _httpClient.ReturnsToken = sessionToken;
+        await sub.SubscribeToOrders();
 
-    //        await _client.Authenticate();
+        var authMessage = new Authentication(1, sessionToken, "a");
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
+    }
 
-    //        var result = await ReadLastLineInStream();
-    //        result.Should().ContainKey("session").WhoseValue.Should().Be(sessionToken);
-    //    }
+    [Theory]
+    [InlineData("1.2345")]
+    [InlineData("1.9876")]
+    public async Task SubscribeWritesAMarketSubscriptionMessageToTheStream(string marketId)
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var filter = new StreamMarketFilter().WithMarketIds(marketId);
 
-    //    [Fact]
-    //    public async Task EachCallToAuthenticateIncrementsTheConnectionId()
-    //    {
-    //        await _client.Authenticate();
-    //        var result = await ReadLastLineInStream();
-    //        result.Should().ContainKey("id").WhoseValue.Should().Be(1);
+        await sub.Subscribe(filter);
 
-    //        await _client.Authenticate();
-    //        var result2 = await ReadLastLineInStream();
-    //        result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
-    //    }
+        var subMessage = new MarketSubscription(2, filter);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
+    }
 
-    //    [Fact]
-    //    public async Task SubscribeWritesAMarketSubscriptionMessageToTheStream()
-    //    {
-    //        await _client.Subscribe(new StreamMarketFilter(), new DataFilter());
+    [Fact]
+    public async Task EachSubscribeCallIncrementsTheConnectionId()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var filter = new StreamMarketFilter().WithMarketIds("1.2345");
 
-    //        var result = await ReadLastLineInStream();
+        await sub.Subscribe(filter);
+        await sub.Subscribe(filter);
 
-    //        result.Should().ContainKey("op").WhoseValue.Should().Be("marketSubscription");
-    //    }
+        var first = new MarketSubscription(2, filter);
+        var second = new MarketSubscription(3, filter);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(first);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(second);
+    }
 
-    //    [Fact]
-    //    public async Task EachCallToSubscribeIncrementsTheConnectionId()
-    //    {
-    //        await _client.Subscribe(new StreamMarketFilter(), new DataFilter());
-    //        var result = await ReadLastLineInStream();
-    //        result.Should().ContainKey("id").WhoseValue.Should().Be(1);
+    [Fact]
+    public async Task SubscribeWritesTheDataFilterToTheStream()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var marketFilter = new StreamMarketFilter().WithMarketIds("1.2345");
+        var dataFilter = new DataFilter().WithBestPrices();
 
-    //        await _client.Subscribe(new StreamMarketFilter(), new DataFilter());
-    //        var result2 = await ReadLastLineInStream();
-    //        result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
-    //    }
+        await sub.Subscribe(marketFilter, dataFilter);
 
-    //    [Theory]
-    //    [InlineData("marketId")]
-    //    [InlineData("1.23456789")]
-    //    public async Task SubscribeWritesTheMarketFilterToTheStream(string marketId)
-    //    {
-    //        var marketFilter = new StreamMarketFilter().WithMarketIds(marketId);
-    //        await _client.Subscribe(marketFilter, new DataFilter());
+        var subMessage = new MarketSubscription(2, marketFilter, dataFilter);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
+    }
 
-    //        var result = await ReadLastLineInStream();
+    [Fact]
+    public async Task SubscribeToOrdersWritesAnOrderSubscriptionMessageToTheStream()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
 
-    //        result.Should().ContainKey("marketFilter")
-    //            .WhoseValue.Should().BeAssignableTo<Dictionary<string, object>>()
-    //            .Which.Should().ContainKey("marketIds")
-    //            .WhoseValue.Should().BeAssignableTo<List<object>>()
-    //            .Which.Should().Contain(marketId);
-    //    }
+        await sub.SubscribeToOrders();
 
-    //    [Fact]
-    //    public async Task SubscribeWritesTheDataFilterToTheStream()
-    //    {
-    //        var dataFilter = new DataFilter().WithBestPrices();
-    //        await _client.Subscribe(new StreamMarketFilter(), dataFilter);
+        var subMessage = new OrderSubscription(2);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
+    }
 
-    //        var result = await ReadLastLineInStream();
+    [Fact]
+    public async Task EachCallToSubscribeToOrdersIncrementsTheConnectionId()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
 
-    //        result.Should().ContainKey("marketDataFilter")
-    //            .WhoseValue.Should().BeAssignableTo<Dictionary<string, object>>()
-    //            .Which.Should().ContainKey("fields")
-    //            .WhoseValue.Should().BeAssignableTo<List<object>>()
-    //            .Which.Should().BeEquivalentTo(dataFilter.Fields);
-    //    }
+        await sub.SubscribeToOrders();
+        await sub.SubscribeToOrders();
 
-    //    [Fact]
-    //    public async Task SubscribeToOrdersWritesAnOrderSubscriptionMessageToTheStream()
-    //    {
-    //        await _client.SubscribeToOrders();
-
-    //        var result = await ReadLastLineInStream();
-
-    //        result.Should().ContainKey("op").WhoseValue.Should().Be("orderSubscription");
-    //    }
-
-    //    [Fact]
-    //    public async Task EachCallToSubscribeToOrdersIncrementsTheConnectionId()
-    //    {
-    //        await _client.SubscribeToOrders();
-    //        var result = await ReadLastLineInStream();
-    //        result.Should().ContainKey("id").WhoseValue.Should().Be(1);
-
-    //        await _client.SubscribeToOrders();
-    //        var result2 = await ReadLastLineInStream();
-    //        result2.Should().ContainKey("id").WhoseValue.Should().Be(2);
-    //    }
+        var first = new OrderSubscription(2);
+        var second = new OrderSubscription(3);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(first);
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(second);
+    }
 
     //    [Fact]
     //    public void DisposesTheStreamWhenDisposed()

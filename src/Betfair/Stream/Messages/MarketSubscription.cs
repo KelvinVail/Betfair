@@ -5,11 +5,11 @@ internal class MarketSubscription : MessageBase
     public MarketSubscription(
         int id,
         StreamMarketFilter marketFiler,
-        DataFilter dataFilter)
+        DataFilter? dataFilter = null)
         : base("marketSubscription", id)
     {
         MarketFilter = marketFiler;
-        MarketDataFilter = dataFilter;
+        MarketDataFilter = dataFilter ?? new DataFilter().WithBestPrices();
     }
 
     public StreamMarketFilter MarketFilter { get; }
