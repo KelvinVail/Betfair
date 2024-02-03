@@ -20,7 +20,7 @@ public class PipelineTests : IDisposable
     {
         var anon = new { Id = id, Test = "Test " };
 
-        await _pipeline.Write(anon);
+        await _pipeline.Write(anon, default);
 
         var json = JsonSerializer.ToJsonString(anon, StandardResolver.CamelCase);
         ReadLineFrom(_stream).Should().Be(json);

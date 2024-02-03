@@ -5,7 +5,7 @@
 # Betfair
 Fast and simple classes for interacting with the Betfair API and Stream.
 
-Full documentation [here](/docs/README.md).
+[Full documentation](/docs/README.md).
 
 ## Installation
 
@@ -18,34 +18,16 @@ or
 PM> Install-Package Betfair
 ```
 
-## Getting Started
-Register and obtain an app key from the [Betfair Developer Program](https://developer.betfair.com/).
-
-### Create a credential object
-
-```csharp
-var credentials = new Credential([USERNAME], [PASSWORD], [APPKEY]);
-```
-It is recommended by Betfair that you use a certificate for non-interactive bot login.
-[Learn more here](https://docs.developer.betfair.com/display/1smk3cen4v3lu3yomq5qye0ni/Non-Interactive+%28bot%29+login).
-
-To use a certificate to login:
-```csharp
-var cert = X509Certificate2.CreateFrom...;
-var credentials = new Credential([USERNAME], [PASSWORD], [APPKEY], cert);
-```
-
-### Subscribe to a Market Stream
-Create a stream client. Then use a MarketFilter and DataFilter to start a stream.
+## Subscribe to a Market Stream
+Create a Subscription. Then use a MarketFilter to start a stream.  
+[Full subscription documentation](/docs/Subscription.md).
 
 ```csharp
-using var streamClient = new StreamClient(credentials);
-await streamClient.Authenticate();
-await streamClient.Subscribe(
-	new StreamMarketFilter().WithMarketIds("MARKET_ID"),
-	new DataFilter().WithBestPrices());
+var credentials = new Credential("USERNAME", "PASSWORD", "APP_KEY");
+using var subscription = new Subscription(credentials);
 
-await foreach (var change in streamClient.GetChanges())
+await subscription.Subscribe(new StreamMarketFilter().WithMarketIds("MARKET_ID"))
+await foreach (var change in subscription.ReadLines())
 {
 	// Handle changes
 }
