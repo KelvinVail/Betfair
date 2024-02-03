@@ -28,14 +28,14 @@ internal class HttpTokenInjector : IHttpClient
         }
         catch (HttpRequestException e)
         {
-            if (SessionIsInvalid(e)) throw;
+            if (SessionIsValid(e)) throw;
 
             await RefreshSessionTokenHeader(content, ct);
             return await _httpClient.PostAsync<T>(uri, content, ct);
         }
     }
 
-    private static bool SessionIsInvalid(HttpRequestException e) =>
+    private static bool SessionIsValid(HttpRequestException e) =>
         e.Message != "INVALID_SESSION_INFORMATION";
 
     private async Task AddSessionTokenHeader(HttpContent content, CancellationToken ct)
