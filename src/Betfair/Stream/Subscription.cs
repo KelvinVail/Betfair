@@ -96,12 +96,6 @@ public class Subscription : IDisposable
         }
     }
 
-    /// <summary>
-    /// Close the stream to stop receiving change messages.
-    /// </summary>
-    public void Close() =>
-        _stream.Close();
-
     [ExcludeFromCodeCoverage]
     public void Dispose()
     {
