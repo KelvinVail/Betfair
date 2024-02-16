@@ -1,6 +1,7 @@
 ﻿using Betfair.Core.Login;
 using Betfair.Stream;
 using Betfair.Stream.Messages;
+using Betfair.Stream.Responses;
 using Betfair.Tests.Stream.TestDoubles;
 using Betfair.Tests.TestDoubles;
 
@@ -195,90 +196,34 @@ public class SubscriptionTests
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(second);
     }
 
-    //    [Fact]
-    //    public void DisposesTheStreamWhenDisposed()
-    //    {
-    //        _client.Dispose();
+    [Fact]
+    public async Task ChangeMessagesAreReadFromTheStream()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var message = new ChangeMessage { Operation = "Test" };
+        _pipe.ObjectsToBeRead.Add(message);
 
-    //        _ms.Should().NotBeWritable();
-    //    }
+        var read = new List<object>();
+        await foreach (var line in sub.ReadLines())
+            read.Add(line);
 
-    //    [Fact]
-    //    public void DisposesTheHttpClientWhenDisposed()
-    //    {
-    //        _client.Dispose();
+        read.Should().ContainEquivalentOf(message, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
+    }
 
-    //        _httpClient.IsDisposed.Should().BeTrue();
+    [Fact]
+    public async Task MultipleChangeMessagesAreReadFromTheStream()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var message1 = new ChangeMessage { Operation = "Test1" };
+        _pipe.ObjectsToBeRead.Add(message1);
+        var message2 = new ChangeMessage { Operation = "Test2" };
+        _pipe.ObjectsToBeRead.Add(message2);
 
-    //        var act = () => _httpClient.Send(new HttpRequestMessage());
+        var read = new List<object>();
+        await foreach (var line in sub.ReadLines())
+            read.Add(line);
 
-    //        act.Should().Throw<InvalidOperationException>()
-    //            .And.Message.Should().StartWith("Cannot access a disposed object.");
-    //    }
-
-    //    [Fact]
-    //    public void DisposeShouldBeIdempotent()
-    //    {
-    //        _client.Dispose();
-    //#pragma warning disable S3966
-    //        _client.Dispose();
-    //#pragma warning restore S3966
-
-    //        _httpClient.TimesDisposed.Should().Be(1);
-    //    }
-
-    //    [Fact]
-    //    public async Task ChangeMessagesAreReadFromTheStream()
-    //    {
-    //        var message = new ChangeMessage { Operation = "Test" };
-    //        await SendChange(message);
-
-    //        var read = await ReadMessages();
-
-    //        read.Should().ContainEquivalentOf(message, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
-    //    }
-
-    //    [Fact]
-    //    public async Task MultipleChangeMessagesAreReadFromTheStream()
-    //    {
-    //        var message1 = new ChangeMessage { Operation = "Test1" };
-    //        await SendChange(message1);
-    //        var message2 = new ChangeMessage { Operation = "Test2" };
-    //        await SendChange(message2);
-
-    //        var read = await ReadMessages();
-
-    //        read.Should().ContainEquivalentOf(message1, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
-    //        read.Should().ContainEquivalentOf(message2, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
-    //    }
-
-    //    [Fact]
-    //    public void CredentialShouldNotBeNull()
-    //    {
-    //        var act = () => new StreamClient(null!);
-
-    //        act.Should().Throw<ArgumentNullException>()
-    //            .And.ParamName.Should().Be("credentials");
-    //    }
-
-    //    [Fact]
-    //    public async Task BetfairStreamCanBeCopiedToAStream()
-    //    {
-    //        var message1 = new ChangeMessage { Operation = "Test1" };
-    //        await SendChange(message1);
-    //        var message2 = new ChangeMessage { Operation = "Test2" };
-    //        await SendChange(message2);
-    //        _ms.Position = 0;
-
-    //        using var ms = new MemoryStream();
-    //        await _client.CopyToStream(ms, default);
-
-    //        ms.Position = 0;
-    //        using var reader = new StreamReader(ms);
-    //        var lines = new List<string>();
-    //        while (!reader.EndOfStream)
-    //            lines.Add(await reader.ReadLineAsync());
-
-    //        lines.Count.Should().Be(2);
-    //    }
+        read.Should().ContainEquivalentOf(message1, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
+        read.Should().ContainEquivalentOf(message2, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
+    }
 }

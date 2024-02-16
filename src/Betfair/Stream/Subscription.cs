@@ -102,12 +102,14 @@ public class Subscription : IDisposable
     public void Close() =>
         _stream.Close();
 
+    [ExcludeFromCodeCoverage]
     public void Dispose()
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
+    [ExcludeFromCodeCoverage]
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;

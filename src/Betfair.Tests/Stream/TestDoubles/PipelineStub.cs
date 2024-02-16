@@ -1,4 +1,6 @@
 ﻿using Betfair.Stream;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
 namespace Betfair.Tests.Stream.TestDoubles;
 
@@ -6,12 +8,19 @@ public class PipelineStub : IPipeline
 {
     public List<object> ObjectsWritten { get; } = [];
 
-    public async Task Write(object value, CancellationToken cancellationToken = default)
+    public List<object> ObjectsToBeRead { get; } = [];
+
+    public async Task Write(object value, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
 
         ObjectsWritten.Add(value);
     }
 
-    public IAsyncEnumerable<byte[]> Read() => throw new NotImplementedException();
+    public async IAsyncEnumerable<byte[]> Read()
+    {
+        await Task.CompletedTask;
+        foreach (var o in ObjectsToBeRead)
+            yield return JsonSerializer.Serialize(o, StandardResolver.AllowPrivateExcludeNullCamelCase);
+    }
 }
