@@ -22,14 +22,16 @@ public class HttpAdapterTests : IDisposable
     }
 
     [Theory]
-    [InlineData("http://test.com")]
-    [InlineData("http://other.com")]
-    public async Task PostUsesThePassedInUri(string uri)
+    [InlineData("test")]
+    [InlineData("other")]
+    public async Task PostUsesThePassedInUri(string value)
     {
-        await _adapter.PostAsync<object>(new Uri(uri), _content);
+        var uri = new Uri($"http://{value}.com");
+
+        await _adapter.PostAsync<object>(uri, _content);
 
         _handler.MethodUsed.Should().Be(HttpMethod.Post);
-        _handler.UriCalled.Should().Be(new Uri(uri));
+        _handler.UriCalled.Should().Be(uri);
     }
 
     [Fact]
