@@ -26,6 +26,27 @@ public class BetfairHttpClientTests : IDisposable
         _client.DefaultRequestHeaders.AcceptEncoding.Should().Contain(
             new StringWithQualityHeaderValue("gzip"));
 
+    [Fact]
+    public void HandlerIsDisposedWithHttpClient()
+    {
+        using var handler = new BetfairClientHandler();
+        var client = new BetfairHttpClient(handler);
+
+        client.Dispose();
+
+        bool handlerIsDisposed = false;
+        try
+        {
+            handler.CheckCertificateRevocationList = false;
+        }
+        catch (ObjectDisposedException)
+        {
+            handlerIsDisposed = true;
+        }
+
+        handlerIsDisposed.Should().BeTrue();
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
