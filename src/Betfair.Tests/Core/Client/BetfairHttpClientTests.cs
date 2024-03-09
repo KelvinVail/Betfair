@@ -1,12 +1,10 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using Betfair.Core.Client;
-using Betfair.Tests.Core.Client.TestDoubles;
 
 namespace Betfair.Tests.Core.Client;
 
 public class BetfairHttpClientTests : IDisposable
 {
-    private readonly HttpMessageHandlerSpy _handler = new ();
     private readonly BetfairHttpClient _client = new ((X509Certificate2?)null);
     private bool _disposedValue;
 
@@ -37,13 +35,7 @@ public class BetfairHttpClientTests : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-
-        if (disposing)
-        {
-            _client.Dispose();
-            _handler.Dispose();
-        }
-
+        if (disposing) _client.Dispose();
         _disposedValue = true;
     }
 }

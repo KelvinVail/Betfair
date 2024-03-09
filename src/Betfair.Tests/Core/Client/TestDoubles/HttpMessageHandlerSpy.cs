@@ -6,6 +6,9 @@ namespace Betfair.Tests.Core.Client.TestDoubles;
 
 public class HttpMessageHandlerSpy : HttpClientHandler
 {
+    public HttpMessageHandlerSpy() =>
+        CheckCertificateRevocationList = true;
+
     public HttpStatusCode RespondsWitHttpStatusCode { get; set; } = HttpStatusCode.OK;
 
     public object? RespondsWithBody { get; set; }
