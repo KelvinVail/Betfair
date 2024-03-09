@@ -40,6 +40,18 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     }
 
     [Fact]
+    public void WithMarketTypeCanBeCalledMultipleTimes()
+    {
+        WithMarketTypes(MarketType.Win);
+        WithMarketTypes(MarketType.CorrectScore);
+
+        MarketTypeCodes.Should().Contain(MarketType.Win.Id);
+        MarketTypeCodes.Should().Contain(MarketType.CorrectScore.Id);
+        MarketTypes.Should().Contain(MarketType.Win.Id);
+        MarketTypes.Should().Contain(MarketType.CorrectScore.Id);
+    }
+
+    [Fact]
     public void TextMarketTypeIdsAreAddedToMarketTypeCodes()
     {
         WithMarketTypes("WIN", "CORRECT_SCORE");
@@ -78,6 +90,16 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     public void EventTypesAreAddedToEventTypesIds()
     {
         WithEventTypes(EventType.HorseRacing, EventType.AmericanFootball);
+
+        EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
+        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id);
+    }
+
+    [Fact]
+    public void WithEventTypesCanBeCalledMultipleTimes()
+    {
+        WithEventTypes(EventType.HorseRacing);
+        WithEventTypes(EventType.AmericanFootball);
 
         EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
         EventTypeIds.Should().Contain(EventType.AmericanFootball.Id);
@@ -124,6 +146,16 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     }
 
     [Fact]
+    public void WithMarketIdsCanBeCalledMultipleTimes()
+    {
+        WithMarketIds("1.2345");
+        WithMarketIds("9.8765");
+
+        MarketIds.Should().Contain("1.2345");
+        MarketIds.Should().Contain("9.8765");
+    }
+
+    [Fact]
     public void AddingNullMarketIdHasNoEffect()
     {
         WithMarketIds("1.999", null!);
@@ -140,6 +172,16 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     public void CountryCodesAreAddedToMarketCountries()
     {
         WithCountries(Country.Algeria, Country.Argentina);
+
+        MarketCountries.Should().Contain(Country.Algeria.Id);
+        MarketCountries.Should().Contain(Country.Argentina.Id);
+    }
+
+    [Fact]
+    public void WithCountriesCanBeCalledMultipleTimes()
+    {
+        WithCountries(Country.Algeria);
+        WithCountries(Country.Argentina);
 
         MarketCountries.Should().Contain(Country.Algeria.Id);
         MarketCountries.Should().Contain(Country.Argentina.Id);
