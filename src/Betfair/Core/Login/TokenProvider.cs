@@ -6,8 +6,8 @@ internal class TokenProvider
 {
     private const string _apiLogin = "https://identitysso.betfair.com/api/login";
     private const string _certLogin = "https://identitysso-cert.betfair.com/api/certlogin";
-    private readonly BetfairHttpClient _client;
-    private readonly Credentials _credentials;
+    private readonly BetfairHttpClient? _client;
+    private readonly Credentials? _credentials;
 
     internal TokenProvider(BetfairHttpClient client, Credentials credentials)
     {
@@ -17,8 +17,6 @@ internal class TokenProvider
 
     internal TokenProvider()
     {
-        _client = null!;
-        _credentials = null!;
     }
 
     internal virtual async Task<string> GetToken(CancellationToken cancellationToken)
@@ -34,11 +32,11 @@ internal class TokenProvider
         result.Status.Equals("success", StringComparison.OrdinalIgnoreCase);
 
     private HttpRequestMessage GetLoginRequest() =>
-        _credentials.Certificate is not null ? CertLogin() : ApiLogin();
+        _credentials!.Certificate is not null ? CertLogin() : ApiLogin();
 
     private async Task<MergedResponse> GetLoginResponse(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var response = await _client.SendAsync(request, cancellationToken);
+        var response = await _client!.SendAsync(request, cancellationToken);
         var result = await JsonSerializer.DeserializeAsync<LoginResponse>(
             await response.Content.ReadAsStreamAsync(cancellationToken),
             StandardResolver.AllowPrivateExcludeNullCamelCase);
@@ -69,7 +67,7 @@ internal class TokenProvider
 
     private void AddHeadersAndContent(HttpRequestMessage request)
     {
-        request.Headers.Add("X-Application", _credentials.AppKey);
+        request.Headers.Add("X-Application", _credentials!.AppKey);
         request.Content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", _credentials.Username }, { "password", _credentials.Password } });
     }
@@ -88,19 +86,12 @@ internal class TokenProvider
         public string LoginStatus { get; init; } = string.Empty;
     }
 
-    private sealed class MergedResponse
+    private sealed class MergedResponse(LoginResponse response)
     {
-        public MergedResponse(LoginResponse response)
-        {
-            Token = response.Token + response.SessionToken;
-            Status = response.Status + response.LoginStatus;
-            Error = response.Error + response.LoginStatus;
-        }
+        public string Token { get; } = response.Token + response.SessionToken;
 
-        public string Token { get; }
+        public string Status { get; } = response.Status + response.LoginStatus;
 
-        public string Status { get; }
-
-        public string Error { get; }
+        public string Error { get; } = response.Error + response.LoginStatus;
     }
 }
