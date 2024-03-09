@@ -4,7 +4,7 @@ namespace Betfair.Tests.Stream;
 
 public class DataFilterTests
 {
-    private readonly DataFilter _filter = new();
+    private readonly DataFilter _filter = new ();
 
     [Fact]
     public void WhenInitializedLadderLevelsIsThree() =>

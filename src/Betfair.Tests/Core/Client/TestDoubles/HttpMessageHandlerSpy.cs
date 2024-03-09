@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Utf8Json;
 using Utf8Json.Resolvers;
+#pragma warning disable SA1010
 
 namespace Betfair.Tests.Core.Client.TestDoubles;
 
@@ -17,7 +18,7 @@ public class HttpMessageHandlerSpy : HttpClientHandler
 
     public Uri? UriCalled { get; private set; }
 
-    public Dictionary<Uri, int> TimesUriCalled { get; private set; } = new ();
+    public Dictionary<Uri, int> TimesUriCalled { get; private set; } = [];
 
     public HttpRequestHeaders? HeadersSent { get; private set; }
 

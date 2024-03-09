@@ -1,6 +1,7 @@
 ﻿using Betfair.Stream;
 using Utf8Json;
 using Utf8Json.Resolvers;
+#pragma warning disable SA1010
 
 namespace Betfair.Tests.Stream.TestDoubles;
 
