@@ -26,6 +26,7 @@ public class Subscription : IDisposable
     /// Used to subscribe to Betfair market and order streams.
     /// </summary>
     /// <param name="credentials">The <see cref="Credentials"/> object need to authenticate with Betfair.</param>
+    [ExcludeFromCodeCoverage]
     public Subscription(Credentials credentials)
     {
         ArgumentNullException.ThrowIfNull(credentials);
