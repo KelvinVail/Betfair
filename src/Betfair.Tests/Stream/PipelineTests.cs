@@ -18,6 +18,7 @@ public class PipelineTests : IDisposable
     [InlineData(98765)]
     public async Task ObjectAreWrittenToTheStream(int id)
     {
+        // comment
         var anon = new { Id = id, Test = "Test " };
 
         await _pipeline.WriteLines(anon, default);
