@@ -34,4 +34,4 @@ jobs:
 
     - name: Run dotnet-stryker
       working-directory: src
-      run: dotnet stryker --reporter "dashboard" --dashboard-api-key ${{ secrets.STRYKER_DASHBOARD_API_KEY }} --version "master" --verbosity trace
+      run: dotnet stryker --reporter "dashboard" --dashboard-api-key ${{ secrets.STRYKER_DASHBOARD_API_KEY }} --version "master"
