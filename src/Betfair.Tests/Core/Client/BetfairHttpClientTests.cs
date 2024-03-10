@@ -1,5 +1,7 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using Betfair.Core.Client;
+using Betfair.Tests.Core.Client.TestDoubles;
+#pragma warning disable CA1806
 
 namespace Betfair.Tests.Core.Client;
 
@@ -30,6 +32,7 @@ public class BetfairHttpClientTests : IDisposable
     public void HandlerIsDisposedWithHttpClient()
     {
         using var handler = new BetfairClientHandler();
+        handler.CheckCertificateRevocationList = true;
         var client = new BetfairHttpClient(handler);
 
         client.Dispose();
@@ -45,6 +48,52 @@ public class BetfairHttpClientTests : IDisposable
         }
 
         handlerIsDisposed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ConstructWithNullCertificateDoesNotThrow()
+    {
+        Action act = () => new BetfairHttpClient((X509Certificate2?)null);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void ConstructWithCertificateDoesNotThrow()
+    {
+        using var cert = new X509Certificate2Stub();
+
+        Action act = () => new BetfairHttpClient(cert);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void ConstructWithNullHandlerThrowsArgumentNullException()
+    {
+        Action act = () => new BetfairHttpClient((HttpMessageHandler)null!);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void ConstructWithHandlerDoesNotThrow()
+    {
+        using var handler = new HttpClientHandler();
+
+        Action act = () => new BetfairHttpClient(handler);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void ConstructWithHandlerSetsHandler()
+    {
+        using var handler = new HttpClientHandler();
+
+        using var client = new BetfairHttpClient(handler);
+
+        client.DefaultRequestHeaders.Connection.Should().Contain("keep-alive");
     }
 
     public void Dispose()

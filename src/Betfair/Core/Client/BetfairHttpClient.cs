@@ -1,11 +1,14 @@
-﻿namespace Betfair.Core.Client;
+﻿#pragma warning disable CA2000, Handler is disposed by HttpClient
+
+namespace Betfair.Core.Client;
 
 internal class BetfairHttpClient : HttpClient
 {
+    private static readonly MediaTypeWithQualityHeaderValue _jsonMediaType = new ("application/json");
+    private static readonly StringWithQualityHeaderValue _gzipEncoding = new ("gzip");
+
     internal BetfairHttpClient(X509Certificate2? cert)
-#pragma warning disable CA2000, Disposed by HttpClient
         : this(new BetfairClientHandler(cert))
-#pragma warning restore CA2000
     {
     }
 
@@ -15,8 +18,8 @@ internal class BetfairHttpClient : HttpClient
     private void Configure()
     {
         Timeout = TimeSpan.FromSeconds(30);
-        DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        DefaultRequestHeaders.Accept.Add(_jsonMediaType);
         DefaultRequestHeaders.Add("Connection", "keep-alive");
-        DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+        DefaultRequestHeaders.AcceptEncoding.Add(_gzipEncoding);
     }
 }
