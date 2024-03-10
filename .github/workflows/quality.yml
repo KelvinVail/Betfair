@@ -46,5 +46,5 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"KelvinVail_Betfair" /o:"kelvinvail" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet tool install --global dotnet-coverage
           dotnet build src --configuration Release
-          dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
+          dotnet-coverage collect "dotnet test src" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
