@@ -14,13 +14,15 @@ internal class Pipeline : IPipeline
     {
         await JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase);
         _stream.WriteByte((byte)'\n');
-        await FillPipeAsync(_stream, _pipe.Writer);
     }
 
     public async IAsyncEnumerable<byte[]> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var task = FillPipeAsync(_stream, _pipe.Writer);
         await foreach (var line in ReadPipeAsync(_pipe.Reader).WithCancellation(cancellationToken))
             yield return line.Slice(0, line.Length).ToArray();
+
+        await task;
     }
 
     private static async Task FillPipeAsync(System.IO.Stream stream, PipeWriter writer)

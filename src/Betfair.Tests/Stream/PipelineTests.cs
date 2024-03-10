@@ -26,6 +26,17 @@ public class PipelineTests : IDisposable
         ReadLineFrom(_stream).Should().Be(json);
     }
 
+    [Fact]
+    public async Task TheLastByteWrittenToTheStreamShouldBeAnEndOfLineChar()
+    {
+        var anon = new { Id = 1, Test = "Test " };
+
+        await _pipeline.WriteLines(anon, default);
+
+        _stream.Position = _stream.Length - 1;
+        _stream.ReadByte().Should().Be((byte)'\n');
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

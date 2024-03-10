@@ -31,10 +31,10 @@ Create a Subscription. Then use a MarketFilter to start a stream.
 [Full subscription documentation](/docs/Subscription.md).
 
 ```csharp
-var credentials = new Credential("USERNAME", "PASSWORD", "APP_KEY");
+var credentials = new Credentials("USERNAME", "PASSWORD", "APP_KEY");
 using var subscription = new Subscription(credentials);
 
-await subscription.Subscribe(new StreamMarketFilter().WithMarketIds("MARKET_ID"))
+await subscription.Subscribe(new StreamMarketFilter().WithMarketIds("MARKET_ID"));
 await foreach (var change in subscription.ReadLines(default))
 {
 	// Handle changes
