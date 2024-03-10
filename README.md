@@ -2,6 +2,12 @@
 [![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/kelvinvail/Betfair/blob/master/LICENSE)
 [![NuGet downloads](https://img.shields.io/nuget/v/Betfair.svg)](https://www.nuget.org/packages/Betfair/)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=bugs)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=coverage)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
+
 # Betfair
 Fast and simple classes for interacting with the Betfair API and Stream.
 
@@ -27,7 +33,7 @@ var credentials = new Credential("USERNAME", "PASSWORD", "APP_KEY");
 using var subscription = new Subscription(credentials);
 
 await subscription.Subscribe(new StreamMarketFilter().WithMarketIds("MARKET_ID"))
-await foreach (var change in subscription.ReadLines())
+await foreach (var change in subscription.ReadLines(default))
 {
 	// Handle changes
 }
