@@ -41,7 +41,6 @@ public class PipelineTests : IDisposable
     public async Task ReadLinesShouldReturnAsSoonAsTheCancellationTokenIsCalled()
     {
         var anon = new { Id = 1, Test = "Test " };
-
         using var cts = new CancellationTokenSource();
         await _pipeline.WriteLine(anon);
         _stream.Position = 0;
@@ -57,7 +56,6 @@ public class PipelineTests : IDisposable
     {
         var anon1 = new { Id = 1, Test = "Test 1" };
         var anon2 = new { Id = 2, Test = "Test 2" };
-
         await _pipeline.WriteLine(anon1);
         await _pipeline.WriteLine(anon2);
         _stream.Position = 0;
@@ -67,6 +65,18 @@ public class PipelineTests : IDisposable
         result.Should().HaveCount(2);
         result[0].Should().BeEquivalentTo(JsonSerializer.Serialize(anon1, StandardResolver.CamelCase));
         result[1].Should().BeEquivalentTo(JsonSerializer.Serialize(anon2, StandardResolver.CamelCase));
+    }
+
+    [Fact]
+    public async Task ReadLinesShouldNotReturnAnySequenceForLinesThatDoNotEndInNewLineChar()
+    {
+        var stream = new MemoryStream("Line\nNoNewlineHere"u8.ToArray());
+        var pipeline = new Pipeline(stream);
+
+        var asyncEnumerable = pipeline.ReadLines(default);
+
+        var lines = await asyncEnumerable.ToListAsync();
+        lines.Should().ContainSingle();
     }
 
     public void Dispose()

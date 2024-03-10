@@ -18,11 +18,9 @@ internal class Pipeline : IPipeline
 
     public async IAsyncEnumerable<byte[]> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var task = CopyDataFromSteamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
+        _ = CopyDataFromSteamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
         await foreach (var line in ReadPipeAsync(_pipe.Reader, cancellationToken))
             yield return line.Slice(0, line.Length).ToArray();
-
-        await task;
     }
 
     private static async Task CopyDataFromSteamToPipeAsync(
