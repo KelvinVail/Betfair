@@ -18,22 +18,17 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '5.0.x'
-
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore src
 
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build src --no-restore
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test src --no-build --verbosity normal
 
     - name: Install dotnet-stryker
       run: dotnet tool install -g dotnet-stryker
 
     - name: Run dotnet-stryker
-      run: dotnet stryker
+      run: dotnet stryker src
