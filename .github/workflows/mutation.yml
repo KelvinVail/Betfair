@@ -31,4 +31,4 @@ jobs:
       run: dotnet tool install -g dotnet-stryker
 
     - name: Run dotnet-stryker
-      run: cd src && dotnet stryker
+      run: cd src && dotnet stryker --reporter "dashboard" --dashboardApiKey ${{ secrets.STRYKER_DASHBOARD_API_KEY }} --projectName "github.com/KelvinVail/Betfair" --version "8.1.0"
