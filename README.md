@@ -8,6 +8,8 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=coverage)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
 
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FKelvinVail%2FBetfair%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/KelvinVail/Betfair/master)
+
 # Betfair
 Fast and simple classes for interacting with the Betfair API and Stream.
 
