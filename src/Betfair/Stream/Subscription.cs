@@ -63,7 +63,7 @@ public class Subscription : IDisposable
 
         _requestId++;
         var marketSubscription = new MarketSubscription(_requestId, marketFilter, dataFilter, conflate);
-        await _pipe.WriteLines(marketSubscription, cancellationToken);
+        await _pipe.WriteLine(marketSubscription);
     }
 
     /// <summary>
@@ -71,14 +71,13 @@ public class Subscription : IDisposable
     /// </summary>
     /// <param name="orderFilter">Optional: Used to shape and filter the order data returned on the stream.</param>
     /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
-    /// <param name="cancellationToken">CancellationToken.</param>
     /// <returns>An awaitable task.</returns>
     public async Task SubscribeToOrders(OrderFilter? orderFilter = null, TimeSpan? conflate = null, CancellationToken cancellationToken = default)
     {
         await Authenticate(cancellationToken);
 
         _requestId++;
-        await _pipe.WriteLines(new OrderSubscription(_requestId, orderFilter, conflate), cancellationToken);
+        await _pipe.WriteLine(new OrderSubscription(_requestId, orderFilter, conflate));
     }
 
     /// <summary>
@@ -127,7 +126,7 @@ public class Subscription : IDisposable
         var token = await _tokenProvider.GetToken(cancellationToken);
         var authMessage = new Authentication(_requestId, token, _appKey);
 
-        await _pipe.WriteLines(authMessage, cancellationToken);
+        await _pipe.WriteLine(authMessage);
 
         _isAuthenticated = true;
     }

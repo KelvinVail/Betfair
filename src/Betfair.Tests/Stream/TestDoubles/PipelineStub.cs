@@ -12,7 +12,7 @@ public class PipelineStub : IPipeline
 
     public List<object> ObjectsToBeRead { get; } = [];
 
-    public async Task WriteLines(object value, CancellationToken cancellationToken)
+    public async Task WriteLine(object value)
     {
         await Task.CompletedTask;
 

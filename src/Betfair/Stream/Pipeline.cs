@@ -10,7 +10,7 @@ internal class Pipeline : IPipeline
     public Pipeline(System.IO.Stream stream) =>
         _stream = stream;
 
-    public async Task WriteLines(object value, CancellationToken cancellationToken)
+    public async Task WriteLine(object value)
     {
         await JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase);
         _stream.WriteByte((byte)'\n');
@@ -18,37 +18,37 @@ internal class Pipeline : IPipeline
 
     public async IAsyncEnumerable<byte[]> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var task = FillPipeAsync(_stream, _pipe.Writer);
-        await foreach (var line in ReadPipeAsync(_pipe.Reader).WithCancellation(cancellationToken))
+        var task = CopyDataFromSteamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
+        await foreach (var line in ReadPipeAsync(_pipe.Reader, cancellationToken))
             yield return line.Slice(0, line.Length).ToArray();
 
         await task;
     }
 
-    private static async Task FillPipeAsync(System.IO.Stream stream, PipeWriter writer)
+    private static async Task CopyDataFromSteamToPipeAsync(
+        System.IO.Stream stream,
+        PipeWriter writer,
+        CancellationToken cancellationToken)
     {
         const int minimumBufferSize = 512;
 
         while (true)
         {
             Memory<byte> memory = writer.GetMemory(minimumBufferSize);
+            int bytesRead;
             try
             {
-                int bytesRead = await stream.ReadAsync(memory);
-                if (bytesRead == 0) break;
-
-                writer.Advance(bytesRead);
+                bytesRead = await stream.ReadAsync(memory, cancellationToken);
             }
-            catch (SocketException)
-            {
-                break;
-            }
-            catch (IOException)
+            catch (OperationCanceledException)
             {
                 break;
             }
 
-            FlushResult result = await writer.FlushAsync();
+            if (bytesRead == 0) break;
+
+            writer.Advance(bytesRead);
+            FlushResult result = await writer.FlushAsync(cancellationToken);
 
             if (result.IsCompleted) break;
         }
@@ -56,11 +56,20 @@ internal class Pipeline : IPipeline
         await writer.CompleteAsync();
     }
 
-    private static async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPipeAsync(PipeReader reader)
+    private static async IAsyncEnumerable<ReadOnlySequence<byte>> ReadPipeAsync(PipeReader reader, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         while (true)
         {
-            ReadResult result = await reader.ReadAsync();
+            ReadResult result;
+            try
+            {
+                result = await reader.ReadAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
             ReadOnlySequence<byte> buffer = result.Buffer;
 
             while (TryReadLine(ref buffer, out ReadOnlySequence<byte> line))

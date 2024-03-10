@@ -2,7 +2,7 @@
 
 internal interface IPipeline
 {
-    Task WriteLines(object value, CancellationToken cancellationToken);
+    Task WriteLine(object value);
 
     IAsyncEnumerable<byte[]> ReadLines(CancellationToken cancellationToken);
 }
