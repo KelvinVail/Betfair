@@ -3,6 +3,8 @@ name: .NET Core
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'src/**'
 
 jobs:
   publish:
