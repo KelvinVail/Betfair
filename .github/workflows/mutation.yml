@@ -6,8 +6,6 @@ on:
       - master
     paths:
       - 'src/**'
-  pull_request:
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 jobs:
@@ -31,4 +29,4 @@ jobs:
       run: dotnet tool install -g dotnet-stryker
 
     - name: Run dotnet-stryker
-      run: cd src && dotnet stryker --reporter "dashboard" --dashboard-api-key ${{ secrets.STRYKER_DASHBOARD_API_KEY }} --project-name "github.com/KelvinVail/Betfair" --version "8.1.0"
+      run: cd src && dotnet stryker --reporter "dashboard" --dashboard-api-key ${{ secrets.STRYKER_DASHBOARD_API_KEY }} --version "8.1.0"
