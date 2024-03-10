@@ -32,5 +32,3 @@ jobs:
 
     - name: Run dotnet-stryker
       run: cd src && dotnet stryker
-
-      # This is a comment
