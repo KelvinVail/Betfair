@@ -7,6 +7,7 @@ internal class BetfairTcpClient : TcpClient
     public BetfairTcpClient() =>
         Configure();
 
+    [ExcludeFromCodeCoverage]
     internal virtual System.IO.Stream GetAuthenticatedSslStream()
     {
         Connect(_hostName, 443);
