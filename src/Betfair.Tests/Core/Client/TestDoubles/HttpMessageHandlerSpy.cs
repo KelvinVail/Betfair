@@ -34,9 +34,7 @@ public class HttpMessageHandlerSpy : HttpClientHandler
     {
         MethodUsed = request.Method;
         UriCalled = request.RequestUri;
-        if (!TimesUriCalled.ContainsKey(request.RequestUri!))
-            TimesUriCalled.Add(request.RequestUri!, 0);
-
+        TimesUriCalled.TryAdd(request.RequestUri!, 0);
         TimesUriCalled[request.RequestUri!] += 1;
 
         HeadersSent = request.Headers;

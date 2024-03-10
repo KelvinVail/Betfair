@@ -7,10 +7,6 @@ public class BetfairTcpClientTests : IDisposable
     private readonly BetfairTcpClientStub _tcp = new ();
     private bool _disposedValue;
 
-    [Fact(Skip = "Changes based on environment")]
-    public void TcpClientReceiveBufferSizeIsCorrect() =>
-        _tcp.ReceiveBufferSize.Should().Be(1024 * 1000 * 2);
-
     [Fact]
     public void TcpSendTimeoutIsCorrect() =>
         _tcp.SendTimeout.Should().Be((int)TimeSpan.FromSeconds(30).TotalMilliseconds);

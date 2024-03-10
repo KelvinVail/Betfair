@@ -5,10 +5,11 @@ namespace Betfair.Stream.Messages;
 /// </summary>
 public class DataFilter
 {
+    private HashSet<string>? _fields;
+
     public int LadderLevels { get; private set; } = 3;
 
-    // TODO make internal or readonly
-    public HashSet<string>? Fields { get; private set; }
+    public IReadOnlySet<string>? Fields => _fields;
 
     /// <summary>
     /// Includes market definitions and updates in the stream data.
@@ -16,9 +17,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithMarketDefinition()
     {
-        // TODO rename With... to Include...
-        Fields ??= new HashSet<string>();
-        Fields.Add("EX_MARKET_DEF");
+        _fields ??=[];
+        _fields.Add("EX_MARKET_DEF");
         return this;
     }
 
@@ -30,9 +30,9 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithBestPricesIncludingVirtual()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("EX_BEST_OFFERS_DISP");
-        return this;
+       _fields ??=[];
+       _fields.Add("EX_BEST_OFFERS_DISP");
+       return this;
     }
 
     /// <summary>
@@ -42,8 +42,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithBestPrices()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("EX_BEST_OFFERS");
+        _fields ??=[];
+        _fields.Add("EX_BEST_OFFERS");
         return this;
     }
 
@@ -53,8 +53,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithFullOffersLadder()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("EX_ALL_OFFERS");
+        _fields ??=[];
+        _fields.Add("EX_ALL_OFFERS");
         return this;
     }
 
@@ -64,8 +64,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithFullTradedLadder()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("EX_TRADED");
+        _fields ??=[];
+        _fields.Add("EX_TRADED");
         return this;
     }
 
@@ -75,8 +75,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithTradedVolume()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("EX_TRADED_VOL");
+        _fields ??=[];
+        _fields.Add("EX_TRADED_VOL");
         return this;
     }
 
@@ -86,8 +86,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithLastTradedPrice()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("EX_LTP");
+        _fields ??=[];
+        _fields.Add("EX_LTP");
         return this;
     }
 
@@ -97,8 +97,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithStartingPriceLadder()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("SP_TRADED");
+        _fields ??=[];
+        _fields.Add("SP_TRADED");
         return this;
     }
 
@@ -108,8 +108,8 @@ public class DataFilter
     /// <returns>This DataFilter.</returns>
     public DataFilter WithStartingPriceProjection()
     {
-        Fields ??= new HashSet<string>();
-        Fields.Add("SP_PROJECTED");
+        _fields ??=[];
+        _fields.Add("SP_PROJECTED");
         return this;
     }
 

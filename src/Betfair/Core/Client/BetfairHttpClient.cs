@@ -1,4 +1,4 @@
-﻿#pragma warning disable CA2000, Handler is disposed by HttpClient
+﻿#pragma warning disable CA2000
 
 namespace Betfair.Core.Client;
 

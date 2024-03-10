@@ -90,6 +90,7 @@ public class BetfairHttpClientTests : IDisposable
     public void ConstructWithHandlerSetsHandler()
     {
         using var handler = new HttpClientHandler();
+        handler.CheckCertificateRevocationList = true;
 
         using var client = new BetfairHttpClient(handler);
 
