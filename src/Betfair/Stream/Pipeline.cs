@@ -6,12 +6,14 @@ internal class Pipeline : IPipeline
     private readonly Pipe _pipe = new ();
 
     public Pipeline(System.IO.Stream stream) =>
-        _stream = stream;
+        _stream = stream ?? throw new ArgumentNullException(nameof(stream));
 
-    public Task Write(object value, CancellationToken cancellationToken) =>
-        JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase)
-            .ContinueWith(_ => _stream.WriteByte((byte)'\n'), cancellationToken)
-            .ContinueWith(_ => FillPipeAsync(_stream, _pipe.Writer), cancellationToken);
+    public async Task Write(object value, CancellationToken cancellationToken)
+    {
+        await JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase);
+        _stream.WriteByte((byte)'\n');
+        await FillPipeAsync(_stream, _pipe.Writer);
+    }
 
     public async IAsyncEnumerable<byte[]> Read()
     {

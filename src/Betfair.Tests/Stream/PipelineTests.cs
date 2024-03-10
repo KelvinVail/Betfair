@@ -26,6 +26,24 @@ public class PipelineTests : IDisposable
         ReadLineFrom(_stream).Should().Be(json);
     }
 
+    [Fact]
+    public void ConstructWithNullStreamThrowsArgumentNullException()
+    {
+        Action act = () => new Pipeline(null!);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void ConstructWithStreamDoesNotThrow()
+    {
+        using var stream = new MemoryStream();
+
+        Action act = () => new Pipeline(stream);
+
+        act.Should().NotThrow();
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
