@@ -1,4 +1,6 @@
-﻿namespace Betfair.Stream;
+﻿using System.Runtime.CompilerServices;
+
+namespace Betfair.Stream;
 
 internal class Pipeline : IPipeline
 {
@@ -6,18 +8,18 @@ internal class Pipeline : IPipeline
     private readonly Pipe _pipe = new ();
 
     public Pipeline(System.IO.Stream stream) =>
-        _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+        _stream = stream;
 
-    public async Task Write(object value, CancellationToken cancellationToken)
+    public async Task WriteLines(object value, CancellationToken cancellationToken)
     {
         await JsonSerializer.SerializeAsync(_stream, value, StandardResolver.AllowPrivateExcludeNullCamelCase);
         _stream.WriteByte((byte)'\n');
         await FillPipeAsync(_stream, _pipe.Writer);
     }
 
-    public async IAsyncEnumerable<byte[]> Read()
+    public async IAsyncEnumerable<byte[]> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var line in ReadPipeAsync(_pipe.Reader))
+        await foreach (var line in ReadPipeAsync(_pipe.Reader).WithCancellation(cancellationToken))
             yield return line.Slice(0, line.Length).ToArray();
     }
 

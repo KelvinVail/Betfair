@@ -20,28 +20,10 @@ public class PipelineTests : IDisposable
     {
         var anon = new { Id = id, Test = "Test " };
 
-        await _pipeline.Write(anon, default);
+        await _pipeline.WriteLines(anon, default);
 
         var json = JsonSerializer.ToJsonString(anon, StandardResolver.CamelCase);
         ReadLineFrom(_stream).Should().Be(json);
-    }
-
-    [Fact]
-    public void ConstructWithNullStreamThrowsArgumentNullException()
-    {
-        Action act = () => new Pipeline(null!);
-
-        act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void ConstructWithStreamDoesNotThrow()
-    {
-        using var stream = new MemoryStream();
-
-        Action act = () => new Pipeline(stream);
-
-        act.Should().NotThrow();
     }
 
     public void Dispose()

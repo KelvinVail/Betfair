@@ -1,4 +1,5 @@
-﻿using Betfair.Core.Client;
+﻿using System.Runtime.CompilerServices;
+using Betfair.Core.Client;
 using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
@@ -62,7 +63,7 @@ public class Subscription : IDisposable
 
         _requestId++;
         var marketSubscription = new MarketSubscription(_requestId, marketFilter, dataFilter, conflate);
-        await _pipe.Write(marketSubscription, cancellationToken);
+        await _pipe.WriteLines(marketSubscription, cancellationToken);
     }
 
     /// <summary>
@@ -77,16 +78,17 @@ public class Subscription : IDisposable
         await Authenticate(cancellationToken);
 
         _requestId++;
-        await _pipe.Write(new OrderSubscription(_requestId, orderFilter, conflate), cancellationToken);
+        await _pipe.WriteLines(new OrderSubscription(_requestId, orderFilter, conflate), cancellationToken);
     }
 
     /// <summary>
     /// Asynchronously iterate ChangeMessages as they become available on the stream.
     /// </summary>
+    /// <param name="cancellationToken">CancellationToken.</param>
     /// <returns>An Async Enumerable of <see cref="ChangeMessage"/>.</returns>
-    public async IAsyncEnumerable<ChangeMessage> ReadLines()
+    public async IAsyncEnumerable<ChangeMessage> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var line in _pipe.Read())
+        await foreach (var line in _pipe.ReadLines(cancellationToken))
         {
             var received = DateTimeOffset.UtcNow.Ticks;
             var changeMessage = JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.ExcludeNullCamelCase);
@@ -125,7 +127,7 @@ public class Subscription : IDisposable
         var token = await _tokenProvider.GetToken(cancellationToken);
         var authMessage = new Authentication(_requestId, token, _appKey);
 
-        await _pipe.Write(authMessage, cancellationToken);
+        await _pipe.WriteLines(authMessage, cancellationToken);
 
         _isAuthenticated = true;
     }

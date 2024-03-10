@@ -2,13 +2,15 @@
 The Subscription is used to subscribe to Betfair market and order streams.
 
 ## Contents
-- [Create a Subscription](#create-a-subscription)
-- [Subscribe to a Market Stream](#subscribe-to-a-market-stream)
-- [Subscribe to an Order Stream](#subscribe-to-an-order-stream)
-- [Consume Change Messages](#consume-change-messages)
-	- [Back Pressure](#back-pressure)
-	- [Consume the raw change messages](#consume-the-raw-change-messages)
-- [Unsubscribe from the stream](#unsubscribe-from-the-stream)
+- [Subscription](#subscription)
+	- [Contents](#contents)
+	- [Create a Subscription](#create-a-subscription)
+	- [Subscribe to a Market Stream](#subscribe-to-a-market-stream)
+	- [Subscribe to an Order Stream](#subscribe-to-an-order-stream)
+	- [Conflate the Subscription](#conflate-the-subscription)
+	- [Consume Change Messages](#consume-change-messages)
+		- [Back Pressure](#back-pressure)
+	- [Unsubscribe from the stream](#unsubscribe-from-the-stream)
 
 ## Create a Subscription
 The Subscription needs a [Credentials](/docs/Authentication.md) object to authenticate to Betfair.  
@@ -60,7 +62,7 @@ await subscription.SubscribeToOrders(conflate: conflate);
 ## Consume Change Messages
 After you have subscribed to a market and/or an order stream you can iterate each [ChangeMessage](/docs/ChangeMessage.md) asynchronously as they become available on the stream. 
 ```csharp
-await foreach (ChangeMessage change in streamClient.ReadLines())
+await foreach (ChangeMessage change in streamClient.ReadLines(default))
 {
 	// Handle change..
 }

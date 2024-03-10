@@ -1,4 +1,5 @@
-﻿using Betfair.Stream;
+﻿using System.Runtime.CompilerServices;
+using Betfair.Stream;
 using Utf8Json;
 using Utf8Json.Resolvers;
 #pragma warning disable SA1010
@@ -11,14 +12,14 @@ public class PipelineStub : IPipeline
 
     public List<object> ObjectsToBeRead { get; } = [];
 
-    public async Task Write(object value, CancellationToken cancellationToken)
+    public async Task WriteLines(object value, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
 
         ObjectsWritten.Add(value);
     }
 
-    public async IAsyncEnumerable<byte[]> Read()
+    public async IAsyncEnumerable<byte[]> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
         foreach (var o in ObjectsToBeRead)

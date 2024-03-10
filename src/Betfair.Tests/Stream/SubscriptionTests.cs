@@ -204,7 +204,7 @@ public class SubscriptionTests
         _pipe.ObjectsToBeRead.Add(message);
 
         var read = new List<object>();
-        await foreach (var line in sub.ReadLines())
+        await foreach (var line in sub.ReadLines(default))
             read.Add(line);
 
         read.Should().ContainEquivalentOf(message, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
@@ -220,7 +220,7 @@ public class SubscriptionTests
         _pipe.ObjectsToBeRead.Add(message2);
 
         var read = new List<object>();
-        await foreach (var line in sub.ReadLines())
+        await foreach (var line in sub.ReadLines(default))
             read.Add(line);
 
         read.Should().ContainEquivalentOf(message1, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
