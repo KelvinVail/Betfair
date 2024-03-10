@@ -16,17 +16,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set Working Directory
+      run: cd src
+
     - name: Install dependencies
-      run: dotnet restore src
+      run: dotnet restore
 
     - name: Build
-      run: dotnet build src --no-restore
+      run: dotnet build --no-restore
 
     - name: Test
-      run: dotnet test src --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal
 
     - name: Install dotnet-stryker
       run: dotnet tool install -g dotnet-stryker
 
     - name: Run dotnet-stryker
-      run: cd src && dotnet stryker --reporter "dashboard" --dashboard-api-key ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+      run: dotnet stryker --reporter "dashboard" --dashboard-api-key X${{ secrets.STRYKER_DASHBOARD_API_KEY }}
