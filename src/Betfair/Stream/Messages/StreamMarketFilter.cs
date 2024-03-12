@@ -1,17 +1,23 @@
+using System.Text.Json.Serialization;
 using Betfair.Core;
 
 namespace Betfair.Stream.Messages;
 
 public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
 {
+    [JsonPropertyName("bettingTypes")]
     public HashSet<string>? BettingTypes { get; private set; }
 
+    [JsonPropertyName("turnInPlayEnabled")]
     public bool? TurnInPlayEnabled { get; private set; }
 
+    [JsonPropertyName("venues")]
     public HashSet<string>? Venues { get; private set; }
 
+    [JsonPropertyName("eventIds")]
     public HashSet<string>? EventIds { get; private set; }
 
+    [JsonPropertyName("bspMarket")]
     public bool? BspMarket { get; private set; }
 
     /// <summary>

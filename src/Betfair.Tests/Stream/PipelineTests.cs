@@ -1,4 +1,5 @@
 ﻿using Betfair.Stream;
+using Betfair.Stream.Messages;
 using Utf8Json;
 using Utf8Json.Resolvers;
 
@@ -18,20 +19,20 @@ public class PipelineTests : IDisposable
     [InlineData(98765)]
     public async Task ObjectAreWrittenToTheStream(int id)
     {
-        var anon = new { Id = id, Test = "Test " };
+        var auth = new Authentication(id, "sessionToken", "appKey");
 
-        await _pipeline.WriteLine(anon);
+        await _pipeline.WriteLine(auth);
 
-        var json = JsonSerializer.ToJsonString(anon, StandardResolver.CamelCase);
+        var json = System.Text.Json.JsonSerializer.Serialize(auth);
         ReadLineFrom(_stream).Should().Be(json);
     }
 
     [Fact]
     public async Task TheLastByteWrittenToTheStreamShouldBeAnEndOfLineChar()
     {
-        var anon = new { Id = 1, Test = "Test " };
+        var auth = new Authentication(1, "sessionToken", "appKey");
 
-        await _pipeline.WriteLine(anon);
+        await _pipeline.WriteLine(auth);
 
         _stream.Position = _stream.Length - 1;
         _stream.ReadByte().Should().Be((byte)'\n');
@@ -40,9 +41,9 @@ public class PipelineTests : IDisposable
     [Fact]
     public async Task ReadLinesShouldReturnAsSoonAsTheCancellationTokenIsCalled()
     {
-        var anon = new { Id = 1, Test = "Test " };
+        var auth = new Authentication(1, "sessionToken", "appKey");
         using var cts = new CancellationTokenSource();
-        await _pipeline.WriteLine(anon);
+        await _pipeline.WriteLine(auth);
         _stream.Position = 0;
 
         await cts.CancelAsync();
@@ -54,17 +55,17 @@ public class PipelineTests : IDisposable
     [Fact]
     public async Task ReadLinesShouldReturnAllLinesWrittenToTheStream()
     {
-        var anon1 = new { Id = 1, Test = "Test 1" };
-        var anon2 = new { Id = 2, Test = "Test 2" };
-        await _pipeline.WriteLine(anon1);
-        await _pipeline.WriteLine(anon2);
+        var auth1 = new Authentication(1, "sessionToken", "appKey");
+        var auth2 = new Authentication(2, "sessionToken", "appKey");
+        await _pipeline.WriteLine(auth1);
+        await _pipeline.WriteLine(auth2);
         _stream.Position = 0;
 
         var result = await _pipeline.ReadLines(CancellationToken.None).ToListAsync();
 
         result.Should().HaveCount(2);
-        result[0].Should().BeEquivalentTo(JsonSerializer.Serialize(anon1, StandardResolver.CamelCase));
-        result[1].Should().BeEquivalentTo(JsonSerializer.Serialize(anon2, StandardResolver.CamelCase));
+        result[0].Should().BeEquivalentTo(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(auth1));
+        result[1].Should().BeEquivalentTo(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(auth2));
     }
 
     [Fact]

@@ -1,4 +1,6 @@
-﻿namespace Betfair.Stream.Messages;
+﻿using System.Text.Json.Serialization;
+
+namespace Betfair.Stream.Messages;
 
 internal abstract class MessageBase
 {
@@ -8,7 +10,9 @@ internal abstract class MessageBase
         Id = id;
     }
 
+    [JsonPropertyName("op")]
     public string Op { get; }
 
+    [JsonPropertyName("id")]
     public int Id { get; }
 }

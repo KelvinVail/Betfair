@@ -1,4 +1,6 @@
-﻿namespace Betfair.Stream.Messages;
+﻿using System.Text.Json.Serialization;
+
+namespace Betfair.Stream.Messages;
 
 /// <summary>
 /// Used to shape and filter the order data returned on the stream.
@@ -7,10 +9,13 @@ public class OrderFilter
 {
     private HashSet<string>? _strategyRefs;
 
+    [JsonPropertyName("includeOverallPosition")]
     public bool? IncludeOverallPosition { get; private set; } = null;
 
+    [JsonPropertyName("partitionMatchedByStrategyRef")]
     public bool? PartitionMatchedByStrategyRef { get; private set; } = null;
 
+    [JsonPropertyName("customerStrategyRefs")]
     public IReadOnlyCollection<string>? CustomerStrategyRefs => _strategyRefs;
 
     /// <summary>

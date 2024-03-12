@@ -1,4 +1,6 @@
-﻿namespace Betfair.Stream.Messages;
+﻿using System.Text.Json.Serialization;
+
+namespace Betfair.Stream.Messages;
 
 internal class MarketSubscription : MessageBase
 {
@@ -14,9 +16,12 @@ internal class MarketSubscription : MessageBase
         ConflateMs = (int)(conflate?.TotalMilliseconds ?? 0);
     }
 
+    [JsonPropertyName("marketFilter")]
     public StreamMarketFilter MarketFilter { get; }
 
+    [JsonPropertyName("marketDataFilter")]
     public DataFilter MarketDataFilter { get; }
 
+    [JsonPropertyName("conflateMs")]
     public int ConflateMs { get; }
 }

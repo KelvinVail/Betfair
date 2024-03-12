@@ -1,18 +1,26 @@
-﻿namespace Betfair.Core;
+﻿using System.Text.Json.Serialization;
+
+namespace Betfair.Core;
 
 public abstract class MarketFilter<T>
     where T : MarketFilter<T>, new()
 {
+    [JsonPropertyName("marketTypes")]
     public HashSet<string>? MarketTypes { get; private set; }
 
+    [JsonPropertyName("marketTypeCodes")]
     public HashSet<string>? MarketTypeCodes { get; private set; }
 
+    [JsonPropertyName("eventTypeIds")]
     public HashSet<int>? EventTypeIds { get; private set; }
 
+    [JsonPropertyName("marketIds")]
     public HashSet<string>? MarketIds { get; private set; }
 
+    [JsonPropertyName("marketCountries")]
     public HashSet<string>? MarketCountries { get; private set; }
 
+    [JsonPropertyName("countryCodes")]
     public HashSet<string>? CountryCodes { get; private set; }
 
     /// <summary>

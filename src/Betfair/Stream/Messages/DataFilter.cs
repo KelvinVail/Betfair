@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Betfair.Stream.Messages;
 
 /// <summary>
@@ -7,8 +9,10 @@ public class DataFilter
 {
     private HashSet<string>? _fields;
 
+    [JsonPropertyName("ladderLevels")]
     public int LadderLevels { get; private set; } = 3;
 
+    [JsonPropertyName("fields")]
     public IReadOnlySet<string>? Fields => _fields;
 
     /// <summary>
