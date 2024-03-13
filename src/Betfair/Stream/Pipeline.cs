@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Betfair.Stream.Messages;
-
-namespace Betfair.Stream;
+﻿namespace Betfair.Stream;
 
 internal class Pipeline : IPipeline
 {
@@ -13,9 +10,9 @@ internal class Pipeline : IPipeline
 
     public async Task WriteLine(object value)
     {
-        var context = ContextSwitch.GetContext(value);
-        var json = System.Text.Json.JsonSerializer.Serialize(value, context);
-        await System.Text.Json.JsonSerializer.SerializeAsync(_stream, value, context);
+        var context = SerializerContextSwitch.GetContext(value);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, context);
+        _stream.Write(bytes);
         _stream.WriteByte((byte)'\n');
     }
 

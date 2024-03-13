@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Betfair.Stream.Messages;
+﻿namespace Betfair.Stream.Messages;
 
 /// <summary>
 /// Used to shape and filter the order data returned on the stream.

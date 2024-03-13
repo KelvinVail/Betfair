@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Betfair.Stream.Messages;
+﻿namespace Betfair.Stream.Messages;
 
 internal class MarketSubscription : MessageBase
 {

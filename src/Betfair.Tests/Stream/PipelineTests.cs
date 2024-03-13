@@ -1,7 +1,5 @@
 ﻿using Betfair.Stream;
 using Betfair.Stream.Messages;
-using Utf8Json;
-using Utf8Json.Resolvers;
 
 namespace Betfair.Tests.Stream;
 

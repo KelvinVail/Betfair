@@ -1,13 +1,17 @@
 ﻿namespace Betfair.Api.Requests;
 
+[JsonSerializable(typeof(MarketCatalogueQuery))]
 public class MarketCatalogueQuery
 {
     private HashSet<string>? _projection;
 
+    [JsonPropertyName("marketProjection")]
     public IReadOnlyCollection<string>? MarketProjection => _projection;
 
+    [JsonPropertyName("sort")]
     public string? Sort { get; private set; }
 
+    [JsonPropertyName("maxResults")]
     public int MaxResults { get; private set; } = 1000;
 
     public MarketCatalogueQuery Include(MarketProjection projection)

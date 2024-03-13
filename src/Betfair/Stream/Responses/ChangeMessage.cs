@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace Betfair.Stream.Responses;
+﻿namespace Betfair.Stream.Responses;
 
 [DataContract]
 public sealed class ChangeMessage

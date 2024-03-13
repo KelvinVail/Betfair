@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Betfair.Core;
+﻿namespace Betfair.Core;
 
 public abstract class MarketFilter<T>
     where T : MarketFilter<T>, new()

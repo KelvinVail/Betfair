@@ -13,6 +13,7 @@
     <PackageProjectUrl>https://github.com/KelvinVail/Betfair</PackageProjectUrl>
     <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
     <PackageTags>Betfair API;Betfair Stream;Betfair</PackageTags>
+	<IsAOTCompatible>true</IsAOTCompatible>
   </PropertyGroup>
 
   <ItemGroup>

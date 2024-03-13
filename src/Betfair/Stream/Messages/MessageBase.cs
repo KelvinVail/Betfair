@@ -1,7 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace Betfair.Stream.Messages;
 
-namespace Betfair.Stream.Messages;
-
+[JsonSerializable(typeof(MessageBase))]
 internal abstract class MessageBase
 {
     protected MessageBase(string operation, int id)

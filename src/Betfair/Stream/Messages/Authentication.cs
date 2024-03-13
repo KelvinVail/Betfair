@@ -1,8 +1,7 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Betfair.Stream.Messages;
+﻿namespace Betfair.Stream.Messages;
 
 [JsonSerializable(typeof(Authentication))]
+[JsonSerializable(typeof(MessageBase))]
 internal class Authentication : MessageBase
 {
     [JsonConstructor]

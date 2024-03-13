@@ -2,8 +2,10 @@
 
 namespace Betfair.Api.Requests;
 
+[JsonSerializable(typeof(ApiMarketFilter))]
 public sealed class ApiMarketFilter : MarketFilter<ApiMarketFilter>
 {
+    [JsonPropertyName("marketTypeCodes")]
     public DateRange? MarketStartTime { get; private set; }
 
     public ApiMarketFilter FromMarketStart(DateTimeOffset dateTime)

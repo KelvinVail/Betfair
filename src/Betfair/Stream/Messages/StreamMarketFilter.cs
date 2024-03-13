@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Betfair.Core;
 
 namespace Betfair.Stream.Messages;
