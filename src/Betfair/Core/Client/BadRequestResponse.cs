@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Core.Client;
 
-[JsonSerializable(typeof(BadRequestResponse))]
 internal class BadRequestResponse
 {
     [JsonPropertyName("detail")]

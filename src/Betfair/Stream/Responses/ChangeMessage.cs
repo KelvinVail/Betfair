@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Stream.Responses;
 
-[JsonSerializable(typeof(ChangeMessage))]
 public sealed class ChangeMessage
 {
     [JsonPropertyName("op")]

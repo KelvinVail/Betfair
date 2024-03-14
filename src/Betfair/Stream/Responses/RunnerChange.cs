@@ -1,6 +1,5 @@
 namespace Betfair.Stream.Responses;
 
-[JsonSerializable(typeof(RunnerChange))]
 public class RunnerChange
 {
     [JsonPropertyName("tv")]

@@ -1,6 +1,5 @@
 namespace Betfair.Stream.Responses;
 
-[JsonSerializable(typeof(RunnerDefinition))]
 public class RunnerDefinition
 {
     [JsonPropertyName("status")]

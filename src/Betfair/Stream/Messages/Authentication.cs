@@ -1,7 +1,5 @@
 ﻿namespace Betfair.Stream.Messages;
 
-[JsonSerializable(typeof(Authentication))]
-[JsonSerializable(typeof(MessageBase))]
 internal class Authentication : MessageBase
 {
     public Authentication(int id, string sessionToken, string appKey)

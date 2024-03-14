@@ -1,6 +1,5 @@
 namespace Betfair.Stream.Responses;
 
-[JsonSerializable(typeof(MarketDefinition))]
 public class MarketDefinition
 {
     [JsonPropertyName("bspMarket")]

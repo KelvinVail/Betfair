@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Api.Responses;
 
-[JsonSerializable(typeof(MarketDescription))]
 public sealed class MarketDescription
 {
     [JsonPropertyName("persistenceEnabled")]

@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Api.Requests;
 
-[JsonSerializable(typeof(MarketCatalogueQuery))]
 public class MarketCatalogueQuery
 {
     private HashSet<string>? _projection;

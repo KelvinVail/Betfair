@@ -7,6 +7,7 @@ using Betfair.Stream.Responses;
 
 namespace Betfair;
 
+//TODO: Ad public classes to a public partial class
 [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(Authentication))]
 [JsonSerializable(typeof(DataFilter))]

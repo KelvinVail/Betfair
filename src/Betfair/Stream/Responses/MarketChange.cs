@@ -1,6 +1,5 @@
 namespace Betfair.Stream.Responses;
 
-[JsonSerializable(typeof(MarketChange))]
 public class MarketChange
 {
     [JsonPropertyName("id")]

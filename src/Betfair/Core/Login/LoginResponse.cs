@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Core.Login;
 
-[JsonSerializable(typeof(LoginResponse))]
 internal class LoginResponse
 {
     [JsonPropertyName("token")]

@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Api.Responses;
 
-[JsonSerializable(typeof(Runner))]
 public sealed class Runner
 {
     [JsonPropertyName("selectionId")]

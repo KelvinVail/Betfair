@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Stream.Messages;
 
-[JsonSerializable(typeof(MessageBase))]
 internal abstract class MessageBase
 {
     protected MessageBase(string op, int id)

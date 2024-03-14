@@ -2,7 +2,6 @@
 
 namespace Betfair.Api.Responses;
 
-[JsonSerializable(typeof(MarketCatalogue))]
 public sealed class MarketCatalogue
 {
     [JsonPropertyName("marketId")]

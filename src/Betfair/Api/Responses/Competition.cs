@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Api.Responses;
 
-[JsonSerializable(typeof(Competition))]
 public sealed class Competition
 {
     [JsonPropertyName("id")]

@@ -2,7 +2,6 @@
 
 namespace Betfair.Api.Requests;
 
-[JsonSerializable(typeof(ApiMarketFilter))]
 public sealed class ApiMarketFilter : MarketFilter<ApiMarketFilter>
 {
     [JsonPropertyName("marketStartTime")]

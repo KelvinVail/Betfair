@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Core.Client;
 
-[JsonSerializable(typeof(BadRequestDetail))]
 internal class BadRequestDetail
 {
     [JsonPropertyName("apiNgException")]

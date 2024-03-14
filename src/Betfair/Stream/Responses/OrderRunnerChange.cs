@@ -1,6 +1,5 @@
 namespace Betfair.Stream.Responses;
 
-[JsonSerializable(typeof(OrderRunnerChange))]
 public class OrderRunnerChange
 {
     [JsonPropertyName("mb")]

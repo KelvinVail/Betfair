@@ -1,6 +1,5 @@
 namespace Betfair.Stream.Responses;
 
-[JsonSerializable(typeof(UnmatchedOrder))]
 public class UnmatchedOrder
 {
     [JsonPropertyName("side")]

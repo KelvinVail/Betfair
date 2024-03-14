@@ -1,6 +1,5 @@
 ﻿namespace Betfair.Api.Requests;
 
-[JsonSerializable(typeof(DateRange))]
 public class DateRange
 {
     [JsonPropertyName("from")]
