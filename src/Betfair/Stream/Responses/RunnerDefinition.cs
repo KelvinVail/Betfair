@@ -1,26 +1,26 @@
 namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(RunnerDefinition))]
 public class RunnerDefinition
 {
-    [DataMember(Name = "status", EmitDefaultValue = false)]
+    [JsonPropertyName("status")]
     public string? Status { get; init; }
 
-    [DataMember(Name = "sortPriority", EmitDefaultValue = false)]
+    [JsonPropertyName("sortPriority")]
     public int? SortPriority { get; init; }
 
-    [DataMember(Name = "removalDate", EmitDefaultValue = false)]
+    [JsonPropertyName("removalDate")]
     public DateTime? RemovalDate { get; init; }
 
-    [DataMember(Name = "id", EmitDefaultValue = false)]
+    [JsonPropertyName("id")]
     public long? SelectionId { get; init; }
 
-    [DataMember(Name = "hc", EmitDefaultValue = false)]
+    [JsonPropertyName("hc")]
     public double? Handicap { get; init; }
 
-    [DataMember(Name = "adjustmentFactor", EmitDefaultValue = false)]
+    [JsonPropertyName("adjustmentFactor")]
     public double? AdjustmentFactor { get; init; }
 
-    [DataMember(Name = "bsp", EmitDefaultValue = false)]
+    [JsonPropertyName("bsp")]
     public double? BspLiability { get; init; }
 }

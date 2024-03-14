@@ -37,9 +37,9 @@ internal class TokenProvider
     private async Task<MergedResponse> GetLoginResponse(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var response = await _client!.SendAsync(request, cancellationToken);
-        var result = await JsonSerializer.DeserializeAsync<LoginResponse>(
+        var result = await JsonSerializer.DeserializeAsync(
             await response.Content.ReadAsStreamAsync(cancellationToken),
-            StandardResolver.AllowPrivateExcludeNullCamelCase);
+            SerializerContextExtensions.GeTypeInfo<LoginResponse>(), cancellationToken);
         return new MergedResponse(result);
     }
 
@@ -70,20 +70,6 @@ internal class TokenProvider
         request.Headers.Add("X-Application", _credentials!.AppKey);
         request.Content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", _credentials.Username }, { "password", _credentials.Password } });
-    }
-
-    // ReSharper disable once ClassNeverInstantiated.Local
-    private sealed class LoginResponse
-    {
-        public string Token { get; init; } = string.Empty;
-
-        public string Status { get; init; } = string.Empty;
-
-        public string Error { get; init; } = string.Empty;
-
-        public string SessionToken { get; init; } = string.Empty;
-
-        public string LoginStatus { get; init; } = string.Empty;
     }
 
     private sealed class MergedResponse(LoginResponse response)

@@ -1,50 +1,50 @@
 namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(RunnerChange))]
 public class RunnerChange
 {
-    [DataMember(Name = "tv", EmitDefaultValue = false)]
+    [JsonPropertyName("tv")]
     public double? TotalMatched { get; init; }
 
-    [DataMember(Name = "batb", EmitDefaultValue = false)]
+    [JsonPropertyName("batb")]
     public List<List<double?>>? BestAvailableToBack { get; init; }
 
-    [DataMember(Name = "spb", EmitDefaultValue = false)]
+    [JsonPropertyName("spb")]
     public List<List<double?>>? StartingPriceBack { get; init; }
 
-    [DataMember(Name = "bdatl", EmitDefaultValue = false)]
+    [JsonPropertyName("bdatl")]
     public List<List<double?>>? BestDisplayAvailableToLay { get; init; }
 
-    [DataMember(Name = "trd", EmitDefaultValue = false)]
+    [JsonPropertyName("trd")]
     public List<List<double?>>? Traded { get; init; }
 
-    [DataMember(Name = "spf", EmitDefaultValue = false)]
+    [JsonPropertyName("spf")]
     public double? StartingPriceFar { get; init; }
 
-    [DataMember(Name = "ltp", EmitDefaultValue = false)]
+    [JsonPropertyName("ltp")]
     public double? LastTradedPrice { get; init; }
 
-    [DataMember(Name = "atb", EmitDefaultValue = false)]
+    [JsonPropertyName("atb")]
     public List<List<double?>>? AvailableToBack { get; init; }
 
-    [DataMember(Name = "spl", EmitDefaultValue = false)]
+    [JsonPropertyName("spl")]
     public List<List<double?>>? StartingPriceLay { get; init; }
 
-    [DataMember(Name = "spn", EmitDefaultValue = false)]
+    [JsonPropertyName("spn")]
     public double? StartingPriceNear { get; init; }
 
-    [DataMember(Name = "atl", EmitDefaultValue = false)]
+    [JsonPropertyName("atl")]
     public List<List<double?>>? AvailableToLay { get; init; }
 
-    [DataMember(Name = "batl", EmitDefaultValue = false)]
+    [JsonPropertyName("batl")]
     public List<List<double?>>? BestAvailableToLay { get; init; }
 
-    [DataMember(Name = "id", EmitDefaultValue = false)]
+    [JsonPropertyName("id")]
     public long? SelectionId { get; init; }
 
-    [DataMember(Name = "hc", EmitDefaultValue = false)]
+    [JsonPropertyName("hc")]
     public double? Handicap { get; init; }
 
-    [DataMember(Name = "bdatb", EmitDefaultValue = false)]
+    [JsonPropertyName("bdatb")]
     public List<List<double?>>? BestDisplayAvailableToBack { get; init; }
 }

@@ -26,4 +26,18 @@ public class HttpClientStub : IHttpClient
             ContentSent = await content.ReadAsByteArrayAsync(ct);
         return await Task.FromResult<T>(default!);
     }
+
+    //TODO: Remove duplicate code
+    public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default)
+    {
+        if (ThrowsError is not null && TimesToThrowError > 0)
+        {
+            TimesToThrowError--;
+            throw new HttpRequestException(ThrowsError);
+        }
+
+        HttpContentSent = content;
+        if (content is not null)
+            ContentSent = await content.ReadAsByteArrayAsync(ct);
+    }
 }

@@ -1,11 +1,13 @@
 ﻿using Betfair.Api.Requests;
 using Betfair.Api.Responses;
+using Betfair.Core.Client;
+using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 
 namespace Betfair;
 
-[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(Authentication))]
 [JsonSerializable(typeof(DataFilter))]
 [JsonSerializable(typeof(MarketSubscription))]
@@ -34,6 +36,12 @@ namespace Betfair;
 [JsonSerializable(typeof(MarketEvent))]
 [JsonSerializable(typeof(MarketStatus))]
 [JsonSerializable(typeof(Runner))]
+
+[JsonSerializable(typeof(LoginResponse))]
+
+[JsonSerializable(typeof(BadRequestResponse))]
+[JsonSerializable(typeof(BadRequestDetail))]
+[JsonSerializable(typeof(BadRequestErrorCode))]
 internal partial class SerializerContext : JsonSerializerContext
 {
 }

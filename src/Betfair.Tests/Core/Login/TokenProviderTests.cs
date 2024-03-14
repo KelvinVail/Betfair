@@ -16,7 +16,7 @@ public class TokenProviderTests : IDisposable
     {
         _client = new BetfairHttpClient(_handler);
         _provider = new TokenProvider(_client, _cred);
-        _handler.RespondsWithBody = new { Token = "Token", Status = "SUCCESS", };
+        _handler.RespondsWithBody = new LoginResponse { Token = "Token", Status = "SUCCESS", };
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class TokenProviderTests : IDisposable
             new Dictionary<string, string> { { "username", username }, { "password", "password" } });
         var expected = await content.ReadAsStringAsync();
 
-        _handler.ContentSent.Should().BeEquivalentTo(expected);
+        _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -111,7 +111,7 @@ public class TokenProviderTests : IDisposable
             new Dictionary<string, string> { { "username", username }, { "password", "password" } });
         var expected = await content.ReadAsStringAsync();
 
-        _handler.ContentSent.Should().BeEquivalentTo(expected);
+        _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -128,7 +128,7 @@ public class TokenProviderTests : IDisposable
             new Dictionary<string, string> { { "username", "username" }, { "password", password } });
         var expected = await content.ReadAsStringAsync();
 
-        _handler.ContentSent.Should().BeEquivalentTo(expected);
+        _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -146,7 +146,7 @@ public class TokenProviderTests : IDisposable
             new Dictionary<string, string> { { "username", "username" }, { "password", password } });
         var expected = await content.ReadAsStringAsync();
 
-        _handler.ContentSent.Should().BeEquivalentTo(expected);
+        _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
@@ -154,7 +154,7 @@ public class TokenProviderTests : IDisposable
     [InlineData("Other")]
     public async Task LoginRespondsWithSessionToken(string token)
     {
-        _handler.RespondsWithBody = new { Token = token, Status = "SUCCESS", };
+        _handler.RespondsWithBody = new LoginResponse { Token = token, Status = "SUCCESS", };
 
         var result = await _provider.GetToken(default);
 
@@ -169,7 +169,7 @@ public class TokenProviderTests : IDisposable
         using var cert = new X509Certificate2Stub();
         var cred = new Credentials("username", "password", "appKey", cert);
         var provider = new TokenProvider(_client, cred);
-        _handler.RespondsWithBody = new { SessionToken = token, LoginStatus = "SUCCESS", };
+        _handler.RespondsWithBody = new LoginResponse { SessionToken = token, LoginStatus = "SUCCESS", };
 
         var result = await provider.GetToken(default);
 
@@ -181,7 +181,7 @@ public class TokenProviderTests : IDisposable
     [InlineData("INVALID_USERNAME_OR_PASSWORD")]
     public async Task LoginRespondsWithErrorIfNotSuccessful(string error)
     {
-        _handler.RespondsWithBody = new { Status = "FAIL", Error = error };
+        _handler.RespondsWithBody = new LoginResponse { Status = "FAIL", Error = error };
 
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
             _provider.GetToken(default));
@@ -197,7 +197,7 @@ public class TokenProviderTests : IDisposable
         using var cert = new X509Certificate2Stub();
         var cred = new Credentials("username", "password", "appKey", cert);
         var provider = new TokenProvider(_client, cred);
-        _handler.RespondsWithBody = new { LoginStatus = error };
+        _handler.RespondsWithBody = new LoginResponse { LoginStatus = error };
 
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
             provider.GetToken(default));

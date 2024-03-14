@@ -1,92 +1,92 @@
 namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(MarketDefinition))]
 public class MarketDefinition
 {
-    [DataMember(Name = "bspMarket", EmitDefaultValue = false)]
+    [JsonPropertyName("bspMarket")]
     public bool? BspMarket { get; init; }
 
-    [DataMember(Name = "turnInPlayEnabled", EmitDefaultValue = false)]
+    [JsonPropertyName("turnInPlayEnabled")]
     public bool? TurnInPlayEnabled { get; init; }
 
-    [DataMember(Name = "persistenceEnabled", EmitDefaultValue = false)]
+    [JsonPropertyName("persistenceEnabled")]
     public bool? PersistenceEnabled { get; init; }
 
-    [DataMember(Name = "marketBaseRate", EmitDefaultValue = false)]
+    [JsonPropertyName("marketBaseRate")]
     public double? MarketBaseRate { get; init; }
 
-    [DataMember(Name = "bettingType", EmitDefaultValue = false)]
+    [JsonPropertyName("bettingType")]
     public string? BettingType { get; init; }
 
-    [DataMember(Name = "status", EmitDefaultValue = false)]
+    [JsonPropertyName("status")]
     public string? Status { get; init; }
 
-    [DataMember(Name = "venue", EmitDefaultValue = false)]
+    [JsonPropertyName("venue")]
     public string? Venue { get; init; }
 
-    [DataMember(Name = "settledTime", EmitDefaultValue = false)]
+    [JsonPropertyName("settledTime")]
     public DateTime? SettledTime { get; init; }
 
-    [DataMember(Name = "timezone", EmitDefaultValue = false)]
+    [JsonPropertyName("timezone")]
     public string? Timezone { get; init; }
 
-    [DataMember(Name = "eachWayDivisor", EmitDefaultValue = false)]
+    [JsonPropertyName("eachWayDivisor")]
     public double? EachWayDivisor { get; init; }
 
-    [DataMember(Name = "regulators", EmitDefaultValue = false)]
+    [JsonPropertyName("regulators")]
     public List<string>? Regulators { get; init; }
 
-    [DataMember(Name = "marketType", EmitDefaultValue = false)]
+    [JsonPropertyName("marketType")]
     public string? MarketType { get; init; }
 
-    [DataMember(Name = "numberOfWinners", EmitDefaultValue = false)]
+    [JsonPropertyName("numberOfWinners")]
     public int? NumberOfWinners { get; init; }
 
-    [DataMember(Name = "countryCode", EmitDefaultValue = false)]
+    [JsonPropertyName("countryCode")]
     public string? CountryCode { get; init; }
 
-    [DataMember(Name = "inPlay", EmitDefaultValue = false)]
+    [JsonPropertyName("inPlay")]
     public bool? InPlay { get; init; }
 
-    [DataMember(Name = "betDelay", EmitDefaultValue = false)]
+    [JsonPropertyName("betDelay")]
     public int? BetDelay { get; init; }
 
-    [DataMember(Name = "numberOfActiveRunners", EmitDefaultValue = false)]
+    [JsonPropertyName("numberOfActiveRunners")]
     public int? NumberOfActiveRunners { get; init; }
 
-    [DataMember(Name = "eventId", EmitDefaultValue = false)]
+    [JsonPropertyName("eventId")]
     public string? EventId { get; init; }
 
-    [DataMember(Name = "crossMatching", EmitDefaultValue = false)]
+    [JsonPropertyName("crossMatching")]
     public bool? CrossMatching { get; init; }
 
-    [DataMember(Name = "runnersVoidable", EmitDefaultValue = false)]
+    [JsonPropertyName("runnersVoidable")]
     public bool? RunnersVoidable { get; init; }
 
-    [DataMember(Name = "suspendTime", EmitDefaultValue = false)]
+    [JsonPropertyName("suspendTime")]
     public DateTime? SuspendTime { get; init; }
 
-    [DataMember(Name = "discountAllowed", EmitDefaultValue = false)]
+    [JsonPropertyName("discountAllowed")]
     public bool? DiscountAllowed { get; init; }
 
-    [DataMember(Name = "runners", EmitDefaultValue = false)]
+    [JsonPropertyName("runners")]
     public List<RunnerDefinition>? Runners { get; init; }
 
-    [DataMember(Name = "version", EmitDefaultValue = false)]
+    [JsonPropertyName("version")]
     public long? Version { get; init; }
 
-    [DataMember(Name = "eventTypeId", EmitDefaultValue = false)]
+    [JsonPropertyName("eventTypeId")]
     public string? EventTypeId { get; init; }
 
-    [DataMember(Name = "complete", EmitDefaultValue = false)]
+    [JsonPropertyName("complete")]
     public bool? Complete { get; init; }
 
-    [DataMember(Name = "openDate", EmitDefaultValue = false)]
+    [JsonPropertyName("openDate")]
     public DateTime? OpenDate { get; init; }
 
-    [DataMember(Name = "marketTime", EmitDefaultValue = false)]
+    [JsonPropertyName("marketTime")]
     public DateTime? MarketTime { get; init; }
 
-    [DataMember(Name = "bspReconciled", EmitDefaultValue = false)]
+    [JsonPropertyName("bspReconciled")]
     public bool? BspReconciled { get; init; }
 }

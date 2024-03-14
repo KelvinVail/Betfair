@@ -18,6 +18,14 @@ internal class HttpAdapter
         return await _client.PostAsync<T>(uri, content, ct);
     }
 
+    //TODO: Remove duplicate code
+    public virtual async Task PostAsync(Uri uri, object body, CancellationToken ct = default)
+    {
+        using var content = ToContent(body);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        await _client.PostAsync(uri, content, ct);
+    }
+
     private static ByteArrayContent ToContent(object body) =>
-        new (JsonSerializer.Serialize(body, StandardResolver.AllowPrivateExcludeNullCamelCase));
+        new (JsonSerializer.SerializeToUtf8Bytes(body, body.GetContext()));
 }

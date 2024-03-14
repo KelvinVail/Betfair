@@ -1,59 +1,59 @@
 namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(UnmatchedOrder))]
 public class UnmatchedOrder
 {
-    [DataMember(Name = "side", EmitDefaultValue = false)]
+    [JsonPropertyName("side")]
     public string? Side { get; init; }
 
-    [DataMember(Name = "pt", EmitDefaultValue = false)]
+    [JsonPropertyName("pt")]
     public string? PersistenceType { get; init; }
 
-    [DataMember(Name = "ot", EmitDefaultValue = false)]
+    [JsonPropertyName("ot")]
     public string? OrderType { get; init; }
 
-    [DataMember(Name = "status", EmitDefaultValue = false)]
+    [JsonPropertyName("status")]
     public string? OrderStatus { get; init; }
 
-    [DataMember(Name = "sv", EmitDefaultValue = false)]
+    [JsonPropertyName("sv")]
     public double? SizeVoided { get; init; }
 
-    [DataMember(Name = "p", EmitDefaultValue = false)]
+    [JsonPropertyName("p")]
     public double? Price { get; init; }
 
-    [DataMember(Name = "sc", EmitDefaultValue = false)]
+    [JsonPropertyName("sc")]
     public double? SizeCancelled { get; init; }
 
-    [DataMember(Name = "rc", EmitDefaultValue = false)]
+    [JsonPropertyName("rc")]
     public string? RegulatorCode { get; init; }
 
-    [DataMember(Name = "s", EmitDefaultValue = false)]
+    [JsonPropertyName("s")]
     public double? Size { get; init; }
 
-    [DataMember(Name = "pd", EmitDefaultValue = false)]
+    [JsonPropertyName("pd")]
     public long? PlacedDate { get; init; }
 
-    [DataMember(Name = "rac", EmitDefaultValue = false)]
+    [JsonPropertyName("rac")]
     public string? RegulatorAuthCode { get; init; }
 
-    [DataMember(Name = "md", EmitDefaultValue = false)]
+    [JsonPropertyName("md")]
     public long? MatchedDate { get; init; }
 
-    [DataMember(Name = "sl", EmitDefaultValue = false)]
+    [JsonPropertyName("sl")]
     public double? SizeLapsed { get; init; }
 
-    [DataMember(Name = "avp", EmitDefaultValue = false)]
+    [JsonPropertyName("avp")]
     public double? AveragePriceMatched { get; init; }
 
-    [DataMember(Name = "sm", EmitDefaultValue = false)]
+    [JsonPropertyName("sm")]
     public double? SizeMatched { get; init; }
 
-    [DataMember(Name = "id", EmitDefaultValue = false)]
+    [JsonPropertyName("id")]
     public string? BetId { get; init; }
 
-    [DataMember(Name = "bsp", EmitDefaultValue = false)]
+    [JsonPropertyName("bsp")]
     public double? BspLiability { get; init; }
 
-    [DataMember(Name = "sr", EmitDefaultValue = false)]
+    [JsonPropertyName("sr")]
     public double? SizeRemaining { get; init; }
 }

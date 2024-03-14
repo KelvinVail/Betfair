@@ -3,9 +3,9 @@
 [JsonSerializable(typeof(MessageBase))]
 internal abstract class MessageBase
 {
-    protected MessageBase(string operation, int id)
+    protected MessageBase(string op, int id)
     {
-        Op = operation;
+        Op = op;
         Id = id;
     }
 

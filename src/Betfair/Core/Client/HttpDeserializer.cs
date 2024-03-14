@@ -16,19 +16,25 @@ internal class HttpDeserializer : IHttpClient
         return await Deserialize<T>(response, ct);
     }
 
+    //TODO: Remove duplicate code
+    public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default)
+    {
+        var response = await _httpClient.PostAsync(uri, content, ct);
+        if (!response.IsSuccessStatusCode) await Throw(response);
+    }
+
     private static async Task Throw(HttpResponseMessage response) =>
         throw new HttpRequestException(
             await ErrorCode(response),
             null,
             statusCode: response.StatusCode);
 
-    private static async Task<dynamic> ErrorCode(HttpResponseMessage response)
+    private static async Task<string> ErrorCode(HttpResponseMessage response)
     {
-        var error = await Deserialize<dynamic>(response, default);
+        var error = await Deserialize<BadRequestResponse>(response, default);
         try
         {
-            var errorCode = error["detail"]["apiNgException"]["errorCode"];
-            return errorCode;
+            return error.Detail.ApiNgException.ErrorCode ?? "An HttpRequestException Occurred.";
         }
         catch (KeyNotFoundException)
         {
@@ -37,8 +43,9 @@ internal class HttpDeserializer : IHttpClient
     }
 
     private static async Task<T> Deserialize<T>(HttpResponseMessage response, CancellationToken ct)
-        where T : class =>
-        JsonSerializer.Deserialize<T>(
-            await response.Content.ReadAsStreamAsync(ct),
-            StandardResolver.AllowPrivateExcludeNullCamelCase);
+        where T : class
+    {
+        var stream = await response.Content.ReadAsStreamAsync(ct);
+        return (await JsonSerializer.DeserializeAsync(stream, SerializerContextExtensions.GeTypeInfo<T>(), ct)) !;
+    }
 }

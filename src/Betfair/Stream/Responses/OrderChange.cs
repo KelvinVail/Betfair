@@ -1,17 +1,17 @@
 namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(OrderChange))]
 public class OrderChange
 {
-    [DataMember(Name = "id", EmitDefaultValue = false)]
+    [JsonPropertyName("id")]
     public string? MarketId { get; init; }
 
-    [DataMember(Name = "accountId", EmitDefaultValue = false)]
+    [JsonPropertyName("accountId")]
     public long? AccountId { get; init; }
 
-    [DataMember(Name = "closed", EmitDefaultValue = false)]
+    [JsonPropertyName("closed")]
     public bool? Closed { get; init; }
 
-    [DataMember(Name = "orc", EmitDefaultValue = false)]
+    [JsonPropertyName("orc")]
     public List<OrderRunnerChange>? OrderRunnerChanges { get; init; }
 }

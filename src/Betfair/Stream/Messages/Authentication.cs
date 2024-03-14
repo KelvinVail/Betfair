@@ -4,7 +4,6 @@
 [JsonSerializable(typeof(MessageBase))]
 internal class Authentication : MessageBase
 {
-    [JsonConstructor]
     public Authentication(int id, string sessionToken, string appKey)
         : base("authentication", id)
     {

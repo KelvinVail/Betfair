@@ -1,23 +1,23 @@
 namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(OrderRunnerChange))]
 public class OrderRunnerChange
 {
-    [DataMember(Name = "mb", EmitDefaultValue = false)]
+    [JsonPropertyName("mb")]
     public List<List<double?>>? MatchedBacks { get; init; }
 
-    [DataMember(Name = "id", EmitDefaultValue = false)]
+    [JsonPropertyName("id")]
     public long? SelectionId { get; init; }
 
-    [DataMember(Name = "hc", EmitDefaultValue = false)]
+    [JsonPropertyName("hc")]
     public double? Handicap { get; init; }
 
-    [DataMember(Name = "fullImage", EmitDefaultValue = false)]
+    [JsonPropertyName("fullImage")]
     public bool? FullImage { get; init; }
 
-    [DataMember(Name = "ml", EmitDefaultValue = false)]
+    [JsonPropertyName("ml")]
     public List<List<double?>>? MatchedLays { get; init; }
 
-    [DataMember(Name = "uo", EmitDefaultValue = false)]
+    [JsonPropertyName("uo")]
     public List<UnmatchedOrder>? UnmatchedOrders { get; init; }
 }

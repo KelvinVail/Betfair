@@ -1,23 +1,23 @@
 namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(MarketChange))]
 public class MarketChange
 {
-    [DataMember(Name = "id", EmitDefaultValue = false)]
+    [JsonPropertyName("id")]
     public string? MarketId { get; init; }
 
-    [DataMember(Name = "marketDefinition", EmitDefaultValue = false)]
+    [JsonPropertyName("marketDefinition")]
     public MarketDefinition? MarketDefinition { get; init; }
 
-    [DataMember(Name = "rc", EmitDefaultValue = false)]
+    [JsonPropertyName("rc")]
     public List<RunnerChange>? RunnerChanges { get; init; }
 
-    [DataMember(Name = "img", EmitDefaultValue = false)]
+    [JsonPropertyName("img")]
     public bool? ReplaceCache { get; init; }
 
-    [DataMember(Name = "tv", EmitDefaultValue = false)]
+    [JsonPropertyName("tv")]
     public double? TotalAmountMatched { get; init; }
 
-    [DataMember(Name = "con", EmitDefaultValue = false)]
+    [JsonPropertyName("con")]
     public bool? Conflated { get; init; }
 }

@@ -1,59 +1,59 @@
 ﻿namespace Betfair.Stream.Responses;
 
-[DataContract]
+[JsonSerializable(typeof(ChangeMessage))]
 public sealed class ChangeMessage
 {
-    [DataMember(Name = "op", EmitDefaultValue = false)]
+    [JsonPropertyName("op")]
     public string? Operation { get; init; }
 
-    [DataMember(Name = "id", EmitDefaultValue = false)]
+    [JsonPropertyName("id")]
     public int Id { get; init; }
 
-    [DataMember(Name = "statusCode", EmitDefaultValue = false)]
+    [JsonPropertyName("statusCode")]
     public string? StatusCode { get; init; }
 
-    [DataMember(Name = "errorCode", EmitDefaultValue = false)]
+    [JsonPropertyName("errorCode")]
     public string? ErrorCode { get; init; }
 
-    [DataMember(Name = "connectionId", EmitDefaultValue = false)]
+    [JsonPropertyName("connectionId")]
     public string? ConnectionId { get; init; }
 
-    [DataMember(Name = "connectionClosed", EmitDefaultValue = false)]
+    [JsonPropertyName("connectionClosed")]
     public bool? ConnectionClosed { get; init; }
 
-    [DataMember(Name = "connectionsAvailable", EmitDefaultValue = false)]
+    [JsonPropertyName("connectionsAvailable")]
     public int? ConnectionsAvailable { get; init; }
 
-    [DataMember(Name = "initialClk", EmitDefaultValue = false)]
+    [JsonPropertyName("initialClk")]
     public string? InitialClock { get; init; }
 
-    [DataMember(Name = "clk", EmitDefaultValue = false)]
+    [JsonPropertyName("clk")]
     public string? Clock { get; init; }
 
-    [DataMember(Name = "conflateMs", EmitDefaultValue = false)]
+    [JsonPropertyName("conflateMs")]
     public int? ConflateMs { get; init; }
 
-    [DataMember(Name = "heartbeatMs", EmitDefaultValue = false)]
+    [JsonPropertyName("heartbeatMs")]
     public int? HeartbeatMs { get; init; }
 
-    [DataMember(Name = "pt", EmitDefaultValue = false)]
+    [JsonPropertyName("pt")]
     public long? PublishTime { get; init; }
 
-    [DataMember(Name = "ct", EmitDefaultValue = false)]
+    [JsonPropertyName("ct")]
     public string? ChangeType { get; init; }
 
-    [DataMember(Name = "segmentType", EmitDefaultValue = false)]
+    [JsonPropertyName("segmentType")]
     public string? SegmentType { get; init; }
 
-    [DataMember(Name = "mc", EmitDefaultValue = false)]
-    public List<MarketChange>? MarketChanges { get; init; }
+    // [JsonPropertyName("mc")]
+    // public List<MarketChange>? MarketChanges { get; init; }
+    //
+    // [JsonPropertyName("oc")]
+    // public List<OrderChange>? OrderChanges { get; init; }
 
-    [DataMember(Name = "oc", EmitDefaultValue = false)]
-    public List<OrderChange>? OrderChanges { get; init; }
-
-    [DataMember(Name = "rt", EmitDefaultValue = false)]
+    [JsonPropertyName("rt")]
     public long ReceivedTick { get; internal set; }
 
-    [DataMember(Name = "dt", EmitDefaultValue = false)]
+    [JsonPropertyName("dt")]
     public long DeserializedTick { get; internal set; }
 }

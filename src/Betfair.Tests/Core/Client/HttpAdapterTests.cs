@@ -1,5 +1,7 @@
-﻿using Betfair.Core.Client;
+﻿using System.Text.Json;
+using Betfair.Core.Client;
 using Betfair.Core.Login;
+using Betfair.Stream.Messages;
 using Betfair.Tests.Core.Client.TestDoubles;
 using Betfair.Tests.TestDoubles;
 
@@ -9,7 +11,7 @@ public class HttpAdapterTests : IDisposable
 {
     private readonly HttpMessageHandlerSpy _handler = new ();
     private readonly TokenProviderStub _tokenProvider = new ();
-    private readonly HttpContent _content = new StringContent("content");
+    private readonly Authentication _content = new (1, "s", "a");
     private readonly Uri _uri = new ("http://test.com");
     private readonly BetfairHttpClient _httpClient;
     private readonly HttpAdapter _adapter;
@@ -28,7 +30,7 @@ public class HttpAdapterTests : IDisposable
     {
         var uri = new Uri($"http://{value}.com");
 
-        await _adapter.PostAsync<object>(uri, _content);
+        await _adapter.PostAsync(uri, _content);
 
         _handler.MethodUsed.Should().Be(HttpMethod.Post);
         _handler.UriCalled.Should().Be(uri);
@@ -37,7 +39,7 @@ public class HttpAdapterTests : IDisposable
     [Fact]
     public async Task PostPutsContentTypeInContentHeader()
     {
-        await _adapter.PostAsync<dynamic>(_uri, _content);
+        await _adapter.PostAsync(_uri, _content);
 
         _handler.ContentHeadersSent.Should().ContainKey("Content-Type")
             .WhoseValue.Should().Contain("application/json");
@@ -46,11 +48,13 @@ public class HttpAdapterTests : IDisposable
     [Theory]
     [InlineData("bodyContent")]
     [InlineData("other")]
-    public async Task PostPutsBodyInTheRequest(object body)
+    public async Task PostPutsBodyInTheRequest(string body)
     {
-        await _adapter.PostAsync<dynamic>(_uri, body);
+        var auth = new Authentication(1, body, "a");
 
-        _handler.ContentSent.Should().BeEquivalentTo(body);
+        await _adapter.PostAsync(_uri, auth);
+
+        _handler.StringContentSent.Should().BeEquivalentTo(JsonSerializer.Serialize(auth, SerializerContext.Default.Authentication));
     }
 
     public void Dispose()
@@ -64,7 +68,6 @@ public class HttpAdapterTests : IDisposable
         if (_disposedValue) return;
         if (disposing)
         {
-            _content.Dispose();
             _httpClient.Dispose();
             _handler.Dispose();
         }

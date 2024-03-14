@@ -16,6 +16,7 @@ internal class HttpTokenInjector : IHttpClient
         _appKey = appKey;
     }
 
+    // TODO: Remove duplicate code
     public async Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)
         where T : class
     {
@@ -32,6 +33,24 @@ internal class HttpTokenInjector : IHttpClient
 
             await RefreshSessionTokenHeader(content, ct);
             return await _httpClient.PostAsync<T>(uri, content, ct);
+        }
+    }
+
+    public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default)
+    {
+        content.Headers.Add("X-Application", _appKey);
+        await AddSessionTokenHeader(content, ct);
+
+        try
+        {
+            await _httpClient.PostAsync(uri, content, ct);
+        }
+        catch (HttpRequestException e)
+        {
+            if (SessionIsValid(e)) throw;
+
+            await RefreshSessionTokenHeader(content, ct);
+            await _httpClient.PostAsync(uri, content, ct);
         }
     }
 

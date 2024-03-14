@@ -90,7 +90,8 @@ public class Subscription : IDisposable
         await foreach (var line in _pipe.ReadLines(cancellationToken))
         {
             var received = DateTimeOffset.UtcNow.Ticks;
-            var changeMessage = JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.ExcludeNullCamelCase);
+            var jsonTypeInfo = SerializerContextExtensions.GeTypeInfo<ChangeMessage>();
+            var changeMessage = JsonSerializer.Deserialize<ChangeMessage>(line, SerializerContext.Default.ChangeMessage) !;
             changeMessage.ReceivedTick = received;
             changeMessage.DeserializedTick = DateTimeOffset.UtcNow.Ticks;
             yield return changeMessage;

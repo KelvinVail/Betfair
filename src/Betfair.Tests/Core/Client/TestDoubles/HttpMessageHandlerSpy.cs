@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Utf8Json;
-using Utf8Json.Resolvers;
+using System.Text.Json;
+
 #pragma warning disable SA1010
 
 namespace Betfair.Tests.Core.Client.TestDoubles;
@@ -24,7 +24,7 @@ public class HttpMessageHandlerSpy : HttpClientHandler
 
     public HttpContentHeaders? ContentHeadersSent { get; private set; }
 
-    public object? ContentSent { get; private set; }
+    public string? StringContentSent { get; private set; }
 
     public HttpContent? RawContentSent { get; private set; }
 
@@ -41,23 +41,17 @@ public class HttpMessageHandlerSpy : HttpClientHandler
         if (request.Content is not null)
         {
             ContentHeadersSent = request.Content.Headers;
-            if (IsFormUrlEncoded(request))
-                ContentSent = await request.Content.ReadAsStringAsync(cancellationToken);
-            else
-                ContentSent = JsonSerializer.Deserialize<object>(await request.Content.ReadAsStreamAsync(cancellationToken), StandardResolver.AllowPrivateExcludeNullCamelCase);
+            StringContentSent = await request.Content.ReadAsStringAsync(cancellationToken);
         }
 
         var response = new HttpResponseMessage(RespondsWitHttpStatusCode);
         if (RespondsWithBody is null)
             return response;
 
-        var bodyString = JsonSerializer.ToJsonString(RespondsWithBody, StandardResolver.AllowPrivateExcludeNullCamelCase);
+        var bodyString = JsonSerializer.Serialize(RespondsWithBody, RespondsWithBody.GetContext());
         response.Content = new StringContent(bodyString);
 
         request.Dispose();
         return response;
     }
-
-    private static bool IsFormUrlEncoded(HttpRequestMessage request) =>
-        Equals(request.Content?.Headers.ContentType, new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
 }
