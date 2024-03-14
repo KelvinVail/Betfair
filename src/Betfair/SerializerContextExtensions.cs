@@ -1,5 +1,7 @@
 ﻿using Betfair.Api.Requests;
 using Betfair.Api.Responses;
+using Betfair.Core.Client;
+using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 
@@ -7,6 +9,14 @@ namespace Betfair;
 
 public static class SerializerContextExtensions
 {
+    private static readonly Dictionary<Type, JsonTypeInfo> _internalTypes = new ()
+    {
+        { typeof(LoginResponse), SerializerContext.Default.LoginResponse },
+        { typeof(BadRequestResponse), SerializerContext.Default.BadRequestResponse },
+        { typeof(BadRequestDetail), SerializerContext.Default.BadRequestDetail },
+        { typeof(BadRequestErrorCode), SerializerContext.Default.BadRequestErrorCode },
+    };
+
     private static readonly Dictionary<Type, JsonTypeInfo> _typeInfo = new ()
     {
         { typeof(Authentication), SerializerContext.Default.Authentication },
@@ -35,21 +45,39 @@ public static class SerializerContextExtensions
         { typeof(Runner), SerializerContext.Default.Runner },
     };
 
-    public static JsonTypeInfo GetContext<T>([NotNull]this T obj)
-        where T : class
-    {
-        if (_typeInfo.TryGetValue(obj.GetType(), out var value))
-            return value;
-
-        throw new InvalidOperationException($"Type {typeof(T)} is not supported.");
-    }
+    public static JsonTypeInfo GetContext<T>([NotNull] this T obj)
+        where T : class => GetTypeInfo(obj.GetType());
 
     public static JsonTypeInfo<T> GetTypeInfo<T>()
-        where T : class
-    {
-        if (_typeInfo.TryGetValue(typeof(T), out var value))
-            return (JsonTypeInfo<T>)value;
+        where T : class => (JsonTypeInfo<T>)GetTypeInfo(typeof(T));
 
-        throw new InvalidOperationException($"Type {typeof(T)} is not supported.");
+    internal static JsonTypeInfo GetInternalContext<T>([NotNull] this T obj)
+        where T : class => GetTypeInfoWithFallback(obj.GetType(), GetInternalTypeInfo);
+
+    internal static JsonTypeInfo<T> GetInternalTypeInfo<T>()
+        where T : class => (JsonTypeInfo<T>)GetTypeInfoWithFallback(typeof(T), GetInternalTypeInfo);
+
+    private static JsonTypeInfo GetTypeInfo(Type type) => GetTypeInfoFromDictionary(type, _typeInfo);
+
+    private static JsonTypeInfo GetInternalTypeInfo(Type type) => GetTypeInfoFromDictionary(type, _internalTypes);
+
+    private static JsonTypeInfo GetTypeInfoWithFallback(Type type, Func<Type, JsonTypeInfo> primaryGetter)
+    {
+        try
+        {
+            return primaryGetter(type);
+        }
+        catch (InvalidOperationException)
+        {
+            return GetTypeInfo(type);
+        }
+    }
+
+    private static JsonTypeInfo GetTypeInfoFromDictionary(Type type, Dictionary<Type, JsonTypeInfo> dictionary)
+    {
+        if (dictionary.TryGetValue(type, out var value))
+            return value;
+
+        throw new InvalidOperationException($"Type {type} is not supported.");
     }
 }
