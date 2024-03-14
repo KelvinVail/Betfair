@@ -13,6 +13,7 @@ public class BetfairApiClient : IDisposable
     private readonly bool _disposeHttpClient = true;
     private bool _disposedValue;
 
+    [ExcludeFromCodeCoverage]
     public BetfairApiClient(Credentials credentials)
     {
         ArgumentNullException.ThrowIfNull(credentials);
@@ -65,6 +66,7 @@ public class BetfairApiClient : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    [ExcludeFromCodeCoverage]
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;

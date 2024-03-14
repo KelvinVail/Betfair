@@ -10,18 +10,13 @@ internal class HttpDeserializer : IHttpClient
     public async Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)
         where T : class
     {
-        var response = await _httpClient.PostAsync(uri, content, ct);
-        if (!response.IsSuccessStatusCode) await Throw(response);
+        var response = await Post(uri, content, ct);
 
         return await Deserialize<T>(response, ct);
     }
 
-    //TODO: Remove duplicate code
-    public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default)
-    {
-        var response = await _httpClient.PostAsync(uri, content, ct);
-        if (!response.IsSuccessStatusCode) await Throw(response);
-    }
+    public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default) =>
+        await Post(uri, content, ct);
 
     private static async Task Throw(HttpResponseMessage response) =>
         throw new HttpRequestException(
@@ -47,5 +42,13 @@ internal class HttpDeserializer : IHttpClient
     {
         var stream = await response.Content.ReadAsStreamAsync(ct);
         return (await JsonSerializer.DeserializeAsync(stream, SerializerContextExtensions.GeTypeInfo<T>(), ct)) !;
+    }
+
+    private async Task<HttpResponseMessage> Post(Uri uri, HttpContent content, CancellationToken ct)
+    {
+        var response = await _httpClient.PostAsync(uri, content, ct);
+        if (!response.IsSuccessStatusCode) await Throw(response);
+
+        return response;
     }
 }

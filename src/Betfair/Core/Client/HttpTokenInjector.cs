@@ -16,46 +16,45 @@ internal class HttpTokenInjector : IHttpClient
         _appKey = appKey;
     }
 
-    // TODO: Remove duplicate code
     public async Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)
         where T : class
     {
-        content.Headers.Add("X-Application", _appKey);
-        await AddSessionTokenHeader(content, ct);
+        var func = new Func<Task<T>>(async () => await _httpClient.PostAsync<T>(uri, content, ct));
 
-        try
-        {
-            return await _httpClient.PostAsync<T>(uri, content, ct);
-        }
-        catch (HttpRequestException e)
-        {
-            if (SessionIsValid(e)) throw;
-
-            await RefreshSessionTokenHeader(content, ct);
-            return await _httpClient.PostAsync<T>(uri, content, ct);
-        }
+        return await PostFunc(func, content, ct);
     }
 
     public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default)
     {
+        var func = new Func<Task<object>>(async () =>
+        {
+            await _httpClient.PostAsync(uri, content, ct);
+            return Task.FromResult<object>(null!);
+        });
+
+        await PostFunc(func, content, ct);
+    }
+
+    private static bool SessionIsValid(HttpRequestException e) =>
+        e.Message != "INVALID_SESSION_INFORMATION";
+
+    private async Task<T> PostFunc<T>(Func<Task<T>> func, HttpContent content, CancellationToken ct) where T : class
+    {
         content.Headers.Add("X-Application", _appKey);
         await AddSessionTokenHeader(content, ct);
 
         try
         {
-            await _httpClient.PostAsync(uri, content, ct);
+            return await func.Invoke();
         }
         catch (HttpRequestException e)
         {
             if (SessionIsValid(e)) throw;
 
             await RefreshSessionTokenHeader(content, ct);
-            await _httpClient.PostAsync(uri, content, ct);
+            return await func.Invoke();
         }
     }
-
-    private static bool SessionIsValid(HttpRequestException e) =>
-        e.Message != "INVALID_SESSION_INFORMATION";
 
     private async Task AddSessionTokenHeader(HttpContent content, CancellationToken ct)
     {

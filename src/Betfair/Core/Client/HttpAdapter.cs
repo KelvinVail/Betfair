@@ -13,17 +13,21 @@ internal class HttpAdapter
     public virtual async Task<T> PostAsync<T>(Uri uri, object body, CancellationToken ct = default)
         where T : class
     {
-        using var content = ToContent(body);
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        using var content = GetHttpContent(body);
         return await _client.PostAsync<T>(uri, content, ct);
     }
 
-    //TODO: Remove duplicate code
-    public virtual async Task PostAsync(Uri uri, object body, CancellationToken ct = default)
+    public async Task PostAsync(Uri uri, object body, CancellationToken ct = default)
     {
-        using var content = ToContent(body);
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        using var content = GetHttpContent(body);
         await _client.PostAsync(uri, content, ct);
+    }
+
+    private static ByteArrayContent GetHttpContent(object body)
+    {
+        var content = ToContent(body);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        return content;
     }
 
     private static ByteArrayContent ToContent(object body) =>
