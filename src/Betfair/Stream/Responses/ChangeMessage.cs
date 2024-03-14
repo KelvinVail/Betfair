@@ -45,11 +45,11 @@ public sealed class ChangeMessage
     [JsonPropertyName("segmentType")]
     public string? SegmentType { get; init; }
 
-    // [JsonPropertyName("mc")]
-    // public List<MarketChange>? MarketChanges { get; init; }
-    //
-    // [JsonPropertyName("oc")]
-    // public List<OrderChange>? OrderChanges { get; init; }
+    [JsonPropertyName("mc")]
+    public List<MarketChange>? MarketChanges { get; init; }
+
+    [JsonPropertyName("oc")]
+    public List<OrderChange>? OrderChanges { get; init; }
 
     [JsonPropertyName("rt")]
     public long ReceivedTick { get; internal set; }

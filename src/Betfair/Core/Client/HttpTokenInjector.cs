@@ -38,7 +38,8 @@ internal class HttpTokenInjector : IHttpClient
     private static bool SessionIsValid(HttpRequestException e) =>
         e.Message != "INVALID_SESSION_INFORMATION";
 
-    private async Task<T> PostFunc<T>(Func<Task<T>> func, HttpContent content, CancellationToken ct) where T : class
+    private async Task<T> PostFunc<T>(Func<Task<T>> func, HttpContent content, CancellationToken ct)
+        where T : class
     {
         content.Headers.Add("X-Application", _appKey);
         await AddSessionTokenHeader(content, ct);

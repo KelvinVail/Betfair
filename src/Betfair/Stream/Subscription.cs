@@ -71,6 +71,7 @@ public class Subscription : IDisposable
     /// </summary>
     /// <param name="orderFilter">Optional: Used to shape and filter the order data returned on the stream.</param>
     /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
+    /// <param name="cancellationToken">Cancellation Token.</param>
     /// <returns>An awaitable task.</returns>
     public async Task SubscribeToOrders(OrderFilter? orderFilter = null, TimeSpan? conflate = null, CancellationToken cancellationToken = default)
     {
@@ -90,8 +91,7 @@ public class Subscription : IDisposable
         await foreach (var line in _pipe.ReadLines(cancellationToken))
         {
             var received = DateTimeOffset.UtcNow.Ticks;
-            var jsonTypeInfo = SerializerContextExtensions.GeTypeInfo<ChangeMessage>();
-            var changeMessage = JsonSerializer.Deserialize<ChangeMessage>(line, SerializerContext.Default.ChangeMessage) !;
+            var changeMessage = JsonSerializer.Deserialize(line, SerializerContext.Default.ChangeMessage) !;
             changeMessage.ReceivedTick = received;
             changeMessage.DeserializedTick = DateTimeOffset.UtcNow.Ticks;
             yield return changeMessage;
