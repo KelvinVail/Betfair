@@ -7,15 +7,14 @@ using Betfair.Stream.Responses;
 
 namespace Betfair;
 
-//TODO: Ad public classes to a public partial class
-[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
-[JsonSerializable(typeof(Authentication))]
-[JsonSerializable(typeof(DataFilter))]
-[JsonSerializable(typeof(MarketSubscription))]
-[JsonSerializable(typeof(OrderFilter))]
-[JsonSerializable(typeof(OrderSubscription))]
-[JsonSerializable(typeof(StreamMarketFilter))]
-[JsonSerializable(typeof(MessageBase))]
+[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSerializable(typeof(Authentication), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(DataFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketSubscription), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(OrderFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(OrderSubscription), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(StreamMarketFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MessageBase), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
 [JsonSerializable(typeof(ChangeMessage))]
 [JsonSerializable(typeof(MarketChange))]
@@ -26,9 +25,9 @@ namespace Betfair;
 [JsonSerializable(typeof(RunnerDefinition))]
 [JsonSerializable(typeof(UnmatchedOrder))]
 
-[JsonSerializable(typeof(ApiMarketFilter))]
-[JsonSerializable(typeof(DateRange))]
-[JsonSerializable(typeof(MarketCatalogueQuery))]
+[JsonSerializable(typeof(ApiMarketFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(DateRange), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketCatalogueQuery), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
 [JsonSerializable(typeof(Competition))]
 [JsonSerializable(typeof(LadderDescription))]

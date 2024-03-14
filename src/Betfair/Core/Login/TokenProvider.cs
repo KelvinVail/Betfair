@@ -39,7 +39,7 @@ internal class TokenProvider
         var response = await _client!.SendAsync(request, cancellationToken);
         var result = await JsonSerializer.DeserializeAsync(
             await response.Content.ReadAsStreamAsync(cancellationToken),
-            SerializerContextExtensions.GeTypeInfo<LoginResponse>(),
+            InternalSerializerContextExtensions.GetTypeInfo<LoginResponse>(),
             cancellationToken);
         return new MergedResponse(result!);
     }

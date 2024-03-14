@@ -41,7 +41,7 @@ internal class HttpDeserializer : IHttpClient
         where T : class
     {
         var stream = await response.Content.ReadAsStreamAsync(ct);
-        return (await JsonSerializer.DeserializeAsync(stream, SerializerContextExtensions.GeTypeInfo<T>(), ct)) !;
+        return (await JsonSerializer.DeserializeAsync(stream, InternalSerializerContextExtensions.GetTypeInfo<T>(), ct)) !;
     }
 
     private async Task<HttpResponseMessage> Post(Uri uri, HttpContent content, CancellationToken ct)

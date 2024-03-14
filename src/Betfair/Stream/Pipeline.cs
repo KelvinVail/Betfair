@@ -10,7 +10,7 @@ internal class Pipeline : IPipeline
 
     public async Task WriteLine(object value)
     {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, value.GetContext());
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, value.GetInternalContext());
         await _stream.WriteAsync(bytes);
         _stream.WriteByte((byte)'\n');
     }

@@ -48,7 +48,7 @@ public class HttpMessageHandlerSpy : HttpClientHandler
         if (RespondsWithBody is null)
             return response;
 
-        var bodyString = JsonSerializer.Serialize(RespondsWithBody, RespondsWithBody.GetContext());
+        var bodyString = JsonSerializer.Serialize(RespondsWithBody, RespondsWithBody.GetInternalContext());
         response.Content = new StringContent(bodyString);
 
         request.Dispose();

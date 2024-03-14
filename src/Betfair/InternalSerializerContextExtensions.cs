@@ -1,11 +1,13 @@
 ﻿using Betfair.Api.Requests;
 using Betfair.Api.Responses;
+using Betfair.Core.Client;
+using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 
 namespace Betfair;
 
-public static class SerializerContextExtensions
+internal static class InternalSerializerContextExtensions
 {
     private static readonly Dictionary<Type, JsonTypeInfo> _typeInfo = new ()
     {
@@ -33,9 +35,13 @@ public static class SerializerContextExtensions
         { typeof(MarketEvent), SerializerContext.Default.MarketEvent },
         { typeof(MarketStatus), SerializerContext.Default.MarketStatus },
         { typeof(Runner), SerializerContext.Default.Runner },
+        { typeof(LoginResponse), SerializerContext.Default.LoginResponse },
+        { typeof(BadRequestResponse), SerializerContext.Default.BadRequestResponse },
+        { typeof(BadRequestDetail), SerializerContext.Default.BadRequestDetail },
+        { typeof(BadRequestErrorCode), SerializerContext.Default.BadRequestErrorCode },
     };
 
-    public static JsonTypeInfo GetContext<T>([NotNull]this T obj)
+    public static JsonTypeInfo GetInternalContext<T>(this T obj)
         where T : class
     {
         if (_typeInfo.TryGetValue(obj.GetType(), out var value))

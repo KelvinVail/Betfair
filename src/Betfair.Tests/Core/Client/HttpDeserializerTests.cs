@@ -1,6 +1,5 @@
 ﻿using Betfair.Api.Responses;
 using Betfair.Core.Client;
-using Betfair.Stream.Messages;
 using Betfair.Tests.Core.Client.TestDoubles;
 
 namespace Betfair.Tests.Core.Client;
