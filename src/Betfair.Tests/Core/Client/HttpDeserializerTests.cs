@@ -22,10 +22,10 @@ public class HttpDeserializerTests : IDisposable
     [Fact]
     public async Task ResponsesShouldBeDeserialized()
     {
-        var expectedResponse = new MarketStatus { Status = "test" };
+        var expectedResponse = new MarketStatus[] { new () { Status = "test" } };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _client.PostAsync<MarketStatus>(_uri, _content);
+        var response = await _client.PostAsync<MarketStatus[]>(_uri, _content);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -49,9 +49,9 @@ public class HttpDeserializerTests : IDisposable
     public async Task PostShouldThrowAGenericMessageIsErrorCodeNotFound()
     {
         _handler.RespondsWitHttpStatusCode = HttpStatusCode.BadRequest;
-        _handler.RespondsWithBody = new MarketStatus { Status = "test" };
+        _handler.RespondsWithBody = new BadRequestResponse();
 
-        var act = async () => { await _client.PostAsync<MarketStatus>(_uri, _content); };
+        var act = async () => { await _client.PostAsync<MarketStatus[]>(_uri, _content); };
 
         (await act.Should().ThrowAsync<HttpRequestException>())
             .WithMessage("An HttpRequestException Occurred.")

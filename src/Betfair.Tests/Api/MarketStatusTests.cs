@@ -10,8 +10,11 @@ public class MarketStatusTests : IDisposable
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
-    public MarketStatusTests() =>
+    public MarketStatusTests()
+    {
         _api = new BetfairApiClient(_client);
+        _client.RespondsWithBody = Array.Empty<MarketStatus>();
+    }
 
     [Fact]
     public async Task CallsTheCorrectEndpoint()
@@ -34,7 +37,7 @@ public class MarketStatusTests : IDisposable
     [Fact]
     public async Task IfResponseIsEmptyReturnNone()
     {
-        _client.RespondsWithBody = new List<MarketStatus>();
+        _client.RespondsWithBody = Array.Empty<MarketStatus>();
 
         var response = await _api.MarketStatus("1.2345", default);
 
@@ -48,7 +51,7 @@ public class MarketStatusTests : IDisposable
     [InlineData("CLOSED")]
     public async Task ReturnStatusFromResponse(string status)
     {
-        _client.RespondsWithBody = new List<MarketStatus> { new () { Status = status } };
+        _client.RespondsWithBody = new MarketStatus[] { new () { Status = status } };
 
         var response = await _api.MarketStatus("1.2345", default);
 
@@ -64,7 +67,11 @@ public class MarketStatusTests : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _api.Dispose();
+        if (disposing)
+        {
+            _api.Dispose();
+            _client.Dispose();
+        }
 
         _disposedValue = true;
     }

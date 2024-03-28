@@ -38,11 +38,13 @@ public static class SerializerContextExtensions
         { typeof(MarketCatalogueQuery), SerializerContext.Default.MarketCatalogueQuery },
         { typeof(Competition), SerializerContext.Default.Competition },
         { typeof(LadderDescription), SerializerContext.Default.LadderDescription },
-        { typeof(MarketCatalogue), SerializerContext.Default.MarketCatalogue },
+        { typeof(MarketCatalogue[]), SerializerContext.Default.MarketCatalogueArray },
         { typeof(MarketDescription), SerializerContext.Default.MarketDescription },
         { typeof(MarketEvent), SerializerContext.Default.MarketEvent },
-        { typeof(MarketStatus), SerializerContext.Default.MarketStatus },
+        { typeof(MarketStatus[]), SerializerContext.Default.MarketStatusArray },
         { typeof(Runner), SerializerContext.Default.Runner },
+        { typeof(MarketCatalogueRequest), SerializerContext.Default.MarketCatalogueRequest },
+        { typeof(MarketBookRequest), SerializerContext.Default.MarketBookRequest },
     };
 
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)

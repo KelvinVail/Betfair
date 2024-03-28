@@ -28,14 +28,17 @@ namespace Betfair;
 [JsonSerializable(typeof(ApiMarketFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(DateRange), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MarketCatalogueQuery), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketCatalogueRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketBookRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
 [JsonSerializable(typeof(Competition))]
 [JsonSerializable(typeof(LadderDescription))]
 [JsonSerializable(typeof(MarketCatalogue))]
 [JsonSerializable(typeof(MarketDescription))]
 [JsonSerializable(typeof(MarketEvent))]
-[JsonSerializable(typeof(MarketStatus))]
+[JsonSerializable(typeof(MarketStatus[]))]
 [JsonSerializable(typeof(Runner))]
+[JsonSerializable(typeof(MarketCatalogue[]))]
 
 [JsonSerializable(typeof(LoginResponse))]
 

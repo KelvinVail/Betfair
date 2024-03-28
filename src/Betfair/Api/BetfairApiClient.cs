@@ -29,32 +29,32 @@ public class BetfairApiClient : IDisposable
         _client = adapter;
     }
 
-    public async Task<IReadOnlyList<MarketCatalogue>> MarketCatalogue(
+    public async Task<MarketCatalogue[]> MarketCatalogue(
         ApiMarketFilter? filter = null,
         MarketCatalogueQuery? query = null,
         CancellationToken cancellationToken = default)
     {
         filter ??= new ApiMarketFilter();
         query ??= new MarketCatalogueQuery();
-        return await _client.PostAsync<IReadOnlyList<MarketCatalogue>>(
-            new Uri($"{_betting}/listMarketCatalogue/"),
-            new
-            {
-                filter,
-                query.MarketProjection,
-                query.Sort,
-                query.MaxResults,
-            },
-            cancellationToken);
+        var request = new MarketCatalogueRequest
+        {
+            Filter = filter,
+            MarketProjection = query.MarketProjection?.ToList(),
+            Sort = query.Sort,
+            MaxResults = query.MaxResults,
+        };
+
+        return await _client.PostAsync<MarketCatalogue[]>(
+            new Uri($"{_betting}/listMarketCatalogue/"), request, cancellationToken);
     }
 
     public async Task<string> MarketStatus(
         string marketId,
         CancellationToken cancellationToken)
     {
-        var response = await _client.PostAsync<List<MarketStatus>>(
+        var response = await _client.PostAsync<MarketStatus[]>(
             new Uri($"{_betting}/listMarketBook/"),
-            new { MarketIds = new List<string> { marketId } },
+            new MarketBookRequest { MarketIds = new List<string> { marketId } },
             cancellationToken);
 
         return response?.FirstOrDefault()?.Status ?? "NONE";

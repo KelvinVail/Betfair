@@ -2,8 +2,19 @@
 
 namespace Betfair.Tests.Api.TestDoubles;
 
-internal class HttpAdapterStub : HttpAdapter
+internal class HttpAdapterStub : HttpAdapter, IDisposable
 {
+    private readonly HttpMessageHandlerSpy _handler = new ();
+    private readonly HttpAdapter _adapter;
+    private bool _disposedValue;
+
+    public HttpAdapterStub()
+    {
+        var client = new BetfairHttpClient(_handler);
+        var deserializer = new HttpDeserializer(client);
+        _adapter = new HttpAdapter(deserializer);
+    }
+
     public Uri? LastUriCalled { get; private set; }
 
     public object? LastContentSent { get; private set; }
@@ -15,9 +26,22 @@ internal class HttpAdapterStub : HttpAdapter
         LastUriCalled = uri;
         LastContentSent = body;
 
-        if (RespondsWithBody is not null)
-            return Task.FromResult((T)RespondsWithBody);
+        _handler.RespondsWithBody = RespondsWithBody;
 
-        return Task.FromResult<T>(default!);
+        return _adapter.PostAsync<T>(uri, body, ct);
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue) return;
+        if (disposing) _handler.Dispose();
+
+        _disposedValue = true;
     }
 }
