@@ -39,11 +39,13 @@ public struct Reader
     {
         var result = new ChangeMessage();
         var reader = new Utf8JsonReader(data);
+        byte[] op = new [] { (byte)'o', (byte)'p' };
 
         while (reader.Read())
         {
             if (reader.TokenType != JsonTokenType.PropertyName) continue;
-            if (!reader.ValueTextEquals("op")) continue;
+            //if (!reader.ValueTextEquals("op")) continue;
+            if (!reader.ValueTextEquals(op)) continue;
             reader.Read();
             result.Operation = reader.GetString();
             return result;
