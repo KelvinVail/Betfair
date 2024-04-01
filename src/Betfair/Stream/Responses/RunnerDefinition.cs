@@ -12,14 +12,17 @@ public class RunnerDefinition
     public DateTime? RemovalDate { get; init; }
 
     [JsonPropertyName("id")]
+    [DataMember(Name = "id")]
     public long? SelectionId { get; init; }
 
     [JsonPropertyName("hc")]
+    [DataMember(Name = "hc")]
     public double? Handicap { get; init; }
 
     [JsonPropertyName("adjustmentFactor")]
     public double? AdjustmentFactor { get; init; }
 
     [JsonPropertyName("bsp")]
+    [DataMember(Name = "bsp")]
     public double? BspLiability { get; init; }
 }

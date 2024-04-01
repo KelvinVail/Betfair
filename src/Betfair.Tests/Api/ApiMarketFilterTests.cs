@@ -55,7 +55,7 @@ public class ApiMarketFilterTests
         card.CountryCodes.Should().Contain(Country.UnitedKingdom.Id);
         card.CountryCodes.Should().Contain(Country.Ireland.Id);
 
-        card.MarketStartTime!.From.Should().Be(DateTime.Today.ToString("yyyy-MM-ddTHH:mm:ssZ", NumberFormatInfo.InvariantInfo));
-        card.MarketStartTime.To.Should().Be(DateTime.Today.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ssZ", NumberFormatInfo.InvariantInfo));
+        card.MarketStartTime!.From.Should().Be(DateTime.Today.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", NumberFormatInfo.InvariantInfo));
+        card.MarketStartTime.To.Should().Be(DateTime.Today.ToUniversalTime().AddDays(1).ToString("yyyy-MM-ddTHH:mm:ssZ", NumberFormatInfo.InvariantInfo));
     }
 }
