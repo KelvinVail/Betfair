@@ -13,7 +13,7 @@ public class StatusMessageBenchmarks
 
     [GlobalSetup]
     public void Setup() =>
-        _data = File.ReadAllBytes(@".\Data\StatusMessage.json");
+        _data = File.ReadAllBytes(@"./Data/StatusMessage.json");
 
     [Benchmark(Baseline = true)]
     public StatusMessage Utf8() =>

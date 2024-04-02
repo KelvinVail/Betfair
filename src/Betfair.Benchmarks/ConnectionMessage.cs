@@ -15,7 +15,7 @@ public class ConnectionMessageBenchmarks
 
     [GlobalSetup]
     public void Setup() =>
-        _data = File.ReadAllBytes(@".\Data\ConnectionMessage.json");
+        _data = File.ReadAllBytes(@"./Data/ConnectionMessage.json");
 
     [Benchmark(Baseline = true)]
     public Stream.Responses.ConnectionMessage Utf8() =>

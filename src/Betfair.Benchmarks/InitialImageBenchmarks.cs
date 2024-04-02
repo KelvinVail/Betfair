@@ -15,9 +15,9 @@ public class InitialImageBenchmarks
 
     [GlobalSetup]
     public void Setup() =>
-        _data = File.ReadAllBytes(@".\Data\InitialImage.json");
+        _data = File.ReadAllBytes(@"./Data/InitialImage.json");
 
-    //[Benchmark(Baseline = true)]
+    [Benchmark(Baseline = true)]
     public ChangeMessage Utf8() =>
         Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(_data, StandardResolver.CamelCase);
 
