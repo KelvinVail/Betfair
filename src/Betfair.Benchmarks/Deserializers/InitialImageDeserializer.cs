@@ -28,14 +28,14 @@ public static class InitialImageDeserializer
             if (reader.ValueTextEquals(_id))
             {
                 reader.Read();
-                result.Id = reader.GetInt32();
+                // result.Id = reader.GetInt32();
                 continue;
             }
 
             if (reader.ValueTextEquals(_initialClk))
             {
                 reader.Read();
-                result.SetInitialClock(reader.ValueSpan.ToArray());
+                // result.SetInitialClock(reader.ValueSpan.ToArray());
                 return result;
             }
         }

@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Jobs;
 using Betfair.Benchmarks.Deserializers;
 using Betfair.Stream.Responses;
+using StatusMessage = Betfair.Benchmarks.Responses.StatusMessage;
 
 namespace Betfair.Benchmarks;
 

@@ -1,15 +1,32 @@
-﻿using System.Text;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+using MemoryPack;
 
 namespace Betfair.Benchmarks.Responses;
 
-public class MarketChange
+[MemoryPackable]
+public partial class MarketChange
 {
-    private byte[] ? _initialClk;
+    [JsonPropertyName("id")]
+    [DataMember(Name = "id")]
+    public string? MarketId { get; init; }
 
-    public int Id { get; set; }
+    [JsonPropertyName("marketDefinition")]
+    public MarketDefinition? MarketDefinition { get; init; }
 
-    public string? InitialClock =>
-        _initialClk is null ? null : Encoding.UTF8.GetString(_initialClk);
+    [JsonPropertyName("rc")]
+    [DataMember(Name = "rc")]
+    public List<RunnerChange>? RunnerChanges { get; init; }
 
-    public void SetInitialClock(byte[] data) => _initialClk = data;
+    [JsonPropertyName("img")]
+    [DataMember(Name = "img")]
+    public bool? ReplaceCache { get; init; }
+
+    [JsonPropertyName("tv")]
+    [DataMember(Name = "tv")]
+    public double? TotalAmountMatched { get; init; }
+
+    [JsonPropertyName("con")]
+    [DataMember(Name = "con")]
+    public bool? Conflated { get; init; }
 }

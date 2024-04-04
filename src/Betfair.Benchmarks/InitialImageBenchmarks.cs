@@ -4,6 +4,8 @@ using BenchmarkDotNet.Jobs;
 using Betfair.Benchmarks.Deserializers;
 using Betfair.Stream.Responses;
 using Utf8Json.Resolvers;
+using ChangeMessage = Betfair.Benchmarks.Responses.ChangeMessage;
+using MarketChange = Betfair.Benchmarks.Responses.MarketChange;
 
 namespace Betfair.Benchmarks;
 
@@ -26,6 +28,6 @@ public class InitialImageBenchmarks
     //    System.Text.Json.JsonSerializer.Deserialize<ChangeMessage>(_data);
 
     [Benchmark]
-    public Benchmarks.Responses.MarketChange CustomUtf8Reader() =>
+    public MarketChange CustomUtf8Reader() =>
         InitialImageDeserializer.Deserialize(_data);
 }
