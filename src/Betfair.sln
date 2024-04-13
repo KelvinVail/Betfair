@@ -13,12 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair", "Betfair\Betfair.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Tests", "Betfair.Tests\Betfair.Tests.csproj", "{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Benchmarks", "Benchmarks", "{5AF07A64-0E89-44F8-9A67-6257A3D6837D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Benchmarks", "Betfair.Benchmarks\Betfair.Benchmarks.csproj", "{BD6201B8-F06C-4F03-83AC-5397167E25EA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Benchmarks.Tests", "Betfair.Benchmarks.Tests\Betfair.Benchmarks.Tests.csproj", "{6A081EBD-FB97-4919-BBA2-E2D34C1B8C62}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,21 +27,9 @@ Global
 		{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBF53A5B-A974-4DEA-9B72-24A7392CF59F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD6201B8-F06C-4F03-83AC-5397167E25EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD6201B8-F06C-4F03-83AC-5397167E25EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD6201B8-F06C-4F03-83AC-5397167E25EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD6201B8-F06C-4F03-83AC-5397167E25EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A081EBD-FB97-4919-BBA2-E2D34C1B8C62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A081EBD-FB97-4919-BBA2-E2D34C1B8C62}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A081EBD-FB97-4919-BBA2-E2D34C1B8C62}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A081EBD-FB97-4919-BBA2-E2D34C1B8C62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{BD6201B8-F06C-4F03-83AC-5397167E25EA} = {5AF07A64-0E89-44F8-9A67-6257A3D6837D}
-		{6A081EBD-FB97-4919-BBA2-E2D34C1B8C62} = {5AF07A64-0E89-44F8-9A67-6257A3D6837D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {10DDD922-8284-41AC-B52D-D9767964B76C}
