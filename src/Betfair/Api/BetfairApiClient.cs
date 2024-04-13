@@ -1,5 +1,7 @@
 ﻿using Betfair.Api.Requests;
+using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
 using Betfair.Core.Login;
 
@@ -28,6 +30,11 @@ public class BetfairApiClient : IDisposable
         _httpClient = null!;
         _client = adapter;
     }
+
+    public Task<PlaceExecutionReport> PlaceOrders(
+        PlaceOrders placeOrders,
+        CancellationToken cancellationToken = default) =>
+        _client.PostAsync<PlaceExecutionReport>(new Uri($"{_betting}/placeOrders/"), placeOrders, cancellationToken);
 
     public async Task<MarketCatalogue[]> MarketCatalogue(
         ApiMarketFilter? filter = null,

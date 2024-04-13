@@ -1,5 +1,7 @@
 ﻿using Betfair.Api.Requests;
+using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
 using Betfair.Core.Login;
 using Betfair.Stream.Messages;
@@ -7,7 +9,7 @@ using Betfair.Stream.Responses;
 
 namespace Betfair;
 
-[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(Authentication), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(DataFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MarketSubscription), GenerationMode = JsonSourceGenerationMode.Serialization)]
@@ -39,6 +41,13 @@ namespace Betfair;
 [JsonSerializable(typeof(MarketStatus[]))]
 [JsonSerializable(typeof(Runner))]
 [JsonSerializable(typeof(MarketCatalogue[]))]
+
+[JsonSerializable(typeof(LimitOrder))]
+[JsonSerializable(typeof(PlaceInstruction))]
+[JsonSerializable(typeof(PlaceOrders))]
+
+[JsonSerializable(typeof(PlaceExecutionReport))]
+[JsonSerializable(typeof(PlaceInstructionReport))]
 
 [JsonSerializable(typeof(LoginResponse))]
 
