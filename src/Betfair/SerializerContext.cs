@@ -1,5 +1,5 @@
 ﻿using Betfair.Api.Requests;
-using Betfair.Api.Requests.Orders;
+using Betfair.Api.Requests.OrderDtos;
 using Betfair.Api.Responses;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;

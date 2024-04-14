@@ -1,4 +1,4 @@
-﻿namespace Betfair.Api.Requests.Orders;
+﻿namespace Betfair.Api.Requests.OrderDtos;
 
 public class LimitOrder
 {

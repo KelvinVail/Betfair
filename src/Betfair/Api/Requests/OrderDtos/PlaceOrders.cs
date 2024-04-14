@@ -1,4 +1,4 @@
-﻿namespace Betfair.Api.Requests.Orders;
+﻿namespace Betfair.Api.Requests.OrderDtos;
 
 /// <summary>
 /// Represents a request to place orders on a market.
@@ -44,7 +44,8 @@ public class PlaceOrders
     /// <summary>
     /// Gets or sets the customer strategy reference.
     /// An optional reference customers can use to specify which strategy has sent the order.
-    /// The reference will be returned on order change messages through the stream API. The string is limited to 15 characters.
+    /// The reference will be returned on order change messages through the stream API.
+    /// The string is limited to 15 characters.
     /// If an empty string is provided it will be treated as null.
     /// </summary>
     public string? CustomerStrategyRef { get; set; }
