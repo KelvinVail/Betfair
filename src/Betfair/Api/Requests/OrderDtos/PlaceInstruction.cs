@@ -25,6 +25,11 @@ public class PlaceInstruction
     public LimitOrder? LimitOrder { get; set; }
 
     /// <summary>
+    /// Gets or sets the Limit On Close order.
+    /// </summary>
+    public LimitOnClose? LimitOnClose { get; set; }
+
+    /// <summary>
     /// Gets or sets the Handicap.
     /// </summary>
     public double? Handicap { get; set; }
