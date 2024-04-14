@@ -28,5 +28,17 @@ public class PayoutTargetOrder(
 
     public string PersistenceType { get; } = persistenceType?.Value ?? Core.PersistenceType.Lapse.Value;
 
-    internal override PlaceInstruction ToInstruction() => throw new NotImplementedException();
+    internal override PlaceInstruction ToInstruction() =>
+        new ()
+        {
+            SelectionId = SelectionId,
+            Side = Side,
+            LimitOrder = new Requests.OrderDtos.LimitOrder
+            {
+                Price = Price,
+                PersistenceType = PersistenceType,
+                BetTargetType = "PAYOUT",
+                BetTargetSize = PayoutTarget,
+            },
+        };
 }
