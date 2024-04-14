@@ -2,7 +2,7 @@
 
 public class LimitOrder
 {
-    public double Size { get; set; }
+    public double? Size { get; set; }
 
     public double Price { get; set; }
 
