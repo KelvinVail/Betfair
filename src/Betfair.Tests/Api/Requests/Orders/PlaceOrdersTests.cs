@@ -5,6 +5,7 @@ namespace Betfair.Tests.Api.Requests.Orders;
 public class PlaceOrdersTests
 {
     [Fact]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1806:Do not ignore method results", Justification = "Used to test Exception handling.")]
     public void MarketIdShouldNotBeNull()
     {
         Action act = () => new PlaceOrders(null!);

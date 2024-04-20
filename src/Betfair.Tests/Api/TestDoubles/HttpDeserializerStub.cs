@@ -5,13 +5,14 @@ namespace Betfair.Tests.Api.TestDoubles;
 internal class HttpAdapterStub : HttpAdapter, IDisposable
 {
     private readonly HttpMessageHandlerSpy _handler = new ();
+    private readonly BetfairHttpClient _client;
     private readonly HttpAdapter _adapter;
     private bool _disposedValue;
 
     public HttpAdapterStub()
     {
-        var client = new BetfairHttpClient(_handler);
-        var deserializer = new HttpDeserializer(client);
+        _client = new BetfairHttpClient(_handler);
+        var deserializer = new HttpDeserializer(_client);
         _adapter = new HttpAdapter(deserializer);
     }
 
@@ -40,7 +41,11 @@ internal class HttpAdapterStub : HttpAdapter, IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _handler.Dispose();
+        if (disposing)
+        {
+            _handler.Dispose();
+            _client.Dispose();
+        }
 
         _disposedValue = true;
     }

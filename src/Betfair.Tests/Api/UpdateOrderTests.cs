@@ -1,6 +1,7 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses.Orders;
+using Betfair.Core;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -27,8 +28,25 @@ public class UpdateOrderTests : IDisposable
     }
 
     [Fact]
-    public async Task RequestBodyShouldBeSerializable()
+    public async Task UpdateOrdersRequestBodyShouldBeSerializable()
     {
+        var updateOrders = new UpdateOrders("1.23456789")
+        {
+            Instructions = new List<UpdateInstruction>
+            {
+                new ()
+                {
+                    BetId = "1.23456789",
+                    NewPersistenceType = PersistenceType.Lapse,
+                },
+            },
+        };
+
+        await _api.UpdateOrders(updateOrders);
+
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.UpdateOrders);
+
+        json.Should().Be("{\"marketId\":\"1.23456789\",\"instructions\":[{\"betId\":\"1.23456789\",\"newPersistenceType\":\"LAPSE\"}]}");
     }
 
     public void Dispose()
