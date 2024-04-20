@@ -1,7 +1,7 @@
-﻿using Betfair.Api.Orders;
-using Betfair.Core;
+﻿using Betfair.Core;
+using Betfair.Extensions.Orders;
 
-namespace Betfair.Tests.Api.Requests.Orders;
+namespace Betfair.Extensions.Tests.Orders;
 
 public class PayoutTargetOrderTests
 {

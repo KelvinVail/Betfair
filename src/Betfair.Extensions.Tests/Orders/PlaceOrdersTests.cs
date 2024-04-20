@@ -1,6 +1,6 @@
 ﻿using Betfair.Api.Requests.OrderDtos;
 
-namespace Betfair.Tests.Api.Requests.Orders;
+namespace Betfair.Extensions.Tests.Orders;
 
 public class PlaceOrdersTests
 {

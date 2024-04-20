@@ -1,7 +1,7 @@
 ﻿using Betfair.Api.Requests.OrderDtos;
 using Betfair.Core;
 
-namespace Betfair.Api.Orders;
+namespace Betfair.Extensions.Orders;
 
 /// <summary>
 /// Fill or Kill bets are killed if they cannot be matched when placed.

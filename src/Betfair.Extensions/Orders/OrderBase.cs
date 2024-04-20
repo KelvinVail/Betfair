@@ -1,7 +1,7 @@
 ﻿using Betfair.Api.Requests.OrderDtos;
 using Betfair.Core;
 
-namespace Betfair.Api.Orders;
+namespace Betfair.Extensions.Orders;
 
 public abstract class OrderBase(long selectionId, Side side)
 {

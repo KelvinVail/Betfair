@@ -1,31 +1,30 @@
 ﻿using Betfair.Api.Requests.OrderDtos;
 using Betfair.Core;
 
-namespace Betfair.Api.Orders;
+namespace Betfair.Extensions.Orders;
 
 /// <summary>
-/// Place a bet specifying your target profit or liability,
+/// Place a bet specifying your target payout,
 /// instead of the backers stake ('size').
-/// Profit target bets automatically calculate the size of bet needed to
-/// achieve the specified profit target.
+/// Payout target bets automatically calculate the size of bet needed to
+/// achieve the specified payout target.
 /// </summary>
 /// <param name="selectionId">The selection id to place the bet on.</param>
 /// <param name="side">Back or Lay.</param>
 /// <param name="price">The price at which to place the bet.</param>
-/// <param name="profitTarget">From the backers perspective, the payout requested
-/// minus the calculated size at which this LimitOrder is to be placed.</param>
+/// <param name="payoutTarget">The total payout requested on a LimitOrder.</param>
 /// <param name="persistenceType">What to do with the bet at turn-in-play.</param>
-public class ProfitTargetOrder(
+public class PayoutTargetOrder(
     long selectionId,
     Side side,
     double price,
-    double profitTarget,
+    double payoutTarget,
     PersistenceType? persistenceType = null)
     : OrderBase(selectionId, side)
 {
     public double Price { get; } = price;
 
-    public double ProfitTarget { get; } = profitTarget;
+    public double PayoutTarget { get; } = payoutTarget;
 
     public string PersistenceType { get; } = persistenceType?.Value ?? Core.PersistenceType.Lapse.Value;
 
@@ -34,12 +33,12 @@ public class ProfitTargetOrder(
         {
             SelectionId = SelectionId,
             Side = Side,
-            LimitOrder = new Requests.OrderDtos.LimitOrder
+            LimitOrder = new Api.Requests.OrderDtos.LimitOrder
             {
                 Price = Price,
                 PersistenceType = PersistenceType,
-                BetTargetType = "BACKERS_PROFIT",
-                BetTargetSize = profitTarget,
+                BetTargetType = "PAYOUT",
+                BetTargetSize = PayoutTarget,
             },
         };
 }

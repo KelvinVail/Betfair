@@ -1,7 +1,7 @@
 ﻿using Betfair.Api.Requests.OrderDtos;
 using Betfair.Core;
 
-namespace Betfair.Api.Orders;
+namespace Betfair.Extensions.Orders;
 
 /// <summary>
 /// A simple exchange bet for immediate execution.
@@ -30,7 +30,7 @@ public class LimitOrder(
         {
             SelectionId = SelectionId,
             Side = Side,
-            LimitOrder = new Requests.OrderDtos.LimitOrder
+            LimitOrder = new Api.Requests.OrderDtos.LimitOrder
             {
                 Price = Price,
                 Size = Size,

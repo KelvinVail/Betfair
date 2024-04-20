@@ -1,7 +1,7 @@
 ﻿using Betfair.Api.Requests.OrderDtos;
 using Betfair.Core;
 
-namespace Betfair.Api.Orders;
+namespace Betfair.Extensions.Orders;
 
 /// <summary>
 /// Bets are matched if, and only if, the returned starting price is better
