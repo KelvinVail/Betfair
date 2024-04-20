@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Betfair.Core.Client;
+﻿using Betfair.Core.Client;
 using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Tests.Core.Client.TestDoubles;

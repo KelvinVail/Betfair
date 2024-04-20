@@ -21,8 +21,8 @@ public class LimitOrderTests
     {
         var order = new LimitOrder(1, Side.Back, 1.01, 9.99);
 
-        order.Side.Should().Be(Side.Back.Value);
-        order.ToInstruction().Side.Should().Be(Side.Back.Value);
+        order.Side.Should().Be(Side.Back);
+        order.ToInstruction().Side.Should().Be(Side.Back);
     }
 
     [Fact]
@@ -30,8 +30,8 @@ public class LimitOrderTests
     {
         var order = new LimitOrder(1, Side.Lay, 1.01, 9.99);
 
-        order.Side.Should().Be(Side.Lay.Value);
-        order.ToInstruction().Side.Should().Be(Side.Lay.Value);
+        order.Side.Should().Be(Side.Lay);
+        order.ToInstruction().Side.Should().Be(Side.Lay);
     }
 
     [Theory]
@@ -64,8 +64,8 @@ public class LimitOrderTests
     {
         var order = new LimitOrder(1, Side.Back, 1.01, 9.99);
 
-        order.PersistenceType.Should().Be(PersistenceType.Lapse.Value);
-        order.ToInstruction().LimitOrder?.PersistenceType.Should().Be(PersistenceType.Lapse.Value);
+        order.PersistenceType.Should().Be(PersistenceType.Lapse);
+        order.ToInstruction().LimitOrder?.PersistenceType.Should().Be(PersistenceType.Lapse);
     }
 
     [Fact]
@@ -73,17 +73,17 @@ public class LimitOrderTests
     {
         var order = new LimitOrder(1, Side.Back, 1.01, 9.99, PersistenceType.Persist);
 
-        order.PersistenceType.Should().Be(PersistenceType.Persist.Value);
-        order.ToInstruction().LimitOrder?.PersistenceType.Should().Be(PersistenceType.Persist.Value);
+        order.PersistenceType.Should().Be(PersistenceType.Persist);
+        order.ToInstruction().LimitOrder?.PersistenceType.Should().Be(PersistenceType.Persist);
     }
 
     [Fact]
     public void PersistenceTypeCanBeSetToMarketOnClose()
     {
-        var order = new LimitOrder(1, Side.Back, 1.01, 9.99, PersistenceType.MarketOnClose);
+        var order = new LimitOrder(1, Side.Back, 1.01, 9.99, PersistenceType.Market_On_Close);
 
-        order.PersistenceType.Should().Be(PersistenceType.MarketOnClose.Value);
-        order.ToInstruction().LimitOrder?.PersistenceType.Should().Be(PersistenceType.MarketOnClose.Value);
+        order.PersistenceType.Should().Be(PersistenceType.Market_On_Close);
+        order.ToInstruction().LimitOrder?.PersistenceType.Should().Be(PersistenceType.Market_On_Close);
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-﻿using Betfair.Api.Requests.OrderDtos;
+﻿using Betfair.Api.Requests.Orders;
 
 namespace Betfair.Api.Responses.Orders;
 

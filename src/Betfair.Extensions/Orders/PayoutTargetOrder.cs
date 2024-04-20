@@ -1,4 +1,4 @@
-﻿using Betfair.Api.Requests.OrderDtos;
+﻿using Betfair.Api.Requests.Orders;
 using Betfair.Core;
 
 namespace Betfair.Extensions.Orders;
@@ -26,14 +26,14 @@ public class PayoutTargetOrder(
 
     public double PayoutTarget { get; } = payoutTarget;
 
-    public string PersistenceType { get; } = persistenceType?.Value ?? Core.PersistenceType.Lapse.Value;
+    public PersistenceType PersistenceType { get; } = persistenceType ?? PersistenceType.Lapse;
 
     internal override PlaceInstruction ToInstruction() =>
         new ()
         {
             SelectionId = SelectionId,
             Side = Side,
-            LimitOrder = new Api.Requests.OrderDtos.LimitOrder
+            LimitOrder = new Api.Requests.Orders.LimitOrder
             {
                 Price = Price,
                 PersistenceType = PersistenceType,

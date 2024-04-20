@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Text.Json;
 using Betfair.Stream;
 #pragma warning disable SA1010
 

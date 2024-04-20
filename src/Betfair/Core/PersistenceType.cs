@@ -1,26 +1,28 @@
-﻿namespace Betfair.Core;
+﻿// ReSharper disable InconsistentNaming
+namespace Betfair.Core;
 
-public sealed class PersistenceType
+/// <summary>
+/// Defines what to do with the order at turn-in-play.
+/// </summary>
+[JsonConverter(typeof(UpperCaseEnumJsonConverter<PersistenceType>))]
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "The underscores are required by Betfair.")]
+public enum PersistenceType
 {
-    private PersistenceType(string value) => Value = value;
+    /// <summary>
+    /// Lapse (cancel) the order automatically when the market is turned in play if the bet is unmatched
+    /// </summary>
+    Lapse,
 
     /// <summary>
-    /// Lapse the order when the market is turned in-play.
+    /// Persist the unmatched order to in-play.
+    /// The bet will be placed automatically into the in-play market at the start of the event.
+    /// Once in play, the bet won't be cancelled by Betfair if a material event takes place
+    /// and will be available until matched or cancelled by the user.
     /// </summary>
-    public static PersistenceType Lapse = new ("LAPSE");
-
-    /// <summary>
-    /// Persist the order to in-play.
-    /// The bet will be place automatically into the in-play market at the start of the event.
-    /// </summary>
-    public static PersistenceType Persist = new ("PERSIST");
+    Persist,
 
     /// <summary>
     /// Put the order into the auction (SP) at turn-in-play.
     /// </summary>
-    public static PersistenceType MarketOnClose = new("MARKET_ON_CLOSE");
-
-    public string Value { get; }
-
-    public override string ToString() => Value;
+    Market_On_Close,
 }

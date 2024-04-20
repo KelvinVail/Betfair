@@ -1,4 +1,4 @@
-﻿namespace Betfair.Api.Requests.OrderDtos;
+﻿namespace Betfair.Api.Requests.Orders;
 
 /// <summary>
 /// Represents a request to place orders on a market.
@@ -10,7 +10,7 @@ public class PlaceOrders
     /// </summary>
     /// <param name="marketId">The market id these orders are to be placed on.</param>
     public PlaceOrders(string marketId) =>
-        MarketId = marketId;
+        MarketId = marketId ?? throw new ArgumentNullException(nameof(marketId));
 
     /// <summary>
     /// Gets the market ID.

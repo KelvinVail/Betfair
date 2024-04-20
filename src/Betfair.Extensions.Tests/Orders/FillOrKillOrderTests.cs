@@ -21,8 +21,8 @@ public class FillOrKillOrderTests
     {
         var order = new FillOrKillOrder(1, Side.Back, 1.01, 9.99);
 
-        order.Side.Should().Be(Side.Back.Value);
-        order.ToInstruction().Side.Should().Be(Side.Back.Value);
+        order.Side.Should().Be(Side.Back);
+        order.ToInstruction().Side.Should().Be(Side.Back);
     }
 
     [Fact]
@@ -30,8 +30,8 @@ public class FillOrKillOrderTests
     {
         var order = new FillOrKillOrder(1, Side.Lay, 1.01, 9.99);
 
-        order.Side.Should().Be(Side.Lay.Value);
-        order.ToInstruction().Side.Should().Be(Side.Lay.Value);
+        order.Side.Should().Be(Side.Lay);
+        order.ToInstruction().Side.Should().Be(Side.Lay);
     }
 
     [Theory]

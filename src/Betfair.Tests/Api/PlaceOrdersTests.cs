@@ -1,6 +1,5 @@
-﻿using System.Text.Json;
-using Betfair.Api;
-using Betfair.Api.Requests.OrderDtos;
+﻿using Betfair.Api;
+using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses.Orders;
 using Betfair.Tests.Api.TestDoubles;
 

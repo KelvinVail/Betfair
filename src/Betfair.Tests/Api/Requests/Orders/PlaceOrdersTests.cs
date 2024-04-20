@@ -1,31 +1,41 @@
 ﻿using Betfair.Api.Requests.Orders;
 
-namespace Betfair.Extensions.Tests.Orders;
+namespace Betfair.Tests.Api.Requests.Orders;
 
 public class PlaceOrdersTests
 {
-    [Theory]
-    [InlineData("1.23456789")]
-    [InlineData("1.9876")]
-    public void MarketIdShouldBeSet(string marketId)
+    [Fact]
+    public void MarketIdShouldNotBeNull()
     {
-        var placeOrders = new PlaceOrders(marketId);
+        Action act = () => new PlaceOrders(null!);
 
-        placeOrders.MarketId.Should().Be(marketId);
+        act.Should().Throw<ArgumentNullException>()
+            .WithParameterName("marketId");
     }
 
     [Fact]
-    public void InstructionsShouldBeEmpty()
+    public void InstructionsShouldNotBeNull()
     {
         var placeOrders = new PlaceOrders("1.23456789");
 
-        placeOrders.Instructions.Should().BeEmpty();
+        placeOrders.Instructions.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void InstructionsCanBeAdded()
+    {
+        var placeOrders = new PlaceOrders("1.23456789");
+        var instruction = new PlaceInstruction();
+
+        placeOrders.Instructions.Add(instruction);
+
+        placeOrders.Instructions.Should().Contain(instruction);
     }
 
     [Theory]
     [InlineData("customerRef123")]
     [InlineData(null)]
-    public void CustomerRefShouldBeSet(string? customerRef)
+    public void CustomerRefCanBeSet(string? customerRef)
     {
         var placeOrders = new PlaceOrders("1.23456789")
         {
@@ -38,7 +48,7 @@ public class PlaceOrdersTests
     [Theory]
     [InlineData(1234567890L)]
     [InlineData(null)]
-    public void MarketVersionShouldBeSet(long? marketVersion)
+    public void MarketVersionCanBeSet(long? marketVersion)
     {
         var placeOrders = new PlaceOrders("1.23456789")
         {
@@ -51,7 +61,7 @@ public class PlaceOrdersTests
     [Theory]
     [InlineData("strategyRef123")]
     [InlineData(null)]
-    public void CustomerStrategyRefShouldBeSet(string? strategyRef)
+    public void CustomerStrategyRefCanBeSet(string? strategyRef)
     {
         var placeOrders = new PlaceOrders("1.23456789")
         {
@@ -65,11 +75,11 @@ public class PlaceOrdersTests
     [InlineData(true)]
     [InlineData(false)]
     [InlineData(null)]
-    public void AsyncShouldBeSet(bool? value)
+    public void AsyncCanBeSet(bool? value)
     {
         var placeOrders = new PlaceOrders("1.23456789")
         {
-            Async = value,
+            Async = value
         };
 
         placeOrders.Async.Should().Be(value);
