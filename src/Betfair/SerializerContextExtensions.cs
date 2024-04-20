@@ -51,7 +51,9 @@ public static class SerializerContextExtensions
         { typeof(PlaceInstruction), SerializerContext.Default.PlaceInstruction },
         { typeof(PlaceOrders), SerializerContext.Default.PlaceOrders },
         { typeof(PlaceExecutionReport), SerializerContext.Default.PlaceExecutionReport },
-        { typeof(PlaceInstructionReport), SerializerContext.Default.PlaceInstructionReport },
+        { typeof(UpdateInstruction), SerializerContext.Default.UpdateInstruction },
+        { typeof(UpdateOrders), SerializerContext.Default.UpdateOrders },
+        { typeof(UpdateExecutionReport), SerializerContext.Default.UpdateExecutionReport },
     };
 
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)

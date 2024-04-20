@@ -79,9 +79,26 @@ public class PlaceOrdersTests
     {
         var placeOrders = new PlaceOrders("1.23456789")
         {
-            Async = value
+            Async = value,
         };
 
         placeOrders.Async.Should().Be(value);
+    }
+
+    [Fact]
+    public void ShouldBeSerializable()
+    {
+        var placeOrders = new PlaceOrders("1.23456789")
+        {
+            CustomerRef = "customerRef123",
+            MarketVersion = 1234567890,
+            CustomerStrategyRef = "strategyRef123",
+            Async = true,
+        };
+
+        var jsonTypeInfo = placeOrders.GetContext();
+        var json = JsonSerializer.Serialize(placeOrders, jsonTypeInfo);
+
+        json.Should().Be("{\"marketId\":\"1.23456789\",\"instructions\":[],\"customerRef\":\"customerRef123\",\"marketVersion\":1234567890,\"customerStrategyRef\":\"strategyRef123\",\"async\":true}");
     }
 }

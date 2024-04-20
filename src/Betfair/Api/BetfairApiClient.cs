@@ -36,6 +36,11 @@ public class BetfairApiClient : IDisposable
         CancellationToken cancellationToken = default) =>
         _client.PostAsync<PlaceExecutionReport>(new Uri($"{_betting}/placeOrders/"), placeOrders, cancellationToken);
 
+    public Task<UpdateExecutionReport> UpdateOrders(
+        UpdateOrders updateOrders,
+        CancellationToken cancellationToken = default) =>
+        _client.PostAsync<UpdateExecutionReport>(new Uri($"{_betting}/updateOrders/"), updateOrders, cancellationToken);
+
     public async Task<MarketCatalogue[]> MarketCatalogue(
         ApiMarketFilter? filter = null,
         MarketCatalogueQuery? query = null,

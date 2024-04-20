@@ -10,7 +10,12 @@ using Betfair.Stream.Responses;
 namespace Betfair;
 
 [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+
+// Login
 [JsonSerializable(typeof(Authentication), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(LoginResponse))]
+
+// Stream Messages
 [JsonSerializable(typeof(DataFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MarketSubscription), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(OrderFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
@@ -18,6 +23,7 @@ namespace Betfair;
 [JsonSerializable(typeof(StreamMarketFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MessageBase), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
+// Stream Responses
 [JsonSerializable(typeof(ChangeMessage))]
 [JsonSerializable(typeof(MarketChange))]
 [JsonSerializable(typeof(MarketDefinition))]
@@ -29,10 +35,12 @@ namespace Betfair;
 
 [JsonSerializable(typeof(ApiMarketFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(DateRange), GenerationMode = JsonSourceGenerationMode.Serialization)]
+
+// Market Catalogue Requests
 [JsonSerializable(typeof(MarketCatalogueQuery), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MarketCatalogueRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
-[JsonSerializable(typeof(MarketBookRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
+// Market Catalogue Responses
 [JsonSerializable(typeof(Competition))]
 [JsonSerializable(typeof(LadderDescription))]
 [JsonSerializable(typeof(MarketCatalogue))]
@@ -42,15 +50,24 @@ namespace Betfair;
 [JsonSerializable(typeof(Runner))]
 [JsonSerializable(typeof(MarketCatalogue[]))]
 
-[JsonSerializable(typeof(LimitOrder))]
-[JsonSerializable(typeof(PlaceInstruction))]
+[JsonSerializable(typeof(MarketBookRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+
+// Place Order Requests
 [JsonSerializable(typeof(PlaceOrders))]
+[JsonSerializable(typeof(PlaceInstruction))]
+[JsonSerializable(typeof(LimitOrder))]
 
+// Place Order Responses
 [JsonSerializable(typeof(PlaceExecutionReport))]
-[JsonSerializable(typeof(PlaceInstructionReport))]
 
-[JsonSerializable(typeof(LoginResponse))]
+// Update Order Requests
+[JsonSerializable(typeof(UpdateOrders))]
+[JsonSerializable(typeof(UpdateInstruction))]
 
+// Update Order Responses
+[JsonSerializable(typeof(UpdateExecutionReport))]
+
+// Error Responses
 [JsonSerializable(typeof(BadRequestResponse))]
 [JsonSerializable(typeof(BadRequestDetail))]
 [JsonSerializable(typeof(BadRequestErrorCode))]

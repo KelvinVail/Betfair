@@ -1,0 +1,51 @@
+﻿using Betfair.Api;
+using Betfair.Api.Requests.Orders;
+using Betfair.Api.Responses.Orders;
+using Betfair.Tests.Api.TestDoubles;
+
+namespace Betfair.Tests.Api;
+
+public class UpdateOrderTests : IDisposable
+{
+    private readonly HttpAdapterStub _client = new ();
+    private readonly BetfairApiClient _api;
+    private bool _disposedValue;
+
+    public UpdateOrderTests()
+    {
+        _api = new BetfairApiClient(_client);
+        _client.RespondsWithBody = new PlaceExecutionReport();
+    }
+
+    [Fact]
+    public async Task UpdateOrdersCallsTheCorrectEndpoint()
+    {
+        await _api.UpdateOrders(new UpdateOrders("1.23456789"));
+
+        _client.LastUriCalled.Should().Be(
+                       "https://api.betfair.com/exchange/betting/rest/v1.0/updateOrders/");
+    }
+
+    [Fact]
+    public async Task RequestBodyShouldBeSerializable()
+    {
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue) return;
+        if (disposing)
+        {
+            _client.Dispose();
+            _api.Dispose();
+        }
+
+        _disposedValue = true;
+    }
+}
