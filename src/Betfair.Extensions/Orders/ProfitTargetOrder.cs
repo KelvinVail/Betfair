@@ -39,6 +39,7 @@ public class ProfitTargetOrder(
                 Price = Price,
                 PersistenceType = PersistenceType,
                 BetTargetType = "BACKERS_PROFIT",
+                BetTargetSize = ProfitTarget,
             },
         };
 }
