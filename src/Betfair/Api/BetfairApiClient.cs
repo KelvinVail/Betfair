@@ -31,17 +31,17 @@ public class BetfairApiClient : IDisposable
         _client = adapter;
     }
 
-    public Task<PlaceExecutionReport> PlaceOrders(
+    public virtual Task<PlaceExecutionReport> PlaceOrders(
         PlaceOrders placeOrders,
         CancellationToken cancellationToken = default) =>
         _client.PostAsync<PlaceExecutionReport>(new Uri($"{_betting}/placeOrders/"), placeOrders, cancellationToken);
 
-    public Task<UpdateExecutionReport> UpdateOrders(
+    public virtual Task<UpdateExecutionReport> UpdateOrders(
         UpdateOrders updateOrders,
         CancellationToken cancellationToken = default) =>
         _client.PostAsync<UpdateExecutionReport>(new Uri($"{_betting}/updateOrders/"), updateOrders, cancellationToken);
 
-    public async Task<MarketCatalogue[]> MarketCatalogue(
+    public virtual async Task<MarketCatalogue[]> MarketCatalogue(
         ApiMarketFilter? filter = null,
         MarketCatalogueQuery? query = null,
         CancellationToken cancellationToken = default)
@@ -60,7 +60,7 @@ public class BetfairApiClient : IDisposable
             new Uri($"{_betting}/listMarketCatalogue/"), request, cancellationToken);
     }
 
-    public async Task<string> MarketStatus(
+    public virtual async Task<string> MarketStatus(
         string marketId,
         CancellationToken cancellationToken)
     {
@@ -72,6 +72,7 @@ public class BetfairApiClient : IDisposable
         return response?.FirstOrDefault()?.Status ?? "NONE";
     }
 
+    [ExcludeFromCodeCoverage]
     public void Dispose()
     {
         Dispose(disposing: true);
