@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>8.2.1</Version>
+    <Version>8.2.2</Version>
     <Authors>Kelvin Vail</Authors>
     <Company>Kelvin Vail</Company>
     <Product>Betfair</Product>
@@ -26,7 +26,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.23.2.88755">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.27.0.93347">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

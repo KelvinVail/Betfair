@@ -16,7 +16,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.23.2.88755">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.27.0.93347">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -28,6 +28,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Betfair\Betfair.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

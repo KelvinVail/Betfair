@@ -13,7 +13,7 @@ public class RunnerDefinition
 
     [JsonPropertyName("id")]
     [DataMember(Name = "id")]
-    public long? SelectionId { get; init; }
+    public long SelectionId { get; init; }
 
     [JsonPropertyName("hc")]
     [DataMember(Name = "hc")]
