@@ -98,6 +98,14 @@ public class Subscription : IDisposable
         }
     }
 
+    /// <summary>
+    /// Asynchronously iterate raw ChangeMessage bytes as they become available on the stream.
+    /// </summary>
+    /// <param name="cancellationToken">CancellationToken.</param>
+    /// <returns>An Async Enumerable of <see cref="byte[]"/>.</returns>
+    public IAsyncEnumerable<byte[]> ReadBytes(CancellationToken cancellationToken) =>
+        _pipe.ReadLines(cancellationToken);
+
     [ExcludeFromCodeCoverage]
     public void Dispose()
     {
