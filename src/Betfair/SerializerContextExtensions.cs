@@ -11,7 +11,7 @@ namespace Betfair;
 
 public static class SerializerContextExtensions
 {
-    private static readonly Dictionary<Type, JsonTypeInfo> _internalTypes = new ()
+    private static readonly Dictionary<Type, JsonTypeInfo> _internalTypes = new()
     {
         { typeof(LoginResponse), SerializerContext.Default.LoginResponse },
         { typeof(BadRequestResponse), SerializerContext.Default.BadRequestResponse },
@@ -19,7 +19,7 @@ public static class SerializerContextExtensions
         { typeof(BadRequestErrorCode), SerializerContext.Default.BadRequestErrorCode },
     };
 
-    private static readonly Dictionary<Type, JsonTypeInfo> _typeInfo = new ()
+    private static readonly Dictionary<Type, JsonTypeInfo> _typeInfo = new()
     {
         { typeof(Authentication), SerializerContext.Default.Authentication },
         { typeof(DataFilter), SerializerContext.Default.DataFilter },
@@ -54,6 +54,12 @@ public static class SerializerContextExtensions
         { typeof(UpdateInstruction), SerializerContext.Default.UpdateInstruction },
         { typeof(UpdateOrders), SerializerContext.Default.UpdateOrders },
         { typeof(UpdateExecutionReport), SerializerContext.Default.UpdateExecutionReport },
+        { typeof(ReplaceInstruction), SerializerContext.Default.ReplaceInstruction },
+        { typeof(ReplaceOrders), SerializerContext.Default.ReplaceOrders },
+        { typeof(ReplaceExecutionReport), SerializerContext.Default.ReplaceExecutionReport },
+        { typeof(CancelInstruction), SerializerContext.Default.CancelInstruction },
+        { typeof(CancelOrders), SerializerContext.Default.CancelOrders },
+        { typeof(CancelExecutionReport), SerializerContext.Default.CancelExecutionReport },
     };
 
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)

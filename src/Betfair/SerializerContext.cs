@@ -67,6 +67,14 @@ namespace Betfair;
 // Update Order Responses
 [JsonSerializable(typeof(UpdateExecutionReport))]
 
+// Replace Order Responses
+[JsonSerializable(typeof(ReplaceOrders))]
+[JsonSerializable(typeof(ReplaceExecutionReport))]
+
+// Cancel Order Responses
+[JsonSerializable(typeof(CancelOrders))]
+[JsonSerializable(typeof(CancelExecutionReport))]
+
 // Error Responses
 [JsonSerializable(typeof(BadRequestResponse))]
 [JsonSerializable(typeof(BadRequestDetail))]
