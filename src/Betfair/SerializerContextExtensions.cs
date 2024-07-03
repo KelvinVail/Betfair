@@ -1,6 +1,8 @@
 ﻿using Betfair.Api.Requests;
+using Betfair.Api.Requests.Markets;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Markets;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
 using Betfair.Core.Login;
@@ -60,6 +62,10 @@ public static class SerializerContextExtensions
         { typeof(CancelInstruction), SerializerContext.Default.CancelInstruction },
         { typeof(CancelOrders), SerializerContext.Default.CancelOrders },
         { typeof(CancelExecutionReport), SerializerContext.Default.CancelExecutionReport },
+        { typeof(MarketProfitAndLossRequest), SerializerContext.Default.MarketProfitAndLossRequest },
+        { typeof(MarketProfitAndLoss), SerializerContext.Default.MarketProfitAndLoss },
+        { typeof(IEnumerable<MarketProfitAndLoss>), SerializerContext.Default.IEnumerableMarketProfitAndLoss },
+        { typeof(RunnerProfitAndLoss), SerializerContext.Default.RunnerProfitAndLoss },
     };
 
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)

@@ -1,6 +1,8 @@
 ﻿using Betfair.Api.Requests;
+using Betfair.Api.Requests.Markets;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Markets;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
 using Betfair.Core.Login;
@@ -68,6 +70,36 @@ public class BetfairApiClient : IDisposable
 
         return await _client.PostAsync<MarketCatalogue[]>(
             new Uri($"{_betting}/listMarketCatalogue/"), request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieve profit and loss for a given list of OPEN markets.
+    /// The values are calculated using matched bets and optionally settled bets.
+    /// Only odds (MarketBettingType = ODDS) markets are implemented, markets of other types are silently ignored.
+    /// To retrieve your profit and loss for CLOSED markets, please use the ClearedOrders request.
+    /// </summary>
+    /// <param name="marketIds">List of markets to calculate profit and loss.</param>
+    /// <param name="includeSettledBets">Option to include settled bets (partially settled markets only). Defaults to false if not specified.</param>
+    /// <param name="includeBspBets">Option to include BSP bets. Defaults to false if not specified.</param>
+    /// <param name="netOfCommission">Option to return profit and loss net of users current commission rate for this market including any special tariffs. Defaults to false if not specified.</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    /// <returns>A list of <see cref="MarketProfitAndLoss"/>.</returns>
+    public virtual async Task<IEnumerable<MarketProfitAndLoss>> MarketProfitAndLoss(
+        List<string> marketIds,
+        bool includeSettledBets = false,
+        bool includeBspBets = false,
+        bool netOfCommission = false,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new MarketProfitAndLossRequest
+        {
+            MarketIds = marketIds,
+            IncludeSettledBets = includeSettledBets,
+            IncludeBspBets = includeBspBets,
+            NetOfCommission = netOfCommission,
+        };
+
+        return await _client.PostAsync<IEnumerable<MarketProfitAndLoss>>(new Uri($"{_betting}/listMarketProfitAndLoss/"), request, cancellationToken);
     }
 
     public virtual async Task<string> MarketStatus(

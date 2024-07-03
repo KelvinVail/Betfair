@@ -1,6 +1,8 @@
 ﻿using Betfair.Api.Requests;
+using Betfair.Api.Requests.Markets;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Markets;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
 using Betfair.Core.Login;
@@ -74,6 +76,12 @@ namespace Betfair;
 // Cancel Order Responses
 [JsonSerializable(typeof(CancelOrders))]
 [JsonSerializable(typeof(CancelExecutionReport))]
+
+// Market Profit and Loss
+[JsonSerializable(typeof(MarketProfitAndLossRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketProfitAndLoss))]
+[JsonSerializable(typeof(IEnumerable<MarketProfitAndLoss>))]
+[JsonSerializable(typeof(RunnerProfitAndLoss))]
 
 // Error Responses
 [JsonSerializable(typeof(BadRequestResponse))]
