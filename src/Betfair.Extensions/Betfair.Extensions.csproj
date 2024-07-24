@@ -16,7 +16,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.27.0.93347">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.30.0.95878">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.1.1" />
+    <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.4" />
   </ItemGroup>
 
 </Project>
