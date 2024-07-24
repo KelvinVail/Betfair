@@ -31,7 +31,7 @@ public class HttpDeserializerTests : IDisposable
     }
 
     [Fact]
-    public async Task PostShouldThrowIfBadRequestIsReturned()
+    public async Task PostShouldThrowResponseBodyIfBadRequestIsReturned()
     {
         _handler.RespondsWitHttpStatusCode = HttpStatusCode.BadRequest;
         var response = new BadRequestResponse();
@@ -40,21 +40,9 @@ public class HttpDeserializerTests : IDisposable
 
         var act = async () => { await _client.PostAsync<MarketStatus>(_uri, _content); };
 
+        var expectedMessage = JsonSerializer.Serialize(response, response.GetInternalContext());
         (await act.Should().ThrowAsync<HttpRequestException>())
-            .WithMessage("INVALID_SESSION_INFORMATION")
-            .And.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task PostShouldThrowAGenericMessageIsErrorCodeNotFound()
-    {
-        _handler.RespondsWitHttpStatusCode = HttpStatusCode.BadRequest;
-        _handler.RespondsWithBody = new BadRequestResponse();
-
-        var act = async () => { await _client.PostAsync<MarketStatus[]>(_uri, _content); };
-
-        (await act.Should().ThrowAsync<HttpRequestException>())
-            .WithMessage("An HttpRequestException Occurred.")
+            .WithMessage(expectedMessage)
             .And.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
