@@ -13,7 +13,7 @@ namespace Betfair;
 
 public static class SerializerContextExtensions
 {
-    private static readonly Dictionary<Type, JsonTypeInfo> _internalTypes = new()
+    private static readonly Dictionary<Type, JsonTypeInfo> _internalTypes = new ()
     {
         { typeof(LoginResponse), SerializerContext.Default.LoginResponse },
         { typeof(BadRequestResponse), SerializerContext.Default.BadRequestResponse },
@@ -21,7 +21,7 @@ public static class SerializerContextExtensions
         { typeof(BadRequestErrorCode), SerializerContext.Default.BadRequestErrorCode },
     };
 
-    private static readonly Dictionary<Type, JsonTypeInfo> _typeInfo = new()
+    private static readonly Dictionary<Type, JsonTypeInfo> _typeInfo = new ()
     {
         { typeof(Authentication), SerializerContext.Default.Authentication },
         { typeof(DataFilter), SerializerContext.Default.DataFilter },
@@ -43,6 +43,7 @@ public static class SerializerContextExtensions
         { typeof(Competition), SerializerContext.Default.Competition },
         { typeof(LadderDescription), SerializerContext.Default.LadderDescription },
         { typeof(MarketCatalogue[]), SerializerContext.Default.MarketCatalogueArray },
+        { typeof(MarketCatalogue), SerializerContext.Default.MarketCatalogue },
         { typeof(MarketDescription), SerializerContext.Default.MarketDescription },
         { typeof(MarketEvent), SerializerContext.Default.MarketEvent },
         { typeof(MarketStatus[]), SerializerContext.Default.MarketStatusArray },

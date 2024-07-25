@@ -51,6 +51,7 @@ namespace Betfair;
 [JsonSerializable(typeof(MarketStatus[]))]
 [JsonSerializable(typeof(Runner))]
 [JsonSerializable(typeof(MarketCatalogue[]))]
+[JsonSerializable(typeof(MarketCatalogue))]
 
 [JsonSerializable(typeof(MarketBookRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
