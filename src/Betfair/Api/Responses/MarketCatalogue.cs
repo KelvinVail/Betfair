@@ -1,6 +1,4 @@
-﻿using Betfair.Core;
-
-namespace Betfair.Api.Responses;
+﻿namespace Betfair.Api.Responses;
 
 public sealed class MarketCatalogue
 {
@@ -23,7 +21,7 @@ public sealed class MarketCatalogue
     public MarketEvent? Event { get; init; }
 
     [JsonPropertyName("eventType")]
-    public EventType? EventType { get; init; }
+    public MarketEventType? EventType { get; init; }
 
     [JsonPropertyName("description")]
     public MarketDescription? Description { get; init; }
