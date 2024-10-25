@@ -8,7 +8,8 @@ public class MarketProfitAndLoss
     public string? MarketId { get; internal set; }
 
     /// <summary>
-    /// Gets the commission rate applied to Profit and Loss values. Only returned if Net Of Commission option is requested.
+    /// Gets the commission rate applied to Profit and Loss values.
+    /// Only returned if Net Of Commission option is requested.
     /// </summary>
     public double? CommissionApplied { get; internal set; }
 
