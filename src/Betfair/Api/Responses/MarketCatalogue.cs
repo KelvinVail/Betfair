@@ -27,5 +27,5 @@ public sealed class MarketCatalogue
     public MarketDescription? Description { get; init; }
 
     [JsonPropertyName("runners")]
-    public IEnumerable<Runner>? Runners { get; init; }
+    public IEnumerable<RunnerResponse>? Runners { get; init; }
 }

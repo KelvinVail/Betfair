@@ -16,7 +16,7 @@ public class RunnerResponse
     /// <summary>
     /// Gets the status of the selection.
     /// For example ACTIVE, REMOVED, WINNER, PLACED, LOSER, HIDDEN.
-    /// Runner status information is available for 90 days following market settlement.
+    /// RunnerResponse status information is available for 90 days following market settlement.
     /// </summary>
     public string Status { get; internal set; } = string.Empty;
 

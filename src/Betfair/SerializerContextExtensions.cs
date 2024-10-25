@@ -8,6 +8,7 @@ using Betfair.Core.Client;
 using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
+using RunnerResponse = Betfair.Api.Responses.RunnerResponse;
 
 namespace Betfair;
 
@@ -47,7 +48,7 @@ public static class SerializerContextExtensions
         { typeof(MarketDescription), SerializerContext.Default.MarketDescription },
         { typeof(MarketEvent), SerializerContext.Default.MarketEvent },
         { typeof(MarketStatus[]), SerializerContext.Default.MarketStatusArray },
-        { typeof(Runner), SerializerContext.Default.Runner },
+        { typeof(RunnerResponse), SerializerContext.Default.RunnerResponse },
         { typeof(MarketCatalogueRequest), SerializerContext.Default.MarketCatalogueRequest },
         { typeof(MarketBookRequest), SerializerContext.Default.MarketBookRequest },
         { typeof(LimitOrder), SerializerContext.Default.LimitOrder },

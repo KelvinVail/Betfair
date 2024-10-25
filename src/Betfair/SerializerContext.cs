@@ -8,6 +8,7 @@ using Betfair.Core.Client;
 using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
+using RunnerResponse = Betfair.Api.Responses.RunnerResponse;
 
 namespace Betfair;
 
@@ -49,7 +50,7 @@ namespace Betfair;
 [JsonSerializable(typeof(MarketDescription))]
 [JsonSerializable(typeof(MarketEvent))]
 [JsonSerializable(typeof(MarketStatus[]))]
-[JsonSerializable(typeof(Runner))]
+[JsonSerializable(typeof(RunnerResponse))]
 [JsonSerializable(typeof(MarketCatalogue[]))]
 [JsonSerializable(typeof(MarketCatalogue))]
 
