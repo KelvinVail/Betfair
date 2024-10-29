@@ -1,20 +1,26 @@
-﻿using Betfair.Core.Login;
-using Betfair.Stream;
+﻿using System.Text.Json;
+using Betfair.Core.Login;
+using Betfair.Extensions.Contracts;
 using Betfair.Stream.Messages;
 
 namespace Betfair.Extensions.Markets;
 
-public sealed class Market : Entity<string>, IDisposable
+public sealed class Market : Entity<string>
 {
-    private Subscription _subscription;
+    private ISubscription _subscription;
     private Action<Market> _onUpdate;
 
     private Market(Credentials credentials, string id, Action<Market> onUpdate)
         : base(id)
     {
-        _subscription = new Subscription(credentials);
+        _subscription = new MarketSubscription(credentials);
         _onUpdate = onUpdate;
     }
+
+    /// <summary>
+    /// Gets the time the market is scheduled to start.
+    /// </summary>
+    public DateTimeOffset StartTime { get; private set; }
 
     /// <summary>
     /// Create a new market subscription.
@@ -56,9 +62,7 @@ public sealed class Market : Entity<string>, IDisposable
         }
     }
 
-    public void Dispose() => _subscription.Dispose();
-
-    internal void OverrideInternalSubscription(Subscription subscription) =>
+    internal void OverrideInternalSubscription(ISubscription subscription) =>
         _subscription = subscription;
 
     private static Result MarketIdIsValid(string id)
@@ -77,6 +81,49 @@ public sealed class Market : Entity<string>, IDisposable
 
     private void Update(byte[] message)
     {
+        var reader = new Utf8JsonReader(message);
+
+        // Read through the message to find the operation type.
+        while (reader.Read())
+        {
+            if (reader.TokenType != JsonTokenType.PropertyName) continue;
+            if (!reader.ValueSpan.SequenceEqual("op"u8.ToArray()))
+                continue;
+
+            // If the operation is not a mcm message then stop.
+            reader.Read();
+            if (!reader.ValueSpan.SequenceEqual("mcm"u8.ToArray()))
+                break;
+
+            // Read through the message to find the market change type.
+            while (reader.Read())
+            {
+                if (reader.TokenType != JsonTokenType.PropertyName) continue;
+                if (!reader.ValueSpan.SequenceEqual("mc"u8.ToArray()))
+                    continue;
+
+                // Read through the message to find the market definition type.
+                while (reader.Read())
+                {
+                    if (reader.TokenType != JsonTokenType.PropertyName) continue;
+                    if (!reader.ValueSpan.SequenceEqual("marketDefinition"u8.ToArray()))
+                        continue;
+
+                    // Read through the market definition message to find the marketTime.
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType != JsonTokenType.PropertyName) continue;
+                        if (!reader.ValueSpan.SequenceEqual("marketTime"u8.ToArray()))
+                            continue;
+
+                        reader.Read();
+                        StartTime = reader.GetDateTimeOffset();
+                        break;
+                    }
+                }
+            }
+        }
+
         _onUpdate.Invoke(this);
     }
 }

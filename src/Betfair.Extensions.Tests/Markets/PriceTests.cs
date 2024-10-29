@@ -156,10 +156,13 @@ public class PriceTests
 
     [Theory]
     [InlineData(1.001, 0)]
+    [InlineData(0.001, 0)]
     [InlineData(1001, 349)]
+    [InlineData(2000, 349)]
     [InlineData(220.5, 271)]
     [InlineData(19.1, 227)]
     [InlineData(50.9, 249)]
+    [InlineData(994.97487437185936, 349)]
     public void InvalidPricesAreDisplayedAtTheNearestTick(double odds, int tick) =>
         TickIsCalculatedCorrectly(odds, tick);
 

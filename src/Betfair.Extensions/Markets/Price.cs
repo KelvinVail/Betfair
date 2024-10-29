@@ -151,6 +151,10 @@ public sealed class Price : ValueObject
                 index = i;
                 minDifference = currentDifference;
             }
+            else
+            {
+                return index;
+            }
         }
 
         return index;
