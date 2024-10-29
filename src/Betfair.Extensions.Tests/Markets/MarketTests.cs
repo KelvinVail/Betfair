@@ -136,4 +136,52 @@ public class MarketTests
 
         market.StartTime.Should().Be(default);
     }
+
+    [Fact]
+    public async Task SetMarketStatus()
+    {
+        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
+        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
+        market.OverrideInternalSubscription(sub);
+
+        await market.Subscribe();
+
+        market.Status.Should().Be("OPEN");
+    }
+
+    [Fact]
+    public async Task SetMarketIsInPlay()
+    {
+        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
+        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
+        market.OverrideInternalSubscription(sub);
+
+        await market.Subscribe();
+
+        market.IsInPlay.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task SetMarketVersion()
+    {
+        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
+        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
+        market.OverrideInternalSubscription(sub);
+
+        await market.Subscribe();
+
+        market.Version.Should().Be(6242839770);
+    }
+
+    [Fact]
+    public async Task SetMarketTotalMatched()
+    {
+        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
+        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
+        market.OverrideInternalSubscription(sub);
+
+        await market.Subscribe();
+
+        market.TotalMatched.Should().Be(17540.83);
+    }
 }

@@ -15,6 +15,7 @@
         "turnInPlayEnabled": true,
         "persistenceEnabled": true,
         "marketBaseRate": 5,
+        "priceLadderDefinition": { "type": "CLASSIC" },
         "eventId": "33728902",
         "eventTypeId": "7",
         "numberOfWinners": 1,
@@ -24,7 +25,7 @@
         "suspendTime": "2024-10-29T12:40:00.000Z",
         "bspReconciled": false,
         "complete": true,
-        "inPlay": false,
+        "inPlay": true,
         "crossMatching": true,
         "runnersVoidable": false,
         "numberOfActiveRunners": 4,
@@ -70,8 +71,7 @@
         "timezone": "Europe/London",
         "openDate": "2024-10-29T12:40:00.000Z",
         "version": 6242839770,
-        "raceType": "Flat",
-        "priceLadderDefinition": { "type": "CLASSIC" }
+        "raceType": "Flat"
       },
       "img": true,
       "tv": 17540.83
