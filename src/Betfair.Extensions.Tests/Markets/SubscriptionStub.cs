@@ -20,7 +20,7 @@ public class SubscriptionStub : ISubscription
         if (!isMultiLine)
         {
             var line = File.ReadAllText(dataPath);
-            var cleanLine = line.Replace("\r", "", StringComparison.OrdinalIgnoreCase).Replace("\n", "", StringComparison.OrdinalIgnoreCase);
+            var cleanLine = line.Replace("\r", string.Empty, StringComparison.OrdinalIgnoreCase).Replace("\n", string.Empty, StringComparison.OrdinalIgnoreCase);
             _byteLines.Add(Encoding.UTF8.GetBytes(cleanLine));
 
             var changeMessage = JsonSerializer.Deserialize<ChangeMessage>(line);

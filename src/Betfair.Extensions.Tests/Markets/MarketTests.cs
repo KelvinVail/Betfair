@@ -8,12 +8,11 @@ public class MarketTests
 {
     private readonly Credentials _credentials = new ("username", "password", "appKey");
     private readonly SubscriptionStub _subscription = new ();
-    private Action<Market> _onUpdate = _ => { };
 
     [Fact]
     public void CredentialMustNotBeNull()
     {
-        var result = Market.Create(null!, "1.1", _onUpdate);
+        var result = Market.Create(null!, "1.1", _subscription);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Credentials must not be empty.");
@@ -22,7 +21,7 @@ public class MarketTests
     [Fact]
     public void MarketIdMustNotBeNull()
     {
-        var result = Market.Create(_credentials, null!, _onUpdate);
+        var result = Market.Create(_credentials, null!, _subscription);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Market id must not be empty.");
@@ -31,7 +30,7 @@ public class MarketTests
     [Fact]
     public void MarketIdMustNotBeEmpty()
     {
-        var result = Market.Create(_credentials, string.Empty, _onUpdate);
+        var result = Market.Create(_credentials, string.Empty, _subscription);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Market id must not be empty.");
@@ -40,7 +39,7 @@ public class MarketTests
     [Fact]
     public void MarketIdMustNotBeWhiteSpace()
     {
-        var result = Market.Create(_credentials, " ", _onUpdate);
+        var result = Market.Create(_credentials, " ", _subscription);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Market id must not be empty.");
@@ -49,7 +48,7 @@ public class MarketTests
     [Fact]
     public void MarketIdMustStartWithAOneThenADotFollowedByNumbers()
     {
-        var result = Market.Create(_credentials, "1.1", _onUpdate);
+        var result = Market.Create(_credentials, "1.1", _subscription);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Id.Should().Be("1.1");
@@ -58,7 +57,7 @@ public class MarketTests
     [Fact]
     public void MarketIdMustStartWithAOneThenADotFollowedByNumbersAndNotLetters()
     {
-        var result = Market.Create(_credentials, "1.a", _onUpdate);
+        var result = Market.Create(_credentials, "1.a", _subscription);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be("Market id must start with a '1.' followed by numbers.");
@@ -69,8 +68,7 @@ public class MarketTests
     [InlineData("1.98765")]
     public async Task SubscribeToMarketUseTheIsOfTheMarketInTheSubscriptionMarketFilter(string marketId)
     {
-        var market = Market.Create(_credentials, marketId, _onUpdate).Value;
-        market.OverrideInternalSubscription(_subscription);
+        var market = Market.Create(_credentials, marketId, _subscription).Value;
 
         await market.Subscribe();
 
@@ -81,8 +79,7 @@ public class MarketTests
     [Fact]
     public async Task IfDataFilterIsNullBestAvailablePricesAndMarketDefinitionIsRequested()
     {
-        var market = Market.Create(_credentials, "1.1", _onUpdate).Value;
-        market.OverrideInternalSubscription(_subscription);
+        var market = Market.Create(_credentials, "1.1", _subscription).Value;
 
         await market.Subscribe();
 
@@ -93,8 +90,7 @@ public class MarketTests
     [Fact]
     public async Task MarketDefinitionIsAddedToTheDataFilterIfItIsNotPresent()
     {
-        var market = Market.Create(_credentials, "1.1", _onUpdate).Value;
-        market.OverrideInternalSubscription(_subscription);
+        var market = Market.Create(_credentials, "1.1", _subscription).Value;
 
         await market.Subscribe(new DataFilter().WithFullTradedLadder());
 
@@ -105,83 +101,10 @@ public class MarketTests
     [Fact]
     public async Task SubscribeToOrdersIsCalled()
     {
-        var market = Market.Create(_credentials, "1.1", _onUpdate).Value;
-        market.OverrideInternalSubscription(_subscription);
+        var market = Market.Create(_credentials, "1.1", _subscription).Value;
 
         await market.Subscribe();
 
         _subscription.SubscribedToOrdersCalled.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task MarketStartTimeIsSetFromTheInitialMarketDefinition()
-    {
-        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-        market.OverrideInternalSubscription(sub);
-
-        await market.Subscribe();
-
-        market.StartTime.Should().Be(new DateTime(2024, 10, 29, 12, 40, 0, DateTimeKind.Utc));
-    }
-
-    [Fact]
-    public async Task DoNotSetTheStartTimeIfMarketIdsDoNotMatch()
-    {
-        var market = Market.Create(_credentials, "1.1", _onUpdate).Value;
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-        market.OverrideInternalSubscription(sub);
-
-        await market.Subscribe();
-
-        market.StartTime.Should().Be(default);
-    }
-
-    [Fact]
-    public async Task SetMarketStatus()
-    {
-        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-        market.OverrideInternalSubscription(sub);
-
-        await market.Subscribe();
-
-        market.Status.Should().Be("OPEN");
-    }
-
-    [Fact]
-    public async Task SetMarketIsInPlay()
-    {
-        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-        market.OverrideInternalSubscription(sub);
-
-        await market.Subscribe();
-
-        market.IsInPlay.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task SetMarketVersion()
-    {
-        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-        market.OverrideInternalSubscription(sub);
-
-        await market.Subscribe();
-
-        market.Version.Should().Be(6242839770);
-    }
-
-    [Fact]
-    public async Task SetMarketTotalMatched()
-    {
-        var market = Market.Create(_credentials, "1.235123059", _onUpdate).Value;
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-        market.OverrideInternalSubscription(sub);
-
-        await market.Subscribe();
-
-        market.TotalMatched.Should().Be(17540.83);
     }
 }

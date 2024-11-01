@@ -1,22 +1,21 @@
-﻿namespace Betfair.Extensions.Markets;
+﻿using Betfair.Extensions.Markets.Enums;
+
+namespace Betfair.Extensions.Markets;
 
 public class Runner : Entity<long>
 {
-    private Runner(long id)
+    private Runner(long id, RunnerStatus status, double adjustmentFactor)
         : base(id)
     {
+        Status = status;
+        AdjustmentFactor = adjustmentFactor;
     }
 
-    public bool IsActive { get; private set; }
+    public RunnerStatus Status { get; }
 
-    public double AdjustmentFactor { get; private set; }
+    public double AdjustmentFactor { get; }
 
-    public double TotalMatched { get; private set; }
 
-    internal static Result<Runner> Create(long id)
-    {
-        return id > 0
-            ? Result.Success(new Runner(id))
-            : Result.Failure<Runner>("Runner id must be greater than zero.");
-    }
+    internal static Runner Create(long id, RunnerStatus status, double adjustmentFactor) =>
+        new (id, status, adjustmentFactor);
 }
