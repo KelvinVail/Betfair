@@ -91,7 +91,7 @@ public sealed class Market : Entity<string>
     {
         var marketFilter = new StreamMarketFilter().WithMarketIds(Id);
         filter ??= new DataFilter().WithBestPrices();
-
+        
         await _subscription.Subscribe(marketFilter, filter.WithMarketDefinition(), cancellationToken: cancellationToken);
         await _subscription.SubscribeToOrders(cancellationToken: cancellationToken);
 
@@ -117,11 +117,12 @@ public sealed class Market : Entity<string>
     {
         _stopwatch.Restart();
         var reader = new Utf8JsonReader(message);
-
+        
         while (reader.Read())
-            this.ReadMarketChangeMessage(ref reader);
+            this.ReadChangeMessage(ref reader);
 
         _stopwatch.Stop();
+
         OnUpdate.Invoke(this);
     }
 }
