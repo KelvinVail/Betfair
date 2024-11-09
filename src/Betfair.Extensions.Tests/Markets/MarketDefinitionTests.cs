@@ -7,7 +7,7 @@ namespace Betfair.Extensions.Tests.Markets;
 public class MarketDefinitionTests
 {
     private readonly Credentials _credentials = new ("username", "password", "appKey");
-    private readonly SubscriptionStub _sub = new (Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
+    private readonly SubscriptionMock _sub = new (Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
     private readonly Market _market;
 
     public MarketDefinitionTests() =>
@@ -42,7 +42,7 @@ public class MarketDefinitionTests
     [Fact]
     public async Task SetMarketStatusWhenInactive()
     {
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage_inactive.json"));
+        var sub = new SubscriptionMock(Path.Combine("Data", "MarketDefinitions", "InitialImage_inactive.json"));
         var market = Market.Create(_credentials, "1.235123059", sub).Value;
         await market.Subscribe();
 
@@ -52,7 +52,7 @@ public class MarketDefinitionTests
     [Fact]
     public async Task SetMarketStatusWhenSuspended()
     {
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage_suspended.json"));
+        var sub = new SubscriptionMock(Path.Combine("Data", "MarketDefinitions", "InitialImage_suspended.json"));
         var market = Market.Create(_credentials, "1.235123059", sub).Value;
         await market.Subscribe();
 
@@ -62,7 +62,7 @@ public class MarketDefinitionTests
     [Fact]
     public async Task SetMarketStatusWhenClosed()
     {
-        var sub = new SubscriptionStub(Path.Combine("Data", "MarketDefinitions", "InitialImage_closed.json"));
+        var sub = new SubscriptionMock(Path.Combine("Data", "MarketDefinitions", "InitialImage_closed.json"));
         var market = Market.Create(_credentials, "1.235123059", sub).Value;
         await market.Subscribe();
 

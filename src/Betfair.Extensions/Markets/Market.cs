@@ -10,10 +10,14 @@ public sealed class Market : Entity<string>
 {
     private readonly Stopwatch _stopwatch = new ();
     private readonly ISubscription _subscription;
+    private readonly Dictionary<long, Runner> _runners = [];
 
     private Market(Credentials credentials, string id, ISubscription? subscription = null)
-        : base(id) =>
+        : base(id)
+    {
         _subscription = subscription ?? new MarketSubscription(credentials);
+        MarketIdUtf8 = Encoding.UTF8.GetBytes(id);
+    }
 
     /// <summary>
     /// Gets or sets an action that is called when the market is updated.
@@ -58,9 +62,9 @@ public sealed class Market : Entity<string>
     /// <summary>
     /// Gets the runners in the market.
     /// </summary>
-    public IReadOnlyList<Runner> Runners => InternalRunners.Values.ToList();
+    public IReadOnlyList<Runner> Runners => _runners.Values.ToList();
 
-    internal Dictionary<long, Runner> InternalRunners { get; } = [];
+    internal byte[] MarketIdUtf8 { get; private set; }
 
     /// <summary>
     /// Create a new market subscription.
@@ -98,6 +102,22 @@ public sealed class Market : Entity<string>
         await foreach (var message in _subscription.ReadBytes(cancellationToken))
             Update(message);
     }
+
+    internal void AddOrUpdateRunnerDefinition(long id, RunnerStatus status, double adjustmentFactor)
+    {
+        if (_runners.TryGetValue(id, out var existingRunner))
+        {
+            existingRunner.Status = status;
+            existingRunner.AdjustmentFactor = adjustmentFactor;
+            return;
+        }
+
+        var runner = Runner.Create(id, status, adjustmentFactor);
+        _runners[id] = runner;
+    }
+
+    internal void UpdateBestAvailableToBack(long id, int level, double price, double size) =>
+        _runners[id].UpdateBestAvailableToBack(level, price, size);
 
     private static Result MarketIdIsValid(string id)
     {

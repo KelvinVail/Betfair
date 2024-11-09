@@ -12,6 +12,21 @@ internal static class JsonReaderExtensions
     internal static bool PropertyName(this ref Utf8JsonReader reader, ReadOnlySpan<byte> key) =>
         reader.TokenType == JsonTokenType.PropertyName && reader.ValueSpan.SequenceEqual(key);
 
+    internal static ReadOnlySpan<byte> NextProperty(this ref Utf8JsonReader reader)
+    {
+        if (reader.TokenType == JsonTokenType.PropertyName)
+            return reader.ValueSpan;
+
+        while (reader.Read())
+        {
+            if (reader.TokenType != JsonTokenType.PropertyName) continue;
+
+            return reader.ValueSpan;
+        }
+
+        return "end"u8;
+    }
+
     internal static bool Value(this ref Utf8JsonReader reader, ReadOnlySpan<byte> value) =>
         reader.ValueSpan.SequenceEqual(value);
 

@@ -29,57 +29,73 @@ public class JsonReadBenchmarks
             _byteLines.Add(Encoding.UTF8.GetBytes(line));
     }
 
-    [Benchmark(Baseline = true)]
-    public void ReadAllLinesWithUtf8JsonReader()
-    {
-        foreach (var line in _byteLines)
-        {
-            var reader = new Utf8JsonReader(line);
+    // [Benchmark(Baseline = true)]
+    // public void ReadAllLinesWithUtf8JsonReader()
+    // {
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var reader = new Utf8JsonReader(line);
+    //
+    //         while (reader.Read())
+    //         {
+    //         }
+    //     }
+    // }
     
-            while (reader.Read())
-            {
-            }
-        }
-    }
-    
-    [Benchmark]
-    public void ReadAllLinesWithJsonDocument()
-    {
-        foreach (var line in _byteLines)
-        {
-            using var doc = JsonDocument.Parse(line);
-    
-            foreach (var element in doc.RootElement.EnumerateObject())
-            {
-            }
-        }
-    }
-    
-    [Benchmark]
-    public void ReadAllLinesWithUtf8Json()
-    {
-        foreach (var line in _byteLines)
-        {
-            var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
-        }
-    }
-    
-    [Benchmark]
-    public void DeserializeAllLinesWithSystemTextJson()
-    {
-        foreach (var line in _byteLines)
-        {
-            var _ = JsonSerializer.Deserialize<ChangeMessage>(line);
-        }
-    }
+    // [Benchmark]
+    // public void ReadAllLinesWithJsonDocument()
+    // {
+    //     foreach (var line in _byteLines)
+    //     {
+    //         using var doc = JsonDocument.Parse(line);
+    //
+    //         foreach (var element in doc.RootElement.EnumerateObject())
+    //         {
+    //         }
+    //     }
+    // }
+    //
+    // [Benchmark]
+    // public void ReadAllLinesWithUtf8Json()
+    // {
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
+    //     }
+    // }
+    //
+    // [Benchmark]
+    // public void DeserializeAllLinesWithSystemTextJson()
+    // {
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var _ = JsonSerializer.Deserialize<ChangeMessage>(line);
+    //     }
+    // }
+
+    // [Benchmark]
+    // public void ReadAllLinesWithMarketCache()
+    // {
+    //     // 232us
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var reader = new Utf8JsonReader(line);
+    //
+    //         _market.ReadChangeMessage(ref reader);
+    //     }
+    // }
 
     [Benchmark]
-    public void ReadAllLinesWithMarketCache()
+    public void ReadAllLinesWithMarketCacheWithoutComments()
     {
-        // 232us
+        var options = new JsonReaderOptions
+        {
+            CommentHandling = JsonCommentHandling.Disallow,
+        };
+
         foreach (var line in _byteLines)
         {
-            var reader = new Utf8JsonReader(line);
+            var reader = new Utf8JsonReader(line, options);
     
             _market.ReadChangeMessage(ref reader);
         }

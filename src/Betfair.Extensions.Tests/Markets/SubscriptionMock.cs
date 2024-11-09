@@ -5,12 +5,12 @@ using Betfair.Stream.Responses;
 
 namespace Betfair.Extensions.Tests.Markets;
 
-public class SubscriptionStub : ISubscription
+public class SubscriptionMock : ISubscription
 {
     private readonly List<byte[]> _byteLines = [];
     private readonly List<ChangeMessage> _changeMessages = [];
 
-    public SubscriptionStub(string? dataPath = null)
+    public SubscriptionMock(string? dataPath = null)
     {
         if (dataPath is null) return;
 

@@ -7,7 +7,7 @@ namespace Betfair.Extensions.Tests.Markets;
 public class MarketTests
 {
     private readonly Credentials _credentials = new ("username", "password", "appKey");
-    private readonly SubscriptionStub _subscription = new ();
+    private readonly SubscriptionMock _subscription = new ();
 
     [Fact]
     public void CredentialMustNotBeNull()
