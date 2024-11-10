@@ -4,8 +4,6 @@ namespace Betfair.Extensions.Markets;
 
 public class Runner : Entity<long>
 {
-    private readonly BestAvailable _bestAvailableToBack = new ();
-
     private Runner(long id, RunnerStatus status, double adjustmentFactor)
         : base(id)
     {
@@ -17,12 +15,10 @@ public class Runner : Entity<long>
 
     public double AdjustmentFactor { get; internal set; }
 
-    public Price BestAvailableToBackPrice(int level) =>
-        _bestAvailableToBack.PriceAt(level);
+    public LevelLadder BestAvailableToBack { get; } = new ();
+
+    public LevelLadder BestAvailableToLay { get; } = new ();
 
     internal static Runner Create(long id, RunnerStatus status, double adjustmentFactor) =>
         new (id, status, adjustmentFactor);
-
-    internal void UpdateBestAvailableToBack(int level, double price, double size) =>
-        _bestAvailableToBack.Update(level, price, size);
 }

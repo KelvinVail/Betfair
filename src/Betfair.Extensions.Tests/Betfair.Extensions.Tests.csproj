@@ -50,6 +50,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Data\BestAvailable\initialImage.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Data\MarketDefinitions\Change.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

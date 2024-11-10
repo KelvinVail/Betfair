@@ -29,18 +29,18 @@ public class JsonReadBenchmarks
             _byteLines.Add(Encoding.UTF8.GetBytes(line));
     }
 
-    // [Benchmark(Baseline = true)]
-    // public void ReadAllLinesWithUtf8JsonReader()
-    // {
-    //     foreach (var line in _byteLines)
-    //     {
-    //         var reader = new Utf8JsonReader(line);
-    //
-    //         while (reader.Read())
-    //         {
-    //         }
-    //     }
-    // }
+    [Benchmark(Baseline = true)]
+    public void ReadAllLinesWithUtf8JsonReader()
+    {
+        foreach (var line in _byteLines)
+        {
+            var reader = new Utf8JsonReader(line);
+    
+            while (reader.Read())
+            {
+            }
+        }
+    }
     
     // [Benchmark]
     // public void ReadAllLinesWithJsonDocument()

@@ -7,6 +7,7 @@ internal static class MarketChangeReader
     private static readonly byte[] _marketId = "id"u8.ToArray();
     private static readonly byte[] _tradedVolume = "tv"u8.ToArray();
     private static readonly byte[] _marketDefinition = "marketDefinition"u8.ToArray();
+    private static readonly byte[] _runnerChanges = "rc"u8.ToArray();
 
     internal static void ReadMarketChange(this Market market, ref Utf8JsonReader reader, long publishTime)
     {
@@ -29,6 +30,9 @@ internal static class MarketChangeReader
                     break;
                 case var _ when propertyName.SequenceEqual(_marketDefinition):
                     market.ReadMarketDefinition(ref reader);
+                    break;
+                case var _ when propertyName.SequenceEqual(_runnerChanges):
+                    market.ReadRunnerChanges(ref reader);
                     break;
                 default:
                     reader.Skip();

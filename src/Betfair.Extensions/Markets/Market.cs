@@ -117,7 +117,10 @@ public sealed class Market : Entity<string>
     }
 
     internal void UpdateBestAvailableToBack(long id, int level, double price, double size) =>
-        _runners[id].UpdateBestAvailableToBack(level, price, size);
+        _runners[id].BestAvailableToBack.Update(level, price, size);
+
+    internal void UpdateBestAvailableToLay(long id, int level, double price, double size) =>
+        _runners[id].BestAvailableToLay.Update(level, price, size);
 
     private static Result MarketIdIsValid(string id)
     {

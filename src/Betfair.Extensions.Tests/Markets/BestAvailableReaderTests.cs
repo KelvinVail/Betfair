@@ -30,14 +30,13 @@ public class BestAvailableReaderTests
         _market.ReadChangeMessage(ref reader);
     }
 
-    [Theory(Skip = "x")]
-    [InlineData(9517643, 30)]
-    public void LevelZeroBackPriceShouldBe(long id, double value)
+    [Theory]
+    [InlineData(9517643, 30, 7.06)]
+    public void LevelZeroBackPriceSizeShouldBe(long id, double price, double size)
     {
-        var price = Price.Of(value);
-
         var runner = _market.Runners.Single(x => x.Id == id);
 
-        // runner.BestAvailable.Back(0).Price.Should().Be(price);
+        var priceSize = new PriceSize(price, size);
+        runner.BestAvailableToBack[0].Should().BeEquivalentTo(priceSize);
     }
 }
