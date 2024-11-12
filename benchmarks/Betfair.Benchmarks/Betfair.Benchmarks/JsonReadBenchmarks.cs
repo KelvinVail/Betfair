@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Betfair.Benchmarks.Mocks;
 using Betfair.Core.Login;
+using Betfair.Extensions.ByteReaders;
 using Betfair.Extensions.JsonReaders;
 using Betfair.Extensions.Markets;
 using Betfair.Stream.Responses;
@@ -41,7 +42,7 @@ public class JsonReadBenchmarks
             }
         }
     }
-
+    
     [Benchmark]
     public void ReadAllBytes()
     {
@@ -68,14 +69,14 @@ public class JsonReadBenchmarks
     //     }
     // }
     //
-    [Benchmark]
-    public void ReadAllLinesWithUtf8Json()
-    {
-        foreach (var line in _byteLines)
-        {
-            var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
-        }
-    }
+    // [Benchmark]
+    // public void ReadAllLinesWithUtf8Json()
+    // {
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
+    //     }
+    // }
     //
     // [Benchmark]
     // public void DeserializeAllLinesWithSystemTextJson()
@@ -99,13 +100,27 @@ public class JsonReadBenchmarks
     // }
 
     [Benchmark]
+    public void ReadAllLinesWithByteReader()
+    {
+        foreach (var line in _byteLines)
+        {
+            var reader = new BetfairJsonReader(line);
+
+            while (reader.Read())
+            {
+            }
+        }
+
+    }
+    
+    [Benchmark]
     public void ReadAllLinesWithMarketCacheWithoutComments()
     {
         var options = new JsonReaderOptions
         {
             CommentHandling = JsonCommentHandling.Disallow,
         };
-
+    
         foreach (var line in _byteLines)
         {
             var reader = new Utf8JsonReader(line, options);

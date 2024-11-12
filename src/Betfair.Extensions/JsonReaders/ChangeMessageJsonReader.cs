@@ -1,5 +1,4 @@
 ﻿using Betfair.Extensions.Markets;
-using Betfair.Extensions.Markets.Enums;
 
 namespace Betfair.Extensions.JsonReaders;
 

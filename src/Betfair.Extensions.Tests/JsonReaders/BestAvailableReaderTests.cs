@@ -4,7 +4,7 @@ using Betfair.Extensions.JsonReaders;
 using Betfair.Extensions.Markets;
 using Betfair.Extensions.Tests.TestDoubles;
 
-namespace Betfair.Extensions.Tests.Markets;
+namespace Betfair.Extensions.Tests.JsonReaders;
 
 public class BestAvailableReaderTests
 {
