@@ -8,6 +8,7 @@ internal static class RunnerChangeReader
     private static readonly byte[] _batl = "batl"u8.ToArray();
     private static readonly byte[] _selectionId = "id"u8.ToArray();
     private static readonly (int, double, double)[] _batbLevels = new (int, double, double)[9];
+    private static readonly (int, double, double)[] _batlLevels = new (int, double, double)[9];
 
     internal static void ReadRunnerChange(
         this Market market,
@@ -15,6 +16,7 @@ internal static class RunnerChangeReader
     {
         long selectionId = 0;
         Array.Clear(_batbLevels, 0, _batbLevels.Length);
+        Array.Clear(_batlLevels, 0, _batlLevels.Length);
 
         while (reader.Read())
         {
@@ -28,6 +30,7 @@ internal static class RunnerChangeReader
                     reader.ReadLevelLadder(_batbLevels);
                     break;
                 case var _ when propertyName.SequenceEqual(_batl):
+                    reader.ReadLevelLadder(_batlLevels);
                     break;
                 case var _ when propertyName.SequenceEqual(_selectionId):
                     reader.Read();
@@ -43,8 +46,14 @@ internal static class RunnerChangeReader
         {
             var level = _batbLevels[i];
             if (level is { Item2: 0 }) break;
-            // TODO: Make this Zero allocate
             market.UpdateBestAvailableToBack(selectionId, level.Item1, level.Item2, level.Item3);
+        }
+
+        for (int i = 0; i < _batlLevels.Length; i++)
+        {
+            var level = _batlLevels[i];
+            if (level is { Item2: 0 }) break;
+            market.UpdateBestAvailableToLay(selectionId, level.Item1, level.Item2, level.Item3);
         }
     }
 }

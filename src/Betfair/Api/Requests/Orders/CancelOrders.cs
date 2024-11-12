@@ -1,4 +1,5 @@
-﻿namespace Betfair.Api.Requests.Orders;
+﻿#pragma warning disable CA2227
+namespace Betfair.Api.Requests.Orders;
 
 /// <summary>
 /// Cancel all bets OR cancel all bets on a market

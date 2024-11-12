@@ -22,7 +22,7 @@ internal static class MarketChangeReader
                 case var _ when propertyName.SequenceEqual(_marketId):
                     reader.Read();
                     if (!reader.ValueSpan.SequenceEqual(market.MarketIdUtf8))
-                        return; // TODO: Is there a way to skip to the end of "mc"?
+                        return;
                     break;
                 case var _ when propertyName.SequenceEqual(_tradedVolume):
                     reader.Read();

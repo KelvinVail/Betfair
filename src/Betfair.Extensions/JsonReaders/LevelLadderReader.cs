@@ -17,16 +17,15 @@ internal static class LevelLadderReader
 
     private static (int, double, double) ReadLevel(this ref Utf8JsonReader reader)
     {
-        int level = -1;
-        double price = 0;
-        double size = 0;
+        reader.Read();
 
+        var level = reader.GetInt32();
         reader.Read();
-        level = reader.GetInt32();
+
+        var price = reader.GetDouble();
         reader.Read();
-        price = reader.GetDouble();
-        reader.Read();
-        size = reader.GetDouble();
+
+        var size = reader.GetDouble();
         reader.Read();
 
         return (level, price, size);

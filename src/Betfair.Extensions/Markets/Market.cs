@@ -62,7 +62,7 @@ public sealed class Market : Entity<string>
     /// <summary>
     /// Gets the runners in the market.
     /// </summary>
-    public IReadOnlyList<Runner> Runners => _runners.Values.ToList();
+    public IReadOnlyCollection<Runner> Runners => _runners.Values;
 
     internal byte[] MarketIdUtf8 { get; private set; }
 
@@ -95,7 +95,7 @@ public sealed class Market : Entity<string>
     {
         var marketFilter = new StreamMarketFilter().WithMarketIds(Id);
         filter ??= new DataFilter().WithBestPrices();
-        
+
         await _subscription.Subscribe(marketFilter, filter.WithMarketDefinition(), cancellationToken: cancellationToken);
         await _subscription.SubscribeToOrders(cancellationToken: cancellationToken);
 
@@ -140,7 +140,7 @@ public sealed class Market : Entity<string>
     {
         _stopwatch.Restart();
         var reader = new Utf8JsonReader(message);
-        
+
         while (reader.Read())
             this.ReadChangeMessage(ref reader);
 

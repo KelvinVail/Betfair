@@ -1,5 +1,6 @@
 ﻿using Betfair.Core.Login;
 using Betfair.Extensions.Markets;
+using Betfair.Extensions.Markets.Enums;
 using Betfair.Stream.Messages;
 
 namespace Betfair.Extensions.Tests.Markets;
@@ -48,10 +49,10 @@ public class MarketTests
     [Fact]
     public void MarketIdMustStartWithAOneThenADotFollowedByNumbers()
     {
-        var result = Market.Create(_credentials, "1.1", _subscription);
+        var result = Market.Create(_credentials, "2.1", _subscription);
 
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Id.Should().Be("1.1");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be("Market id must start with a '1.' followed by numbers.");
     }
 
     [Fact]
@@ -106,5 +107,36 @@ public class MarketTests
         await market.Subscribe();
 
         _subscription.SubscribedToOrdersCalled.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(1, RunnerStatus.Active, 1.0)]
+    [InlineData(2, RunnerStatus.Removed, 99.9)]
+    public void RunnersCanBeAdded(long id, RunnerStatus status, double adj)
+    {
+        var market = Market.Create(_credentials, "1.1", _subscription).Value;
+
+        market.AddOrUpdateRunnerDefinition(id, status, adj);
+
+        market.Runners.Should().ContainSingle();
+        market.Runners.Single().Id.Should().Be(id);
+        market.Runners.Single().Status.Should().Be(status);
+        market.Runners.Single().AdjustmentFactor.Should().Be(adj);
+    }
+
+    [Fact]
+    public void RunnersCanBeUpdated()
+    {
+        var market = Market.Create(_credentials, "1.1", _subscription).Value;
+        market.AddOrUpdateRunnerDefinition(1, RunnerStatus.Active, 1.0);
+        var runner = market.Runners.Single();
+
+        market.AddOrUpdateRunnerDefinition(1, RunnerStatus.Removed, 99.9);
+
+        market.Runners.Single().Should().BeSameAs(runner);
+        market.Runners.Should().ContainSingle();
+        market.Runners.Single().Id.Should().Be(1);
+        market.Runners.Single().Status.Should().Be(RunnerStatus.Removed);
+        market.Runners.Single().AdjustmentFactor.Should().Be(99.9);
     }
 }

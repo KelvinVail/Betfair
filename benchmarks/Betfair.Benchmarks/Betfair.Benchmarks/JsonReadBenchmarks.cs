@@ -41,7 +41,20 @@ public class JsonReadBenchmarks
             }
         }
     }
-    
+
+    [Benchmark]
+    public void ReadAllBytes()
+    {
+        long count = 0;
+        foreach (var line in _byteLines)
+        {
+            foreach (var b in line)
+            {
+                count++;
+            }
+        }
+    }
+    //
     // [Benchmark]
     // public void ReadAllLinesWithJsonDocument()
     // {
@@ -55,14 +68,14 @@ public class JsonReadBenchmarks
     //     }
     // }
     //
-    // [Benchmark]
-    // public void ReadAllLinesWithUtf8Json()
-    // {
-    //     foreach (var line in _byteLines)
-    //     {
-    //         var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
-    //     }
-    // }
+    [Benchmark]
+    public void ReadAllLinesWithUtf8Json()
+    {
+        foreach (var line in _byteLines)
+        {
+            var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
+        }
+    }
     //
     // [Benchmark]
     // public void DeserializeAllLinesWithSystemTextJson()

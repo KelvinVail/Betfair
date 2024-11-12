@@ -9,6 +9,7 @@ using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 using RunnerResponse = Betfair.Api.Responses.RunnerResponse;
+#pragma warning disable CA1506
 
 namespace Betfair;
 

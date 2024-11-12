@@ -1,10 +1,11 @@
-﻿namespace Betfair.Api.Responses.Orders;
+﻿#pragma warning disable CA2227
+namespace Betfair.Api.Responses.Orders;
 
 public class CancelExecutionReport
 {
     /// <summary>
     /// Gets or sets the ID of the market.
-    /// Echo of marketId passed
+    /// Echo of marketId passed.
     /// </summary>
     public string MarketId { get; set; } = string.Empty;
 
