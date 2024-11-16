@@ -30,31 +30,31 @@ public class JsonReadBenchmarks
             _byteLines.Add(Encoding.UTF8.GetBytes(line));
     }
 
-    [Benchmark(Baseline = true)]
-    public void ReadAllLinesWithUtf8JsonReader()
-    {
-        foreach (var line in _byteLines)
-        {
-            var reader = new Utf8JsonReader(line);
-    
-            while (reader.Read())
-            {
-            }
-        }
-    }
-    
-    [Benchmark]
-    public void ReadAllBytes()
-    {
-        long count = 0;
-        foreach (var line in _byteLines)
-        {
-            foreach (var b in line)
-            {
-                count++;
-            }
-        }
-    }
+    // [Benchmark(Baseline = true)]
+    // public void ReadAllLinesWithUtf8JsonReader()
+    // {
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var reader = new Utf8JsonReader(line);
+    //
+    //         while (reader.Read())
+    //         {
+    //         }
+    //     }
+    // }
+    //
+    // [Benchmark(Baseline = true)]
+    // public void ReadAllBytes()
+    // {
+    //     long count = 0;
+    //     foreach (var line in _byteLines)
+    //     {
+    //         foreach (var b in line)
+    //         {
+    //             count++;
+    //         }
+    //     }
+    // }
     //
     // [Benchmark]
     // public void ReadAllLinesWithJsonDocument()
@@ -99,31 +99,42 @@ public class JsonReadBenchmarks
     //     }
     // }
 
+    // [Benchmark]
+    // public void ReadAllLinesWithByteReader()
+    // {
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var reader = new BetfairJsonReader(line);
+    //
+    //         while (reader.Read())
+    //         {
+    //         }
+    //     }
+    //
+    // }
+    //
+    // [Benchmark]
+    // public void ReadAllLinesWithMarketCacheWithoutComments()
+    // {
+    //     var options = new JsonReaderOptions
+    //     {
+    //         CommentHandling = JsonCommentHandling.Disallow,
+    //     };
+    //
+    //     foreach (var line in _byteLines)
+    //     {
+    //         var reader = new Utf8JsonReader(line, options);
+    //
+    //         _market.ReadChangeMessage(ref reader);
+    //     }
+    // }
+    
     [Benchmark]
-    public void ReadAllLinesWithByteReader()
+    public void ReadAllLinesWithBetfairJsonReader()
     {
         foreach (var line in _byteLines)
         {
             var reader = new BetfairJsonReader(line);
-
-            while (reader.Read())
-            {
-            }
-        }
-
-    }
-    
-    [Benchmark]
-    public void ReadAllLinesWithMarketCacheWithoutComments()
-    {
-        var options = new JsonReaderOptions
-        {
-            CommentHandling = JsonCommentHandling.Disallow,
-        };
-    
-        foreach (var line in _byteLines)
-        {
-            var reader = new Utf8JsonReader(line, options);
     
             _market.ReadChangeMessage(ref reader);
         }

@@ -1,4 +1,5 @@
 ﻿using Betfair.Core.Login;
+using Betfair.Extensions.ByteReaders;
 using Betfair.Extensions.Contracts;
 using Betfair.Extensions.JsonReaders;
 using Betfair.Extensions.Markets.Enums;
@@ -139,7 +140,7 @@ public sealed class Market : Entity<string>
     private void Update(byte[] message)
     {
         _stopwatch.Restart();
-        var reader = new Utf8JsonReader(message);
+        var reader = new BetfairJsonReader(message);
 
         while (reader.Read())
             this.ReadChangeMessage(ref reader);

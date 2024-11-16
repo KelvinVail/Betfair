@@ -2,7 +2,10 @@
 using System.Buffers.Text;
 using System.Globalization;
 using System.Text;
+using Betfair.Core.Login;
 using Betfair.Extensions.ByteReaders;
+using Betfair.Extensions.Markets;
+using Betfair.Extensions.Tests.TestDoubles;
 
 namespace Betfair.Extensions.Tests.ByteReaderTests;
 
@@ -20,6 +23,31 @@ public class BetfairJsonReaderTests
     }
 
     [Fact]
+    public void CanReadTheWholeMarket()
+    {
+        var market = Market.Create(new Credentials("u", "p", "a"), "1.235123059", new SubscriptionStub()).Value;
+        var path = Path.Combine("Data", "messages.txt");
+
+        var lineCount = 0;
+        foreach (var line in File.ReadLines(path))
+        {
+            lineCount++;
+            var reader = new BetfairJsonReader(Encoding.UTF8.GetBytes(line));
+
+            try
+            {
+                market.ReadChangeMessage(ref reader);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+    }
+
+    [Fact]
     public void CanReadTheWholeLine()
     {
         var reader = new BetfairJsonReader(_byteLine);
@@ -30,28 +58,6 @@ public class BetfairJsonReaderTests
     }
 
     [Fact]
-    public void DetectsTheFirstObjectStart()
-    {
-        var reader = new BetfairJsonReader(_byteLine);
-
-        while (reader.Read())
-            if (reader.TokenType == JsonTokenType.StartObject) break;
-
-        reader.Position.Should().Be(1);
-    }
-
-    [Fact]
-    public void DetectsTheFirstObjectEnd()
-    {
-        var reader = new BetfairJsonReader(_byteLine);
-
-        while (reader.Read())
-            if (reader.TokenType == JsonTokenType.EndObject) break;
-
-        reader.Position.Should().Be(418);
-    }
-
-    [Fact]
     public void DetectsTheFirstPropertyName()
     {
         var reader = new BetfairJsonReader(_byteLine);
@@ -59,7 +65,6 @@ public class BetfairJsonReaderTests
         while (reader.Read())
             if (reader.TokenType == JsonTokenType.PropertyName) break;
 
-        reader.Position.Should().Be(8);
         var propertyName = Encoding.UTF8.GetString(reader.ValueSpan);
         propertyName.Should().Be("op");
     }

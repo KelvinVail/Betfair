@@ -35,10 +35,12 @@ internal ref struct BetfairJsonReader
     public bool Read()
     {
         int length = _buffer.Length;
+        TokenType = JsonTokenType.None;
         while (Position < length)
         {
             byte currentByte = _buffer[Position];
             // var c = (char)currentByte;
+
             if (currentByte == ' ')
             {
                 Position++;
@@ -51,19 +53,18 @@ internal ref struct BetfairJsonReader
                 return true;
             }
 
-            var token = _tokenMap[currentByte];
-            if (token == JsonTokenType.None)
+            TokenType = _tokenMap[currentByte];
+            if (TokenType == JsonTokenType.None)
             {
                 ReadToEndOfValue(length);
                 return true;
             }
 
-            if (token == JsonTokenType.String)
+            if (TokenType == JsonTokenType.String)
             {
                 ReadToEndOfString(length);
             }
 
-            TokenType = token;
             Position++;
             return true;
         }
