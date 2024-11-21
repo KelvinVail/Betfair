@@ -26,7 +26,7 @@ or
 PM> Install-Package Betfair
 ```
 
-## Subscribe to a Market Stream
+## How to Subscribe to a Market Stream
 Create a Subscription. Then use a MarketFilter to start a stream.  
 [Full subscription documentation](/docs/Subscription.md).
 
@@ -39,4 +39,43 @@ await foreach (var change in subscription.ReadLines(default))
 {
 	// Handle changes
 }
+```
+
+## How to List Today's Horse Races
+```csharp
+var credentials = new Credentials("USERNAME", "PASSWORD", "APP_KEY");
+
+using var client = new BetfairApiClient(credentials);
+
+var filter = new ApiMarketFilter()
+    .WithMarketTypes(MarketType.Win)
+    .WithCountries(Country.UnitedKingdom, Country.Ireland)
+    .WithEventTypes(EventType.HorseRacing)
+    .FromMarketStart(DateTimeOffset.UtcNow)
+    .ToMarketStart(DateTimeOffset.UtcNow.AddDays(1));
+
+var query = new MarketCatalogueQuery()
+    .Include(MarketProjection.Event)
+    .Include(MarketProjection.MarketStartTime)
+    .Include(MarketProjection.MarketDescription)
+    .Include(MarketProjection.RunnerDescription)
+    .OrderBy(MarketSort.FirstToStart)
+    .Take(200);
+
+var marketCatalogues = await client.MarketCatalogue(filter, query);
+```
+Or use the helper extension.
+```csharp
+var filter = new ApiMarketFilter()
+    .TodaysCard();
+
+var query = new MarketCatalogueQuery()
+    .Include(MarketProjection.Event)
+    .Include(MarketProjection.MarketStartTime)
+    .Include(MarketProjection.MarketDescription)
+    .Include(MarketProjection.RunnerDescription)
+    .OrderBy(MarketSort.FirstToStart)
+    .Take(200);
+
+var marketCatalogues = await client.MarketCatalogue(filter, query);
 ```
