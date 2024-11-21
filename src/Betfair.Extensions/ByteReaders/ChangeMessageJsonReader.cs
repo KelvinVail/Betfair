@@ -9,7 +9,7 @@ internal static class ChangeMessageJsonReader
         while (reader.Read())
         {
             if (!reader.PropertyName("op"u8)) continue;
-
+            
             reader.Read();
             if (reader.Value("mcm"u8))
                 market.ReadMarketChangeMessage(ref reader);

@@ -40,31 +40,31 @@ internal ref struct BetfairJsonReader
         {
             byte currentByte = _buffer[Position];
             // var c = (char)currentByte;
-
+            
             if (currentByte == ' ')
             {
                 Position++;
                 continue;
             }
-
+            
             if (currentByte == ',')
             {
                 Position++;
                 return true;
             }
-
+            
             TokenType = _tokenMap[currentByte];
             if (TokenType == JsonTokenType.None)
             {
                 ReadToEndOfValue(length);
                 return true;
             }
-
+            
             if (TokenType == JsonTokenType.String)
             {
                 ReadToEndOfString(length);
             }
-
+            
             Position++;
             return true;
         }
