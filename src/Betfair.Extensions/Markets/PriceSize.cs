@@ -1,6 +1,6 @@
 ﻿namespace Betfair.Extensions.Markets;
 
-public sealed class PriceSize
+public readonly struct PriceSize
 {
     internal PriceSize(double price, double size)
     {

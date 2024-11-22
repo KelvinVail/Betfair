@@ -27,6 +27,7 @@ public sealed class Price : ValueObject
         Chance = 1 / decimalOdds;
         MinimumSize = Math.Min(Math.Ceiling(10 / decimalOdds * 100) / 100, 1);
         IsValidPrice = _prices.ContainsKey(decimalOdds);
+        Index = (int)Math.Round(decimalOdds * 100);
     }
 
     /// <summary>
@@ -59,6 +60,8 @@ public sealed class Price : ValueObject
     /// Gets a value indicating whether the price is a valid price.
     /// </summary>
     public bool IsValidPrice { get; }
+
+    internal int Index { get; }
 
     /// <summary>
     /// Create a price object from a decimal odds value.

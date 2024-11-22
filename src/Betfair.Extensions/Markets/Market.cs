@@ -11,7 +11,7 @@ public sealed class Market : Entity<string>
 {
     private readonly Stopwatch _stopwatch = new ();
     private readonly ISubscription _subscription;
-    private readonly Dictionary<long, Runner> _runners = [];
+    private readonly Dictionary<long, RunnerCache> _runners = [];
 
     private Market(Credentials credentials, string id, ISubscription? subscription = null)
         : base(id)
@@ -63,7 +63,7 @@ public sealed class Market : Entity<string>
     /// <summary>
     /// Gets the runners in the market.
     /// </summary>
-    public IReadOnlyCollection<Runner> Runners => _runners.Values;
+    public IReadOnlyCollection<RunnerCache> Runners => _runners.Values;
 
     internal byte[] MarketIdUtf8 { get; private set; }
 
@@ -113,7 +113,7 @@ public sealed class Market : Entity<string>
             return;
         }
 
-        var runner = Runner.Create(id, status, adjustmentFactor);
+        var runner = RunnerCache.Create(id, status, adjustmentFactor);
         _runners[id] = runner;
     }
 
