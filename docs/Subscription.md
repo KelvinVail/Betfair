@@ -45,7 +45,7 @@ await subscription.SubscribeToOrders();
 ```
 The order stream can optionally by shaped and filtered using the [OrderFilter](/docs/OrderFilter.md).
 ```csharp
-var orderFilter = new DataFilter().WithStrategyRefs("myRef");
+var orderFilter = new OrderFilter().WithStrategyRefs("myRef");
 await subscription.SubscribeToOrders(orderFilter);
 ```
 
