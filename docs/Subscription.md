@@ -73,9 +73,9 @@ The implementation of handling change messages is left to the reader. This is so
 The StreamClient takes changes off of the underlying TCP connection as quickly as it can, holding any messages in a cache that are unconsumed by you. Be aware of this if you plan to perform any long running operations between handling each message.
 
 ## Unsubscribe from the stream
-To unsubscribe from the entire stream you must close or the subscription.
+To unsubscribe from the entire stream you must dispose of the subscription.
 ```csharp
-subscription.Close();
+subscription.Dispose();
 ```
-Once a Subscription is closed you can not reuse it.  
-You can not unsubscribe from components of your subscription. For example, if you are subscribed to two markets you can not unsubscribe from one and leave the other open. To stop the stream you must close it. 
+Once a Subscription is disposed of, you can not reuse it.
+You can not unsubscribe from components of your subscription. For example, if you are subscribed to two markets you can not unsubscribe from one and leave the other open. To stop the stream you must dispose of it. 
