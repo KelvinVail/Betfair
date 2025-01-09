@@ -4,7 +4,7 @@ namespace Betfair.Extensions.JsonReaders;
 
 internal static class ChangeMessageJsonReader
 {
-    internal static void ReadChangeMessage(this Market market, ref Utf8JsonReader reader)
+    internal static void ReadChangeMessage(this MarketCache market, ref Utf8JsonReader reader)
     {
         while (reader.Read())
         {

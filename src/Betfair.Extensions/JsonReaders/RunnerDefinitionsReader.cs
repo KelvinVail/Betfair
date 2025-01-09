@@ -4,7 +4,7 @@ namespace Betfair.Extensions.JsonReaders;
 
 internal static class RunnerDefinitionsReader
 {
-    internal static void ReadRunners(this Market market, ref Utf8JsonReader reader)
+    internal static void ReadRunners(this MarketCache market, ref Utf8JsonReader reader)
     {
         while (reader.Read())
         {

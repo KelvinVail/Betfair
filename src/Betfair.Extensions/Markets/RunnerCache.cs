@@ -15,9 +15,15 @@ public class RunnerCache : Entity<long>
 
     public double AdjustmentFactor { get; internal set; }
 
+    public double IfWin { get; private set; }
+
+    public double IfLose { get; private set; }
+
     public LevelLadderDictionary BestAvailableToBack { get; } = new ();
 
     public LevelLadderDictionary BestAvailableToLay { get; } = new ();
+
+    public PriceLadderDictionary TradedLadder { get; } = new ();
 
     internal static RunnerCache Create(long id, RunnerStatus status, double adjustmentFactor) =>
         new (id, status, adjustmentFactor);

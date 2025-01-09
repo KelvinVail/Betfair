@@ -9,7 +9,7 @@ internal static class MarketChangeReader
     private static readonly byte[] _marketDefinition = "marketDefinition"u8.ToArray();
     private static readonly byte[] _runnerChanges = "rc"u8.ToArray();
 
-    internal static void ReadMarketChange(this Market market, ref Utf8JsonReader reader, long publishTime)
+    internal static void ReadMarketChange(this MarketCache market, ref Utf8JsonReader reader, long publishTime)
     {
         var objectCount = 0;
         while (reader.Read())

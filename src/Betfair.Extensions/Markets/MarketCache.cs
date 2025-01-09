@@ -1,19 +1,18 @@
 ﻿using Betfair.Core.Login;
 using Betfair.Extensions.ByteReaders;
 using Betfair.Extensions.Contracts;
-using Betfair.Extensions.JsonReaders;
 using Betfair.Extensions.Markets.Enums;
 using Betfair.Stream.Messages;
 
 namespace Betfair.Extensions.Markets;
 
-public sealed class Market : Entity<string>
+public sealed class MarketCache : Entity<string>
 {
     private readonly Stopwatch _stopwatch = new ();
     private readonly ISubscription _subscription;
     private readonly Dictionary<long, RunnerCache> _runners = [];
 
-    private Market(Credentials credentials, string id, ISubscription? subscription = null)
+    private MarketCache(Credentials credentials, string id, ISubscription? subscription = null)
         : base(id)
     {
         _subscription = subscription ?? new MarketSubscription(credentials);
@@ -23,7 +22,7 @@ public sealed class Market : Entity<string>
     /// <summary>
     /// Gets or sets an action that is called when the market is updated.
     /// </summary>
-    public Action<Market> OnUpdate { get; set; } = _ => { };
+    public Action<MarketCache> OnUpdate { get; set; } = _ => { };
 
     /// <summary>
     /// Gets the time the market is scheduled to start.
@@ -74,15 +73,15 @@ public sealed class Market : Entity<string>
     /// <param name="marketId">The market marketId to subscribe to.</param>
     /// <param name="subscription">Optional: Use to stub out the subscription for testing.</param>
     /// <returns>A Market subscription.</returns>
-    public static Result<Market> Create(Credentials credentials, string marketId, ISubscription? subscription = null)
+    public static Result<MarketCache> Create(Credentials credentials, string marketId, ISubscription? subscription = null)
     {
         if (credentials == null)
-            return Result.Failure<Market>("Credentials must not be empty.");
+            return Result.Failure<MarketCache>("Credentials must not be empty.");
 
         var result = MarketIdIsValid(marketId);
         return result.IsFailure
-            ? Result.Failure<Market>(result.Error)
-            : new Market(credentials, marketId, subscription);
+            ? Result.Failure<MarketCache>(result.Error)
+            : new MarketCache(credentials, marketId, subscription);
     }
 
     /// <summary>
@@ -106,6 +105,12 @@ public sealed class Market : Entity<string>
 
     internal void AddOrUpdateRunnerDefinition(long id, RunnerStatus status, double adjustmentFactor)
     {
+        if (status == RunnerStatus.Removed)
+        {
+            _runners.Remove(id);
+            return;
+        }
+
         if (_runners.TryGetValue(id, out var existingRunner))
         {
             existingRunner.Status = status;
@@ -122,6 +127,9 @@ public sealed class Market : Entity<string>
 
     internal void UpdateBestAvailableToLay(long id, int level, double price, double size) =>
         _runners[id].BestAvailableToLay.Update(level, price, size);
+
+    internal void UpdateTradedLadder(long id, double price, double size) =>
+        _runners[id].TradedLadder.Update(price, size);
 
     private static Result MarketIdIsValid(string id)
     {

@@ -8,10 +8,10 @@ public class MarketDefinitionTests
 {
     private readonly Credentials _credentials = new ("username", "password", "appKey");
     private readonly SubscriptionMock _sub = new (Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-    private readonly Market _market;
+    private readonly MarketCache _market;
 
     public MarketDefinitionTests() =>
-        _market = Market.Create(_credentials, "1.235123059", _sub).Value;
+        _market = MarketCache.Create(_credentials, "1.235123059", _sub).Value;
 
     [Fact]
     public async Task MarketStartTimeIsSetFromTheInitialMarketDefinition()
@@ -24,7 +24,7 @@ public class MarketDefinitionTests
     [Fact]
     public async Task DoNotSetTheStartTimeIfMarketIdsDoNotMatch()
     {
-        var market = Market.Create(_credentials, "1.1", _sub).Value;
+        var market = MarketCache.Create(_credentials, "1.1", _sub).Value;
 
         await market.Subscribe();
 
@@ -43,7 +43,7 @@ public class MarketDefinitionTests
     public async Task SetMarketStatusWhenInactive()
     {
         var sub = new SubscriptionMock(Path.Combine("Data", "MarketDefinitions", "InitialImage_inactive.json"));
-        var market = Market.Create(_credentials, "1.235123059", sub).Value;
+        var market = MarketCache.Create(_credentials, "1.235123059", sub).Value;
         await market.Subscribe();
 
         market.Status.Should().Be(MarketStatus.Inactive);
@@ -53,7 +53,7 @@ public class MarketDefinitionTests
     public async Task SetMarketStatusWhenSuspended()
     {
         var sub = new SubscriptionMock(Path.Combine("Data", "MarketDefinitions", "InitialImage_suspended.json"));
-        var market = Market.Create(_credentials, "1.235123059", sub).Value;
+        var market = MarketCache.Create(_credentials, "1.235123059", sub).Value;
         await market.Subscribe();
 
         market.Status.Should().Be(MarketStatus.Suspended);
@@ -63,7 +63,7 @@ public class MarketDefinitionTests
     public async Task SetMarketStatusWhenClosed()
     {
         var sub = new SubscriptionMock(Path.Combine("Data", "MarketDefinitions", "InitialImage_closed.json"));
-        var market = Market.Create(_credentials, "1.235123059", sub).Value;
+        var market = MarketCache.Create(_credentials, "1.235123059", sub).Value;
         await market.Subscribe();
 
         market.Status.Should().Be(MarketStatus.Closed);

@@ -11,7 +11,7 @@ internal static class RunnerChangeReader
     private static readonly (int, double, double)[] _batlLevels = new (int, double, double)[9];
 
     internal static void ReadRunnerChange(
-        this Market market,
+        this MarketCache market,
         ref BetfairJsonReader reader)
     {
         long selectionId = 0;

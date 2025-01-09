@@ -9,7 +9,7 @@ namespace Betfair.Extensions.Tests.JsonReaders;
 public class BestAvailableReaderTests
 {
     private readonly byte[] _byteLine;
-    private readonly Market _market;
+    private readonly MarketCache _market;
 
     public BestAvailableReaderTests()
     {
@@ -19,7 +19,7 @@ public class BestAvailableReaderTests
         var cleanLine = line.Replace("\r", string.Empty, StringComparison.OrdinalIgnoreCase).Replace("\n", string.Empty, StringComparison.OrdinalIgnoreCase);
         _byteLine = Encoding.UTF8.GetBytes(cleanLine);
 
-        _market = Market.Create(new Credentials("u", "p", "k"), "1.235123059", new SubscriptionStub()).Value;
+        _market = MarketCache.Create(new Credentials("u", "p", "k"), "1.235123059", new SubscriptionStub()).Value;
 
         var options = new JsonReaderOptions
         {
@@ -36,7 +36,7 @@ public class BestAvailableReaderTests
     {
         var runner = _market.Runners.Single(x => x.Id == id);
 
-        var priceSize = new PriceSize(price, size);
-        runner.BestAvailableToBack[0].Should().BeEquivalentTo(priceSize);
+        runner.BestAvailableToBack[0].Price.Should().Be(price);
+        runner.BestAvailableToBack[0].Size.Should().Be(size);
     }
 }

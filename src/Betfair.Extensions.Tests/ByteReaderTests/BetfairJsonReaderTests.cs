@@ -25,7 +25,7 @@ public class BetfairJsonReaderTests
     [Fact]
     public void CanReadTheWholeMarket()
     {
-        var market = Market.Create(new Credentials("u", "p", "a"), "1.235123059", new SubscriptionStub()).Value;
+        var market = MarketCache.Create(new Credentials("u", "p", "a"), "1.235123059", new SubscriptionStub()).Value;
         var path = Path.Combine("Data", "messages.txt");
 
         var lineCount = 0;

@@ -7,7 +7,7 @@ namespace Betfair.Extensions.Tests.Markets;
 
 public class BestAvailableTests
 {
-    private readonly Market _market = Market.Create(new Credentials("u", "p", "k"), "1.235123059", new SubscriptionStub()).Value;
+    private readonly MarketCache _market = MarketCache.Create(new Credentials("u", "p", "k"), "1.235123059", new SubscriptionStub()).Value;
 
     [Theory]
     [InlineData(1, 0, 1.01, 9.99)]
@@ -23,16 +23,16 @@ public class BestAvailableTests
 
         _market.UpdateBestAvailableToBack(id, level, price, size);
 
-        var expected = new PriceSize(price, size);
         var runner = _market.Runners.Single(x => x.Id == id);
-        runner.BestAvailableToBack[level].Should().BeEquivalentTo(expected);
+        runner.BestAvailableToBack[level].Price.Should().Be(price);
+        runner.BestAvailableToBack[level].Size.Should().Be(size);
     }
 
     [Theory]
     [InlineData(1, 0, 1.01, 9.99)]
     [InlineData(2, 1, 3.5, 1.99)]
     [InlineData(9876543210, 10, 80, 3.24)]
-    public void BestAvailableToBackCanBeUpdate(
+    public void BestAvailableToBackCanBeUpdated(
         long id,
         int level,
         double price,
@@ -43,9 +43,9 @@ public class BestAvailableTests
 
         _market.UpdateBestAvailableToBack(id, level, price, size);
 
-        var expected = new PriceSize(price, size);
         var runner = _market.Runners.Single(x => x.Id == id);
-        runner.BestAvailableToBack[level].Should().BeEquivalentTo(expected);
+        runner.BestAvailableToBack[level].Price.Should().Be(price);
+        runner.BestAvailableToBack[level].Size.Should().Be(size);
     }
 
     [Theory]
@@ -62,16 +62,16 @@ public class BestAvailableTests
 
         _market.UpdateBestAvailableToLay(id, level, price, size);
 
-        var expected = new PriceSize(price, size);
         var runner = _market.Runners.Single(x => x.Id == id);
-        runner.BestAvailableToLay[level].Should().BeEquivalentTo(expected);
+        runner.BestAvailableToLay[level].Price.Should().Be(price);
+        runner.BestAvailableToLay[level].Size.Should().Be(size);
     }
 
     [Theory]
     [InlineData(1, 0, 1.01, 9.99)]
     [InlineData(2, 1, 3.5, 1.99)]
     [InlineData(9876543210, 10, 80, 3.24)]
-    public void BestAvailableToLayCanBeUpdate(
+    public void BestAvailableToLayCanBeUpdated(
         long id,
         int level,
         double price,
@@ -82,8 +82,8 @@ public class BestAvailableTests
 
         _market.UpdateBestAvailableToLay(id, level, price, size);
 
-        var expected = new PriceSize(price, size);
         var runner = _market.Runners.Single(x => x.Id == id);
-        runner.BestAvailableToLay[level].Should().BeEquivalentTo(expected);
+        runner.BestAvailableToLay[level].Price.Should().Be(price);
+        runner.BestAvailableToLay[level].Size.Should().Be(size);
     }
 }

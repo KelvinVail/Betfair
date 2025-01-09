@@ -18,7 +18,7 @@ internal static class MarketDefinitionReader
         [(byte)'I'] = MarketStatus.Inactive,
     };
 
-    internal static void ReadMarketDefinition(this Market market, ref Utf8JsonReader reader)
+    internal static void ReadMarketDefinition(this MarketCache market, ref Utf8JsonReader reader)
     {
         var objectCount = 0;
         while (reader.Read())

@@ -17,7 +17,7 @@ internal static class RunnerDefinitionReader
         [(byte)'H'] = RunnerStatus.Hidden,
     };
 
-    internal static void ReadRunner(this Market market, ref BetfairJsonReader reader)
+    internal static void ReadRunner(this MarketCache market, ref BetfairJsonReader reader)
     {
         long id = 0;
         double adjustmentFactor = 0;

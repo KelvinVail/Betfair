@@ -7,10 +7,10 @@ public class MarketChangeTests
 {
     private readonly Credentials _credentials = new ("username", "password", "appKey");
     private readonly SubscriptionMock _sub = new (Path.Combine("Data", "MarketDefinitions", "InitialImage.json"));
-    private readonly Market _market;
+    private readonly MarketCache _market;
 
     public MarketChangeTests() =>
-        _market = Market.Create(_credentials, "1.235123059", _sub).Value;
+        _market = MarketCache.Create(_credentials, "1.235123059", _sub).Value;
 
     [Fact]
     public async Task SetMarketTotalMatched()
@@ -31,7 +31,7 @@ public class MarketChangeTests
     [Fact]
     public async Task DoNotSetThePublishTimeIfMarketIdsDoNotMatch()
     {
-        var market = Market.Create(_credentials, "1.1", _sub).Value;
+        var market = MarketCache.Create(_credentials, "1.1", _sub).Value;
 
         await market.Subscribe();
 

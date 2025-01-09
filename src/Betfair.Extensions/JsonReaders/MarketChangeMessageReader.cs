@@ -8,7 +8,7 @@ internal static class MarketChangeMessageReader
     private static readonly byte[] _marketChange = "mc"u8.ToArray();
 
     internal static void ReadMarketChangeMessage(
-        this Market market,
+        this MarketCache market,
         ref Utf8JsonReader reader)
     {
         var objectCount = 0;
