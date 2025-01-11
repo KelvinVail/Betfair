@@ -2,6 +2,8 @@
 
 internal class OrderCache
 {
+    private readonly PriceLadderDictionary _matchedBacks = [];
+
     private OrderCache()
     {
     }
@@ -15,8 +17,10 @@ internal class OrderCache
 
     internal void UpdateMatchedBacks(double price, double size)
     {
-        IfWin = Math.Round((price * size) - size, 2);
-        IfLose = size;
+        _matchedBacks.Update(price, Math.Round((price * size) - size, 2));
+        IfLose = -size;
+
+        IfWin = _matchedBacks.Values.Sum();
     }
 
     internal void UpdateMatchedLays(double price, double size)
