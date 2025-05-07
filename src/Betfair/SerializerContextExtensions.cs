@@ -69,6 +69,9 @@ public static class SerializerContextExtensions
         { typeof(MarketProfitAndLoss), SerializerContext.Default.MarketProfitAndLoss },
         { typeof(IEnumerable<MarketProfitAndLoss>), SerializerContext.Default.IEnumerableMarketProfitAndLoss },
         { typeof(RunnerProfitAndLoss), SerializerContext.Default.RunnerProfitAndLoss },
+        { typeof(EventTypesRequest), SerializerContext.Default.EventTypesRequest },
+        { typeof(EventTypeResult), SerializerContext.Default.EventTypeResult },
+        { typeof(EventTypeResult[]), SerializerContext.Default.EventTypeResultArray },
     };
 
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)

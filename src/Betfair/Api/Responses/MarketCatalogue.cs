@@ -21,7 +21,7 @@ public sealed class MarketCatalogue
     public MarketEvent? Event { get; init; }
 
     [JsonPropertyName("eventType")]
-    public MarketEventType? EventType { get; init; }
+    public EventType? EventType { get; init; }
 
     [JsonPropertyName("description")]
     public MarketDescription? Description { get; init; }

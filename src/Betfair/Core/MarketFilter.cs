@@ -29,7 +29,7 @@ public abstract class MarketFilter<T>
     public T WithMarketTypes(params MarketType[] marketTypes) =>
         marketTypes is null ? This() : WithMarketTypes(marketTypes.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    /// <inheritdoc cref="MarketFilter{T}.WithMarketTypes"/>
+    /// <inheritdoc cref="MarketFilter{T}.WithMarketTypes(MarketType[])"/>
     public T WithMarketTypes(params string[] marketTypes)
     {
         if (marketTypes is null) return This();

@@ -33,6 +33,15 @@ public class BetfairApiClient : IDisposable
         _client = adapter;
     }
 
+    public virtual Task<EventTypeResult[]> EventTypes(
+        ApiMarketFilter? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        filter ??= new ApiMarketFilter();
+        var request = new EventTypesRequest { Filter = filter };
+        return _client.PostAsync<EventTypeResult[]>(new Uri($"{_betting}/listEventTypes/"), request, cancellationToken);
+    }
+
     public virtual Task<PlaceExecutionReport> PlaceOrders(
         PlaceOrders placeOrders,
         CancellationToken cancellationToken = default) =>

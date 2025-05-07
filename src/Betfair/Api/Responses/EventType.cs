@@ -1,6 +1,6 @@
 ﻿namespace Betfair.Api.Responses;
 
-public class MarketEventType
+public class EventType
 {
     [JsonPropertyName("id")]
     public string? Id { get; init; }
