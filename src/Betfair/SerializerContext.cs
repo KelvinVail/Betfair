@@ -97,6 +97,14 @@ namespace Betfair;
 [JsonSerializable(typeof(EventType))]
 [JsonSerializable(typeof(EventTypeResult))]
 [JsonSerializable(typeof(EventTypeResult[]))]
+
+// Events Requests
+[JsonSerializable(typeof(EventsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+
+// Events
+[JsonSerializable(typeof(Event))]
+[JsonSerializable(typeof(EventResult))]
+[JsonSerializable(typeof(EventResult[]))]
 internal partial class SerializerContext : JsonSerializerContext
 {
 }

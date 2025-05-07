@@ -1,0 +1,66 @@
+﻿using Betfair.Api;
+using Betfair.Api.Requests;
+using Betfair.Api.Responses;
+using Betfair.Tests.Api.TestDoubles;
+
+namespace Betfair.Tests.Api;
+
+public class EventTests : IDisposable
+{
+    private readonly HttpAdapterStub _client = new ();
+    private readonly BetfairApiClient _api;
+    private bool _disposedValue;
+
+    public EventTests()
+    {
+        _api = new BetfairApiClient(_client);
+        _client.RespondsWithBody = Array.Empty<EventResult>();
+    }
+
+    [Fact]
+    public async Task CallsTheCorrectEndpoint()
+    {
+        await _api.Events();
+
+        _client.LastUriCalled.Should().Be(
+            "https://api.betfair.com/exchange/betting/rest/v1.0/listEvents/");
+    }
+
+    [Fact]
+    public async Task PostsDefaultBodyIfFilterIsNull()
+    {
+        await _api.Events();
+
+        _client.LastContentSent.Should().BeEquivalentTo(
+            new EventsRequest());
+    }
+
+    [Fact]
+    public async Task RequestBodyShouldBeSerializable()
+    {
+        var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
+
+        await _api.Events(filter);
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.EventsRequest);
+
+        json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue) return;
+        if (disposing)
+        {
+            _client.Dispose();
+            _api.Dispose();
+        }
+
+        _disposedValue = true;
+    }
+}

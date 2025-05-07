@@ -72,6 +72,9 @@ public static class SerializerContextExtensions
         { typeof(EventTypesRequest), SerializerContext.Default.EventTypesRequest },
         { typeof(EventTypeResult), SerializerContext.Default.EventTypeResult },
         { typeof(EventTypeResult[]), SerializerContext.Default.EventTypeResultArray },
+        { typeof(EventsRequest), SerializerContext.Default.EventsRequest },
+        { typeof(EventResult), SerializerContext.Default.EventResult },
+        { typeof(EventResult[]), SerializerContext.Default.EventResultArray },
     };
 
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)

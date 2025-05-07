@@ -33,6 +33,12 @@ public class BetfairApiClient : IDisposable
         _client = adapter;
     }
 
+    /// <summary>
+    /// Returns a list of Event Types (i.e. Sports) associated with the markets selected by the MarketFilter.
+    /// </summary>
+    /// <param name="filter">The filter to select desired markets. All markets that match the criteria in the filter are selected.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>An array of <see cref="EventTypeResult"/>.</returns>
     public virtual Task<EventTypeResult[]> EventTypes(
         ApiMarketFilter? filter = null,
         CancellationToken cancellationToken = default)
@@ -40,6 +46,21 @@ public class BetfairApiClient : IDisposable
         filter ??= new ApiMarketFilter();
         var request = new EventTypesRequest { Filter = filter };
         return _client.PostAsync<EventTypeResult[]>(new Uri($"{_betting}/listEventTypes/"), request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Returns a list of Events (i.e, Reading vs. Man United) associated with the markets selected by the MarketFilter.
+    /// </summary>
+    /// <param name="filter">The filter to select desired markets. All markets that match the criteria in the filter are selected.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>An array of <see cref="EventResult"/>.</returns>
+    public virtual Task<EventResult[]> Events(
+        ApiMarketFilter? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        filter ??= new ApiMarketFilter();
+        var request = new EventsRequest { Filter = filter };
+        return _client.PostAsync<EventResult[]>(new Uri($"{_betting}/listEvents/"), request, cancellationToken);
     }
 
     public virtual Task<PlaceExecutionReport> PlaceOrders(
