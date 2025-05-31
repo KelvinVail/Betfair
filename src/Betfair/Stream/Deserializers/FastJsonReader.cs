@@ -1,4 +1,5 @@
 using System.Buffers.Text;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace Betfair.Stream.Deserializers;
@@ -100,55 +101,146 @@ internal ref struct FastJsonReader
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetInt32()
     {
-        if (TokenType == JsonTokenType.Number)
+        if (TokenType == JsonTokenType.Number && ValueSpan.Length > 0)
         {
-            Utf8Parser.TryParse(ValueSpan, out int value, out _);
-            return value;
+            // Ultra-fast integer parsing for common cases
+            var span = ValueSpan;
+            int result = 0;
+            int sign = 1;
+            int i = 0;
+
+            // Handle negative numbers
+            if (span[0] == (byte)'-')
+            {
+                sign = -1;
+                i = 1;
+            }
+
+            // Parse digits directly for maximum speed
+            for (; i < span.Length; i++)
+            {
+                byte b = span[i];
+                if (b >= (byte)'0' && b <= (byte)'9')
+                {
+                    result = result * 10 + (b - (byte)'0');
+                }
+                else
+                {
+                    break; // Non-digit character
+                }
+            }
+
+            return result * sign;
         }
         return 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public long GetInt64()
     {
-        if (TokenType == JsonTokenType.Number)
+        if (TokenType == JsonTokenType.Number && ValueSpan.Length > 0)
         {
-            Utf8Parser.TryParse(ValueSpan, out long value, out _);
-            return value;
+            // Ultra-fast long parsing for timestamps and IDs
+            var span = ValueSpan;
+            long result = 0;
+            long sign = 1;
+            int i = 0;
+
+            // Handle negative numbers
+            if (span[0] == (byte)'-')
+            {
+                sign = -1;
+                i = 1;
+            }
+
+            // Parse digits directly for maximum speed
+            for (; i < span.Length; i++)
+            {
+                byte b = span[i];
+                if (b >= (byte)'0' && b <= (byte)'9')
+                {
+                    result = result * 10 + (b - (byte)'0');
+                }
+                else
+                {
+                    break; // Non-digit character
+                }
+            }
+
+            return result * sign;
         }
         return 0;
     }
 
     public bool GetBoolean() => TokenType == JsonTokenType.True;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double GetDouble()
     {
-        if (TokenType == JsonTokenType.Number)
+        if (TokenType == JsonTokenType.Number && ValueSpan.Length > 0)
         {
-            // Try parsing as double first
+            // Ultra-fast double parsing optimized for Betfair data patterns
+            var span = ValueSpan;
+
+            // Check for simple integer case first (most common)
+            bool hasDecimal = false;
+            for (int i = 0; i < span.Length; i++)
+            {
+                if (span[i] == (byte)'.')
+                {
+                    hasDecimal = true;
+                    break;
+                }
+            }
+
+            if (!hasDecimal)
+            {
+                // Simple integer case - use fast int parsing
+                return GetInt64();
+            }
+
+            // Fall back to standard parsing for decimals
             if (Utf8Parser.TryParse(ValueSpan, out double doubleValue, out _))
                 return doubleValue;
-
-            // If that fails, try parsing as int and convert to double
-            if (Utf8Parser.TryParse(ValueSpan, out int intValue, out _))
-                return intValue;
         }
 
         return 0.0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double? GetNullableDouble()
     {
-        if (TokenType == JsonTokenType.Number)
+        if (TokenType == JsonTokenType.Null)
+            return null;
+
+        if (TokenType == JsonTokenType.Number && ValueSpan.Length > 0)
         {
-            // Try parsing as double first
+            // Ultra-fast double parsing optimized for Betfair data patterns
+            var span = ValueSpan;
+
+            // Check for simple integer case first (most common)
+            bool hasDecimal = false;
+            for (int i = 0; i < span.Length; i++)
+            {
+                if (span[i] == (byte)'.')
+                {
+                    hasDecimal = true;
+                    break;
+                }
+            }
+
+            if (!hasDecimal)
+            {
+                // Simple integer case - use fast int parsing
+                return GetInt64();
+            }
+
+            // Fall back to standard parsing for decimals
             if (Utf8Parser.TryParse(ValueSpan, out double doubleValue, out _))
                 return doubleValue;
-
-            // If that fails, try parsing as int and convert to double
-            if (Utf8Parser.TryParse(ValueSpan, out int intValue, out _))
-                return intValue;
         }
 
         return null;
