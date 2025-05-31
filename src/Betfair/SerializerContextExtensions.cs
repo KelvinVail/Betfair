@@ -1,7 +1,9 @@
 ﻿using Betfair.Api.Requests;
+using Betfair.Api.Requests.Account;
 using Betfair.Api.Requests.Markets;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Account;
 using Betfair.Api.Responses.Markets;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
@@ -75,6 +77,50 @@ public static class SerializerContextExtensions
         { typeof(EventsRequest), SerializerContext.Default.EventsRequest },
         { typeof(EventResult), SerializerContext.Default.EventResult },
         { typeof(EventResult[]), SerializerContext.Default.EventResultArray },
+
+        // New API endpoints
+        { typeof(CompetitionsRequest), SerializerContext.Default.CompetitionsRequest },
+        { typeof(CompetitionResult), SerializerContext.Default.CompetitionResult },
+        { typeof(CompetitionResult[]), SerializerContext.Default.CompetitionResultArray },
+        { typeof(CountriesRequest), SerializerContext.Default.CountriesRequest },
+        { typeof(CountryCodeResult), SerializerContext.Default.CountryCodeResult },
+        { typeof(CountryCodeResult[]), SerializerContext.Default.CountryCodeResultArray },
+        { typeof(MarketTypesRequest), SerializerContext.Default.MarketTypesRequest },
+        { typeof(MarketTypeResult), SerializerContext.Default.MarketTypeResult },
+        { typeof(MarketTypeResult[]), SerializerContext.Default.MarketTypeResultArray },
+        { typeof(TimeRangesRequest), SerializerContext.Default.TimeRangesRequest },
+        { typeof(TimeRangeResult), SerializerContext.Default.TimeRangeResult },
+        { typeof(TimeRangeResult[]), SerializerContext.Default.TimeRangeResultArray },
+        { typeof(VenuesRequest), SerializerContext.Default.VenuesRequest },
+        { typeof(VenueResult), SerializerContext.Default.VenueResult },
+        { typeof(VenueResult[]), SerializerContext.Default.VenueResultArray },
+        { typeof(CurrentOrdersRequest), SerializerContext.Default.CurrentOrdersRequest },
+        { typeof(CurrentOrderSummaryReport), SerializerContext.Default.CurrentOrderSummaryReport },
+        { typeof(CurrentOrder), SerializerContext.Default.CurrentOrder },
+        { typeof(PriceSize), SerializerContext.Default.PriceSize },
+        { typeof(ClearedOrdersRequest), SerializerContext.Default.ClearedOrdersRequest },
+        { typeof(ClearedOrderSummaryReport), SerializerContext.Default.ClearedOrderSummaryReport },
+        { typeof(ClearedOrder), SerializerContext.Default.ClearedOrder },
+        { typeof(ItemDescription), SerializerContext.Default.ItemDescription },
+        { typeof(PriceProjection), SerializerContext.Default.PriceProjection },
+        { typeof(ExBestOffersOverrides), SerializerContext.Default.ExBestOffersOverrides },
+        { typeof(RunnerBookRequest), SerializerContext.Default.RunnerBookRequest },
+        { typeof(MarketBook[]), SerializerContext.Default.MarketBookArray },
+
+        // Account API
+        { typeof(AccountFundsRequest), SerializerContext.Default.AccountFundsRequest },
+        { typeof(AccountFundsResponse), SerializerContext.Default.AccountFundsResponse },
+        { typeof(AccountDetailsRequest), SerializerContext.Default.AccountDetailsRequest },
+        { typeof(AccountDetailsResponse), SerializerContext.Default.AccountDetailsResponse },
+        { typeof(AccountStatementRequest), SerializerContext.Default.AccountStatementRequest },
+        { typeof(AccountStatementReport), SerializerContext.Default.AccountStatementReport },
+        { typeof(StatementItem), SerializerContext.Default.StatementItem },
+        { typeof(StatementLegacyData), SerializerContext.Default.StatementLegacyData },
+        { typeof(CurrencyRatesRequest), SerializerContext.Default.CurrencyRatesRequest },
+        { typeof(CurrencyRate), SerializerContext.Default.CurrencyRate },
+        { typeof(CurrencyRate[]), SerializerContext.Default.CurrencyRateArray },
+        { typeof(TransferFundsRequest), SerializerContext.Default.TransferFundsRequest },
+        { typeof(TransferResponse), SerializerContext.Default.TransferResponse },
     };
 
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)

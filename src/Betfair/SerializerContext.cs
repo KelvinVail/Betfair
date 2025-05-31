@@ -1,7 +1,9 @@
 ﻿using Betfair.Api.Requests;
+using Betfair.Api.Requests.Account;
 using Betfair.Api.Requests.Markets;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Account;
 using Betfair.Api.Responses.Markets;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
@@ -105,6 +107,64 @@ namespace Betfair;
 [JsonSerializable(typeof(Event))]
 [JsonSerializable(typeof(EventResult))]
 [JsonSerializable(typeof(EventResult[]))]
+
+// Competitions
+[JsonSerializable(typeof(CompetitionsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(CompetitionResult))]
+[JsonSerializable(typeof(CompetitionResult[]))]
+
+// Countries
+[JsonSerializable(typeof(CountriesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(CountryCodeResult))]
+[JsonSerializable(typeof(CountryCodeResult[]))]
+
+// Market Types
+[JsonSerializable(typeof(MarketTypesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketTypeResult))]
+[JsonSerializable(typeof(MarketTypeResult[]))]
+
+// Time Ranges
+[JsonSerializable(typeof(TimeRangesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(TimeRangeResult))]
+[JsonSerializable(typeof(TimeRangeResult[]))]
+
+// Venues
+[JsonSerializable(typeof(VenuesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(VenueResult))]
+[JsonSerializable(typeof(VenueResult[]))]
+
+// Current Orders
+[JsonSerializable(typeof(CurrentOrdersRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(CurrentOrderSummaryReport))]
+[JsonSerializable(typeof(CurrentOrder))]
+[JsonSerializable(typeof(PriceSize))]
+
+// Cleared Orders
+[JsonSerializable(typeof(ClearedOrdersRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(ClearedOrderSummaryReport))]
+[JsonSerializable(typeof(ClearedOrder))]
+[JsonSerializable(typeof(ItemDescription))]
+
+// Market Book
+[JsonSerializable(typeof(PriceProjection), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(ExBestOffersOverrides), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(RunnerBookRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketBook[]))]
+
+// Account API
+[JsonSerializable(typeof(AccountFundsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(AccountFundsResponse))]
+[JsonSerializable(typeof(AccountDetailsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(AccountDetailsResponse))]
+[JsonSerializable(typeof(AccountStatementRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(AccountStatementReport))]
+[JsonSerializable(typeof(StatementItem))]
+[JsonSerializable(typeof(StatementLegacyData))]
+[JsonSerializable(typeof(CurrencyRatesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(CurrencyRate))]
+[JsonSerializable(typeof(CurrencyRate[]))]
+[JsonSerializable(typeof(TransferFundsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(TransferResponse))]
 internal partial class SerializerContext : JsonSerializerContext
 {
 }

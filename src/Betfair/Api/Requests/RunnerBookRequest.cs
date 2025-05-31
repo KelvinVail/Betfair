@@ -1,9 +1,15 @@
-﻿namespace Betfair.Api.Requests;
+﻿﻿namespace Betfair.Api.Requests;
 
-internal class MarketBookRequest
+internal class RunnerBookRequest
 {
-    [JsonPropertyName("marketIds")]
-    public List<string>? MarketIds { get; set; }
+    [JsonPropertyName("marketId")]
+    public string? MarketId { get; set; }
+
+    [JsonPropertyName("selectionId")]
+    public long SelectionId { get; set; }
+
+    [JsonPropertyName("handicap")]
+    public double? Handicap { get; set; }
 
     [JsonPropertyName("priceProjection")]
     public PriceProjection? PriceProjection { get; set; }
