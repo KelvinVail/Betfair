@@ -1,25 +1,28 @@
-﻿using System.Buffers.Text;
+using System.Buffers.Text;
+using System.Text.Json;
 
-namespace Betfair.Extensions.ByteReaders;
+namespace Betfair.Stream.Deserializers;
 
-internal ref struct BetfairJsonReader
+/// <summary>
+/// Fast JSON reader optimized for Betfair stream data parsing.
+/// </summary>
+internal ref struct FastJsonReader
 {
     private static readonly JsonTokenType[] _tokenMap = new JsonTokenType[256];
     private readonly ReadOnlySpan<byte> _buffer;
     private int _lastValueStart;
     private int _lastValueEnd;
 
-    static BetfairJsonReader()
+    static FastJsonReader()
     {
         _tokenMap['{'] = JsonTokenType.StartObject;
         _tokenMap['}'] = JsonTokenType.EndObject;
         _tokenMap['['] = JsonTokenType.StartArray;
         _tokenMap[']'] = JsonTokenType.EndArray;
-        _tokenMap['\"'] = JsonTokenType.String;
-        _tokenMap[':'] = JsonTokenType.PropertyName;
+        _tokenMap['"'] = JsonTokenType.String;
     }
 
-    public BetfairJsonReader(ReadOnlySpan<byte> data)
+    public FastJsonReader(ReadOnlySpan<byte> data)
     {
         _buffer = data;
         Position = 0;
@@ -36,40 +39,44 @@ internal ref struct BetfairJsonReader
     {
         int length = _buffer.Length;
         TokenType = JsonTokenType.None;
-        while (Position < length)
+
+        // Skip whitespace
+        while (Position < length && (_buffer[Position] == ' ' || _buffer[Position] == '\t' || _buffer[Position] == '\r' || _buffer[Position] == '\n'))
         {
-            byte currentByte = _buffer[Position];
-            // var c = (char)currentByte;
-            
-            if (currentByte == ' ')
-            {
-                Position++;
-                continue;
-            }
-            
-            if (currentByte == ',')
-            {
-                Position++;
-                return true;
-            }
-            
-            TokenType = _tokenMap[currentByte];
-            if (TokenType == JsonTokenType.None)
-            {
-                ReadToEndOfValue(length);
-                return true;
-            }
-            
-            if (TokenType == JsonTokenType.String)
-            {
-                ReadToEndOfString(length);
-            }
-            
+            Position++;
+        }
+
+        if (Position >= length)
+            return false;
+
+        byte currentByte = _buffer[Position];
+
+        // Skip commas and colons
+        if (currentByte == ',' || currentByte == ':')
+        {
+            Position++;
+            return Read(); // Recursively read the next token
+        }
+
+        TokenType = _tokenMap[currentByte];
+
+        if (TokenType == JsonTokenType.String)
+        {
+            ReadToEndOfString(length);
+            Position++; // Move past the closing quote
+            return true;
+        }
+        else if (TokenType != JsonTokenType.None)
+        {
             Position++;
             return true;
         }
-
-        return false;
+        else
+        {
+            // This is a value (number, boolean, null)
+            ReadToEndOfValue(length);
+            return true;
+        }
     }
 
     public int GetInt32()
@@ -81,19 +88,6 @@ internal ref struct BetfairJsonReader
     public long GetInt64()
     {
         Utf8Parser.TryParse(ValueSpan, out long value, out _);
-        return value;
-    }
-
-    public DateTimeOffset GetDateTimeOffset()
-    {
-        var trailingBytes = "0000"u8.ToArray();
-        var newLength = (_lastValueEnd - _lastValueStart) + 3;
-        byte[] result = new byte[newLength];
-        var span = _buffer.Slice(_lastValueStart, _lastValueEnd - _lastValueStart - 1);
-        span.CopyTo(result);
-        trailingBytes.CopyTo(result.AsSpan(span.Length));
-
-        Utf8Parser.TryParse(result, out DateTimeOffset value, out _, 'O');
         return value;
     }
 
@@ -139,25 +133,36 @@ internal ref struct BetfairJsonReader
     private void ReadToEndOfString(int length)
     {
         _lastValueStart = Position + 1;
-        while (++Position < length)
+        Position++;
+        
+        while (Position < length)
         {
-            if (_buffer[Position] != '\"') continue;
-
-            _lastValueEnd = Position;
-            return;
+            if (_buffer[Position] == '"')
+            {
+                _lastValueEnd = Position;
+                return;
+            }
+            Position++;
         }
+        
+        _lastValueEnd = Position;
     }
 
     private void ReadToEndOfValue(int length)
     {
         _lastValueStart = Position;
-        while (++Position < length)
+        
+        while (Position < length)
         {
-            var b = _buffer[Position];
-            if (b != ',' && _tokenMap[b] == JsonTokenType.None) continue;
-
-            _lastValueEnd = Position;
-            return;
+            byte currentByte = _buffer[Position];
+            if (currentByte == ',' || currentByte == '}' || currentByte == ']' || currentByte == ' ')
+            {
+                _lastValueEnd = Position;
+                return;
+            }
+            Position++;
         }
+        
+        _lastValueEnd = Position;
     }
 }
