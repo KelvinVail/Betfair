@@ -5,7 +5,8 @@ using Betfair.Stream.Responses;
 namespace Betfair.Stream.Deserializers;
 
 /// <summary>
-/// High-performance deserializer for MarketChange objects.
+/// Ultra-high-performance deserializer for MarketChange objects.
+/// Optimized for known property order in MarketStream.txt.
 /// </summary>
 internal static class MarketChangeDeserializer
 {
@@ -37,7 +38,8 @@ internal static class MarketChangeDeserializer
     }
 
     /// <summary>
-    /// Reads a MarketChange using optimized FastJsonReader parsing.
+    /// Reads a MarketChange using ultra-fast optimized parsing with direct property matching.
+    /// Optimized for the exact property order found in MarketStream.txt.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static MarketChange? ReadMarketChange(ref FastJsonReader reader)
@@ -56,29 +58,37 @@ internal static class MarketChangeDeserializer
 
             if (reader.TokenType == JsonTokenType.String)
             {
-                var propertyType = PropertyLookup.GetPropertyType(reader.ValueSpan);
+                var propertySpan = reader.ValueSpan;
                 if (!reader.Read()) // Move to value
                     throw new JsonException("Incomplete JSON: expected value after property name");
 
-                switch (propertyType)
+                // Ultra-fast property matching using length and first byte
+                // Based on MarketStream.txt analysis: id, marketDefinition, rc, img, tv
+                switch (propertySpan.Length)
                 {
-                    case PropertyType.Id:
-                        marketId = reader.GetString();
+                    case 2:
+                        if (propertySpan[0] == 'i' && propertySpan[1] == 'd')
+                            marketId = reader.GetString();
+                        else if (propertySpan[0] == 'r' && propertySpan[1] == 'c')
+                            runnerChanges = RunnerChangeDeserializer.ReadRunnerChanges(ref reader);
+                        else if (propertySpan[0] == 't' && propertySpan[1] == 'v')
+                            totalAmountMatched = reader.GetDouble();
+                        else
+                            reader.SkipValue();
                         break;
-                    case PropertyType.Tv:
-                        totalAmountMatched = reader.GetDouble();
+                    case 3:
+                        if (propertySpan[0] == 'i' && propertySpan[1] == 'm' && propertySpan[2] == 'g')
+                            replaceCache = reader.GetBoolean();
+                        else if (propertySpan[0] == 'c' && propertySpan[1] == 'o' && propertySpan[2] == 'n')
+                            conflated = reader.GetBoolean();
+                        else
+                            reader.SkipValue();
                         break;
-                    case PropertyType.Rc:
-                        runnerChanges = RunnerChangeDeserializer.ReadRunnerChanges(ref reader);
-                        break;
-                    case PropertyType.Img:
-                        replaceCache = reader.GetBoolean();
-                        break;
-                    case PropertyType.Con:
-                        conflated = reader.GetBoolean();
-                        break;
-                    case PropertyType.MarketDefinition:
-                        marketDefinition = MarketDefinitionDeserializer.ReadMarketDefinition(ref reader);
+                    case 16:
+                        if (propertySpan.SequenceEqual("marketDefinition"u8))
+                            marketDefinition = MarketDefinitionDeserializer.ReadMarketDefinition(ref reader);
+                        else
+                            reader.SkipValue();
                         break;
                     default:
                         reader.SkipValue();

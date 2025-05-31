@@ -41,18 +41,18 @@ public class JsonReadBenchmarks
     //     }
     // }
     //
-    // [Benchmark(Baseline = true)]
-    // public void ReadAllBytes()
-    // {
-    //     long count = 0;
-    //     foreach (var line in _byteLines)
-    //     {
-    //         foreach (var b in line)
-    //         {
-    //             count++;
-    //         }
-    //     }
-    // }
+    //[Benchmark(Baseline = true)]
+    //public void ReadAllBytes()
+    //{
+    //    long count = 0;
+    //    foreach (var line in _byteLines)
+    //    {
+    //        foreach (var b in line)
+    //        {
+    //            count++;
+    //        }
+    //    }
+    //}
     //
     // [Benchmark]
     // public void ReadAllLinesWithJsonDocument()
@@ -67,7 +67,7 @@ public class JsonReadBenchmarks
     //     }
     // }
     //
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public void ReadAllLinesWithUtf8Json()
     {
         foreach (var line in _byteLines)

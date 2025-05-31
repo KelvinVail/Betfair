@@ -5,7 +5,8 @@ using Betfair.Stream.Responses;
 namespace Betfair.Stream.Deserializers;
 
 /// <summary>
-/// High-performance deserializer for RunnerChange objects.
+/// Ultra-high-performance deserializer for RunnerChange objects.
+/// Optimized for known property order in MarketStream.txt.
 /// </summary>
 internal static class RunnerChangeDeserializer
 {
@@ -66,56 +67,59 @@ internal static class RunnerChangeDeserializer
 
             if (reader.TokenType == JsonTokenType.String)
             {
-                var propertyType = PropertyLookup.GetPropertyType(reader.ValueSpan);
+                var propertySpan = reader.ValueSpan;
                 if (!reader.Read()) // Move to value
                     throw new JsonException("Incomplete JSON: expected value after property name");
 
-                switch (propertyType)
+                // Ultra-fast property matching using length and first byte
+                // Based on MarketStream.txt analysis: atb, atl, trd, batb, batl, ltp, tv, id
+                switch (propertySpan.Length)
                 {
-                    case PropertyType.Id:
-                        selectionId = reader.GetInt64();
+                    case 2:
+                        if (propertySpan[0] == 'i' && propertySpan[1] == 'd')
+                            selectionId = reader.GetInt64();
+                        else if (propertySpan[0] == 't' && propertySpan[1] == 'v')
+                            totalMatched = reader.GetDouble();
+                        else if (propertySpan[0] == 'h' && propertySpan[1] == 'c')
+                            handicap = reader.GetDouble();
+                        else
+                            reader.SkipValue();
                         break;
-                    case PropertyType.Tv:
-                        totalMatched = reader.GetDouble();
+                    case 3:
+                        if (propertySpan[0] == 'a' && propertySpan[1] == 't' && propertySpan[2] == 'b')
+                            availableToBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else if (propertySpan[0] == 'a' && propertySpan[1] == 't' && propertySpan[2] == 'l')
+                            availableToLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else if (propertySpan[0] == 't' && propertySpan[1] == 'r' && propertySpan[2] == 'd')
+                            traded = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else if (propertySpan[0] == 'l' && propertySpan[1] == 't' && propertySpan[2] == 'p')
+                            lastTradedPrice = reader.GetDouble();
+                        else if (propertySpan[0] == 's' && propertySpan[1] == 'p' && propertySpan[2] == 'f')
+                            startingPriceFar = reader.GetDouble();
+                        else if (propertySpan[0] == 's' && propertySpan[1] == 'p' && propertySpan[2] == 'n')
+                            startingPriceNear = reader.GetDouble();
+                        else if (propertySpan[0] == 's' && propertySpan[1] == 'p' && propertySpan[2] == 'b')
+                            startingPriceBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else if (propertySpan[0] == 's' && propertySpan[1] == 'p' && propertySpan[2] == 'l')
+                            startingPriceLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else
+                            reader.SkipValue();
                         break;
-                    case PropertyType.Ltp:
-                        lastTradedPrice = reader.GetDouble();
+                    case 4:
+                        if (propertySpan.SequenceEqual("batb"u8))
+                            bestAvailableToBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else if (propertySpan.SequenceEqual("batl"u8))
+                            bestAvailableToLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else
+                            reader.SkipValue();
                         break;
-                    case PropertyType.Spf:
-                        startingPriceFar = reader.GetDouble();
-                        break;
-                    case PropertyType.Spn:
-                        startingPriceNear = reader.GetDouble();
-                        break;
-                    case PropertyType.Hc:
-                        handicap = reader.GetDouble();
-                        break;
-                    case PropertyType.Batb:
-                        bestAvailableToBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Spb:
-                        startingPriceBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Bdatl:
-                        bestDisplayAvailableToLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Trd:
-                        traded = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Atb:
-                        availableToBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Spl:
-                        startingPriceLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Atl:
-                        availableToLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Batl:
-                        bestAvailableToLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
-                        break;
-                    case PropertyType.Bdatb:
-                        bestDisplayAvailableToBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                    case 5:
+                        if (propertySpan.SequenceEqual("bdatb"u8))
+                            bestDisplayAvailableToBack = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else if (propertySpan.SequenceEqual("bdatl"u8))
+                            bestDisplayAvailableToLay = DoubleArrayDeserializer.ReadDoubleArrays(ref reader);
+                        else
+                            reader.SkipValue();
                         break;
                     default:
                         reader.SkipValue();
