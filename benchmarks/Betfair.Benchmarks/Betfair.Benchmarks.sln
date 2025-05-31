@@ -5,11 +5,7 @@ VisualStudioVersion = 17.10.35201.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betfair.Benchmarks", "Betfair.Benchmarks\Betfair.Benchmarks.csproj", "{A175BD98-185C-4065-9DD0-C485AEFAF700}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions", "..\..\src\Betfair.Extensions\Betfair.Extensions.csproj", "{73CB90D6-A1FA-4C58-9C16-1AD5195223FE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair", "..\..\src\Betfair\Betfair.csproj", "{00CADB93-1590-444F-8264-905A365E6EB5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betfair.Extensions.Tests", "..\..\src\Betfair.Extensions.Tests\Betfair.Extensions.Tests.csproj", "{28C57ABF-FBF0-4E27-B1B1-2A4865AD38B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,18 +17,10 @@ Global
 		{A175BD98-185C-4065-9DD0-C485AEFAF700}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A175BD98-185C-4065-9DD0-C485AEFAF700}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A175BD98-185C-4065-9DD0-C485AEFAF700}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73CB90D6-A1FA-4C58-9C16-1AD5195223FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73CB90D6-A1FA-4C58-9C16-1AD5195223FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73CB90D6-A1FA-4C58-9C16-1AD5195223FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73CB90D6-A1FA-4C58-9C16-1AD5195223FE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{00CADB93-1590-444F-8264-905A365E6EB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{00CADB93-1590-444F-8264-905A365E6EB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00CADB93-1590-444F-8264-905A365E6EB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00CADB93-1590-444F-8264-905A365E6EB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{28C57ABF-FBF0-4E27-B1B1-2A4865AD38B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{28C57ABF-FBF0-4E27-B1B1-2A4865AD38B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{28C57ABF-FBF0-4E27-B1B1-2A4865AD38B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{28C57ABF-FBF0-4E27-B1B1-2A4865AD38B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

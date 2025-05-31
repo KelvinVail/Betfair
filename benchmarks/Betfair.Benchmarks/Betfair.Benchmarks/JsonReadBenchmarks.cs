@@ -1,10 +1,4 @@
 ﻿using System.Text;
-using System.Text.Json;
-using Betfair.Benchmarks.Mocks;
-using Betfair.Core.Login;
-using Betfair.Extensions.ByteReaders;
-using Betfair.Extensions.JsonReaders;
-using Betfair.Extensions.Markets;
 using Betfair.Stream.Deserializers;
 using Betfair.Stream.Responses;
 using Utf8Json.Resolvers;
@@ -16,8 +10,6 @@ namespace Betfair.Benchmarks;
 public class JsonReadBenchmarks
 {
     private readonly List<byte[]> _byteLines = [];
-    private readonly Credentials _credentials = new ("username", "password", "appKey");
-    private readonly SubscriptionStub _sub = new (Path.Combine("Data", "messages.txt"));
 
     [GlobalSetup]
     public void Setup()
