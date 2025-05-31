@@ -75,33 +75,116 @@ internal ref struct FastJsonReader
         {
             // This is a value (number, boolean, null)
             ReadToEndOfValue(length);
+
+            // Determine the actual token type based on the value
+            if (ValueSpan.Length > 0)
+            {
+                byte firstByte = ValueSpan[0];
+                if (firstByte == 't' || firstByte == 'f')
+                {
+                    TokenType = firstByte == 't' ? JsonTokenType.True : JsonTokenType.False;
+                }
+                else if (firstByte == 'n')
+                {
+                    TokenType = JsonTokenType.Null;
+                }
+                else
+                {
+                    TokenType = JsonTokenType.Number;
+                }
+            }
+            else
+            {
+                TokenType = JsonTokenType.Number;
+            }
+
             return true;
         }
     }
 
     public int GetInt32()
     {
-        Utf8Parser.TryParse(ValueSpan, out int value, out _);
-        return value;
+        if (TokenType == JsonTokenType.Number)
+        {
+            Utf8Parser.TryParse(ValueSpan, out int value, out _);
+            return value;
+        }
+        return 0;
     }
 
     public long GetInt64()
     {
-        Utf8Parser.TryParse(ValueSpan, out long value, out _);
-        return value;
+        if (TokenType == JsonTokenType.Number)
+        {
+            Utf8Parser.TryParse(ValueSpan, out long value, out _);
+            return value;
+        }
+        return 0;
     }
 
-    public bool GetBoolean() => ValueSpan[0] == 't';
+    public bool GetBoolean() => TokenType == JsonTokenType.True;
 
     public double GetDouble()
     {
-        Utf8Parser.TryParse(ValueSpan, out double value, out _);
-        return value;
+        if (TokenType == JsonTokenType.Number)
+        {
+            // Try parsing as double first
+            if (Utf8Parser.TryParse(ValueSpan, out double doubleValue, out _))
+                return doubleValue;
+
+            // If that fails, try parsing as int and convert to double
+            if (Utf8Parser.TryParse(ValueSpan, out int intValue, out _))
+                return intValue;
+        }
+
+        return 0.0;
+    }
+
+    public double? GetNullableDouble()
+    {
+        if (TokenType == JsonTokenType.Number)
+        {
+            // Try parsing as double first
+            if (Utf8Parser.TryParse(ValueSpan, out double doubleValue, out _))
+                return doubleValue;
+
+            // If that fails, try parsing as int and convert to double
+            if (Utf8Parser.TryParse(ValueSpan, out int intValue, out _))
+                return intValue;
+        }
+
+        return null;
     }
 
     public string GetString()
     {
-        return System.Text.Encoding.UTF8.GetString(ValueSpan);
+        if (TokenType == JsonTokenType.String)
+            return System.Text.Encoding.UTF8.GetString(ValueSpan);
+        if (TokenType == JsonTokenType.Null)
+            return null;
+        return string.Empty;
+    }
+
+    public DateTime GetDateTime()
+    {
+        if (TokenType == JsonTokenType.String)
+        {
+            var str = System.Text.Encoding.UTF8.GetString(ValueSpan);
+            if (DateTime.TryParse(str, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime value))
+                return value;
+        }
+        return default;
+    }
+
+    public DateTime? GetNullableDateTime()
+    {
+        if (TokenType == JsonTokenType.String)
+        {
+            var str = System.Text.Encoding.UTF8.GetString(ValueSpan);
+            if (DateTime.TryParse(str, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime value))
+                return value;
+        }
+        return null;
     }
 
     public void SkipValue()

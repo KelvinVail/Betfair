@@ -1,30 +1,664 @@
+using System.Buffers;
+using System.Buffers.Text;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Betfair.Stream.Responses;
 
 namespace Betfair.Stream.Deserializers;
 
-internal sealed class BetfairStreamDeserializer
+public sealed class BetfairStreamDeserializer
 {
-    private static readonly byte[] _opProperty = "op"u8.ToArray();
-    private static readonly byte[] _idProperty = "id"u8.ToArray();
-    private static readonly byte[] _initialClkProperty = "initialClk"u8.ToArray();
-    private static readonly byte[] _clkProperty = "clk"u8.ToArray();
-    private static readonly byte[] _ptProperty = "pt"u8.ToArray();
-    private static readonly byte[] _ctProperty = "ct"u8.ToArray();
-    private static readonly byte[] _mcProperty = "mc"u8.ToArray();
-    private static readonly byte[] _ocProperty = "oc"u8.ToArray();
-    private static readonly byte[] _statusCodeProperty = "statusCode"u8.ToArray();
-    private static readonly byte[] _errorCodeProperty = "errorCode"u8.ToArray();
-    private static readonly byte[] _connectionIdProperty = "connectionId"u8.ToArray();
-    private static readonly byte[] _connectionClosedProperty = "connectionClosed"u8.ToArray();
-    private static readonly byte[] _connectionsAvailableProperty = "connectionsAvailable"u8.ToArray();
-    private static readonly byte[] _conflateProperty = "conflateMs"u8.ToArray();
-    private static readonly byte[] _heartbeatProperty = "heartbeatMs"u8.ToArray();
-    private static readonly byte[] _segmentTypeProperty = "segmentType"u8.ToArray();
+    // Object pools for reducing GC pressure
+    private static readonly ConcurrentQueue<List<MarketChange>> _marketChangeListPool = new();
+    private static readonly ConcurrentQueue<List<OrderChange>> _orderChangeListPool = new();
+    private static readonly ConcurrentQueue<List<RunnerChange>> _runnerChangeListPool = new();
+    private static readonly ConcurrentQueue<List<List<double>>> _doubleArrayListPool = new();
+    private static readonly ConcurrentQueue<List<double>> _doubleListPool = new();
+    private static readonly ConcurrentQueue<List<string>> _stringListPool = new();
+    private static readonly ConcurrentQueue<List<RunnerDefinition>> _runnerDefinitionListPool = new();
 
-    private static readonly byte[] _marketDefinitionProperty = "marketDefinition"u8.ToArray();
+    /// <summary>
+    /// High-performance JSON reader optimized for Betfair stream data parsing.
+    /// Reads bytes directly from streams to minimize GC pressure and maximize speed.
+    /// </summary>
+    private ref struct FastJsonReader
+    {
+        private readonly ReadOnlySpan<byte> _buffer;
+        private int _lastValueStart;
+        private int _lastValueEnd;
+
+        public FastJsonReader(ReadOnlySpan<byte> data)
+        {
+            _buffer = data;
+            Position = 0;
+            TokenType = JsonTokenType.None;
+            _lastValueStart = 0;
+            _lastValueEnd = 0;
+
+            // Validate that we have valid JSON structure
+            if (data.Length == 0)
+                throw new JsonException("Empty JSON");
+        }
+
+        public int Position { get; private set; }
+        public JsonTokenType TokenType { get; private set; }
+        public ReadOnlySpan<byte> ValueSpan => _buffer[_lastValueStart.._lastValueEnd];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Read()
+        {
+            // Skip whitespace
+            SkipWhitespace();
+
+            if (Position >= _buffer.Length)
+                return false;
+
+            byte currentByte = _buffer[Position];
+
+            switch (currentByte)
+            {
+                case (byte)'{':
+                    TokenType = JsonTokenType.StartObject;
+                    Position++;
+                    return true;
+                case (byte)'}':
+                    TokenType = JsonTokenType.EndObject;
+                    Position++;
+                    return true;
+                case (byte)'[':
+                    TokenType = JsonTokenType.StartArray;
+                    Position++;
+                    return true;
+                case (byte)']':
+                    TokenType = JsonTokenType.EndArray;
+                    Position++;
+                    return true;
+                case (byte)'"':
+                    return ReadString();
+                case (byte)',':
+                    Position++;
+                    return Read(); // Skip comma and read next token
+                case (byte)':':
+                    Position++;
+                    return Read(); // Skip colon and read next token
+                case (byte)'t':
+                case (byte)'f':
+                    return ReadBoolean();
+                case (byte)'n':
+                    return ReadNull();
+                default:
+                    if (IsDigit(currentByte) || currentByte == (byte)'-')
+                        return ReadNumber();
+
+                    throw new JsonException($"Unexpected character: {(char)currentByte}");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Skip()
+        {
+            if (TokenType == JsonTokenType.StartObject)
+            {
+                int depth = 1;
+                while (depth > 0 && Read())
+                {
+                    if (TokenType == JsonTokenType.StartObject)
+                        depth++;
+                    else if (TokenType == JsonTokenType.EndObject)
+                        depth--;
+                }
+            }
+            else if (TokenType == JsonTokenType.StartArray)
+            {
+                int depth = 1;
+                while (depth > 0 && Read())
+                {
+                    if (TokenType == JsonTokenType.StartArray)
+                        depth++;
+                    else if (TokenType == JsonTokenType.EndArray)
+                        depth--;
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SkipWhitespace()
+        {
+            while (Position < _buffer.Length)
+            {
+                byte b = _buffer[Position];
+                if (b == ' ' || b == '\t' || b == '\r' || b == '\n')
+                    Position++;
+                else
+                    break;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsDigit(byte b) => b >= '0' && b <= '9';
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool ReadString()
+        {
+            Position++; // Skip opening quote
+            _lastValueStart = Position;
+
+            while (Position < _buffer.Length)
+            {
+                byte b = _buffer[Position];
+                if (b == '"')
+                {
+                    _lastValueEnd = Position;
+                    Position++; // Skip closing quote
+                    TokenType = JsonTokenType.String;
+                    return true;
+                }
+                if (b == '\\')
+                {
+                    Position++; // Skip escaped character
+                    if (Position >= _buffer.Length)
+                        throw new JsonException("Incomplete escape sequence");
+                }
+                Position++;
+            }
+            throw new JsonException("Unterminated string");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool ReadNumber()
+        {
+            _lastValueStart = Position;
+
+            // Skip optional minus
+            if (Position < _buffer.Length && _buffer[Position] == '-')
+                Position++;
+
+            // Read digits
+            while (Position < _buffer.Length && IsDigit(_buffer[Position]))
+                Position++;
+
+            // Read decimal part if present
+            if (Position < _buffer.Length && _buffer[Position] == '.')
+            {
+                Position++;
+                while (Position < _buffer.Length && IsDigit(_buffer[Position]))
+                    Position++;
+            }
+
+            // Read exponent if present
+            if (Position < _buffer.Length && (_buffer[Position] == 'e' || _buffer[Position] == 'E'))
+            {
+                Position++;
+                if (Position < _buffer.Length && (_buffer[Position] == '+' || _buffer[Position] == '-'))
+                    Position++;
+                while (Position < _buffer.Length && IsDigit(_buffer[Position]))
+                    Position++;
+            }
+
+            _lastValueEnd = Position;
+            TokenType = JsonTokenType.Number;
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool ReadBoolean()
+        {
+            _lastValueStart = Position;
+
+            if (Position + 4 <= _buffer.Length &&
+                _buffer[Position] == 't' && _buffer[Position + 1] == 'r' &&
+                _buffer[Position + 2] == 'u' && _buffer[Position + 3] == 'e')
+            {
+                Position += 4;
+                _lastValueEnd = Position;
+                TokenType = JsonTokenType.True;
+                return true;
+            }
+
+            if (Position + 5 <= _buffer.Length &&
+                _buffer[Position] == 'f' && _buffer[Position + 1] == 'a' &&
+                _buffer[Position + 2] == 'l' && _buffer[Position + 3] == 's' &&
+                _buffer[Position + 4] == 'e')
+            {
+                Position += 5;
+                _lastValueEnd = Position;
+                TokenType = JsonTokenType.False;
+                return true;
+            }
+
+            throw new JsonException("Invalid boolean value");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool ReadNull()
+        {
+            _lastValueStart = Position;
+
+            if (Position + 4 <= _buffer.Length &&
+                _buffer[Position] == 'n' && _buffer[Position + 1] == 'u' &&
+                _buffer[Position + 2] == 'l' && _buffer[Position + 3] == 'l')
+            {
+                Position += 4;
+                _lastValueEnd = Position;
+                TokenType = JsonTokenType.Null;
+                return true;
+            }
+
+            throw new JsonException("Invalid null value");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetInt32()
+        {
+            if (TokenType == JsonTokenType.Number)
+            {
+                Utf8Parser.TryParse(ValueSpan, out int value, out _);
+                return value;
+            }
+            return 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public long GetInt64()
+        {
+            if (TokenType == JsonTokenType.Number)
+            {
+                Utf8Parser.TryParse(ValueSpan, out long value, out _);
+                return value;
+            }
+            return 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double GetDouble()
+        {
+            if (TokenType == JsonTokenType.Number)
+            {
+                Utf8Parser.TryParse(ValueSpan, out double value, out _);
+                return value;
+            }
+            return 0.0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool GetBoolean()
+        {
+            return TokenType == JsonTokenType.True;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DateTime GetDateTime()
+        {
+            if (TokenType == JsonTokenType.String)
+            {
+                Utf8Parser.TryParse(ValueSpan, out DateTime value, out _, 'O');
+                return value;
+            }
+            return default;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string? GetString()
+        {
+            if (TokenType == JsonTokenType.String)
+                return ValueSpan.Length == 0 ? string.Empty : System.Text.Encoding.UTF8.GetString(ValueSpan);
+            if (TokenType == JsonTokenType.Null)
+                return null;
+            return string.Empty;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double? GetNullableDouble()
+        {
+            if (TokenType == JsonTokenType.Number)
+            {
+                // Try parsing as int first (since JSON often has integers)
+                if (Utf8Parser.TryParse(ValueSpan, out int intValue, out _))
+                    return intValue;
+
+                // If that fails, try parsing as double
+                if (Utf8Parser.TryParse(ValueSpan, out double doubleValue, out _))
+                    return doubleValue;
+            }
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DateTime? GetNullableDateTime()
+        {
+            if (TokenType == JsonTokenType.String)
+            {
+                var str = System.Text.Encoding.UTF8.GetString(ValueSpan);
+                if (DateTime.TryParse(str, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime value))
+                    return value;
+            }
+            return null;
+        }
+
+    }
+
+
+
+    private enum PropertyType : byte
+    {
+        Unknown = 0,
+        Op = 1,
+        Id = 2,
+        InitialClk = 3,
+        Clk = 4,
+        Pt = 5,
+        Ct = 6,
+        Mc = 7,
+        Oc = 8,
+        StatusCode = 9,
+        ErrorCode = 10,
+        ConnectionId = 11,
+        ConnectionClosed = 12,
+        ConnectionsAvailable = 13,
+        ConflateMs = 14,
+        HeartbeatMs = 15,
+        SegmentType = 16,
+        MarketDefinition = 17,
+        Tv = 18,
+        Rc = 19,
+        Img = 20,
+        Con = 21,
+        Ltp = 22,
+        Spf = 23,
+        Spn = 24,
+        Hc = 25,
+        Batb = 26,
+        Spb = 27,
+        Bdatl = 28,
+        Trd = 29,
+        Atb = 30,
+        Spl = 31,
+        Atl = 32,
+        Batl = 33,
+        Bdatb = 34,
+        AccountId = 35,
+        Closed = 36,
+        BspMarket = 37,
+        TurnInPlayEnabled = 38,
+        PersistenceEnabled = 39,
+        MarketBaseRate = 40,
+        BettingType = 41,
+        Status = 42,
+        Venue = 43,
+        SettledTime = 44,
+        Timezone = 45,
+        EachWayDivisor = 46,
+        Regulators = 47,
+        MarketType = 48,
+        NumberOfWinners = 49,
+        CountryCode = 50,
+        InPlay = 51,
+        BetDelay = 52,
+        NumberOfActiveRunners = 53,
+        EventId = 54,
+        CrossMatching = 55,
+        RunnersVoidable = 56,
+        SuspendTime = 57,
+        DiscountAllowed = 58,
+        Runners = 59,
+        Version = 60,
+        EventTypeId = 61,
+        Complete = 62,
+        OpenDate = 63,
+        MarketTime = 64,
+        BspReconciled = 65,
+        SortPriority = 66,
+        RemovalDate = 67,
+        AdjustmentFactor = 68,
+        Bsp = 69
+    }
+
+
+
+    // Object pool helper methods
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static List<T> GetPooledList<T>(ConcurrentQueue<List<T>> pool)
+    {
+        if (pool.TryDequeue(out var list))
+        {
+            list.Clear();
+            return list;
+        }
+        return new List<T>();
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ChangeMessage? DeserializeChangeMessage(byte[] lineBytes)
+    private static void ReturnToPool<T>(List<T> list, ConcurrentQueue<List<T>> pool)
+    {
+        if (list.Count < 1000) // Prevent memory bloat
+        {
+            pool.Enqueue(list);
+        }
+    }
+
+    // Optimized property lookup using length-based switching and direct byte comparisons
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetPropertyType(ReadOnlySpan<byte> propertyName)
+    {
+        // Fast path for most common properties by length
+        return propertyName.Length switch
+        {
+            2 => GetTwoCharProperty(propertyName),
+            3 => GetThreeCharProperty(propertyName),
+            4 => GetFourCharProperty(propertyName),
+            5 => GetFiveCharProperty(propertyName),
+            6 => GetSixCharProperty(propertyName),
+            7 => GetSevenCharProperty(propertyName),
+            8 => GetEightCharProperty(propertyName),
+            9 => GetNineCharProperty(propertyName),
+            10 => GetTenCharProperty(propertyName),
+            11 => GetElevenCharProperty(propertyName),
+            12 => GetTwelveCharProperty(propertyName),
+            13 => GetThirteenCharProperty(propertyName),
+            14 => GetFourteenCharProperty(propertyName),
+            15 => GetFifteenCharProperty(propertyName),
+            16 => GetSixteenCharProperty(propertyName),
+            17 => GetSeventeenCharProperty(propertyName),
+            18 => GetEighteenCharProperty(propertyName),
+            19 => GetNineteenCharProperty(propertyName),
+            20 => GetTwentyCharProperty(propertyName),
+            21 => GetTwentyOneCharProperty(propertyName),
+            _ => PropertyType.Unknown
+        };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetTwoCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span[0] == 'o' && span[1] == 'p') return PropertyType.Op;
+        if (span[0] == 'i' && span[1] == 'd') return PropertyType.Id;
+        if (span[0] == 'p' && span[1] == 't') return PropertyType.Pt;
+        if (span[0] == 'c' && span[1] == 't') return PropertyType.Ct;
+        if (span[0] == 'm' && span[1] == 'c') return PropertyType.Mc;
+        if (span[0] == 'o' && span[1] == 'c') return PropertyType.Oc;
+        if (span[0] == 't' && span[1] == 'v') return PropertyType.Tv;
+        if (span[0] == 'r' && span[1] == 'c') return PropertyType.Rc;
+        if (span[0] == 'h' && span[1] == 'c') return PropertyType.Hc;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetThreeCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span[0] == 'c' && span[1] == 'l' && span[2] == 'k') return PropertyType.Clk;
+        if (span[0] == 'i' && span[1] == 'm' && span[2] == 'g') return PropertyType.Img;
+        if (span[0] == 'c' && span[1] == 'o' && span[2] == 'n') return PropertyType.Con;
+        if (span[0] == 'l' && span[1] == 't' && span[2] == 'p') return PropertyType.Ltp;
+        if (span[0] == 's' && span[1] == 'p' && span[2] == 'f') return PropertyType.Spf;
+        if (span[0] == 's' && span[1] == 'p' && span[2] == 'n') return PropertyType.Spn;
+        if (span[0] == 's' && span[1] == 'p' && span[2] == 'b') return PropertyType.Spb;
+        if (span[0] == 't' && span[1] == 'r' && span[2] == 'd') return PropertyType.Trd;
+        if (span[0] == 'a' && span[1] == 't' && span[2] == 'b') return PropertyType.Atb;
+        if (span[0] == 's' && span[1] == 'p' && span[2] == 'l') return PropertyType.Spl;
+        if (span[0] == 'a' && span[1] == 't' && span[2] == 'l') return PropertyType.Atl;
+        if (span[0] == 'b' && span[1] == 's' && span[2] == 'p') return PropertyType.Bsp;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetFourCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("batb"u8)) return PropertyType.Batb;
+        if (span.SequenceEqual("batl"u8)) return PropertyType.Batl;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetFiveCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("bdatl"u8)) return PropertyType.Bdatl;
+        if (span.SequenceEqual("bdatb"u8)) return PropertyType.Bdatb;
+        if (span.SequenceEqual("venue"u8)) return PropertyType.Venue;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetSixCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("status"u8)) return PropertyType.Status;
+        if (span.SequenceEqual("closed"u8)) return PropertyType.Closed;
+        if (span.SequenceEqual("inPlay"u8)) return PropertyType.InPlay;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetSevenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("version"u8)) return PropertyType.Version;
+        if (span.SequenceEqual("runners"u8)) return PropertyType.Runners;
+        if (span.SequenceEqual("eventId"u8)) return PropertyType.EventId;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetEightCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("timezone"u8)) return PropertyType.Timezone;
+        if (span.SequenceEqual("openDate"u8)) return PropertyType.OpenDate;
+        if (span.SequenceEqual("betDelay"u8)) return PropertyType.BetDelay;
+        if (span.SequenceEqual("complete"u8)) return PropertyType.Complete;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetNineCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("accountId"u8)) return PropertyType.AccountId;
+        if (span.SequenceEqual("bspMarket"u8)) return PropertyType.BspMarket;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetTenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("statusCode"u8)) return PropertyType.StatusCode;
+        if (span.SequenceEqual("initialClk"u8)) return PropertyType.InitialClk;
+        if (span.SequenceEqual("conflateMs"u8)) return PropertyType.ConflateMs;
+        if (span.SequenceEqual("marketType"u8)) return PropertyType.MarketType;
+        if (span.SequenceEqual("marketTime"u8)) return PropertyType.MarketTime;
+        if (span.SequenceEqual("regulators"u8)) return PropertyType.Regulators;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetElevenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("segmentType"u8)) return PropertyType.SegmentType;
+        if (span.SequenceEqual("bettingType"u8)) return PropertyType.BettingType;
+        if (span.SequenceEqual("heartbeatMs"u8)) return PropertyType.HeartbeatMs;
+        if (span.SequenceEqual("settledTime"u8)) return PropertyType.SettledTime;
+        if (span.SequenceEqual("suspendTime"u8)) return PropertyType.SuspendTime;
+        if (span.SequenceEqual("eventTypeId"u8)) return PropertyType.EventTypeId;
+        if (span.SequenceEqual("removalDate"u8)) return PropertyType.RemovalDate;
+        if (span.SequenceEqual("countryCode"u8)) return PropertyType.CountryCode;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetTwelveCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("connectionId"u8)) return PropertyType.ConnectionId;
+        if (span.SequenceEqual("sortPriority"u8)) return PropertyType.SortPriority;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetThirteenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("crossMatching"u8)) return PropertyType.CrossMatching;
+        if (span.SequenceEqual("bspReconciled"u8)) return PropertyType.BspReconciled;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetFourteenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("eachWayDivisor"u8)) return PropertyType.EachWayDivisor;
+        if (span.SequenceEqual("marketBaseRate"u8)) return PropertyType.MarketBaseRate;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetFifteenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("numberOfWinners"u8)) return PropertyType.NumberOfWinners;
+        if (span.SequenceEqual("runnersVoidable"u8)) return PropertyType.RunnersVoidable;
+        if (span.SequenceEqual("discountAllowed"u8)) return PropertyType.DiscountAllowed;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetSixteenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("marketDefinition"u8)) return PropertyType.MarketDefinition;
+        if (span.SequenceEqual("connectionClosed"u8)) return PropertyType.ConnectionClosed;
+        if (span.SequenceEqual("adjustmentFactor"u8)) return PropertyType.AdjustmentFactor;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetSeventeenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("turnInPlayEnabled"u8)) return PropertyType.TurnInPlayEnabled;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetEighteenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("persistenceEnabled"u8)) return PropertyType.PersistenceEnabled;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetNineteenCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("connectionsAvailable"u8)) return PropertyType.ConnectionsAvailable;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetTwentyCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("numberOfActiveRunners"u8)) return PropertyType.NumberOfActiveRunners;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static PropertyType GetTwentyOneCharProperty(ReadOnlySpan<byte> span)
+    {
+        if (span.SequenceEqual("numberOfActiveRunners"u8)) return PropertyType.NumberOfActiveRunners;
+        return PropertyType.Unknown;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ChangeMessage? DeserializeChangeMessage(byte[] lineBytes)
     {
         if (lineBytes == null || lineBytes.Length == 0)
             return null;
@@ -37,10 +671,10 @@ internal sealed class BetfairStreamDeserializer
     {
         try
         {
-            var reader = new Utf8JsonReader(lineSpan);
-            return ReadChangeMessage(ref reader);
+            var reader = new FastJsonReader(lineSpan);
+            return ReadChangeMessageOptimized(ref reader);
         }
-        catch (JsonException)
+        catch
         {
             // Skip invalid JSON messages
             return null;
@@ -48,7 +682,7 @@ internal sealed class BetfairStreamDeserializer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ChangeMessage? ReadChangeMessage(ref Utf8JsonReader reader)
+    private ChangeMessage? ReadChangeMessageOptimized(ref FastJsonReader reader)
     {
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
             return null;
@@ -76,93 +710,65 @@ internal sealed class BetfairStreamDeserializer
             if (reader.TokenType == JsonTokenType.EndObject)
                 break;
 
-            if (reader.TokenType == JsonTokenType.PropertyName)
+            if (reader.TokenType == JsonTokenType.String)
             {
-                var propertyName = reader.ValueSpan;
+                var propertyType = GetPropertyType(reader.ValueSpan);
+                if (!reader.Read()) // Move to value
+                    throw new JsonException("Incomplete JSON: expected value after property name");
 
-                if (propertyName.SequenceEqual(_opProperty))
+                switch (propertyType)
                 {
-                    reader.Read();
-                    operation = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_idProperty))
-                {
-                    reader.Read();
-                    id = reader.GetInt32();
-                }
-                else if (propertyName.SequenceEqual(_initialClkProperty))
-                {
-                    reader.Read();
-                    initialClock = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_clkProperty))
-                {
-                    reader.Read();
-                    clock = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_ptProperty))
-                {
-                    reader.Read();
-                    publishTime = reader.GetInt64();
-                }
-                else if (propertyName.SequenceEqual(_ctProperty))
-                {
-                    reader.Read();
-                    changeType = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_statusCodeProperty))
-                {
-                    reader.Read();
-                    statusCode = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_errorCodeProperty))
-                {
-                    reader.Read();
-                    errorCode = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_connectionIdProperty))
-                {
-                    reader.Read();
-                    connectionId = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_connectionClosedProperty))
-                {
-                    reader.Read();
-                    connectionClosed = reader.GetBoolean();
-                }
-                else if (propertyName.SequenceEqual(_connectionsAvailableProperty))
-                {
-                    reader.Read();
-                    connectionsAvailable = reader.GetInt32();
-                }
-                else if (propertyName.SequenceEqual(_conflateProperty))
-                {
-                    reader.Read();
-                    conflateMs = reader.GetInt32();
-                }
-                else if (propertyName.SequenceEqual(_heartbeatProperty))
-                {
-                    reader.Read();
-                    heartbeatMs = reader.GetInt32();
-                }
-                else if (propertyName.SequenceEqual(_segmentTypeProperty))
-                {
-                    reader.Read();
-                    segmentType = reader.GetString();
-                }
-                else if (propertyName.SequenceEqual(_mcProperty))
-                {
-                    marketChanges = ReadMarketChanges(ref reader);
-                }
-                else if (propertyName.SequenceEqual(_ocProperty))
-                {
-                    orderChanges = ReadOrderChanges(ref reader);
-                }
-                else
-                {
-                    // Skip unknown properties
-                    reader.Read();
-                    reader.Skip();
+                    case PropertyType.Op:
+                        operation = reader.GetString();
+                        break;
+                    case PropertyType.Id:
+                        id = reader.GetInt32();
+                        break;
+                    case PropertyType.InitialClk:
+                        initialClock = reader.GetString();
+                        break;
+                    case PropertyType.Clk:
+                        clock = reader.GetString();
+                        break;
+                    case PropertyType.Pt:
+                        publishTime = reader.GetInt64();
+                        break;
+                    case PropertyType.Ct:
+                        changeType = reader.GetString();
+                        break;
+                    case PropertyType.StatusCode:
+                        statusCode = reader.GetString();
+                        break;
+                    case PropertyType.ErrorCode:
+                        errorCode = reader.GetString();
+                        break;
+                    case PropertyType.ConnectionId:
+                        connectionId = reader.GetString();
+                        break;
+                    case PropertyType.ConnectionClosed:
+                        connectionClosed = reader.GetBoolean();
+                        break;
+                    case PropertyType.ConnectionsAvailable:
+                        connectionsAvailable = reader.GetInt32();
+                        break;
+                    case PropertyType.ConflateMs:
+                        conflateMs = reader.GetInt32();
+                        break;
+                    case PropertyType.HeartbeatMs:
+                        heartbeatMs = reader.GetInt32();
+                        break;
+                    case PropertyType.SegmentType:
+                        segmentType = reader.GetString();
+                        break;
+                    case PropertyType.Mc:
+                        marketChanges = ReadMarketChangesOptimized(ref reader);
+                        break;
+                    case PropertyType.Oc:
+                        orderChanges = ReadOrderChangesOptimized(ref reader);
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
                 }
             }
         }
@@ -185,20 +791,19 @@ internal sealed class BetfairStreamDeserializer
             HeartbeatMs = heartbeatMs,
             SegmentType = segmentType,
             MarketChanges = marketChanges,
-            OrderChanges = orderChanges
+            OrderChanges = orderChanges,
         };
     }
 
     /// <summary>
-    /// Reads market changes array with optimized performance.
+    /// Reads market changes array with optimized performance using FastJsonReader.
     /// </summary>
-    private List<MarketChange>? ReadMarketChanges(ref Utf8JsonReader reader)
+    private List<MarketChange>? ReadMarketChangesOptimized(ref FastJsonReader reader)
     {
-        reader.Read(); // Read the array start
         if (reader.TokenType != JsonTokenType.StartArray)
             return null;
 
-        var marketChanges = new List<MarketChange>();
+        var marketChanges = GetPooledList(_marketChangeListPool);
 
         while (reader.Read())
         {
@@ -207,25 +812,24 @@ internal sealed class BetfairStreamDeserializer
 
             if (reader.TokenType == JsonTokenType.StartObject)
             {
-                var marketChange = ReadMarketChange(ref reader);
+                var marketChange = ReadMarketChangeOptimized(ref reader);
                 if (marketChange != null)
                     marketChanges.Add(marketChange);
             }
         }
 
-        return marketChanges;
+        return marketChanges.Count > 0 ? marketChanges : null;
     }
 
     /// <summary>
-    /// Reads order changes array with optimized performance.
+    /// Reads order changes array with optimized performance using FastJsonReader.
     /// </summary>
-    private List<OrderChange>? ReadOrderChanges(ref Utf8JsonReader reader)
+    private List<OrderChange>? ReadOrderChangesOptimized(ref FastJsonReader reader)
     {
-        reader.Read(); // Read the array start
         if (reader.TokenType != JsonTokenType.StartArray)
             return null;
 
-        var orderChanges = new List<OrderChange>();
+        var orderChanges = GetPooledList(_orderChangeListPool);
 
         while (reader.Read())
         {
@@ -234,20 +838,20 @@ internal sealed class BetfairStreamDeserializer
 
             if (reader.TokenType == JsonTokenType.StartObject)
             {
-                var orderChange = ReadOrderChange(ref reader);
+                var orderChange = ReadOrderChangeOptimized(ref reader);
                 if (orderChange != null)
                     orderChanges.Add(orderChange);
             }
         }
 
-        return orderChanges;
+        return orderChanges.Count > 0 ? orderChanges : null;
     }
 
     /// <summary>
-    /// Reads a MarketChange using basic parsing for now.
+    /// Reads a MarketChange using optimized FastJsonReader parsing.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private MarketChange? ReadMarketChange(ref Utf8JsonReader reader)
+    private MarketChange? ReadMarketChangeOptimized(ref FastJsonReader reader)
     {
         string? marketId = null;
         double? totalAmountMatched = null;
@@ -261,44 +865,36 @@ internal sealed class BetfairStreamDeserializer
             if (reader.TokenType == JsonTokenType.EndObject)
                 break;
 
-            if (reader.TokenType != JsonTokenType.PropertyName)
-                continue;
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var propertyType = GetPropertyType(reader.ValueSpan);
+                if (!reader.Read()) // Move to value
+                    throw new JsonException("Incomplete JSON: expected value after property name");
 
-            var propertyName = reader.ValueSpan;
-
-            if (propertyName.SequenceEqual("id"u8))
-            {
-                reader.Read();
-                marketId = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("tv"u8))
-            {
-                reader.Read();
-                totalAmountMatched = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("rc"u8))
-            {
-                runnerChanges = ReadRunnerChanges(ref reader);
-            }
-            else if (propertyName.SequenceEqual("img"u8))
-            {
-                reader.Read();
-                replaceCache = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("con"u8))
-            {
-                reader.Read();
-                conflated = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual(_marketDefinitionProperty))
-            {
-                marketDefinition = ReadMarketDefinition(ref reader);
-            }
-            else
-            {
-                // Skip unknown properties
-                reader.Read();
-                reader.Skip();
+                switch (propertyType)
+                {
+                    case PropertyType.Id:
+                        marketId = reader.GetString();
+                        break;
+                    case PropertyType.Tv:
+                        totalAmountMatched = reader.GetDouble();
+                        break;
+                    case PropertyType.Rc:
+                        runnerChanges = ReadRunnerChangesOptimized(ref reader);
+                        break;
+                    case PropertyType.Img:
+                        replaceCache = reader.GetBoolean();
+                        break;
+                    case PropertyType.Con:
+                        conflated = reader.GetBoolean();
+                        break;
+                    case PropertyType.MarketDefinition:
+                        marketDefinition = ReadMarketDefinitionOptimized(ref reader);
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
             }
         }
 
@@ -309,15 +905,17 @@ internal sealed class BetfairStreamDeserializer
             RunnerChanges = runnerChanges,
             ReplaceCache = replaceCache,
             Conflated = conflated,
-            MarketDefinition = marketDefinition
+            MarketDefinition = marketDefinition,
         };
     }
 
+
+
     /// <summary>
-    /// Reads an OrderChange using basic parsing for now.
+    /// Reads an OrderChange using optimized FastJsonReader parsing.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private OrderChange? ReadOrderChange(ref Utf8JsonReader reader)
+    private OrderChange? ReadOrderChangeOptimized(ref FastJsonReader reader)
     {
         string? marketId = null;
         long? accountId = null;
@@ -329,31 +927,27 @@ internal sealed class BetfairStreamDeserializer
             if (reader.TokenType == JsonTokenType.EndObject)
                 break;
 
-            if (reader.TokenType != JsonTokenType.PropertyName)
-                continue;
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var propertyType = GetPropertyType(reader.ValueSpan);
+                if (!reader.Read()) // Move to value
+                    throw new JsonException("Incomplete JSON: expected value after property name");
 
-            var propertyName = reader.ValueSpan;
-
-            if (propertyName.SequenceEqual("id"u8))
-            {
-                reader.Read();
-                marketId = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("accountId"u8))
-            {
-                reader.Read();
-                accountId = reader.GetInt64();
-            }
-            else if (propertyName.SequenceEqual("closed"u8))
-            {
-                reader.Read();
-                closed = reader.GetBoolean();
-            }
-            else
-            {
-                // Skip unknown properties
-                reader.Read();
-                reader.Skip();
+                switch (propertyType)
+                {
+                    case PropertyType.Id:
+                        marketId = reader.GetString();
+                        break;
+                    case PropertyType.AccountId:
+                        accountId = reader.GetInt64();
+                        break;
+                    case PropertyType.Closed:
+                        closed = reader.GetBoolean();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
             }
         }
 
@@ -362,20 +956,19 @@ internal sealed class BetfairStreamDeserializer
             MarketId = marketId,
             AccountId = accountId,
             Closed = closed,
-            OrderRunnerChanges = orderRunnerChanges
+            OrderRunnerChanges = orderRunnerChanges,
         };
     }
 
     /// <summary>
-    /// Reads runner changes array with basic parsing.
+    /// Reads runner changes array with optimized FastJsonReader performance.
     /// </summary>
-    private List<RunnerChange>? ReadRunnerChanges(ref Utf8JsonReader reader)
+    private List<RunnerChange>? ReadRunnerChangesOptimized(ref FastJsonReader reader)
     {
-        reader.Read(); // Read the array start
         if (reader.TokenType != JsonTokenType.StartArray)
             return null;
 
-        var runnerChanges = new List<RunnerChange>();
+        var runnerChanges = GetPooledList(_runnerChangeListPool);
 
         while (reader.Read())
         {
@@ -384,67 +977,20 @@ internal sealed class BetfairStreamDeserializer
 
             if (reader.TokenType == JsonTokenType.StartObject)
             {
-                var runnerChange = ReadRunnerChange(ref reader);
+                var runnerChange = ReadRunnerChangeOptimized(ref reader);
                 if (runnerChange != null)
                     runnerChanges.Add(runnerChange);
             }
         }
 
+        // Always return the list, even if empty, to match System.Text.Json behavior
         return runnerChanges;
     }
 
     /// <summary>
-    /// Reads arrays of double arrays (e.g., [[1.5, 100], [2.0, 200]]) with optimized performance.
+    /// Reads a RunnerChange using optimized FastJsonReader parsing.
     /// </summary>
-    private List<List<double>>? ReadDoubleArrays(ref Utf8JsonReader reader)
-    {
-        reader.Read(); // Read the array start
-        if (reader.TokenType != JsonTokenType.StartArray)
-            return null;
-
-        var result = new List<List<double>>();
-
-        while (reader.Read())
-        {
-            if (reader.TokenType == JsonTokenType.EndArray)
-                break;
-
-            if (reader.TokenType == JsonTokenType.StartArray)
-            {
-                var innerArray = ReadDoubleArray(ref reader);
-                if (innerArray != null && innerArray.Count > 0)
-                    result.Add(innerArray);
-            }
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Reads a single array of doubles with optimized performance.
-    /// </summary>
-    private List<double>? ReadDoubleArray(ref Utf8JsonReader reader)
-    {
-        var result = new List<double>(4); // Most arrays have 2-3 elements
-
-        while (reader.Read())
-        {
-            if (reader.TokenType == JsonTokenType.EndArray)
-                break;
-
-            if (reader.TokenType == JsonTokenType.Number)
-            {
-                result.Add(reader.GetDouble());
-            }
-        }
-
-        return result.Count > 0 ? result : null;
-    }
-
-    /// <summary>
-    /// Reads a RunnerChange using basic parsing.
-    /// </summary>
-    private RunnerChange? ReadRunnerChange(ref Utf8JsonReader reader)
+    private RunnerChange? ReadRunnerChangeOptimized(ref FastJsonReader reader)
     {
         long? selectionId = null;
         double? totalMatched = null;
@@ -467,82 +1013,63 @@ internal sealed class BetfairStreamDeserializer
             if (reader.TokenType == JsonTokenType.EndObject)
                 break;
 
-            if (reader.TokenType != JsonTokenType.PropertyName)
-                continue;
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var propertyType = GetPropertyType(reader.ValueSpan);
+                if (!reader.Read()) // Move to value
+                    throw new JsonException("Incomplete JSON: expected value after property name");
 
-            var propertyName = reader.ValueSpan;
-
-            if (propertyName.SequenceEqual("id"u8))
-            {
-                reader.Read();
-                selectionId = reader.GetInt64();
-            }
-            else if (propertyName.SequenceEqual("tv"u8))
-            {
-                reader.Read();
-                totalMatched = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("ltp"u8))
-            {
-                reader.Read();
-                lastTradedPrice = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("spf"u8))
-            {
-                reader.Read();
-                startingPriceFar = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("spn"u8))
-            {
-                reader.Read();
-                startingPriceNear = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("hc"u8))
-            {
-                reader.Read();
-                handicap = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("batb"u8))
-            {
-                bestAvailableToBack = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("spb"u8))
-            {
-                startingPriceBack = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("bdatl"u8))
-            {
-                bestDisplayAvailableToLay = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("trd"u8))
-            {
-                traded = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("atb"u8))
-            {
-                availableToBack = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("spl"u8))
-            {
-                startingPriceLay = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("atl"u8))
-            {
-                availableToLay = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("batl"u8))
-            {
-                bestAvailableToLay = ReadDoubleArrays(ref reader);
-            }
-            else if (propertyName.SequenceEqual("bdatb"u8))
-            {
-                bestDisplayAvailableToBack = ReadDoubleArrays(ref reader);
-            }
-            else
-            {
-                // Skip unknown properties
-                reader.Read();
-                reader.Skip();
+                switch (propertyType)
+                {
+                    case PropertyType.Id:
+                        selectionId = reader.GetInt64();
+                        break;
+                    case PropertyType.Tv:
+                        totalMatched = reader.GetDouble();
+                        break;
+                    case PropertyType.Ltp:
+                        lastTradedPrice = reader.GetDouble();
+                        break;
+                    case PropertyType.Spf:
+                        startingPriceFar = reader.GetDouble();
+                        break;
+                    case PropertyType.Spn:
+                        startingPriceNear = reader.GetDouble();
+                        break;
+                    case PropertyType.Hc:
+                        handicap = reader.GetDouble();
+                        break;
+                    case PropertyType.Batb:
+                        bestAvailableToBack = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Spb:
+                        startingPriceBack = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Bdatl:
+                        bestDisplayAvailableToLay = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Trd:
+                        traded = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Atb:
+                        availableToBack = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Spl:
+                        startingPriceLay = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Atl:
+                        availableToLay = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Batl:
+                        bestAvailableToLay = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    case PropertyType.Bdatb:
+                        bestDisplayAvailableToBack = ReadDoubleArraysOptimized(ref reader);
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
             }
         }
 
@@ -562,17 +1089,67 @@ internal sealed class BetfairStreamDeserializer
             StartingPriceLay = startingPriceLay,
             AvailableToLay = availableToLay,
             BestAvailableToLay = bestAvailableToLay,
-            BestDisplayAvailableToBack = bestDisplayAvailableToBack
+            BestDisplayAvailableToBack = bestDisplayAvailableToBack,
         };
     }
 
+
+
     /// <summary>
-    /// Reads a MarketDefinition using optimized parsing.
+    /// Reads arrays of double arrays using optimized FastJsonReader.
+    /// </summary>
+    private List<List<double>>? ReadDoubleArraysOptimized(ref FastJsonReader reader)
+    {
+        if (reader.TokenType != JsonTokenType.StartArray)
+            return null;
+
+        var result = GetPooledList(_doubleArrayListPool);
+
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndArray)
+                break;
+
+            if (reader.TokenType == JsonTokenType.StartArray)
+            {
+                var innerArray = ReadDoubleArrayOptimized(ref reader);
+                if (innerArray != null && innerArray.Count > 0)
+                    result.Add(innerArray);
+            }
+        }
+
+        // Always return the list, even if empty, to match System.Text.Json behavior
+        return result;
+    }
+
+    /// <summary>
+    /// Reads a single array of doubles using optimized FastJsonReader.
+    /// </summary>
+    private List<double>? ReadDoubleArrayOptimized(ref FastJsonReader reader)
+    {
+        var result = GetPooledList(_doubleListPool);
+
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndArray)
+                break;
+
+            if (reader.TokenType == JsonTokenType.Number)
+            {
+                result.Add(reader.GetDouble());
+            }
+        }
+
+        // Don't return to pool here since we're returning the list
+        return result.Count > 0 ? result : null;
+    }
+
+    /// <summary>
+    /// Reads a MarketDefinition using optimized FastJsonReader parsing.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private MarketDefinition? ReadMarketDefinition(ref Utf8JsonReader reader)
+    private MarketDefinition? ReadMarketDefinitionOptimized(ref FastJsonReader reader)
     {
-        reader.Read(); // Read the object start
         if (reader.TokenType != JsonTokenType.StartObject)
             return null;
 
@@ -611,159 +1188,106 @@ internal sealed class BetfairStreamDeserializer
             if (reader.TokenType == JsonTokenType.EndObject)
                 break;
 
-            if (reader.TokenType != JsonTokenType.PropertyName)
-                continue;
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var propertyName = reader.ValueSpan;
+                var propertyType = GetPropertyType(propertyName);
+                if (!reader.Read()) // Move to value
+                    throw new JsonException("Incomplete JSON: expected value after property name");
 
-            var propertyName = reader.ValueSpan;
-
-            if (propertyName.SequenceEqual("bspMarket"u8))
-            {
-                reader.Read();
-                bspMarket = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("turnInPlayEnabled"u8))
-            {
-                reader.Read();
-                turnInPlayEnabled = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("persistenceEnabled"u8))
-            {
-                reader.Read();
-                persistenceEnabled = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("marketBaseRate"u8))
-            {
-                reader.Read();
-                marketBaseRate = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("bettingType"u8))
-            {
-                reader.Read();
-                bettingType = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("status"u8))
-            {
-                reader.Read();
-                status = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("venue"u8))
-            {
-                reader.Read();
-                venue = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("settledTime"u8))
-            {
-                reader.Read();
-                settledTime = reader.GetDateTime();
-            }
-            else if (propertyName.SequenceEqual("timezone"u8))
-            {
-                reader.Read();
-                timezone = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("eachWayDivisor"u8))
-            {
-                reader.Read();
-                eachWayDivisor = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("regulators"u8))
-            {
-                regulators = ReadStringArray(ref reader);
-            }
-            else if (propertyName.SequenceEqual("marketType"u8))
-            {
-                reader.Read();
-                marketType = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("numberOfWinners"u8))
-            {
-                reader.Read();
-                numberOfWinners = reader.GetInt32();
-            }
-            else if (propertyName.SequenceEqual("countryCode"u8))
-            {
-                reader.Read();
-                countryCode = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("inPlay"u8))
-            {
-                reader.Read();
-                inPlay = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("betDelay"u8))
-            {
-                reader.Read();
-                betDelay = reader.GetInt32();
-            }
-            else if (propertyName.SequenceEqual("numberOfActiveRunners"u8))
-            {
-                reader.Read();
-                numberOfActiveRunners = reader.GetInt32();
-            }
-            else if (propertyName.SequenceEqual("eventId"u8))
-            {
-                reader.Read();
-                eventId = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("crossMatching"u8))
-            {
-                reader.Read();
-                crossMatching = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("runnersVoidable"u8))
-            {
-                reader.Read();
-                runnersVoidable = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("suspendTime"u8))
-            {
-                reader.Read();
-                suspendTime = reader.GetDateTime();
-            }
-            else if (propertyName.SequenceEqual("discountAllowed"u8))
-            {
-                reader.Read();
-                discountAllowed = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("runners"u8))
-            {
-                runners = ReadRunnerDefinitions(ref reader);
-            }
-            else if (propertyName.SequenceEqual("version"u8))
-            {
-                reader.Read();
-                version = reader.GetInt64();
-            }
-            else if (propertyName.SequenceEqual("eventTypeId"u8))
-            {
-                reader.Read();
-                eventTypeId = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("complete"u8))
-            {
-                reader.Read();
-                complete = reader.GetBoolean();
-            }
-            else if (propertyName.SequenceEqual("openDate"u8))
-            {
-                reader.Read();
-                openDate = reader.GetDateTime();
-            }
-            else if (propertyName.SequenceEqual("marketTime"u8))
-            {
-                reader.Read();
-                marketTime = reader.GetDateTime();
-            }
-            else if (propertyName.SequenceEqual("bspReconciled"u8))
-            {
-                reader.Read();
-                bspReconciled = reader.GetBoolean();
-            }
-            else
-            {
-                // Skip unknown properties
-                reader.Read();
-                reader.Skip();
+                switch (propertyType)
+                {
+                    case PropertyType.BspMarket:
+                        bspMarket = reader.GetBoolean();
+                        break;
+                    case PropertyType.TurnInPlayEnabled:
+                        turnInPlayEnabled = reader.GetBoolean();
+                        break;
+                    case PropertyType.PersistenceEnabled:
+                        persistenceEnabled = reader.GetBoolean();
+                        break;
+                    case PropertyType.MarketBaseRate:
+                        marketBaseRate = reader.GetNullableDouble();
+                        break;
+                    case PropertyType.BettingType:
+                        bettingType = reader.GetString();
+                        break;
+                    case PropertyType.Status:
+                        status = reader.GetString();
+                        break;
+                    case PropertyType.Venue:
+                        venue = reader.GetString();
+                        break;
+                    case PropertyType.Timezone:
+                        timezone = reader.GetString();
+                        break;
+                    case PropertyType.SettledTime:
+                        settledTime = reader.GetNullableDateTime();
+                        break;
+                    case PropertyType.SuspendTime:
+                        suspendTime = reader.GetNullableDateTime();
+                        break;
+                    case PropertyType.OpenDate:
+                        openDate = reader.GetNullableDateTime();
+                        break;
+                    case PropertyType.MarketTime:
+                        marketTime = reader.GetNullableDateTime();
+                        break;
+                    case PropertyType.EachWayDivisor:
+                        eachWayDivisor = reader.GetNullableDouble();
+                        break;
+                    case PropertyType.Regulators:
+                        regulators = ReadStringArrayOptimized(ref reader);
+                        break;
+                    case PropertyType.MarketType:
+                        marketType = reader.GetString();
+                        break;
+                    case PropertyType.NumberOfWinners:
+                        numberOfWinners = reader.GetInt32();
+                        break;
+                    case PropertyType.CountryCode:
+                        countryCode = reader.GetString();
+                        break;
+                    case PropertyType.InPlay:
+                        inPlay = reader.GetBoolean();
+                        break;
+                    case PropertyType.BetDelay:
+                        betDelay = reader.GetInt32();
+                        break;
+                    case PropertyType.NumberOfActiveRunners:
+                        numberOfActiveRunners = reader.GetInt32();
+                        break;
+                    case PropertyType.EventId:
+                        eventId = reader.GetString();
+                        break;
+                    case PropertyType.CrossMatching:
+                        crossMatching = reader.GetBoolean();
+                        break;
+                    case PropertyType.RunnersVoidable:
+                        runnersVoidable = reader.GetBoolean();
+                        break;
+                    case PropertyType.DiscountAllowed:
+                        discountAllowed = reader.GetBoolean();
+                        break;
+                    case PropertyType.Runners:
+                        runners = ReadRunnerDefinitionsOptimized(ref reader);
+                        break;
+                    case PropertyType.Version:
+                        version = reader.GetInt64();
+                        break;
+                    case PropertyType.EventTypeId:
+                        eventTypeId = reader.GetString();
+                        break;
+                    case PropertyType.Complete:
+                        complete = reader.GetBoolean();
+                        break;
+                    case PropertyType.BspReconciled:
+                        bspReconciled = reader.GetBoolean();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
             }
         }
 
@@ -797,20 +1321,19 @@ internal sealed class BetfairStreamDeserializer
             Complete = complete,
             OpenDate = openDate,
             MarketTime = marketTime,
-            BspReconciled = bspReconciled
+            BspReconciled = bspReconciled,
         };
     }
 
     /// <summary>
-    /// Reads an array of strings with optimized performance.
+    /// Reads an array of strings using optimized FastJsonReader.
     /// </summary>
-    private List<string>? ReadStringArray(ref Utf8JsonReader reader)
+    private List<string>? ReadStringArrayOptimized(ref FastJsonReader reader)
     {
-        reader.Read(); // Read the array start
         if (reader.TokenType != JsonTokenType.StartArray)
             return null;
 
-        var result = new List<string>();
+        var result = GetPooledList(_stringListPool);
 
         while (reader.Read())
         {
@@ -825,19 +1348,19 @@ internal sealed class BetfairStreamDeserializer
             }
         }
 
+        // Always return the list, even if empty, to match System.Text.Json behavior
         return result;
     }
 
     /// <summary>
-    /// Reads runner definitions array with optimized performance.
+    /// Reads runner definitions array using optimized FastJsonReader.
     /// </summary>
-    private List<RunnerDefinition>? ReadRunnerDefinitions(ref Utf8JsonReader reader)
+    private List<RunnerDefinition>? ReadRunnerDefinitionsOptimized(ref FastJsonReader reader)
     {
-        reader.Read(); // Read the array start
         if (reader.TokenType != JsonTokenType.StartArray)
             return null;
 
-        var runners = new List<RunnerDefinition>();
+        var runners = GetPooledList(_runnerDefinitionListPool);
 
         while (reader.Read())
         {
@@ -846,20 +1369,21 @@ internal sealed class BetfairStreamDeserializer
 
             if (reader.TokenType == JsonTokenType.StartObject)
             {
-                var runner = ReadRunnerDefinition(ref reader);
+                var runner = ReadRunnerDefinitionOptimized(ref reader);
                 if (runner != null)
                     runners.Add(runner);
             }
         }
 
+        // Always return the list, even if empty, to match System.Text.Json behavior
         return runners;
     }
 
     /// <summary>
-    /// Reads a RunnerDefinition using optimized parsing.
+    /// Reads a RunnerDefinition using optimized FastJsonReader parsing.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private RunnerDefinition? ReadRunnerDefinition(ref Utf8JsonReader reader)
+    private RunnerDefinition? ReadRunnerDefinitionOptimized(ref FastJsonReader reader)
     {
         string? status = null;
         int? sortPriority = null;
@@ -874,51 +1398,39 @@ internal sealed class BetfairStreamDeserializer
             if (reader.TokenType == JsonTokenType.EndObject)
                 break;
 
-            if (reader.TokenType != JsonTokenType.PropertyName)
-                continue;
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var propertyType = GetPropertyType(reader.ValueSpan);
+                if (!reader.Read()) // Move to value
+                    throw new JsonException("Incomplete JSON: expected value after property name");
 
-            var propertyName = reader.ValueSpan;
-
-            if (propertyName.SequenceEqual("status"u8))
-            {
-                reader.Read();
-                status = reader.GetString();
-            }
-            else if (propertyName.SequenceEqual("sortPriority"u8))
-            {
-                reader.Read();
-                sortPriority = reader.GetInt32();
-            }
-            else if (propertyName.SequenceEqual("removalDate"u8))
-            {
-                reader.Read();
-                removalDate = reader.GetDateTime();
-            }
-            else if (propertyName.SequenceEqual("id"u8))
-            {
-                reader.Read();
-                selectionId = reader.GetInt64();
-            }
-            else if (propertyName.SequenceEqual("hc"u8))
-            {
-                reader.Read();
-                handicap = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("adjustmentFactor"u8))
-            {
-                reader.Read();
-                adjustmentFactor = reader.GetDouble();
-            }
-            else if (propertyName.SequenceEqual("bsp"u8))
-            {
-                reader.Read();
-                bspLiability = reader.GetDouble();
-            }
-            else
-            {
-                // Skip unknown properties
-                reader.Read();
-                reader.Skip();
+                switch (propertyType)
+                {
+                    case PropertyType.Status:
+                        status = reader.GetString();
+                        break;
+                    case PropertyType.SortPriority:
+                        sortPriority = reader.GetInt32();
+                        break;
+                    case PropertyType.RemovalDate:
+                        removalDate = reader.GetDateTime();
+                        break;
+                    case PropertyType.Id:
+                        selectionId = reader.GetInt64();
+                        break;
+                    case PropertyType.Hc:
+                        handicap = reader.GetDouble();
+                        break;
+                    case PropertyType.AdjustmentFactor:
+                        adjustmentFactor = reader.GetDouble();
+                        break;
+                    case PropertyType.Bsp:
+                        bspLiability = reader.GetDouble();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
             }
         }
 
@@ -930,7 +1442,7 @@ internal sealed class BetfairStreamDeserializer
             SelectionId = selectionId,
             Handicap = handicap,
             AdjustmentFactor = adjustmentFactor,
-            BspLiability = bspLiability
+            BspLiability = bspLiability,
         };
     }
 }

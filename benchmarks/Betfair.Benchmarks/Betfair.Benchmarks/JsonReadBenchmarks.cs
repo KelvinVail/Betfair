@@ -5,6 +5,7 @@ using Betfair.Core.Login;
 using Betfair.Extensions.ByteReaders;
 using Betfair.Extensions.JsonReaders;
 using Betfair.Extensions.Markets;
+using Betfair.Stream.Deserializers;
 using Betfair.Stream.Responses;
 using Utf8Json.Resolvers;
 
@@ -17,14 +18,11 @@ public class JsonReadBenchmarks
     private readonly List<byte[]> _byteLines = [];
     private readonly Credentials _credentials = new ("username", "password", "appKey");
     private readonly SubscriptionStub _sub = new (Path.Combine("Data", "messages.txt"));
-    private Market _market;
 
     [GlobalSetup]
     public void Setup()
     {
         var path = Path.Combine("Data", "messages.txt");
-
-        _market = Market.Create(_credentials, "1.235123059", _sub).Value;
 
         foreach (var line in File.ReadAllLines(path))
             _byteLines.Add(Encoding.UTF8.GetBytes(line));
@@ -69,23 +67,33 @@ public class JsonReadBenchmarks
     //     }
     // }
     //
-    // [Benchmark]
-    // public void ReadAllLinesWithUtf8Json()
-    // {
-    //     foreach (var line in _byteLines)
-    //     {
-    //         var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
-    //     }
-    // }
-    //
-    // [Benchmark]
-    // public void DeserializeAllLinesWithSystemTextJson()
-    // {
-    //     foreach (var line in _byteLines)
-    //     {
-    //         var _ = JsonSerializer.Deserialize<ChangeMessage>(line);
-    //     }
-    // }
+    [Benchmark]
+    public void ReadAllLinesWithUtf8Json()
+    {
+        foreach (var line in _byteLines)
+        {
+            var _ = Utf8Json.JsonSerializer.Deserialize<ChangeMessage>(line, StandardResolver.CamelCase);
+        }
+    }
+
+    [Benchmark]
+    public void DeserializeAllLinesWithSystemTextJson()
+    {
+        foreach (var line in _byteLines)
+        {
+            var _ = JsonSerializer.Deserialize<ChangeMessage>(line);
+        }
+    }
+
+    [Benchmark]
+    public void DeserializeAllLinesWithCustomDeserializer()
+    {
+        var deserializer = new BetfairStreamDeserializer();
+        foreach (var line in _byteLines)
+        {
+            var _ = deserializer.DeserializeChangeMessage(line);
+        }
+    }
 
     // [Benchmark]
     // public void ReadAllLinesWithMarketCache()
@@ -128,15 +136,4 @@ public class JsonReadBenchmarks
     //         _market.ReadChangeMessage(ref reader);
     //     }
     // }
-    
-    [Benchmark]
-    public void ReadAllLinesWithBetfairJsonReader()
-    {
-        foreach (var line in _byteLines)
-        {
-            var reader = new BetfairJsonReader(line);
-    
-            _market.ReadChangeMessage(ref reader);
-        }
-    }
 }
