@@ -76,14 +76,14 @@ public class JsonReadBenchmarks
         }
     }
 
-    [Benchmark]
-    public void DeserializeAllLinesWithSystemTextJson()
-    {
-        foreach (var line in _byteLines)
-        {
-            var _ = JsonSerializer.Deserialize<ChangeMessage>(line);
-        }
-    }
+    //[Benchmark]
+    //public void DeserializeAllLinesWithSystemTextJson()
+    //{
+    //    foreach (var line in _byteLines)
+    //    {
+    //        var _ = JsonSerializer.Deserialize<ChangeMessage>(line);
+    //    }
+    //}
 
     [Benchmark]
     public void DeserializeAllLinesWithCustomDeserializer()
