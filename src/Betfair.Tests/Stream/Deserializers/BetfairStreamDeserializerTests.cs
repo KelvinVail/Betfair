@@ -6,8 +6,6 @@ namespace Betfair.Tests.Stream.Deserializers;
 
 public sealed class BetfairStreamDeserializerTests
 {
-    private readonly BetfairStreamDeserializer _deserializer = new ();
-
     [Fact]
     public void ShouldBeEquivalentToSystemTextJson()
     {
@@ -18,8 +16,8 @@ public sealed class BetfairStreamDeserializerTests
         {
             var bytes = Encoding.UTF8.GetBytes(line);
 
-            var changeMessage = _deserializer.DeserializeChangeMessage(bytes);
-            var systemTextJsonMessage = JsonSerializer.Deserialize<ChangeMessage>(line);
+            var changeMessage = UltraFastChangeMessageDeserializer.Deserialize(bytes);
+            var systemTextJsonMessage = JsonSerializer.Deserialize<ChangeMessage>(bytes);
 
             changeMessage.Should().BeEquivalentTo(systemTextJsonMessage, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
         }

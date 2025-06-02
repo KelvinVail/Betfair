@@ -1,5 +1,6 @@
 ﻿namespace Betfair.Stream;
 
+[ExcludeFromCodeCoverage]
 internal class BetfairTcpClient : TcpClient
 {
     private const string _hostName = "stream-api.betfair.com";

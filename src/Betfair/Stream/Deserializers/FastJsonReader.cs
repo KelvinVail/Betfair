@@ -1,13 +1,7 @@
 using System.Buffers.Text;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace Betfair.Stream.Deserializers;
 
-/// <summary>
-/// Ultra-fast JSON reader optimized for Betfair stream data parsing.
-/// Uses direct byte comparisons and minimal branching for maximum performance.
-/// </summary>
 internal ref struct FastJsonReader
 {
     private readonly ReadOnlySpan<byte> _buffer;
@@ -31,15 +25,6 @@ internal ref struct FastJsonReader
     {
         int length = _buffer.Length;
         TokenType = JsonTokenType.None;
-
-        // Ultra-fast whitespace skipping using direct byte comparisons
-        while (Position < length)
-        {
-            byte b = _buffer[Position];
-            if (b != ' ' && b != '\t' && b != '\r' && b != '\n')
-                break;
-            Position++;
-        }
 
         if (Position >= length)
             return false;
@@ -82,21 +67,15 @@ internal ref struct FastJsonReader
                 ReadToEndOfValue(length);
 
                 // Ultra-fast token type determination
-                if (ValueSpan.Length > 0)
+                byte firstByte = ValueSpan[0];
+                TokenType = firstByte switch
                 {
-                    byte firstByte = ValueSpan[0];
-                    TokenType = firstByte switch
-                    {
-                        (byte)'t' => JsonTokenType.True,
-                        (byte)'f' => JsonTokenType.False,
-                        (byte)'n' => JsonTokenType.Null,
-                        _ => JsonTokenType.Number
-                    };
-                }
-                else
-                {
-                    TokenType = JsonTokenType.Number;
-                }
+                    (byte)'t' => JsonTokenType.True,
+                    (byte)'f' => JsonTokenType.False,
+                    (byte)'n' => JsonTokenType.Null,
+                    _ => JsonTokenType.Number
+                };
+
                 return true;
         }
     }
@@ -246,7 +225,7 @@ internal ref struct FastJsonReader
         return null;
     }
 
-    public string GetString()
+    public string? GetString()
     {
         if (TokenType == JsonTokenType.String)
             return System.Text.Encoding.UTF8.GetString(ValueSpan);
@@ -255,25 +234,21 @@ internal ref struct FastJsonReader
         return string.Empty;
     }
 
-    public DateTime GetDateTime()
-    {
-        if (TokenType == JsonTokenType.String)
-        {
-            var str = System.Text.Encoding.UTF8.GetString(ValueSpan);
-            if (DateTime.TryParse(str, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime value))
-                return value;
-        }
-        return default;
-    }
-
     public DateTime? GetNullableDateTime()
     {
         if (TokenType == JsonTokenType.String)
         {
-            var str = System.Text.Encoding.UTF8.GetString(ValueSpan);
-            if (DateTime.TryParse(str, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime value))
-                return value;
+            var trailingBytes = "0000"u8.ToArray();
+            var newLength = (_lastValueEnd - _lastValueStart) + 3;
+            byte[] result = new byte[newLength];
+            var span = _buffer.Slice(_lastValueStart, _lastValueEnd - _lastValueStart - 1);
+            span.CopyTo(result);
+            trailingBytes.CopyTo(result.AsSpan(span.Length));
+
+            if (Utf8Parser.TryParse(result, out DateTimeOffset value, out _, 'O'))
+                return value.DateTime;
         }
+
         return null;
     }
 
@@ -307,7 +282,7 @@ internal ref struct FastJsonReader
     {
         _lastValueStart = Position + 1;
         Position++;
-        
+
         while (Position < length)
         {
             if (_buffer[Position] == '"')
@@ -315,9 +290,10 @@ internal ref struct FastJsonReader
                 _lastValueEnd = Position;
                 return;
             }
+
             Position++;
         }
-        
+
         _lastValueEnd = Position;
     }
 
@@ -329,6 +305,7 @@ internal ref struct FastJsonReader
         while (Position < length)
         {
             byte currentByte = _buffer[Position];
+
             // Check for value terminators in order of likelihood
             if (currentByte == ',' || currentByte == '}' || currentByte == ']' ||
                 currentByte == ' ' || currentByte == '\t' || currentByte == '\r' || currentByte == '\n')
@@ -336,6 +313,7 @@ internal ref struct FastJsonReader
                 _lastValueEnd = Position;
                 return;
             }
+
             Position++;
         }
 
