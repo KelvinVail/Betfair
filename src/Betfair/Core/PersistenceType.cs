@@ -24,5 +24,5 @@ public enum PersistenceType
     /// <summary>
     /// Put the order into the auction (SP) at turn-in-play.
     /// </summary>
-    Market_On_Close,
+    MarketOnClose,
 }

@@ -171,45 +171,32 @@ public class BetfairApiClient : IDisposable
         _client.PostAsync<CancelExecutionReport>(new Uri($"{_betting}/cancelOrders/"), cancelOrders, cancellationToken);
 
     /// <summary>
-    /// Returns a list of your current orders. Optionally you can filter and sort your current orders using the various parameters.
+    /// Returns a list of your current orders.
+    /// Optionally you can filter and sort your current orders using the various parameters,
+    /// setting none of the parameters will return all of your current orders up to a maximum of 1000 bets,
+    /// ordered BY_BET and sorted EARLIEST_TO_LATEST. To retrieve more than 1000 orders,
+    /// you need to make use of the from and take parameters.
     /// </summary>
-    /// <param name="betIds">Optionally restricts the results to the specified bet IDs.</param>
-    /// <param name="marketIds">Optionally restricts the results to the specified market IDs.</param>
-    /// <param name="orderProjection">Optionally restricts the results to the specified order status.</param>
-    /// <param name="customerOrderRefs">Optionally restricts the results to the specified customer order references.</param>
-    /// <param name="customerStrategyRefs">Optionally restricts the results to the specified customer strategy references.</param>
-    /// <param name="dateRange">Optionally restricts the results to be from/to the specified placed date.</param>
-    /// <param name="orderBy">Specifies how the results will be ordered.</param>
-    /// <param name="sortDir">Specifies the direction the results will be sorted in.</param>
-    /// <param name="fromRecord">Specifies the first record that will be returned.</param>
-    /// <param name="recordCount">Specifies how many records will be returned.</param>
+    /// <param name="filter">The filter to select and sort desired orders. All orders that match the criteria in the filter are selected.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A <see cref="CurrentOrderSummaryReport"/>.</returns>
     public virtual Task<CurrentOrderSummaryReport> CurrentOrders(
-        IEnumerable<string>? betIds = null,
-        IEnumerable<string>? marketIds = null,
-        OrderProjection orderProjection = OrderProjection.All,
-        IEnumerable<string>? customerOrderRefs = null,
-        IEnumerable<string>? customerStrategyRefs = null,
-        DateRange? dateRange = null,
-        OrderBy orderBy = OrderBy.PlacedDate,
-        SortDir sortDir = SortDir.EarliestToLatest,
-        int fromRecord = 0,
-        int recordCount = 1000,
+        ApiOrderFilter? filter = null,
         CancellationToken cancellationToken = default)
     {
+        filter ??= new ApiOrderFilter();
         var request = new CurrentOrdersRequest
         {
-            BetIds = betIds?.ToList(),
-            MarketIds = marketIds?.ToList(),
-            OrderProjection = orderProjection.ToString().ToUpperInvariant(),
-            CustomerOrderRefs = customerOrderRefs?.ToList(),
-            CustomerStrategyRefs = customerStrategyRefs?.ToList(),
-            DateRange = dateRange,
-            OrderBy = orderBy.ToString().ToUpperInvariant(),
-            SortDir = sortDir.ToString().ToUpperInvariant(),
-            FromRecord = fromRecord,
-            RecordCount = recordCount
+            BetIds = filter.BetIds?.ToList(),
+            MarketIds = filter.MarketIds?.ToList(),
+            OrderProjection = filter.OrderProjection,
+            CustomerOrderRefs = filter.CustomerOrderRefs?.ToList(),
+            CustomerStrategyRefs = filter.CustomerStrategyRefs?.ToList(),
+            DateRange = filter.DateRange,
+            OrderBy = filter.OrderByValue,
+            SortDir = filter.SortDir,
+            FromRecord = filter.FromRecord,
+            RecordCount = filter.RecordCount,
         };
         return _client.PostAsync<CurrentOrderSummaryReport>(new Uri($"{_betting}/listCurrentOrders/"), request, cancellationToken);
     }
@@ -341,7 +328,7 @@ public class BetfairApiClient : IDisposable
     public virtual Task<MarketBook[]> MarketBook(
         IEnumerable<string> marketIds,
         PriceProjection? priceProjection = null,
-        OrderProjection? orderProjection = null,
+        OrderStatus? orderProjection = null,
         MatchProjection? matchProjection = null,
         bool? includeOverallPosition = null,
         bool? partitionMatchedByStrategyRef = null,
@@ -392,7 +379,7 @@ public class BetfairApiClient : IDisposable
         long selectionId,
         double? handicap = null,
         PriceProjection? priceProjection = null,
-        OrderProjection? orderProjection = null,
+        OrderStatus? orderProjection = null,
         MatchProjection? matchProjection = null,
         bool? includeOverallPosition = null,
         bool? partitionMatchedByStrategyRef = null,

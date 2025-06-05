@@ -8,24 +8,24 @@ public class OrderTypeTests
     public void EnumOrderTypeHasCorrectValues()
     {
         ((int)OrderType.Limit).Should().Be(0);
-        ((int)OrderType.Limit_On_Close).Should().Be(1);
-        ((int)OrderType.Market_On_Close).Should().Be(2);
+        ((int)OrderType.LimitOnClose).Should().Be(1);
+        ((int)OrderType.MarketOnClose).Should().Be(2);
     }
 
     [Fact]
     public void EnumOrderTypeHasCorrectStringValues()
     {
         OrderType.Limit.ToString().Should().Be("Limit");
-        OrderType.Limit_On_Close.ToString().Should().Be("Limit_On_Close");
-        OrderType.Market_On_Close.ToString().Should().Be("Market_On_Close");
+        OrderType.LimitOnClose.ToString().Should().Be("LimitOnClose");
+        OrderType.MarketOnClose.ToString().Should().Be("MarketOnClose");
     }
 
     [Fact]
     public void CanParseEnumOrderTypeFromString()
     {
         OrderType.Limit.Should().Be(Enum.Parse<OrderType>("Limit"));
-        OrderType.Limit_On_Close.Should().Be(Enum.Parse<OrderType>("Limit_On_Close"));
-        OrderType.Market_On_Close.Should().Be(Enum.Parse<OrderType>("Market_On_Close"));
+        OrderType.LimitOnClose.Should().Be(Enum.Parse<OrderType>("LimitOnClose"));
+        OrderType.MarketOnClose.Should().Be(Enum.Parse<OrderType>("MarketOnClose"));
     }
 
     [Fact]
@@ -40,8 +40,8 @@ public class OrderTypeTests
         var orderTypeMarketOnClose = JsonSerializer.Deserialize<OrderType>(jsonStringMarketOnClose);
 
         OrderType.Limit.Should().Be(orderTypeLimit);
-        OrderType.Limit_On_Close.Should().Be(orderTypeLimitOnClose);
-        OrderType.Market_On_Close.Should().Be(orderTypeMarketOnClose);
+        OrderType.LimitOnClose.Should().Be(orderTypeLimitOnClose);
+        OrderType.MarketOnClose.Should().Be(orderTypeMarketOnClose);
     }
 
     [Fact]
@@ -52,8 +52,8 @@ public class OrderTypeTests
         const string jsonStringMarketOnClose = "\"MARKET_ON_CLOSE\"";
 
         var orderTypeLimit = JsonSerializer.Serialize(OrderType.Limit);
-        var orderTypeLimitOnClose = JsonSerializer.Serialize(OrderType.Limit_On_Close);
-        var orderTypeMarketOnClose = JsonSerializer.Serialize(OrderType.Market_On_Close);
+        var orderTypeLimitOnClose = JsonSerializer.Serialize(OrderType.LimitOnClose);
+        var orderTypeMarketOnClose = JsonSerializer.Serialize(OrderType.MarketOnClose);
 
         orderTypeLimit.Should().Be(jsonStringLimit);
         orderTypeLimitOnClose.Should().Be(jsonStringLimitOnClose);

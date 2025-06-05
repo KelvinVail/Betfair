@@ -25,8 +25,8 @@ public class PlaceInstructionTests
 
     [Theory]
     [InlineData(OrderType.Limit)]
-    [InlineData(OrderType.Limit_On_Close)]
-    [InlineData(OrderType.Market_On_Close)]
+    [InlineData(OrderType.LimitOnClose)]
+    [InlineData(OrderType.MarketOnClose)]
     public void OrderTypeCanBeSet(OrderType orderType)
     {
         var instruction = new PlaceInstruction { OrderType = orderType };

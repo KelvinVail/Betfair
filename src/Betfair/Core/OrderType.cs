@@ -1,8 +1,6 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Betfair.Core;
+﻿namespace Betfair.Core;
 
 [JsonConverter(typeof(UpperCaseEnumJsonConverter<OrderType>))]
-[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "The underscores are required by Betfair.")]
 public enum OrderType
 {
     /// <summary>
@@ -13,10 +11,10 @@ public enum OrderType
     /// <summary>
     /// Limit order for the auction (SP).
     /// </summary>
-    Limit_On_Close,
+    LimitOnClose,
 
     /// <summary>
     /// Market order for the auction (SP).
     /// </summary>
-    Market_On_Close,
+    MarketOnClose,
 }

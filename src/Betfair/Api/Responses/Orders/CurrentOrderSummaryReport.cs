@@ -6,12 +6,14 @@
 public class CurrentOrderSummaryReport
 {
     /// <summary>
-    /// Gets the current orders.
+    /// Gets the list of current orders returned by your query.
+    /// This will be a valid list (i.e. empty or non-empty but never 'null').
     /// </summary>
-    public List<CurrentOrder>? CurrentOrders { get; internal set; }
+    public List<CurrentOrder> CurrentOrders { get; init; } = [];
 
     /// <summary>
-    /// Gets a value indicating whether more orders are available.
+    /// Gets a value indicating whether there are further result items beyond this page.
+    /// Note that underlying data is highly time-dependent and the subsequent search orders query might return an empty result.
     /// </summary>
-    public bool MoreAvailable { get; internal set; }
+    public bool MoreAvailable { get; init; }
 }

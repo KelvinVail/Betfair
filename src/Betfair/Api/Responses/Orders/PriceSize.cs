@@ -8,10 +8,10 @@ public class PriceSize
     /// <summary>
     /// Gets the price.
     /// </summary>
-    public double Price { get; internal set; }
+    public double Price { get; init; }
 
     /// <summary>
     /// Gets the size.
     /// </summary>
-    public double Size { get; internal set; }
+    public double Size { get; init; }
 }

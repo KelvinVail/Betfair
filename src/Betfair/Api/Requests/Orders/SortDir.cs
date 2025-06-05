@@ -1,17 +1,19 @@
 ﻿﻿namespace Betfair.Api.Requests.Orders;
 
 /// <summary>
-/// Sort direction for orders.
+/// Specifies the direction the results will be sorted in.
+/// If no value is passed in, it defaults to EARLIEST_TO_LATEST.
 /// </summary>
+[JsonConverter(typeof(UpperCaseEnumJsonConverter<SortDir>))]
 public enum SortDir
 {
     /// <summary>
-    /// Earliest to latest.
+    /// Order from the earliest value to latest e.g. lowest betId is first in the results.
     /// </summary>
     EarliestToLatest,
 
     /// <summary>
-    /// Latest to earliest.
+    /// Order from the latest value to the earliest e.g. highest betId is first in the results.
     /// </summary>
-    LatestToEarliest
+    LatestToEarliest,
 }

@@ -9,7 +9,7 @@ internal class CurrentOrdersRequest
     public List<string>? MarketIds { get; set; }
 
     [JsonPropertyName("orderProjection")]
-    public string? OrderProjection { get; set; }
+    public OrderStatus? OrderProjection { get; set; }
 
     [JsonPropertyName("customerOrderRefs")]
     public List<string>? CustomerOrderRefs { get; set; }
@@ -21,14 +21,14 @@ internal class CurrentOrdersRequest
     public DateRange? DateRange { get; set; }
 
     [JsonPropertyName("orderBy")]
-    public string? OrderBy { get; set; }
+    public OrderBy? OrderBy { get; set; }
 
     [JsonPropertyName("sortDir")]
-    public string? SortDir { get; set; }
+    public SortDir? SortDir { get; set; }
 
     [JsonPropertyName("fromRecord")]
     public int FromRecord { get; set; }
 
     [JsonPropertyName("recordCount")]
-    public int RecordCount { get; set; }
+    public int RecordCount { get; set; } = 1000;
 }
