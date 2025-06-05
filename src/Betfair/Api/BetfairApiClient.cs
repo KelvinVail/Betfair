@@ -68,6 +68,7 @@ public class BetfairApiClient : IDisposable
 
     /// <summary>
     /// Returns a list of Competitions (i.e. World Cup 2014) associated with the markets selected by the MarketFilter.
+    /// Please Note: for horse and greyhounds racing, please use Venues.
     /// </summary>
     /// <param name="filter">The filter to select desired markets. All markets that match the criteria in the filter are selected.</param>
     /// <param name="cancellationToken">A cancellation token.</param>

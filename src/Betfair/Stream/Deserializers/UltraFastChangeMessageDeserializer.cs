@@ -2,17 +2,17 @@ using Betfair.Stream.Responses;
 
 namespace Betfair.Stream.Deserializers;
 
-internal static class UltraFastChangeMessageDeserializer
+public static class UltraFastChangeMessageDeserializer
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static ChangeMessage? Deserialize(ReadOnlySpan<byte> jsonBytes)
+    public static ChangeMessage Deserialize(ReadOnlySpan<byte> jsonBytes)
     {
         var reader = new FastJsonReader(jsonBytes);
         return ReadChangeMessageOptimized(ref reader);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ChangeMessage? ReadChangeMessageOptimized(ref FastJsonReader reader)
+    private static ChangeMessage ReadChangeMessageOptimized(ref FastJsonReader reader)
     {
         var message = new ChangeMessage();
 

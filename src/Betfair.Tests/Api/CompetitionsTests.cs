@@ -46,6 +46,43 @@ public class CompetitionsTests : IDisposable
             new CompetitionsRequest { Filter = filter });
     }
 
+    [Fact]
+    public async Task RequestBodyShouldBeSerializable()
+    {
+        var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
+
+        await _api.Competitions(filter);
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CompetitionsRequest);
+
+        json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
+    }
+
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        _client.RespondsWithBody = new[]
+        {
+            new CompetitionResult
+            {
+                MarketCount = 2,
+                CompetitionRegion = "Europe",
+                Competition = new Competition
+                {
+                    Id = "1",
+                    Name = "Test Competition",
+                },
+            },
+        };
+
+        var response = await _api.Competitions();
+
+        response.Should().HaveCount(1);
+        response[0].MarketCount.Should().Be(2);
+        response[0].CompetitionRegion.Should().Be("Europe");
+        response[0].Competition!.Id.Should().Be("1");
+        response[0].Competition!.Name.Should().Be("Test Competition");
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);
