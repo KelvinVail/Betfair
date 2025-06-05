@@ -1,38 +1,38 @@
-﻿﻿using Betfair.Api;
+﻿using Betfair.Api;
 using Betfair.Api.Requests;
 using Betfair.Api.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
-public class CompetitionsTests : IDisposable
+public class CountriesTests : IDisposable
 {
     private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
-    public CompetitionsTests()
+    public CountriesTests()
     {
         _api = new BetfairApiClient(_client);
-        _client.RespondsWithBody = Array.Empty<CompetitionResult>();
+        _client.RespondsWithBody = Array.Empty<CountryCodeResult>();
     }
 
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.Competitions();
+        await _api.Countries();
 
         _client.LastUriCalled.Should().Be(
-            "https://api.betfair.com/exchange/betting/rest/v1.0/listCompetitions/");
+            "https://api.betfair.com/exchange/betting/rest/v1.0/listCountries/");
     }
 
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.Competitions();
+        await _api.Countries();
 
         _client.LastContentSent.Should().BeEquivalentTo(
-            new CompetitionsRequest());
+            new CountriesRequest());
     }
 
     [Fact]
@@ -40,10 +40,10 @@ public class CompetitionsTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.Competitions(filter);
+        await _api.Countries(filter);
 
         _client.LastContentSent.Should().BeEquivalentTo(
-            new CompetitionsRequest { Filter = filter });
+            new CountriesRequest { Filter = filter });
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class CompetitionsTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.Competitions(filter);
-        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CompetitionsRequest);
+        await _api.Countries(filter);
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CountriesRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
     }
@@ -62,25 +62,14 @@ public class CompetitionsTests : IDisposable
     {
         _client.RespondsWithBody = new[]
         {
-            new CompetitionResult
-            {
-                MarketCount = 2,
-                CompetitionRegion = "Europe",
-                Competition = new Competition
-                {
-                    Id = "1",
-                    Name = "Test Competition",
-                },
-            },
+            new CountryCodeResult { CountryCode = "GB", MarketCount = 2 },
         };
 
-        var response = await _api.Competitions();
+        var response = await _api.Countries();
 
         response.Should().HaveCount(1);
         response[0].MarketCount.Should().Be(2);
-        response[0].CompetitionRegion.Should().Be("Europe");
-        response[0].Competition!.Id.Should().Be("1");
-        response[0].Competition!.Name.Should().Be("Test Competition");
+        response[0].CountryCode.Should().Be("GB");
     }
 
     public void Dispose()
@@ -96,7 +85,7 @@ public class CompetitionsTests : IDisposable
             if (disposing)
             {
                 _client.Dispose();
-                _api?.Dispose();
+                _api.Dispose();
             }
 
             _disposedValue = true;
