@@ -198,6 +198,7 @@ public class BetfairApiClient : IDisposable
             FromRecord = filter.FromRecord,
             RecordCount = filter.RecordCount,
         };
+
         return _client.PostAsync<CurrentOrderSummaryReport>(new Uri($"{_betting}/listCurrentOrders/"), request, cancellationToken);
     }
 
