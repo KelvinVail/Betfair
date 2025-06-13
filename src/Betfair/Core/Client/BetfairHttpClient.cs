@@ -8,12 +8,16 @@ internal class BetfairHttpClient : HttpClient
     private static readonly StringWithQualityHeaderValue _gzipEncoding = new ("gzip");
 
     internal BetfairHttpClient(X509Certificate2? cert)
-        : this(new BetfairClientHandler(cert))
+        : base(new BetfairClientHandler(cert), true)
     {
+        Configure();
     }
 
     internal BetfairHttpClient(HttpMessageHandler handler)
-        : base(handler, true) => Configure();
+        : base(handler, true)
+    {
+        Configure();
+    }
 
     private void Configure()
     {

@@ -8,10 +8,10 @@ public class MarketTypeResult
     /// <summary>
     /// Gets the market type.
     /// </summary>
-    public string? MarketType { get; internal set; }
+    public string? MarketType { get; init; }
 
     /// <summary>
     /// Gets the count of markets associated with this market type.
     /// </summary>
-    public int MarketCount { get; internal set; }
+    public int MarketCount { get; init; }
 }
