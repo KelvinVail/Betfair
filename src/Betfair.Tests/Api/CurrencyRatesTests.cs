@@ -1,64 +1,56 @@
 using Betfair.Api;
-using Betfair.Api.Requests;
-using Betfair.Api.Responses;
-using Betfair.Core;
+using Betfair.Api.Requests.Account;
+using Betfair.Api.Responses.Account;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
-public class VenuesTests : IDisposable
+public class CurrencyRatesTests : IDisposable
 {
     private readonly HttpAdapterStub _client = new();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
-    public VenuesTests()
+    public CurrencyRatesTests()
     {
         _api = new BetfairApiClient(_client);
-        _client.RespondsWithBody = Array.Empty<VenueResult>();
+        _client.RespondsWithBody = Array.Empty<CurrencyRate>();
     }
 
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.Venues();
+        await _api.CurrencyRates();
 
         _client.LastUriCalled.Should().Be(
-            "https://api.betfair.com/exchange/betting/rest/v1.0/listVenues/");
+            "https://api.betfair.com/exchange/account/rest/v1.0/listCurrencyRates/");
     }
 
     [Fact]
-    public async Task PostsDefaultBodyIfFilterIsNull()
+    public async Task PostsDefaultBodyIfFromCurrencyIsNull()
     {
-        await _api.Venues();
+        await _api.CurrencyRates();
 
         _client.LastContentSent.Should().BeEquivalentTo(
-            new VenuesRequest());
+            new CurrencyRatesRequest());
     }
 
     [Fact]
-    public async Task PostsFilterIfProvided()
+    public async Task PostsProvidedFromCurrency()
     {
-        var filter = new ApiMarketFilter().WithEventTypes(Betfair.Core.EventType.Of(1));
-
-        await _api.Venues(filter);
+        await _api.CurrencyRates("USD");
 
         _client.LastContentSent.Should().BeEquivalentTo(
-            new VenuesRequest
-            {
-                Filter = filter,
-            });
+            new CurrencyRatesRequest { FromCurrency = "USD" });
     }
 
     [Fact]
     public async Task RequestBodyShouldBeSerializable()
     {
-        var filter = new ApiMarketFilter().WithEventTypes(Betfair.Core.EventType.Of(1));
+        await _api.CurrencyRates("USD");
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CurrencyRatesRequest);
 
-        await _api.Venues(filter);
-        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.VenuesRequest);
-
-        json.Should().Be("{\"filter\":{\"eventTypeIds\":[\"1\"]}}");
+        json.Should().Be("{\"fromCurrency\":\"USD\"}");
     }
 
     [Fact]
@@ -66,15 +58,20 @@ public class VenuesTests : IDisposable
     {
         var expectedResponse = new[]
         {
-            new VenueResult
+            new CurrencyRate
             {
-                Venue = "Cheltenham",
-                MarketCount = 5,
+                CurrencyCode = "GBP",
+                Rate = 0.85
             },
+            new CurrencyRate
+            {
+                CurrencyCode = "EUR",
+                Rate = 0.92
+            }
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Venues();
+        var response = await _api.CurrencyRates("USD");
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -96,4 +93,4 @@ public class VenuesTests : IDisposable
 
         _disposedValue = true;
     }
-} 
+}

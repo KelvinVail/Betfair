@@ -1,8 +1,8 @@
 ﻿﻿using Betfair.Api;
-﻿using Betfair.Api.Responses;
-﻿using Betfair.Tests.Api.TestDoubles;
+using Betfair.Api.Responses.Markets;
+using Betfair.Tests.Api.TestDoubles;
 
-﻿namespace Betfair.Tests.Api;
+namespace Betfair.Tests.Api;
 
 public class MarketStatusTests : IDisposable
 {
@@ -13,7 +13,7 @@ public class MarketStatusTests : IDisposable
     public MarketStatusTests()
     {
         _api = new BetfairApiClient(_client);
-        _client.RespondsWithBody = Array.Empty<MarketStatus>();
+        _client.RespondsWithBody = Array.Empty<MarketBook>();
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class MarketStatusTests : IDisposable
     [Fact]
     public async Task IfResponseIsEmptyReturnNone()
     {
-        _client.RespondsWithBody = Array.Empty<MarketStatus>();
+        _client.RespondsWithBody = Array.Empty<MarketBook>();
 
         var response = await _api.MarketStatus("1.2345", default);
 
@@ -51,7 +51,7 @@ public class MarketStatusTests : IDisposable
     [InlineData("CLOSED")]
     public async Task ReturnStatusFromResponse(string status)
     {
-        _client.RespondsWithBody = new MarketStatus[] { new () { Status = status } };
+        _client.RespondsWithBody = new MarketBook[] { new () { Status = status } };
 
         var response = await _api.MarketStatus("1.2345", default);
 

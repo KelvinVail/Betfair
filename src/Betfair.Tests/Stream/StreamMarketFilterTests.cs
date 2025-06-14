@@ -220,7 +220,7 @@ public class StreamMarketFilterTests
     {
         _filter.WithEventTypes(eventTypeId);
 
-        _filter.EventTypeIds.Should().Contain(eventTypeId);
+        _filter.EventTypeIds.Should().Contain(eventTypeId.ToString());
     }
 
     [Fact]
@@ -229,8 +229,8 @@ public class StreamMarketFilterTests
         _filter.WithEventTypes(1);
         _filter.WithEventTypes(2);
 
-        _filter.EventTypeIds.Should().Contain(1);
-        _filter.EventTypeIds.Should().Contain(2);
+        _filter.EventTypeIds.Should().Contain("1");
+        _filter.EventTypeIds.Should().Contain("2");
     }
 
     [Fact]
@@ -240,7 +240,7 @@ public class StreamMarketFilterTests
         _filter.WithEventTypes(1);
 
         _filter.EventTypeIds?.Count.Should().Be(1);
-        _filter.EventTypeIds.Should().Contain(1);
+        _filter.EventTypeIds.Should().Contain("1");
     }
 
     [Fact]

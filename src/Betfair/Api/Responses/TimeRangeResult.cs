@@ -8,10 +8,12 @@ public class TimeRangeResult
     /// <summary>
     /// Gets the time range.
     /// </summary>
-    public DateRangeResult? TimeRange { get; init; }
+    [JsonPropertyName("timeRange")]
+    public TimeRange? TimeRange { get; init; }
 
     /// <summary>
     /// Gets the count of markets associated with this time range.
     /// </summary>
+    [JsonPropertyName("marketCount")]
     public int MarketCount { get; init; }
 }

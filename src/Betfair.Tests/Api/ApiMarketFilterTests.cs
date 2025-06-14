@@ -44,7 +44,7 @@ public class ApiMarketFilterTests
     {
         var card = new ApiMarketFilter().TodaysCard();
 
-        card.EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
+        card.EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString());
 
         card.MarketTypeCodes.Should().Contain(MarketType.Win.Id);
         card.MarketTypes.Should().Contain(MarketType.Win.Id);

@@ -1,4 +1,5 @@
 ﻿using Betfair.Api.Responses;
+using Betfair.Api.Responses.Markets;
 using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 
@@ -22,10 +23,10 @@ public class HttpDeserializerTests : IDisposable
     [Fact]
     public async Task ResponsesShouldBeDeserialized()
     {
-        var expectedResponse = new MarketStatus[] { new () { Status = "test" } };
+        var expectedResponse = new MarketBook[] { new () { Status = "test" } };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _client.PostAsync<MarketStatus[]>(_uri, _content);
+        var response = await _client.PostAsync<MarketBook[]>(_uri, _content);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -38,7 +39,7 @@ public class HttpDeserializerTests : IDisposable
         response.Detail.ApiNgException.ErrorCode = "INVALID_SESSION_INFORMATION";
         _handler.RespondsWithBody = response;
 
-        var act = async () => { await _client.PostAsync<MarketStatus>(_uri, _content); };
+        var act = async () => { await _client.PostAsync<MarketBook>(_uri, _content); };
 
         var expectedMessage = JsonSerializer.Serialize(response, response.GetInternalContext());
         (await act.Should().ThrowAsync<HttpRequestException>())

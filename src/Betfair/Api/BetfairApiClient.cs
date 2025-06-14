@@ -399,7 +399,7 @@ public class BetfairApiClient : IDisposable
         string marketId,
         CancellationToken cancellationToken)
     {
-        var response = await _client.PostAsync<MarketStatus[]>(
+        var response = await _client.PostAsync<MarketBook[]>(
             new Uri($"{_betting}/listMarketBook/"),
             new MarketBookRequest { MarketIds = [marketId] },
             cancellationToken);

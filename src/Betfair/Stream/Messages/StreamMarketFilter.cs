@@ -8,13 +8,13 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     public HashSet<string>? BettingTypes { get; private set; }
 
     [JsonPropertyName("turnInPlayEnabled")]
-    public bool? TurnInPlayEnabled { get; private set; }
+    public new bool? TurnInPlayEnabled { get; private set; }
 
     [JsonPropertyName("venues")]
-    public HashSet<string>? Venues { get; private set; }
+    public new HashSet<string>? Venues { get; private set; }
 
     [JsonPropertyName("eventIds")]
-    public HashSet<string>? EventIds { get; private set; }
+    public new HashSet<string>? EventIds { get; private set; }
 
     [JsonPropertyName("bspMarket")]
     public bool? BspMarket { get; private set; }
@@ -48,7 +48,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
         venues is null ? this : WithVenues(venues.Where(x => x is not null).Select(x => x.Id).ToArray());
 
     /// <inheritdoc cref="StreamMarketFilter.WithVenues"/>
-    public StreamMarketFilter WithVenues(params string[] venues)
+    public new StreamMarketFilter WithVenues(params string[] venues)
     {
         if (venues is null) return this;
 

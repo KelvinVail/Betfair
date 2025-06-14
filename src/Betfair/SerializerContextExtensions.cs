@@ -51,7 +51,6 @@ public static class SerializerContextExtensions
         { typeof(MarketCatalogue), SerializerContext.Default.MarketCatalogue },
         { typeof(MarketDescription), SerializerContext.Default.MarketDescription },
         { typeof(MarketEvent), SerializerContext.Default.MarketEvent },
-        { typeof(MarketStatus[]), SerializerContext.Default.MarketStatusArray },
         { typeof(RunnerResponse), SerializerContext.Default.RunnerResponse },
         { typeof(MarketCatalogueRequest), SerializerContext.Default.MarketCatalogueRequest },
         { typeof(MarketBookRequest), SerializerContext.Default.MarketBookRequest },

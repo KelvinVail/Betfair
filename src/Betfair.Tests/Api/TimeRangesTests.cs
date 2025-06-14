@@ -86,10 +86,10 @@ public class TimeRangesTests : IDisposable
         {
             new TimeRangeResult
             {
-                TimeRange = new DateRangeResult
+                TimeRange = new TimeRange
                 {
-                    From = DateTimeOffset.UtcNow.ToString("s"),
-                    To = DateTimeOffset.UtcNow.AddDays(1).ToString("s"),
+                    From = DateTimeOffset.UtcNow,
+                    To = DateTimeOffset.UtcNow.AddDays(1),
                 },
                 MarketCount = 2,
             },

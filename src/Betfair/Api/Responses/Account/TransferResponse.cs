@@ -8,5 +8,5 @@ public class TransferResponse
     /// <summary>
     /// Gets the transaction ID.
     /// </summary>
-    public string? TransactionId { get; internal set; }
+    public string? TransactionId { get; init; }
 }

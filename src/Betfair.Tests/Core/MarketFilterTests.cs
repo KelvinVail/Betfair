@@ -91,8 +91,8 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     {
         WithEventTypes(EventType.HorseRacing, EventType.AmericanFootball);
 
-        EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
-        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id);
+        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString());
+        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id.ToString());
     }
 
     [Fact]
@@ -101,8 +101,8 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
         WithEventTypes(EventType.HorseRacing);
         WithEventTypes(EventType.AmericanFootball);
 
-        EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
-        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id);
+        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString());
+        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id.ToString());
     }
 
     [Fact]
@@ -110,8 +110,8 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     {
         WithEventTypes(1, 7);
 
-        EventTypeIds.Should().Contain(1);
-        EventTypeIds.Should().Contain(7);
+        EventTypeIds.Should().Contain("1");
+        EventTypeIds.Should().Contain("7");
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     {
         WithEventTypes(EventType.HorseRacing, null!);
 
-        EventTypeIds.Should().Contain(EventType.HorseRacing.Id);
+        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString());
         EventTypeIds.Should().NotContainNulls();
     }
 

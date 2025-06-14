@@ -43,7 +43,7 @@ public class EventTypeTests : IDisposable
         await _api.EventTypes(filter);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.EventTypesRequest);
 
-        json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]},\"maxResults\":1000}");
+        json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
     }
 
     public void Dispose()

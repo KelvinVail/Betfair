@@ -51,7 +51,6 @@ namespace Betfair;
 [JsonSerializable(typeof(MarketCatalogue))]
 [JsonSerializable(typeof(MarketDescription))]
 [JsonSerializable(typeof(MarketEvent))]
-[JsonSerializable(typeof(MarketStatus[]))]
 [JsonSerializable(typeof(RunnerResponse))]
 [JsonSerializable(typeof(MarketCatalogue[]))]
 [JsonSerializable(typeof(MarketCatalogue))]

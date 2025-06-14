@@ -13,4 +13,7 @@ internal class MarketCatalogueRequest
 
     [JsonPropertyName("maxResults")]
     public int MaxResults { get; set; } = 1000;
+
+    [JsonPropertyName("locale")]
+    public string? Locale { get; set; }
 }

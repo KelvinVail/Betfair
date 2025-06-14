@@ -8,35 +8,35 @@ public class StatementItem
     /// <summary>
     /// Gets the reference ID.
     /// </summary>
-    public string? RefId { get; internal set; }
+    public string? RefId { get; init; }
 
     /// <summary>
     /// Gets the item date.
     /// </summary>
-    public DateTime ItemDate { get; internal set; }
+    public DateTime ItemDate { get; init; }
 
     /// <summary>
     /// Gets the amount.
     /// </summary>
-    public double Amount { get; internal set; }
+    public double Amount { get; init; }
 
     /// <summary>
     /// Gets the balance.
     /// </summary>
-    public double Balance { get; internal set; }
+    public double Balance { get; init; }
 
     /// <summary>
     /// Gets the item class.
     /// </summary>
-    public string? ItemClass { get; internal set; }
+    public string? ItemClass { get; init; }
 
     /// <summary>
     /// Gets the item class data.
     /// </summary>
-    public Dictionary<string, object>? ItemClassData { get; internal set; }
+    public Dictionary<string, string>? ItemClassData { get; init; }
 
     /// <summary>
     /// Gets the legacy data.
     /// </summary>
-    public StatementLegacyData? LegacyData { get; internal set; }
+    public StatementLegacyData? LegacyData { get; init; }
 }

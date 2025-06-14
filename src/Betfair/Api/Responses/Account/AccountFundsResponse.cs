@@ -8,35 +8,35 @@ public class AccountFundsResponse
     /// <summary>
     /// Gets the available to bet amount.
     /// </summary>
-    public double AvailableToBetBalance { get; internal set; }
+    public double AvailableToBetBalance { get; init; }
 
     /// <summary>
     /// Gets the exposure.
     /// </summary>
-    public double Exposure { get; internal set; }
+    public double Exposure { get; init; }
 
     /// <summary>
     /// Gets the retained commission.
     /// </summary>
-    public double RetainedCommission { get; internal set; }
+    public double RetainedCommission { get; init; }
 
     /// <summary>
     /// Gets the exposure limit.
     /// </summary>
-    public double ExposureLimit { get; internal set; }
+    public double ExposureLimit { get; init; }
 
     /// <summary>
     /// Gets the discount rate.
     /// </summary>
-    public double DiscountRate { get; internal set; }
+    public double DiscountRate { get; init; }
 
     /// <summary>
     /// Gets the points balance.
     /// </summary>
-    public int PointsBalance { get; internal set; }
+    public int PointsBalance { get; init; }
 
     /// <summary>
     /// Gets the wallet.
     /// </summary>
-    public string? Wallet { get; internal set; }
+    public string? Wallet { get; init; }
 }
