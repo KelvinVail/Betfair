@@ -31,7 +31,7 @@ public static class SerializerContextExtensions
         { typeof(Authentication), SerializerContext.Default.Authentication },
         { typeof(DataFilter), SerializerContext.Default.DataFilter },
         { typeof(MarketSubscription), SerializerContext.Default.MarketSubscription },
-        { typeof(OrderFilter), SerializerContext.Default.OrderFilter },
+        { typeof(StreamOrderFilter), SerializerContext.Default.StreamOrderFilter },
         { typeof(OrderSubscription), SerializerContext.Default.OrderSubscription },
         { typeof(StreamMarketFilter), SerializerContext.Default.StreamMarketFilter },
         { typeof(ChangeMessage), SerializerContext.Default.ChangeMessage },

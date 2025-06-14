@@ -23,7 +23,7 @@ namespace Betfair;
 // Stream Messages
 [JsonSerializable(typeof(DataFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MarketSubscription), GenerationMode = JsonSourceGenerationMode.Serialization)]
-[JsonSerializable(typeof(OrderFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(StreamOrderFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(OrderSubscription), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(StreamMarketFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MessageBase), GenerationMode = JsonSourceGenerationMode.Serialization)]

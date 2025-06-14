@@ -1,6 +1,6 @@
 using Betfair.Core.Enums;
 
-namespace Betfair.Api.Requests.Orders;
+namespace Betfair.Api.Requests.Orders.Filters;
 
 /// <summary>
 /// Filter for current orders API requests.

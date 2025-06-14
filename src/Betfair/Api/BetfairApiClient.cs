@@ -2,6 +2,7 @@
 using Betfair.Api.Requests.Account;
 using Betfair.Api.Requests.Markets;
 using Betfair.Api.Requests.Orders;
+using Betfair.Api.Requests.Orders.Filters;
 using Betfair.Api.Responses;
 using Betfair.Api.Responses.Account;
 using Betfair.Api.Responses.Markets;

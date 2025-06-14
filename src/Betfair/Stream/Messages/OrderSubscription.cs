@@ -4,7 +4,7 @@ internal class OrderSubscription : MessageBase
 {
     public OrderSubscription(
         int id,
-        OrderFilter? orderFilter = null,
+        StreamOrderFilter? orderFilter = null,
         TimeSpan? conflate = null)
         : base("orderSubscription", id)
     {
@@ -13,7 +13,7 @@ internal class OrderSubscription : MessageBase
     }
 
     [JsonPropertyName("orderFilter")]
-    public OrderFilter? OrderFilter { get; }
+    public StreamOrderFilter? OrderFilter { get; }
 
     [JsonPropertyName("conflateMs")]
     public int ConflateMs { get; }

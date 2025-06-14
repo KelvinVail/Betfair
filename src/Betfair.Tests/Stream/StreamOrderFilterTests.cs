@@ -2,9 +2,9 @@
 
 namespace Betfair.Tests.Stream;
 
-public class OrderFilterTests
+public class StreamOrderFilterTests
 {
-    private readonly OrderFilter _filter = new ();
+    private readonly StreamOrderFilter _filter = new ();
 
     [Fact]
     public void IncludeOverallPositionIsNullAsDefault() =>

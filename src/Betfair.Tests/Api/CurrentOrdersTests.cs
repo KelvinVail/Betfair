@@ -1,5 +1,6 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests.Orders;
+using Betfair.Api.Requests.Orders.Filters;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Enums;
 using Betfair.Tests.Api.TestDoubles;

@@ -160,7 +160,7 @@ public class SubscriptionTests
     public async Task SubscribeToOrderWritesOrderFilterToTheStream(string strategyRef)
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
-        var orderFilter = new OrderFilter().WithStrategyRefs(strategyRef);
+        var orderFilter = new StreamOrderFilter().WithStrategyRefs(strategyRef);
 
         await sub.SubscribeToOrders(orderFilter);
 

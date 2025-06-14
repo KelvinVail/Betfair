@@ -73,7 +73,7 @@ public class Subscription : IDisposable
     /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
     /// <param name="cancellationToken">Cancellation Token.</param>
     /// <returns>An awaitable task.</returns>
-    public async Task SubscribeToOrders(OrderFilter? orderFilter = null, TimeSpan? conflate = null, CancellationToken cancellationToken = default)
+    public async Task SubscribeToOrders(StreamOrderFilter? orderFilter = null, TimeSpan? conflate = null, CancellationToken cancellationToken = default)
     {
         await Authenticate(cancellationToken);
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// Used to shape and filter the order data returned on the stream.
 /// </summary>
-public class OrderFilter
+public class StreamOrderFilter
 {
     private HashSet<string>? _strategyRefs;
 
@@ -19,8 +19,8 @@ public class OrderFilter
     /// <summary>
     /// Returns aggregated order data per runner. e.g. (Back / Lays).
     /// </summary>
-    /// <returns>This <see cref="OrderFilter"/>.</returns>
-    public OrderFilter WithAggregatedPositions()
+    /// <returns>This <see cref="StreamOrderFilter"/>.</returns>
+    public StreamOrderFilter WithAggregatedPositions()
     {
         IncludeOverallPosition = true;
         return this;
@@ -29,8 +29,8 @@ public class OrderFilter
     /// <summary>
     /// Returns data for each individual order per runner.
     /// </summary>
-    /// <returns>This <see cref="OrderFilter"/>.</returns>
-    public OrderFilter WithDetailedPositions()
+    /// <returns>This <see cref="StreamOrderFilter"/>.</returns>
+    public StreamOrderFilter WithDetailedPositions()
     {
         IncludeOverallPosition = false;
         return this;
@@ -41,8 +41,8 @@ public class OrderFilter
     /// if aggregated positions have been request.
     /// Has no effect if detailed permissions have been requested.
     /// </summary>
-    /// <returns>This <see cref="OrderFilter"/>.</returns>
-    public OrderFilter WithOrdersPerStrategy()
+    /// <returns>This <see cref="StreamOrderFilter"/>.</returns>
+    public StreamOrderFilter WithOrdersPerStrategy()
     {
         PartitionMatchedByStrategyRef = true;
         return this;
@@ -54,8 +54,8 @@ public class OrderFilter
     /// (Note: overall position is not filtered)
     /// </summary>
     /// <param name="strategyRefs">A set of strategy references (specified in placeOrders).</param>
-    /// <returns>This <see cref="OrderFilter"/>.</returns>
-    public OrderFilter WithStrategyRefs(params string[] strategyRefs)
+    /// <returns>This <see cref="StreamOrderFilter"/>.</returns>
+    public StreamOrderFilter WithStrategyRefs(params string[] strategyRefs)
     {
         _strategyRefs ??=[];
 
