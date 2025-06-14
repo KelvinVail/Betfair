@@ -25,8 +25,6 @@ public class HttpMessageHandlerSpy : HttpClientHandler
 
     public string? StringContentSent { get; private set; }
 
-    public HttpContent? RawContentSent { get; private set; }
-
     protected override async Task<HttpResponseMessage> SendAsync(
         [NotNull]HttpRequestMessage request,
         CancellationToken cancellationToken)

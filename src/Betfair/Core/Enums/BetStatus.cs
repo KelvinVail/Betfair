@@ -23,5 +23,5 @@ public enum BetStatus
     /// <summary>
     /// Cancelled bets.
     /// </summary>
-    Cancelled
+    Cancelled,
 }

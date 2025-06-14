@@ -8,7 +8,7 @@ namespace Betfair.Tests.Api;
 
 public class VenuesTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -96,4 +96,4 @@ public class VenuesTests : IDisposable
 
         _disposedValue = true;
     }
-} 
+}

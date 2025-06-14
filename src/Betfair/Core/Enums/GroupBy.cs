@@ -28,5 +28,5 @@ public enum GroupBy
     /// <summary>
     /// Group by bet.
     /// </summary>
-    Bet
+    Bet,
 }

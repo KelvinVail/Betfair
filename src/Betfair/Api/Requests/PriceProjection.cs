@@ -6,10 +6,10 @@
 public class PriceProjection
 {
     /// <summary>
-    /// Gets or sets the price data to include.
+    /// Gets the price data to include.
     /// </summary>
     [JsonPropertyName("priceData")]
-    public List<string>? PriceData { get; set; }
+    public List<string>? PriceData { get; init; }
 
     /// <summary>
     /// Gets or sets the exchange prices to include.

@@ -8,7 +8,7 @@ namespace Betfair.Tests.Api;
 
 public class TransferFundsTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -46,7 +46,7 @@ public class TransferFundsTests : IDisposable
             {
                 From = "UK",
                 To = "AUSTRALIAN",
-                Amount = 50.25
+                Amount = 50.25,
             });
     }
 
@@ -55,7 +55,7 @@ public class TransferFundsTests : IDisposable
     {
         var expectedResponse = new TransferResponse
         {
-            TransactionId = "TXN123456789"
+            TransactionId = "TXN123456789",
         };
         _client.RespondsWithBody = expectedResponse;
 

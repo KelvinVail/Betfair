@@ -7,7 +7,7 @@ namespace Betfair.Tests.Api;
 
 public class CurrencyRatesTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 

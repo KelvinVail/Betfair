@@ -1,4 +1,4 @@
-﻿﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Responses.Markets;
 using Betfair.Tests.Api.TestDoubles;
 

@@ -9,5 +9,5 @@ public class KeyLineDescription
     /// Gets the list of KeyLineSelection objects.
     /// </summary>
     [JsonPropertyName("keyLine")]
-    public List<KeyLineSelection> KeyLine { get; init; } = new();
+    public List<KeyLineSelection> KeyLine { get; init; } = new ();
 }
