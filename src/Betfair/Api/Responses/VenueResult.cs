@@ -8,10 +8,10 @@ public class VenueResult
     /// <summary>
     /// Gets the venue.
     /// </summary>
-    public string? Venue { get; internal set; }
+    public string? Venue { get; init; }
 
     /// <summary>
     /// Gets the count of markets associated with this venue.
     /// </summary>
-    public int MarketCount { get; internal set; }
+    public int MarketCount { get; init; }
 }

@@ -1,6 +1,4 @@
-﻿﻿using Betfair.Api.Requests;
-
-namespace Betfair.Api.Responses;
+﻿namespace Betfair.Api.Responses;
 
 /// <summary>
 /// Time range result.
@@ -10,10 +8,10 @@ public class TimeRangeResult
     /// <summary>
     /// Gets the time range.
     /// </summary>
-    public DateRange? TimeRange { get; internal set; }
+    public DateRangeResult? TimeRange { get; init; }
 
     /// <summary>
     /// Gets the count of markets associated with this time range.
     /// </summary>
-    public int MarketCount { get; internal set; }
+    public int MarketCount { get; init; }
 }
