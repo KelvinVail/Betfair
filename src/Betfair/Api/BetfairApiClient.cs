@@ -3,6 +3,7 @@ using Betfair.Api.Requests.Account;
 using Betfair.Api.Requests.Markets;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Requests.Orders.Filters;
+using Betfair.Api.Requests.Orders.Queries;
 using Betfair.Api.Responses;
 using Betfair.Api.Responses.Account;
 using Betfair.Api.Responses.Markets;
@@ -205,60 +206,34 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns a list of settled bets based on the bet status, ordered by settled date.
+    /// Returns a list of settled bets based on the specified query.
     /// </summary>
-    /// <param name="betStatus">Restricts the results to the specified status.</param>
-    /// <param name="eventTypeIds">Optionally restricts the results to the specified Event Type IDs.</param>
-    /// <param name="eventIds">Optionally restricts the results to the specified Event IDs.</param>
-    /// <param name="marketIds">Optionally restricts the results to the specified market IDs.</param>
-    /// <param name="runnerIds">Optionally restricts the results to the specified runner IDs.</param>
-    /// <param name="betIds">Optionally restricts the results to the specified bet IDs.</param>
-    /// <param name="customerOrderRefs">Optionally restricts the results to the specified customer order references.</param>
-    /// <param name="customerStrategyRefs">Optionally restricts the results to the specified customer strategy references.</param>
-    /// <param name="side">Optionally restricts the results to the specified side.</param>
-    /// <param name="settledDateRange">Optionally restricts the results to be from/to the specified settled date.</param>
-    /// <param name="groupBy">How to aggregate the lines, if not supplied then the lowest level is returned.</param>
-    /// <param name="includeItemDescription">If you ask for orders, should the item description be included.</param>
-    /// <param name="locale">The language to be used where applicable.</param>
-    /// <param name="fromRecord">Specifies the first record that will be returned.</param>
-    /// <param name="recordCount">Specifies how many records will be returned.</param>
+    /// <param name="query">The query parameters for filtering cleared orders.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A <see cref="ClearedOrderSummaryReport"/>.</returns>
     public virtual Task<ClearedOrderSummaryReport> ClearedOrders(
-        BetStatus betStatus,
-        IEnumerable<string>? eventTypeIds = null,
-        IEnumerable<string>? eventIds = null,
-        IEnumerable<string>? marketIds = null,
-        IEnumerable<long>? runnerIds = null,
-        IEnumerable<string>? betIds = null,
-        IEnumerable<string>? customerOrderRefs = null,
-        IEnumerable<string>? customerStrategyRefs = null,
-        Side? side = null,
-        DateRange? settledDateRange = null,
-        GroupBy? groupBy = null,
-        bool includeItemDescription = false,
-        string? locale = null,
-        int fromRecord = 0,
-        int recordCount = 1000,
+        ClearedOrdersQuery query,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(query);
+
         var request = new ClearedOrdersRequest
         {
-            BetStatus = betStatus.ToString().ToUpperInvariant(),
-            EventTypeIds = eventTypeIds?.ToList(),
-            EventIds = eventIds?.ToList(),
-            MarketIds = marketIds?.ToList(),
-            RunnerIds = runnerIds?.ToList(),
-            BetIds = betIds?.ToList(),
-            CustomerOrderRefs = customerOrderRefs?.ToList(),
-            CustomerStrategyRefs = customerStrategyRefs?.ToList(),
-            Side = side?.ToString().ToUpperInvariant(),
-            SettledDateRange = settledDateRange,
-            GroupBy = groupBy?.ToString().ToUpperInvariant(),
-            IncludeItemDescription = includeItemDescription,
-            Locale = locale,
-            FromRecord = fromRecord,
-            RecordCount = recordCount
+            BetStatus = query.BetStatus.ToString().ToUpperInvariant(),
+            EventTypeIds = query.EventTypeIds?.ToList(),
+            EventIds = query.EventIds?.ToList(),
+            MarketIds = query.MarketIds?.ToList(),
+            RunnerIds = query.RunnerIds?.ToList(),
+            BetIds = query.BetIds?.ToList(),
+            CustomerOrderRefs = query.CustomerOrderRefs?.ToList(),
+            CustomerStrategyRefs = query.CustomerStrategyRefs?.ToList(),
+            Side = query.Side?.ToString().ToUpperInvariant(),
+            SettledDateRange = query.SettledDateRange,
+            GroupBy = query.GroupByOption?.ToString().ToUpperInvariant(),
+            IncludeItemDescription = query.IncludeItemDescription,
+            Locale = query.Locale,
+            FromRecord = query.FromRecord,
+            RecordCount = query.RecordCount,
         };
         return _client.PostAsync<ClearedOrderSummaryReport>(new Uri($"{_betting}/listClearedOrders/"), request, cancellationToken);
     }
@@ -292,7 +267,7 @@ public class BetfairApiClient : IDisposable
     /// <param name="includeSettledBets">Option to include settled bets (partially settled markets only). Defaults to false if not specified.</param>
     /// <param name="includeBspBets">Option to include BSP bets. Defaults to false if not specified.</param>
     /// <param name="netOfCommission">Option to return profit and loss net of users current commission rate for this market including any special tariffs. Defaults to false if not specified.</param>
-    /// <param name="cancellationToken">Cancellation Token</param>
+    /// <param name="cancellationToken">Cancellation Token.</param>
     /// <returns>A list of <see cref="MarketProfitAndLoss"/>.</returns>
     public virtual async Task<IEnumerable<MarketProfitAndLoss>> MarketProfitAndLoss(
         List<string> marketIds,
@@ -313,101 +288,67 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns a list of dynamic data about markets. Dynamic data includes prices, the status of the market, the status of selections, the traded volume, and the status of any orders you have placed in the market.
+    /// Returns a list of dynamic data about markets using a fluent query.
     /// </summary>
-    /// <param name="marketIds">One or more market IDs. The number of markets returned depends on the amount of data you request via the price projection.</param>
-    /// <param name="priceProjection">The projection of price data you want to receive in the response.</param>
-    /// <param name="orderProjection">The orders you want to receive in the response.</param>
-    /// <param name="matchProjection">If you ask for orders, specifies the representation of matches.</param>
-    /// <param name="includeOverallPosition">If you ask for orders, returns matches for each selection. Defaults to true if unspecified.</param>
-    /// <param name="partitionMatchedByStrategyRef">If you ask for orders, returns the breakdown of matches by strategy for each selection. Defaults to false if unspecified.</param>
-    /// <param name="customerStrategyRefs">If you ask for orders, restricts the results to orders matching any of the specified set of customer defined strategies.</param>
-    /// <param name="currencyCode">A Betfair standard currency code. If not specified, the default currency code is used.</param>
-    /// <param name="locale">The language used for the response. If not specified, the default is returned.</param>
-    /// <param name="matchedSince">If you ask for orders, restricts the results to orders that have at least one fragment matched since the specified date.</param>
-    /// <param name="betIds">If you ask for orders, restricts the results to orders with the specified bet IDs.</param>
+    /// <param name="marketIds">One or more market IDs.</param>
+    /// <param name="query">The query parameters for the market book request.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An array of <see cref="MarketBook"/>.</returns>
     public virtual Task<MarketBook[]> MarketBook(
         IEnumerable<string> marketIds,
-        PriceProjection? priceProjection = null,
-        OrderStatus? orderProjection = null,
-        MatchProjection? matchProjection = null,
-        bool? includeOverallPosition = null,
-        bool? partitionMatchedByStrategyRef = null,
-        IEnumerable<string>? customerStrategyRefs = null,
-        string? currencyCode = null,
-        string? locale = null,
-        DateTime? matchedSince = null,
-        IEnumerable<string>? betIds = null,
+        MarketBookQuery? query = null,
         CancellationToken cancellationToken = default)
     {
+        query ??= new MarketBookQuery();
         var request = new MarketBookRequest
         {
             MarketIds = marketIds.ToList(),
-            PriceProjection = priceProjection,
-            OrderProjection = orderProjection?.ToString().ToUpperInvariant(),
-            MatchProjection = matchProjection?.ToString().ToUpperInvariant(),
-            IncludeOverallPosition = includeOverallPosition,
-            PartitionMatchedByStrategyRef = partitionMatchedByStrategyRef,
-            CustomerStrategyRefs = customerStrategyRefs?.ToList(),
-            CurrencyCode = currencyCode,
-            Locale = locale,
-            MatchedSince = matchedSince,
-            BetIds = betIds?.ToList()
+            PriceProjection = query.PriceProjection,
+            OrderProjection = query.OrderProjection?.ToString().ToUpperInvariant(),
+            MatchProjection = query.MatchProjection?.ToString().ToUpperInvariant(),
+            IncludeOverallPosition = query.IncludeOverallPosition,
+            PartitionMatchedByStrategyRef = query.PartitionMatchedByStrategyRef,
+            CustomerStrategyRefs = query.CustomerStrategyRefs?.ToList(),
+            CurrencyCode = query.CurrencyCode,
+            Locale = query.Locale,
+            MatchedSince = query.MatchedSinceDate,
+            BetIds = query.BetIds?.ToList(),
         };
         return _client.PostAsync<MarketBook[]>(new Uri($"{_betting}/listMarketBook/"), request, cancellationToken);
     }
 
     /// <summary>
-    /// Returns a list of dynamic data about a single market's runners. Dynamic data includes prices, the status of the market, the status of selections, the traded volume, and the status of any orders you have placed in the market.
+    /// Returns dynamic data about a single market's runners using a fluent query.
     /// </summary>
     /// <param name="marketId">The market ID.</param>
     /// <param name="selectionId">The selection ID.</param>
     /// <param name="handicap">The handicap associated with the runner in case of Asian handicap markets.</param>
-    /// <param name="priceProjection">The projection of price data you want to receive in the response.</param>
-    /// <param name="orderProjection">The orders you want to receive in the response.</param>
-    /// <param name="matchProjection">If you ask for orders, specifies the representation of matches.</param>
-    /// <param name="includeOverallPosition">If you ask for orders, returns matches for each selection. Defaults to true if unspecified.</param>
-    /// <param name="partitionMatchedByStrategyRef">If you ask for orders, returns the breakdown of matches by strategy for each selection. Defaults to false if unspecified.</param>
-    /// <param name="customerStrategyRefs">If you ask for orders, restricts the results to orders matching any of the specified set of customer defined strategies.</param>
-    /// <param name="currencyCode">A Betfair standard currency code. If not specified, the default currency code is used.</param>
-    /// <param name="locale">The language used for the response. If not specified, the default is returned.</param>
-    /// <param name="matchedSince">If you ask for orders, restricts the results to orders that have at least one fragment matched since the specified date.</param>
-    /// <param name="betIds">If you ask for orders, restricts the results to orders with the specified bet IDs.</param>
+    /// <param name="query">The query parameters for the runner book request.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A <see cref="MarketBook"/>.</returns>
     public virtual async Task<MarketBook?> RunnerBook(
         string marketId,
         long selectionId,
         double? handicap = null,
-        PriceProjection? priceProjection = null,
-        OrderStatus? orderProjection = null,
-        MatchProjection? matchProjection = null,
-        bool? includeOverallPosition = null,
-        bool? partitionMatchedByStrategyRef = null,
-        IEnumerable<string>? customerStrategyRefs = null,
-        string? currencyCode = null,
-        string? locale = null,
-        DateTime? matchedSince = null,
-        IEnumerable<string>? betIds = null,
+        MarketBookQuery? query = null,
         CancellationToken cancellationToken = default)
     {
+        query ??= new MarketBookQuery();
         var request = new RunnerBookRequest
         {
             MarketId = marketId,
             SelectionId = selectionId,
             Handicap = handicap,
-            PriceProjection = priceProjection,
-            OrderProjection = orderProjection?.ToString().ToUpperInvariant(),
-            MatchProjection = matchProjection?.ToString().ToUpperInvariant(),
-            IncludeOverallPosition = includeOverallPosition,
-            PartitionMatchedByStrategyRef = partitionMatchedByStrategyRef,
-            CustomerStrategyRefs = customerStrategyRefs?.ToList(),
-            CurrencyCode = currencyCode,
-            Locale = locale,
-            MatchedSince = matchedSince,
-            BetIds = betIds?.ToList()
+            PriceProjection = query.PriceProjection,
+            OrderProjection = query.OrderProjection?.ToString().ToUpperInvariant(),
+            MatchProjection = query.MatchProjection?.ToString().ToUpperInvariant(),
+            IncludeOverallPosition = query.IncludeOverallPosition,
+            PartitionMatchedByStrategyRef = query.PartitionMatchedByStrategyRef,
+            CustomerStrategyRefs = query.CustomerStrategyRefs?.ToList(),
+            CurrencyCode = query.CurrencyCode,
+            Locale = query.Locale,
+            MatchedSince = query.MatchedSinceDate,
+            BetIds = query.BetIds?.ToList(),
         };
         var response = await _client.PostAsync<MarketBook[]>(new Uri($"{_betting}/listRunnerBook/"), request, cancellationToken);
         return response?.FirstOrDefault();
@@ -454,33 +395,25 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Get account statement.
+    /// Get account statement using a fluent query.
     /// </summary>
-    /// <param name="locale">The language to be used where applicable. If not specified, the customer account default is returned.</param>
-    /// <param name="fromRecord">Specifies the first record that will be returned. Records start at index zero, not at index one.</param>
-    /// <param name="recordCount">Specifies how many records will be returned, from the index position 'fromRecord'. Note that there is a page size limit of 100.</param>
-    /// <param name="itemDateRange">Return items with an itemDate within this date range. Both from and to date times are inclusive.</param>
-    /// <param name="includeItem">Which items to include, if not specified then defaults to ALL.</param>
-    /// <param name="wallet">Which wallet to return statementItems for. Defaults to UK wallet if not specified.</param>
+    /// <param name="query">The query parameters for the account statement request.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An <see cref="AccountStatementReport"/>.</returns>
     public virtual Task<AccountStatementReport> AccountStatement(
-        string? locale = null,
-        int fromRecord = 0,
-        int recordCount = 100,
-        DateRange? itemDateRange = null,
-        IncludeItem includeItem = IncludeItem.All,
-        Wallet wallet = Wallet.Uk,
+        AccountStatementQuery query,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(query);
+
         var request = new AccountStatementRequest
         {
-            Locale = locale,
-            FromRecord = fromRecord,
-            RecordCount = recordCount,
-            ItemDateRange = itemDateRange,
-            IncludeItem = includeItem.ToString().ToUpperInvariant(),
-            Wallet = wallet.ToString().ToUpperInvariant()
+            Locale = query.Locale,
+            FromRecord = query.FromRecord,
+            RecordCount = query.RecordCount,
+            ItemDateRange = query.ItemDateRange,
+            IncludeItem = query.IncludeItem.ToString().ToUpperInvariant(),
+            Wallet = query.Wallet.ToString().ToUpperInvariant(),
         };
         return _client.PostAsync<AccountStatementReport>(new Uri($"{_account}/getAccountStatement/"), request, cancellationToken);
     }
@@ -517,7 +450,7 @@ public class BetfairApiClient : IDisposable
         {
             From = from.ToString().ToUpperInvariant(),
             To = toWallet.ToString().ToUpperInvariant(),
-            Amount = amount
+            Amount = amount,
         };
         return _client.PostAsync<TransferResponse>(new Uri($"{_account}/transferFunds/"), request, cancellationToken);
     }
