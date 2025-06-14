@@ -165,6 +165,7 @@ namespace Betfair;
 [JsonSerializable(typeof(CurrencyRate[]))]
 [JsonSerializable(typeof(TransferFundsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(TransferResponse))]
+[ExcludeFromCodeCoverage]
 internal partial class SerializerContext : JsonSerializerContext
 {
 }

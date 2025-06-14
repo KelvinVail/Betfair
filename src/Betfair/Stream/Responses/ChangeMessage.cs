@@ -1,6 +1,4 @@
-﻿using Betfair.Stream.Deserializers;
-
-namespace Betfair.Stream.Responses;
+﻿namespace Betfair.Stream.Responses;
 
 public sealed class ChangeMessage
 {

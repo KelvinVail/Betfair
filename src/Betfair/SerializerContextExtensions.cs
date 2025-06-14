@@ -15,6 +15,7 @@ using RunnerResponse = Betfair.Api.Responses.RunnerResponse;
 
 namespace Betfair;
 
+[ExcludeFromCodeCoverage]
 public static class SerializerContextExtensions
 {
     private static readonly Dictionary<Type, JsonTypeInfo> _internalTypes = new ()
