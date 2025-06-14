@@ -13,5 +13,5 @@ public enum Wallet
     /// <summary>
     /// Australian wallet.
     /// </summary>
-    Australian
+    Australian,
 }

@@ -23,5 +23,5 @@ public enum IncludeItem
     /// <summary>
     /// Poker room items.
     /// </summary>
-    PokerRoom
+    PokerRoom,
 }

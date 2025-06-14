@@ -177,7 +177,11 @@ public class FluentApiIntegrationTests : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _api.Dispose();
+        if (disposing)
+        {
+            _client?.Dispose();
+            _api?.Dispose();
+        }
         _disposedValue = true;
     }
 }

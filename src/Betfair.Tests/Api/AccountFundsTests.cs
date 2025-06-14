@@ -1,4 +1,4 @@
-﻿﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Requests.Account;
 using Betfair.Api.Responses.Account;
 using Betfair.Tests.Api.TestDoubles;
@@ -7,7 +7,7 @@ namespace Betfair.Tests.Api;
 
 public class AccountFundsTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -84,6 +84,7 @@ public class AccountFundsTests : IDisposable
         {
             if (disposing)
             {
+                _client?.Dispose();
                 _api?.Dispose();
             }
 

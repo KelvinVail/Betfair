@@ -62,7 +62,7 @@ public static class SerializerContextExtensions
         {
             try
             {
-                var jsonTypeInfo = (JsonTypeInfo)property.GetValue(defaultInstance)!;
+                var jsonTypeInfo = (JsonTypeInfo) property.GetValue(defaultInstance)!;
                 var type = jsonTypeInfo.Type;
                 cache.TryAdd(type, jsonTypeInfo);
             }

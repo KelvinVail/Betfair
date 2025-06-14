@@ -30,7 +30,7 @@ public class CurrentOrder
     /// <summary>
     /// Gets the price and size.
     /// </summary>
-    public PriceSize PriceSize { get; init; }
+    public PriceSize PriceSize { get; init; } = new ();
 
     /// <summary>
     /// Gets the BSP liability.

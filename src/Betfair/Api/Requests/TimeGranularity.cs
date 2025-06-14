@@ -18,5 +18,5 @@ public enum TimeGranularity
     /// <summary>
     /// Minutes granularity.
     /// </summary>
-    Minutes
+    Minutes,
 }

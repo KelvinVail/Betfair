@@ -18,5 +18,5 @@ public enum MatchProjection
     /// <summary>
     /// Rolled up matches by average price.
     /// </summary>
-    RolledUpByAvgPrice
+    RolledUpByAvgPrice,
 }

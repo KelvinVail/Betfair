@@ -220,7 +220,7 @@ public class StreamMarketFilterTests
     {
         _filter.WithEventTypes(eventTypeId);
 
-        _filter.EventTypeIds.Should().Contain(eventTypeId.ToString());
+        _filter.EventTypeIds.Should().Contain(eventTypeId.ToString(System.Globalization.CultureInfo.InvariantCulture));
     }
 
     [Fact]

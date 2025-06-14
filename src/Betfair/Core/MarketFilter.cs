@@ -136,7 +136,7 @@ public abstract class MarketFilter<T>
     /// <param name="eventTypes">Event Types to include.</param>
     /// <returns>This <typeparamref name="T"/>.</returns>
     public T WithEventTypes(params EventType[] eventTypes) =>
-        eventTypes is null ? This() : WithEventTypes(eventTypes.Where(x => x is not null).Select(x => x.Id.ToString()).ToArray());
+        eventTypes is null ? This() : WithEventTypes(eventTypes.Where(x => x is not null).Select(x => x.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray());
 
     /// <inheritdoc cref="MarketFilter{T}.WithEventTypes(EventType[])"/>
     public T WithEventTypes(params string[] eventTypes)
@@ -157,7 +157,7 @@ public abstract class MarketFilter<T>
 
         EventTypeIds ??= [];
         foreach (var eventType in eventTypes)
-            EventTypeIds.Add(eventType.ToString());
+            EventTypeIds.Add(eventType.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
         return This();
     }
@@ -355,5 +355,5 @@ public abstract class MarketFilter<T>
         return This();
     }
 
-    private T This() => (this as T)!;
+    private T This() => (this as T) !;
 }
