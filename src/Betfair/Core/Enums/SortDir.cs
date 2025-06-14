@@ -4,7 +4,7 @@
 /// Specifies the direction the results will be sorted in.
 /// If no value is passed in, it defaults to EARLIEST_TO_LATEST.
 /// </summary>
-[JsonConverter(typeof(UpperCaseEnumJsonConverter<SortDir>))]
+[JsonConverter(typeof(SnakeCaseEnumJsonConverter<SortDir>))]
 public enum SortDir
 {
     /// <summary>

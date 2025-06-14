@@ -1,11 +1,9 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Betfair.Core;
+﻿namespace Betfair.Core.Enums;
 
 /// <summary>
 /// Defines what to do with the order at turn-in-play.
 /// </summary>
-[JsonConverter(typeof(UpperCaseEnumJsonConverter<PersistenceType>))]
-[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "The underscores are required by Betfair.")]
+[JsonConverter(typeof(SnakeCaseEnumJsonConverter<PersistenceType>))]
 public enum PersistenceType
 {
     /// <summary>

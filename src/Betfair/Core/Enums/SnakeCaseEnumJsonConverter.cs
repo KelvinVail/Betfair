@@ -1,6 +1,6 @@
-﻿namespace Betfair;
+﻿namespace Betfair.Core.Enums;
 
-internal class UpperCaseEnumJsonConverter<T> : JsonConverter<T>
+internal class SnakeCaseEnumJsonConverter<T> : JsonConverter<T>
     where T : Enum
 {
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -26,7 +26,7 @@ internal class UpperCaseEnumJsonConverter<T> : JsonConverter<T>
             return value;
 
         var builder = new System.Text.StringBuilder();
-        for (int i = 0; i < value.Length; i++)
+        for (var i = 0; i < value.Length; i++)
         {
             var c = value[i];
             if (char.IsUpper(c) && i > 0)

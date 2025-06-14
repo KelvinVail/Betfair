@@ -3,7 +3,7 @@
 /// <summary>
 /// Optionally restricts the results to the specified order status.
 /// </summary>
-[JsonConverter(typeof(UpperCaseEnumJsonConverter<OrderStatus>))]
+[JsonConverter(typeof(SnakeCaseEnumJsonConverter<OrderStatus>))]
 public enum OrderStatus
 {
     /// <summary>

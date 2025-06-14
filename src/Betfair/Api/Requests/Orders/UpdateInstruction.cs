@@ -1,4 +1,4 @@
-﻿using Betfair.Core;
+﻿using Betfair.Core.Enums;
 
 namespace Betfair.Api.Requests.Orders;
 

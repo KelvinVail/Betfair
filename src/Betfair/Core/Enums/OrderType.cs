@@ -1,6 +1,6 @@
 ﻿namespace Betfair.Core.Enums;
 
-[JsonConverter(typeof(UpperCaseEnumJsonConverter<OrderType>))]
+[JsonConverter(typeof(SnakeCaseEnumJsonConverter<OrderType>))]
 public enum OrderType
 {
     /// <summary>

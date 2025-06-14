@@ -1,7 +1,7 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses.Orders;
-using Betfair.Core;
+using Betfair.Core.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
