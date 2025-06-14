@@ -1,5 +1,8 @@
 ﻿namespace Betfair.Api.Requests.Orders;
 
+/// <summary>
+/// Place a new LIMIT_ON_CLOSE bet.
+/// </summary>
 public class LimitOnCloseOrder
 {
     /// <summary>

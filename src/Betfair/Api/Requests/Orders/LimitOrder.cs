@@ -2,6 +2,9 @@
 
 namespace Betfair.Api.Requests.Orders;
 
+/// <summary>
+/// Place a new LIMIT order (simple exchange bet for immediate execution).
+/// </summary>
 public class LimitOrder
 {
     /// <summary>

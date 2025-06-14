@@ -70,8 +70,8 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns a list of Competitions (i.e. World Cup 2014) associated with the markets selected by the MarketFilter.
-    /// Please Note: for horse and greyhounds racing, please use Venues.
+    /// Returns a list of Competitions (i.e., World Cup 2013) associated with the markets selected by the
+    /// MarketFilter. Currently only Football markets have an associated competition.
     /// </summary>
     /// <param name="filter">The filter to select desired markets. All markets that match the criteria in the filter are selected.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
@@ -147,16 +147,38 @@ public class BetfairApiClient : IDisposable
         return _client.PostAsync<VenueResult[]>(new Uri($"{_betting}/listVenues/"), request, cancellationToken);
     }
 
+    /// <summary>
+    /// Place new orders into market. LIMIT orders below the minimum bet size are allowed if
+    /// there is an unmatched bet at the same price in the market. This operation is atomic in that
+    /// all orders will be placed or none will be placed.
+    /// </summary>
+    /// <param name="placeOrders">The place orders request containing market id and instructions.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A <see cref="PlaceExecutionReport"/>.</returns>
     public virtual Task<PlaceExecutionReport> PlaceOrders(
         PlaceOrders placeOrders,
         CancellationToken cancellationToken = default) =>
         _client.PostAsync<PlaceExecutionReport>(new Uri($"{_betting}/placeOrders/"), placeOrders, cancellationToken);
 
+    /// <summary>
+    /// Update non-exposure changing fields.
+    /// </summary>
+    /// <param name="updateOrders">The update orders request containing market id and instructions.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>An <see cref="UpdateExecutionReport"/>.</returns>
     public virtual Task<UpdateExecutionReport> UpdateOrders(
         UpdateOrders updateOrders,
         CancellationToken cancellationToken = default) =>
         _client.PostAsync<UpdateExecutionReport>(new Uri($"{_betting}/updateOrders/"), updateOrders, cancellationToken);
 
+    /// <summary>
+    /// This operation is logically a bulk cancel followed by a bulk place. The cancel is completed first then
+    /// the new orders are placed. The new orders will be placed atomically in that they will all be placed or none
+    /// will be placed. In the case where the new orders cannot be placed the cancellations will not be rolled back.
+    /// </summary>
+    /// <param name="replaceOrders">The replace orders request containing market id and instructions.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A <see cref="ReplaceExecutionReport"/>.</returns>
     public virtual Task<ReplaceExecutionReport> ReplaceOrders(
         ReplaceOrders replaceOrders,
         CancellationToken cancellationToken = default) =>
@@ -238,6 +260,15 @@ public class BetfairApiClient : IDisposable
         return _client.PostAsync<ClearedOrderSummaryReport>(new Uri($"{_betting}/listClearedOrders/"), request, cancellationToken);
     }
 
+    /// <summary>
+    /// Returns a list of information about markets that does not change (or changes very rarely). You use
+    /// listMarketCatalogue to retrieve the name of the market, the names of selections and other information about
+    /// markets.
+    /// </summary>
+    /// <param name="filter">The filter to select desired markets. All markets that match the criteria in the filter are selected.</param>
+    /// <param name="query">The type and amount of data returned about the market.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>An array of <see cref="MarketCatalogue"/>.</returns>
     public virtual async Task<MarketCatalogue[]> MarketCatalogue(
         ApiMarketFilter? filter = null,
         MarketCatalogueQuery? query = null,
@@ -288,7 +319,9 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns a list of dynamic data about markets using a fluent query.
+    /// Returns a list of dynamic data about markets. Dynamic data includes prices, the status of the
+    /// market, the status of selections, the traded volume, and the status of any orders you have placed in the
+    /// market.
     /// </summary>
     /// <param name="marketIds">One or more market IDs.</param>
     /// <param name="query">The query parameters for the market book request.</param>
@@ -318,7 +351,9 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns dynamic data about a single market's runners using a fluent query.
+    /// Returns a list of dynamic data about a market and a specified runner. Dynamic data includes prices, the status of the
+    /// market, the status of selections, the traded volume, and the status of any orders you have placed in the
+    /// market.
     /// </summary>
     /// <param name="marketId">The market ID.</param>
     /// <param name="selectionId">The selection ID.</param>
@@ -354,6 +389,12 @@ public class BetfairApiClient : IDisposable
         return response?.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Returns the status of a market.
+    /// </summary>
+    /// <param name="marketId">The market ID to get the status for.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The market status as a string.</returns>
     public virtual async Task<string> MarketStatus(
         string marketId,
         CancellationToken cancellationToken)
@@ -369,7 +410,7 @@ public class BetfairApiClient : IDisposable
     // Account API Endpoints
 
     /// <summary>
-    /// Returns the available to bet amount, exposure and commission information.
+    /// Get available to bet amount.
     /// </summary>
     /// <param name="wallet">Name of the wallet. Defaults to UK wallet if not specified.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
@@ -383,7 +424,7 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns the details relating to your account, including your discount rate and Betfair point balance.
+    /// Get Account details.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An <see cref="AccountDetailsResponse"/>.</returns>
@@ -395,7 +436,7 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Get account statement using a fluent query.
+    /// Get account statement.
     /// </summary>
     /// <param name="query">The query parameters for the account statement request.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
@@ -433,7 +474,7 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Transfer funds between different wallets.
+    /// Transfer funds between wallets.
     /// </summary>
     /// <param name="from">Source wallet.</param>
     /// <param name="toWallet">Destination wallet.</param>

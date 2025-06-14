@@ -2,6 +2,9 @@
 
 namespace Betfair.Api.Requests.Orders;
 
+/// <summary>
+/// Instruction to place a new order.
+/// </summary>
 public class PlaceInstruction
 {
     /// <summary>

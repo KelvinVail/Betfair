@@ -1,0 +1,1249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface name="AccountAPING" owner="BDP" version="1.0.0" date="now()" namespace="com.betfair.account.api"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <description>Account API-NG</description>
+
+    <!-- akm operations-->
+    <operation name="createDeveloperAppKeys" since="1.0.0">
+        <description>
+            Create 2 application keys for given user; one active and the other delayed
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="appName" type="string">
+                    <description>
+                        A Display name for the application.
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="DeveloperApp">
+                <description>
+                    A map of application keys, one marked ACTIVE, and the other DELAYED
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.</description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getDeveloperAppKeys" since="1.0.0">
+        <description>
+            Get all application keys owned by the given developer/vendor
+        </description>
+        <parameters>
+            <request/>
+            <simpleResponse type="list(DeveloperApp)">
+                <description>
+                    A list of application keys owned by the given developer/vendor
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.</description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getAccountFunds" since="1.0.0">
+        <description>
+            Get available to bet amount.
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="false" name="wallet" type="Wallet">
+                    <description>
+                        Name of the wallet in question.
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="AccountFundsResponse">
+                <description>
+                    Response for retrieving available to bet.
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.</description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="transferFunds" since="1.0.0">
+        <description>
+            Transfer funds between wallets
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="from" type="Wallet">
+                    <description>
+                        Source wallet
+                    </description>
+                </parameter>
+                <parameter mandatory="true" name="to" type="Wallet">
+                    <description>
+                        Destination wallet
+                    </description>
+                </parameter>
+                <parameter mandatory="true" name="amount" type="double">
+                    <description>
+                        Amount to transfer
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="TransferResponse">
+                <description>
+                    Response for transfer funds action
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.</description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getAccountDetails" since="1.0.0">
+        <description>
+            Get Account details.
+        </description>
+        <parameters>
+            <request/>
+            <simpleResponse type="AccountDetailsResponse">
+                <description>
+                    Response for retrieving account details.
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.</description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getVendorClientId" since="1.0.0">
+        <description>
+            Get vendor client id for customer account.
+        </description>
+        <parameters>
+            <request/>
+            <simpleResponse type="string">
+                <description>
+                    Vendor client id.
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.</description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getApplicationSubscriptionToken" since="1.0.0">
+        <description>
+            Returns the newly generate subscription token
+        </description>
+        <parameters>
+            <request>
+                <parameter name="subscriptionLength" type="i32" mandatory="false">
+                    <description>How many days the subscription should last. Open ended if value not supplied.
+                        Expiry time will be rounded up to midnight on the date of expiry.
+                    </description>
+                </parameter>
+                <parameter name="clientReference" type="string" mandatory="false">
+                    <description>Any client reference for this subscription token request.</description>
+                </parameter>
+            </request>
+            <simpleResponse type="string">
+                <description>
+                    Subscription token
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="activateApplicationSubscription" since="1.0.0">
+        <description>
+            Activate the subscription token for the customer
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="subscriptionToken" type="string">
+                    <description>
+                        Subscription token for activation
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="Status">
+                <description/>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="cancelApplicationSubscription" since="1.0.0">
+        <description>
+            Cancel application subscription
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="subscriptionToken" type="string">
+                    <description>
+                        Subscription token to cancel
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="Status">
+                <description/>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name ="updateApplicationSubscription">
+        <description>
+            Update an application subscription with a new expiry date
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="vendorClientId" type="string">
+                    <description>
+                        The vendor client id for which to update the subscription for
+                    </description>
+                </parameter>
+                <parameter mandatory="true" name="subscriptionLength" type="i32">
+                    <description>
+                        How many days the subscription should last.
+                        Expiry time will be rounded up to midnight on the date of expiry.
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="string">
+                <description>
+                    Subscription token
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="listApplicationSubscriptionTokens" since="1.0.0">
+        <description>
+            List of subscription tokens for an application
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="false" name="subscriptionStatus" type="SubscriptionStatus">
+                    <description>
+                        Optionally filter response by Subscription status of the token
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="list(ApplicationSubscription)">
+                <description>
+                    List of subscription tokens for an application
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="listAccountSubscriptionTokens" since="1.0.0">
+        <description>
+            List of subscription tokens associated with the account
+        </description>
+        <parameters>
+            <request/>
+            <simpleResponse type="list(AccountSubscription)">
+                <description>
+                    List of subscription tokens associated with the account
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getApplicationSubscriptionHistory">
+        <description>
+            Identify all subscriptions, regardless of status, for a single client for a single application key.
+            The operation may be called by either the application key owner or a client.
+        </description>
+        <parameters>
+            <request>
+                <parameter name="vendorClientId" type="string" mandatory="false">
+                    <description>
+                        A vendor client id must be provided if this operation is being called by the application key owner.  nb. The presence of an x-application header implies that this
+                        operation is being called by the application key owner.
+                        A vendor client id will be ignored, if the operation is being called by the client.  nb. The absence of an x-application header implies that this
+                        operation is being called by the client.
+                    </description>
+                </parameter>
+                <parameter name="applicationKey" type="string" mandatory="false">
+                    <description>If the operation is called by the client then an applicationKey must be provided as a parameter (as opposed to a x-application header)</description>
+                </parameter>
+            </request>
+            <simpleResponse type="list(SubscriptionHistory)">
+                <description>
+                    List of subscriptions, regardless of status, associated with the client account for a single application key
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getAccountStatement">
+        <description>
+            Get account statement
+        </description>
+        <parameters>
+            <request>
+                <parameter name="locale" type="string" mandatory="false">
+                    <description>The language to be used where applicable. If not specified, the customer account
+                        default is returned.
+                    </description>
+                </parameter>
+                <parameter name="fromRecord" type="i32" mandatory="false">
+                    <description>
+                        Specifies the first record that will be returned. Records start at index zero. If not specified
+                        then it will default to 0.
+                    </description>
+                </parameter>
+                <parameter name="recordCount" type="i32" mandatory="false">
+                    <description>
+                        Specifies the maximum number of records to be returned. Note that there is a page size limit of
+                        100.  If not specified then it will default to the page limit size.
+                    </description>
+                </parameter>
+                <parameter name="itemDateRange" type="TimeRange" mandatory="false">
+                    <description>
+                        Return items with an itemDate within this date range. Both from and to date times are inclusive.
+                        If from is not specified then the oldest available items will be in range.
+                        If to is not specified then the latest items will be in range.
+
+                        nb. This itemDataRange is currently only applied when includeItem is set to ALL or not
+                        specified, else items are NOT bound by itemDate.
+                    </description>
+                </parameter>
+                <parameter name="includeItem" type="IncludeItem" mandatory="false">
+                    <description>
+                        Which items to include, if not specified then defaults to ALL.
+                    </description>
+                </parameter>
+                <parameter name="wallet" type="Wallet" mandatory="false">
+                    <description>Which wallet to return statementItems for. If unspecified then the UK wallet will be
+                        selected
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="AccountStatementReport">
+                <description>
+                    List of statement items chronologically ordered plus moreAvailable boolean to facilitate paging
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="listCurrencyRates">
+        <description>
+            Returns a list of currency rates based on given currency
+        </description>
+        <parameters>
+            <request>
+                <parameter name="fromCurrency" type="string" mandatory="false">
+                    <description>The currency from which the rates are computed. GBP is used if no value is passed</description>
+                </parameter>
+            </request>
+            <simpleResponse type="list(CurrencyRate)">
+                <description>
+                    List of currency rates
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getAuthorisationCode" since="1.0.0">
+        <description>
+            Generate auth code for web vendor, used to get vendor session
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="vendorId" type="string">
+                    <description>
+                        The vendor's public identifier
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="AuthorisationResponse">
+                <description>
+                    Response object containing the authorisation code and the redirect url
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>
+                        Generic exception that is thrown if this operation fails for any reason
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="token" since="1.0.0">
+        <description>
+            Generate web vendor session based on a standard session identifiable by auth code, vendor secret and app key
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="client_id" type="string">
+                    <description>
+                        The vendor's vendorId
+                    </description>
+                </parameter>
+                <parameter mandatory="true" name="grant_type" type="GrantType">
+                    <description>
+                        Whether the vendor is using an authorisation code or a refresh token to get a session
+                    </description>
+                </parameter>
+                <parameter mandatory="false" name="code" type="string">
+                    <description>
+                        The authorisation code used to lookup the session to be returned
+                    </description>
+                </parameter>
+                <parameter mandatory="true" name="client_secret" type="string">
+                    <description>
+                        The vendor's private key used to verify their identity
+                    </description>
+                </parameter>
+                <parameter mandatory="false" name="refresh_token" type="string">
+                    <description>
+                        The vendor's refresh token if the grant_type is refresh_token
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="VendorAccessTokenInfo">
+                <description>
+                    Response object containing VendorAccessToken, RefreshToken and optionally a Subscription Token if one was created
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>
+                        Generic exception that is thrown if this operation fails for any reason
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getVendorDetails" since="1.0.0">
+        <description>
+            Return details about a vendor from its identifier. Response includes Vendor Name and URL.
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="vendorId" type="string">
+                    <description>
+                        The vendor's public identifier
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="VendorDetails">
+                <description>
+                    Response object containing the vendor and the redirect url
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>
+                        Generic exception that is thrown if this operation fails for any reason
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="revokeAccessToWebApp" since="1.0.0">
+        <description>
+            Remove the link between an account and a vendor web app. This will remove the refreshToken for this user-vendor pair subscription.
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="vendorId" type="i64">
+                    <description>
+                        The id of the vendor to revoke access for
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="Status">
+                <description>
+                    Returns whether the request was successful or not
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>
+                        Generic exception that is thrown if this operation fails for any reason
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="listAuthorizedWebApps" since="1.0.0">
+        <description>
+            Retrieve all vendors applications currently subscribed to by the user making the request
+        </description>
+        <parameters>
+            <request/>
+            <simpleResponse type="list(VendorDetails)">
+                <description>
+                    A list of all vendor subscriptions the user has subscribed to
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>
+                        Generic exception that is thrown if this operation fails for any reason
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="isAccountSubscribedToWebApp" since="1.0.0">
+        <description>
+            Return whether an account has authorised a web app.
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="vendorId" type="string">
+                    <description>
+                        The id of the vendor to check subscription for
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="bool">
+                <description>
+                    Subscribed or not
+                </description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>
+                        Generic exception that is thrown if this operation fails for any reason
+                    </description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <operation name="getAffiliateRelation" since="1.0.0">
+        <description>
+            Return relation between a list of users and an affiliate
+        </description>
+        <parameters>
+            <request>
+                <parameter mandatory="true" name="vendorClientIds" type="list(string)">
+                    <description>
+                        List of client ids to check affiliation on
+                    </description>
+                </parameter>
+            </request>
+            <simpleResponse type="list(AffiliateRelation)">
+                <description>List of affiliate relation status per user</description>
+            </simpleResponse>
+            <exceptions>
+                <exception type="AccountAPINGException">
+                    <description>Generic exception that is thrown if this operation fails for any reason.</description>
+                </exception>
+            </exceptions>
+        </parameters>
+    </operation>
+
+    <dataType name="TransferResponse">
+        <description>Transfer operation response</description>
+        <parameter name="transactionId" type="string" mandatory="true">
+            <description>The id of the transfer transaction that will be used in tracking the transfers between the
+                wallets
+            </description>
+        </parameter>
+    </dataType>
+
+    <dataType name="AccountStatementReport">
+        <description>A container representing search results.</description>
+        <parameter name="accountStatement" type="list(StatementItem)" mandatory="true">
+            <description>
+                The list of statement items returned by your request.
+            </description>
+        </parameter>
+        <parameter name="moreAvailable" type="bool" mandatory="true">
+            <description>
+                Indicates whether there are further result items beyond this page.
+            </description>
+        </parameter>
+    </dataType>
+
+    <dataType name="StatementItem">
+        <description>Summary of a cleared order.</description>
+        <parameter name="refId" type="string" mandatory="false">
+            <description>An external reference, eg. equivalent to betId in the case of an exchange bet statement item.
+            </description>
+        </parameter>
+        <parameter name="itemDate" type="dateTime" mandatory="true">
+            <description>The date and time of the statement item, eg. equivalent to settledData for an exchange bet
+                statement item. (in ISO-8601 format, not translated)
+            </description>
+        </parameter>
+        <parameter name="amount" type="double">
+            <description>The amount of money the balance is adjusted by</description>
+        </parameter>
+        <parameter name="balance" type="double">
+            <description>Account balance.</description>
+        </parameter>
+        <parameter name="itemClass" type="ItemClass">
+            <description>Class of statement item. This value will determine which set of keys will be included in
+                itemClassData
+            </description>
+        </parameter>
+        <parameter name="itemClassData" type="map(string,string)">
+            <description>Key value pairs describing the current statement item. The set of keys will be determined by
+                the itemClass
+            </description>
+        </parameter>
+        <parameter name="legacyData" type="StatementLegacyData">
+            <description>Set of fields originally returned from APIv6. Provided to facilitate migration from APIv6 to
+                API-NG, and ultimately onto itemClass and itemClassData
+            </description>
+        </parameter>
+    </dataType>
+
+    <dataType name="StatementLegacyData">
+        <description>Summary of a cleared order.</description>
+        <parameter name="avgPrice" type="double" mandatory="false"><description/> </parameter>
+        <parameter name="betSize" type="double" mandatory="false"><description/> </parameter>
+        <parameter name="betType" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="betCategoryType" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="commissionRate" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="eventId" type="i64" mandatory="false"><description/> </parameter>
+        <parameter name="eventTypeId" type="i64" mandatory="false"><description/> </parameter>
+        <parameter name="fullMarketName" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="grossBetAmount" type="double" mandatory="false"><description/> </parameter>
+        <parameter name="marketName" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="marketType" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="placedDate" type="dateTime" mandatory="false"><description/> </parameter>
+        <parameter name="selectionId" type="i64" mandatory="false"><description/> </parameter>
+        <parameter name="selectionName" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="startDate" type="dateTime" mandatory="false"><description/> </parameter>
+        <parameter name="transactionType" type="string" mandatory="false"><description/> </parameter>
+        <parameter name="transactionId" type="i64" mandatory="false"><description/> </parameter>
+        <parameter name="winLose" type="string" mandatory="false"><description/> </parameter>
+    </dataType>
+
+    <dataType name="TimeRange">
+        <description>TimeRange</description>
+        <parameter name="from" type="dateTime" mandatory="false">
+            <description>from, format: ISO 8601)</description>
+        </parameter>
+        <parameter name="to" type="dateTime" mandatory="false">
+            <description>to, format: ISO 8601</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="ApplicationSubscription">
+        <description>
+            Application subscription details
+        </description>
+        <parameter name="subscriptionToken" type="string" mandatory="true">
+            <description>Application key identifier</description>
+        </parameter>
+        <parameter name="expiryDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Expiry date</description>
+        </parameter>
+        <parameter name="expiredDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Expired date</description>
+        </parameter>
+        <parameter name="createdDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Create date</description>
+        </parameter>
+        <parameter name="activationDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Activation date</description>
+        </parameter>
+        <parameter name="cancellationDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Cancelled date</description>
+        </parameter>
+        <parameter name="subscriptionStatus" type="string" mandatory="false">
+            <description>Subscription status</description>
+        </parameter>
+        <parameter name="clientReference" type="string" mandatory="false">
+            <description>Client reference</description>
+        </parameter>
+        <parameter name="vendorClientId" type="string" mandatory="false">
+            <description>Vendor client Id</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="SubscriptionHistory">
+        <description>
+            Application subscription history details
+        </description>
+        <parameter name="subscriptionToken" type="string" mandatory="true">
+            <description>Application key identifier</description>
+        </parameter>
+        <parameter name="expiryDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Expiry date</description>
+        </parameter>
+        <parameter name="expiredDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Expired date</description>
+        </parameter>
+        <parameter name="createdDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Create date</description>
+        </parameter>
+        <parameter name="activationDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Activation date</description>
+        </parameter>
+        <parameter name="cancellationDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Cancelled date</description>
+        </parameter>
+        <parameter name="subscriptionStatus" type="string" mandatory="false">
+            <description>Subscription status</description>
+        </parameter>
+        <parameter name="clientReference" type="string" mandatory="false">
+            <description>Client reference</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="AccountSubscription">
+        <description>
+            Application subscription details
+        </description>
+        <parameter name="subscriptionTokens" type="list(SubscriptionTokenInfo)" mandatory="true">
+            <description>List of subscription token details</description>
+        </parameter>
+        <parameter name="applicationName" type="string" mandatory="false">
+            <description>Application name</description>
+        </parameter>
+        <parameter name="applicationVersionId" type="string" mandatory="false">
+            <description>Application version Id</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="SubscriptionTokenInfo">
+        <description>
+            Subscription token information
+        </description>
+        <parameter name="subscriptionToken" type="string" mandatory="true">
+            <description>Subscription token</description>
+        </parameter>
+        <parameter name="activatedDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Activated date</description>
+        </parameter>
+        <parameter name="expiryDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Expiry date</description>
+        </parameter>
+        <parameter name="expiredDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Expired date</description>
+        </parameter>
+        <parameter name="cancellationDateTime" type="dateTime" mandatory="false">
+            <description>Subscription Cancelled date</description>
+        </parameter>
+        <parameter name="subscriptionStatus" type="string" mandatory="false">
+            <description>Subscription status</description>
+        </parameter>
+    </dataType>
+
+
+    <!--akm data types-->
+    <dataType name="DeveloperApp">
+        <description>
+            Describes developer/vendor specific application
+        </description>
+        <parameter name="appName" type="string" mandatory="true">
+            <description>
+                The unique name of the application
+            </description>
+        </parameter>
+        <parameter name="appId" type="i64" mandatory="true">
+            <description>
+                A unique id of this application
+            </description>
+        </parameter>
+        <parameter name="appVersions" type="list(DeveloperAppVersion)" mandatory="true">
+            <description>
+                The application versions (including application keys)
+            </description>
+        </parameter>
+    </dataType>
+
+    <dataType name="DeveloperAppVersion">
+        <description>
+            Describes a version of an external application
+        </description>
+        <parameter name="owner" type="string" mandatory="true">
+            <description>
+                The sportex user who owns the specific version of the application
+            </description>
+        </parameter>
+        <parameter name="versionId" type="i64" mandatory="true">
+            <description>
+                The unique Id of the application version
+            </description>
+        </parameter>
+        <parameter name="version" type="string" mandatory="true">
+            <description>
+                The version identifier string such as 1.0, 2.0. Unique for a given application.
+            </description>
+        </parameter>
+        <parameter name="applicationKey" type="string" mandatory="true">
+            <description>
+                The unqiue application key associated with this application version
+            </description>
+        </parameter>
+        <parameter name="delayData" type="bool" mandatory="false">
+            <description>
+                Indicates whether the data exposed by platform services as seen by this application key is
+                delayed or realtime.
+            </description>
+        </parameter>
+        <parameter name="subscriptionRequired" type="bool" mandatory="true">
+            <description>
+                Indicates whether the application version needs explicit subscription
+            </description>
+        </parameter>
+        <parameter name="ownerManaged" type="bool" mandatory="true">
+            <description>
+                Indicates whether the application version needs explicit management by producers.
+                A value of false indicates, this is a version meant for developer use.
+            </description>
+        </parameter>
+        <parameter name="active" type="bool" mandatory="true">
+            <description>
+                Indicates whether the application version is currently active
+            </description>
+        </parameter>
+        <parameter name="vendorId" type="string" mandatory="false">
+            <description>
+                Public unique string provided to the Vendor that they can use to pass to the Betfair API in order to identify themselves.
+            </description>
+        </parameter>
+        <parameter name="vendorSecret" type="string" mandatory="false">
+            <description>
+                Private unique string provided to the Vendor that they pass with certain calls to confirm their identity.
+                Linked to a particular App Key.
+            </description>
+        </parameter>
+    </dataType>
+
+    <dataType name="AccountFundsResponse">
+        <description>
+            Response for retrieving available to bet.
+        </description>
+        <parameter name="availableToBetBalance" type="double" mandatory="false">
+            <description>
+                Amount available to bet.
+            </description>
+        </parameter>
+        <parameter name="exposure" type="double" mandatory="false">
+            <description>
+                Current exposure.
+            </description>
+        </parameter>
+        <parameter name="retainedCommission" type="double" mandatory="false">
+            <description>
+                Sum of retained commission.
+            </description>
+        </parameter>
+        <parameter name="exposureLimit" type="double" mandatory="false">
+            <description>
+                Exposure limit.
+            </description>
+        </parameter>
+        <parameter name="discountRate" type="double" mandatory="false">
+            <description>
+                User Discount Rate.
+            </description>
+        </parameter>
+        <parameter name="pointsBalance" type="i32" mandatory="false">
+            <description>
+                The Betfair points balance.
+            </description>
+        </parameter>
+        <parameter name="wallet" type="string" mandatory="false">
+            <description>
+                The Betfair wallet name.
+            </description>
+        </parameter>
+    </dataType>
+
+    <dataType name="AccountDetailsResponse">
+        <description>
+            Response for Account details.
+        </description>
+        <parameter name="currencyCode" type="string" mandatory="false">
+            <description>
+                Default user currency Code.
+            </description>
+        </parameter>
+        <parameter name="firstName" type="string" mandatory="false">
+            <description>
+                First Name.
+            </description>
+        </parameter>
+        <parameter name="lastName" type="string" mandatory="false">
+            <description>
+                Last Name.
+            </description>
+        </parameter>
+        <parameter name="localeCode" type="string" mandatory="false">
+            <description>
+                Locale Code.
+            </description>
+        </parameter>
+        <parameter name="region" type="string" mandatory="false">
+            <description>
+                Region.
+            </description>
+        </parameter>
+        <parameter name="timezone" type="string" mandatory="false">
+            <description>
+                User Time Zone.
+            </description>
+        </parameter>
+        <parameter name="discountRate" type="double" mandatory="false">
+            <description>
+                User Discount Rate.
+            </description>
+        </parameter>
+        <parameter name="pointsBalance" type="i32" mandatory="false">
+            <description>
+                The Betfair points balance.
+            </description>
+        </parameter>
+        <parameter name="countryCode" type="string" mandatory="false">
+            <description>
+                Country Code.
+            </description>
+        </parameter>
+    </dataType>
+
+    <dataType name="CurrencyRate">
+        <description>
+            Currency rate
+        </description>
+        <parameter name="currencyCode" type="string" mandatory="false">
+            <description>
+                Three letter ISO 4217 code
+            </description>
+        </parameter>
+        <parameter name="rate" type="double" mandatory="false">
+            <description>
+                Exchange rate for the currency specified in the request
+            </description>
+        </parameter>
+    </dataType>
+
+    <!-- vendor web data types -->
+
+    <dataType name="AuthorisationResponse">
+        <description>
+            Wrapper object containing authorisation code and redirect URL for web vendors
+        </description>
+        <parameter name="authorisationCode" type="string" mandatory="true">
+            <description>The authorisation code</description>
+        </parameter>
+        <parameter name="redirectUrl" type="string" mandatory="true">
+            <description>URL to redirect the user to the vendor page</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="SubscriptionOptions">
+        <description>
+            Wrapper object containing details of how a subscription should be created
+        </description>
+        <parameter name="subscription_length" type="i32" mandatory="false">
+            <description>
+                How many days should a created subscription last for. Open ended subscription created if value not provided.
+                Relevant only if createdSubscription is true.
+            </description>
+        </parameter>
+        <parameter name="subscription_token" type="string" mandatory="false">
+            <description>
+                An existing subscription token that the caller wishes to be activated instead of creating a new one.
+                Ignored is createSubscription is true.
+            </description>
+        </parameter>
+        <parameter name="client_reference" type="string" mandatory="false">
+            <description>Any client reference for this subscription token request.</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="VendorAccessTokenInfo">
+        <description>
+            Wrapper object containing UserVendorSessionToken, RefreshToken and optionally a Subscription Token if one was created
+        </description>
+        <parameter name="access_token" type="string" mandatory="true">
+            <description>Session token used by web vendors</description>
+        </parameter>
+        <parameter name="token_type" type="TokenType" mandatory="true">
+            <description>Type of the token</description>
+        </parameter>
+        <parameter name="expires_in" type="i64" mandatory="true">
+            <description>How long until the token expires</description>
+        </parameter>
+        <parameter name="refresh_token" type="string" mandatory="true">
+            <description>Token used to refresh the session token in future</description>
+        </parameter>
+        <parameter name="application_subscription" type="ApplicationSubscription" mandatory="true">
+            <description>Object containing the vendor client id and optionally some subscription information</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="VendorDetails">
+        <description>
+            Wrapper object containing vendor name and redirect url
+        </description>
+        <parameter name="appVersionId" type="i64" mandatory="true">
+            <description>Internal id of the application</description>
+        </parameter>
+        <parameter name="vendorName" type="string" mandatory="true">
+            <description>Vendor name</description>
+        </parameter>
+        <parameter name="redirectUrl" type="string" mandatory="false">
+            <description>URL to be redirected to</description>
+        </parameter>
+    </dataType>
+
+    <dataType name="AffiliateRelation">
+        <description>
+            Wrapper object containing affiliate relation details
+        </description>
+        <parameter name="vendorClientId" type="string" mandatory="true">
+            <description>ID of user</description>
+        </parameter>
+        <parameter name="status" type="AffiliateRelationStatus" mandatory="true">
+            <description>The affiliate relation status</description>
+        </parameter>
+    </dataType>
+
+    <exceptionType name="AccountAPINGException" prefix="AANGX">
+        <description>This exception is thrown when an operation fails</description>
+        <parameter name="errorCode" type="string">
+            <description>the unique code for this error</description>
+            <validValues>
+                <value id="1" name="INVALID_INPUT_DATA">
+                    <description>Invalid input data</description>
+                </value>
+                <value id="2" name="INVALID_SESSION_INFORMATION">
+                    <description>The session token passed is invalid or expired</description>
+                </value>
+                <value id="3" name="UNEXPECTED_ERROR">
+                    <description>An unexpected internal error occurred that prevented successful request processing.
+                    </description>
+                </value>
+                <value id="4" name="INVALID_APP_KEY">
+                    <description>The application key passed is invalid</description>
+                </value>
+                <value id="5" name="SERVICE_BUSY">
+                    <description>The service is currently too busy to service this request</description>
+                </value>
+                <value id="6" name="TIMEOUT_ERROR">
+                    <description>Internal call to downstream service timed out</description>
+                </value>
+                <value id="7" name="DUPLICATE_APP_NAME">
+                    <description>Duplicate application name</description>
+                </value>
+                <value id="8" name="APP_KEY_CREATION_FAILED">
+                    <description>Creating application key version has failed</description>
+                </value>
+                <value id="9" name="APP_CREATION_FAILED">
+                    <description>Application creation has been failed</description>
+                </value>
+                <value id="10" name="NO_SESSION">
+                    <description>A session token is required for this operation</description>
+                </value>
+                <value id="11" name="NO_APP_KEY">
+                    <description>An application key is required for this operation</description>
+                </value>
+                <value id="12" name="SUBSCRIPTION_EXPIRED">
+                    <description>An application key is required for this operation</description>
+                </value>
+                <value id="13" name="INVALID_SUBSCRIPTION_TOKEN">
+                    <description>An application key is required for this operation</description>
+                </value>
+                <value id="14" name="TOO_MANY_REQUESTS">
+                    <description>Too many requests</description>
+                </value>
+                <value id="15" name="INVALID_CLIENT_REF">
+                    <description>Invalid length for the client reference</description>
+                </value>
+                <value id="16" name="WALLET_TRANSFER_ERROR">
+                    <description>There was a problem transferring funds between your wallets</description>
+                </value>
+                <value id="17" name="INVALID_VENDOR_CLIENT_ID">
+                    <description>The vendor client ID is not subscribed to this application key</description>
+                </value>
+                <value id="18" name="USER_NOT_SUBSCRIBED">
+                    <description>The user making the request is not subscribed to the application key they are trying to perform the action on (e.g. creating an Authorisation Code)</description>
+                </value>
+                <value id="19" name="INVALID_SECRET">
+                    <description>The vendor making the request has provided a vendor secret that does not match our records</description>
+                </value>
+                <value id="20" name="INVALID_AUTH_CODE">
+                    <description>The vendor making the request has not provided a valid authorisation code</description>
+                </value>
+                <value id="21" name="INVALID_GRANT_TYPE">
+                    <description>The vendor making the request has not provided a valid grant_type, or the grant_type they have passed does not match the parameters (authCode/refreshToken)</description>
+                </value>
+            </validValues>
+
+        </parameter>
+        <parameter name="errorDetails" type="string">
+            <description>the stack trace of the error</description>
+        </parameter>
+        <parameter name="requestUUID" type="string">
+            <description/>
+        </parameter>
+    </exceptionType>
+
+
+    <!-- Enums start -->
+
+    <simpleType name="SubscriptionStatus" type="string">
+        <validValues>
+            <value name="ALL">
+                <description>Any subscription status</description>
+            </value>
+            <value name="ACTIVATED">
+                <description>Only activated subscriptions</description>
+            </value>
+            <value name="UNACTIVATED">
+                <description>Only unactivated subscriptions</description>
+            </value>
+            <value name="CANCELLED">
+                <description>Only cancelled subscriptions</description>
+            </value>
+            <value name="EXPIRED">
+                <description>Only expired subscriptions</description>
+            </value>
+        </validValues>
+    </simpleType>
+
+    <simpleType name="Status" type="string">
+        <validValues>
+            <value name="SUCCESS">
+                <description>Sucess status</description>
+            </value>
+        </validValues>
+    </simpleType>
+
+    <simpleType name="ItemClass" type="string">
+        <validValues>
+            <value name="UNKNOWN">
+                <description>Statement item not mapped to a specific class. All values will be concatenated into a
+                    single key/value pair.
+                    The key will be 'unknownStatementItem' and the value will be a comma separated string.
+                </description>
+            </value>
+        </validValues>
+    </simpleType>
+
+    <simpleType name="Wallet" type="string">
+        <validValues>
+            <value name="UK"><description/></value>
+            <value name="AUSTRALIAN"><description/></value>
+        </validValues>
+    </simpleType>
+
+    <simpleType name="IncludeItem" type="string">
+        <validValues>
+            <value name="ALL"><description/></value>
+            <value name="EXCHANGE"><description/></value>
+            <value name="POKER_ROOM"><description/></value>
+            <value name="DEPOSITS_WITHDRAWALS"><description/></value>
+        </validValues>
+    </simpleType>
+
+    <simpleType name="GrantType" type="string">
+        <validValues>
+            <value name="AUTHORIZATION_CODE"><description/></value>
+            <value name="REFRESH_TOKEN"><description/></value>
+        </validValues>
+    </simpleType>
+
+    <simpleType name="TokenType" type="string">
+        <validValues>
+            <value name="BEARER"><description/></value>
+        </validValues>
+    </simpleType>
+
+    <simpleType name="AffiliateRelationStatus" type="string">
+        <validValues>
+            <value name="INVALID_USER">
+                <description>Provided vendor client ID is not valid</description>
+             </value>
+            <value name="AFFILIATED">
+                <description>Vendor client ID valid and affiliated</description>
+            </value>
+            <value name="NOT_AFFILIATED">
+                <description>Vendor client ID valid but not affiliated</description>
+            </value>
+        </validValues>
+    </simpleType>
+
+    <!-- Enums end -->
+
+</interface>
