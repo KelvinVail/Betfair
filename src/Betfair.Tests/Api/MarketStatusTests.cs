@@ -58,6 +58,47 @@ public class MarketStatusTests : IDisposable
         response.Should().Be(status);
     }
 
+    [Fact]
+    public async Task RequestBodyShouldBeSerializable()
+    {
+        await _api.MarketStatus("1.23456789", default);
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.MarketBookRequest);
+
+        json.Should().Be("{\"marketIds\":[\"1.23456789\"]}");
+    }
+
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        var expectedResponse = new[]
+        {
+            new MarketBook
+            {
+                MarketId = "1.23456789",
+                Status = "OPEN",
+                IsMarketDataDelayed = false,
+                BetDelay = 0,
+                BspReconciled = false,
+                Complete = true,
+                InPlay = false,
+                NumberOfWinners = 1,
+                NumberOfRunners = 2,
+                NumberOfActiveRunners = 2,
+                LastMatchTime = DateTimeOffset.UtcNow,
+                TotalMatched = 1000.0,
+                TotalAvailable = 500.0,
+                CrossMatching = true,
+                RunnersVoidable = false,
+                Version = 123456789,
+            },
+        };
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.MarketStatus("1.23456789", default);
+
+        response.Should().Be("OPEN");
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

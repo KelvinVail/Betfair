@@ -50,6 +50,43 @@ public class MarketCatalogueTests : IDisposable
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]},\"marketProjection\":[\"MARKET_START_TIME\"],\"sort\":\"MAXIMUM_TRADED\",\"maxResults\":10}");
     }
 
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        var expectedResponse = new[]
+        {
+            new MarketCatalogue
+            {
+                MarketId = "1.23456789",
+                MarketName = "Match Odds",
+                TotalMatched = 1000.50m,
+                Competition = new Competition
+                {
+                    Id = "10932509",
+                    Name = "English Premier League"
+                },
+                Event = new MarketEvent
+                {
+                    Id = "29301",
+                    Name = "Test Match",
+                    CountryCode = "GB",
+                    Timezone = "GMT",
+                    OpenDate = DateTimeOffset.UtcNow.AddDays(1)
+                },
+                EventType = new EventType
+                {
+                    Id = "1",
+                    Name = "Soccer"
+                }
+            }
+        };
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.MarketCatalogue();
+
+        response.Should().BeEquivalentTo(expectedResponse);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

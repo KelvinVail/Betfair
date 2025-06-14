@@ -44,6 +44,34 @@ public class AccountFundsTests : IDisposable
             new AccountFundsRequest { Wallet = "AUSTRALIAN" });
     }
 
+    [Fact]
+    public async Task RequestBodyShouldBeSerializable()
+    {
+        await _api.AccountFunds(Wallet.Australian);
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountFundsRequest);
+
+        json.Should().Be("{\"wallet\":\"AUSTRALIAN\"}");
+    }
+
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        var expectedResponse = new AccountFundsResponse
+        {
+            AvailableToBetBalance = 1000.50,
+            Exposure = 250.75,
+            RetainedCommission = 15.25,
+            ExposureLimit = 5000.00,
+            DiscountRate = 0.05,
+            PointsBalance = 100
+        };
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.AccountFunds();
+
+        response.Should().BeEquivalentTo(expectedResponse);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

@@ -48,6 +48,38 @@ public class CancelOrderTests : IDisposable
         json.Should().Be("{\"marketId\":\"1.2345\",\"instructions\":[{\"betId\":\"12345\",\"sizeReduction\":2}]}");
     }
 
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        var expectedResponse = new CancelExecutionReport
+        {
+            MarketId = "1.23456789",
+            Status = "SUCCESS",
+            ErrorCode = null,
+            CustomerRef = "test-ref",
+            InstructionReports = new List<CancelInstructionReport>
+            {
+                new CancelInstructionReport
+                {
+                    Status = "SUCCESS",
+                    ErrorCode = null,
+                    Instruction = new CancelInstruction
+                    {
+                        BetId = "123456789",
+                        SizeReduction = 10.0
+                    },
+                    SizeCancelled = 10.0,
+                    CancelledDate = DateTimeOffset.UtcNow
+                }
+            }
+        };
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.CancelOrders(new CancelOrders());
+
+        response.Should().BeEquivalentTo(expectedResponse);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

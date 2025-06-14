@@ -46,6 +46,28 @@ public class EventTests : IDisposable
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
     }
 
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        var expectedResponse = new[]
+        {
+            new EventResult
+            {
+                Event = new EventType
+                {
+                    Id = "29301",
+                    Name = "Test Event"
+                },
+                MarketCount = 5
+            }
+        };
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.Events();
+
+        response.Should().BeEquivalentTo(expectedResponse);
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

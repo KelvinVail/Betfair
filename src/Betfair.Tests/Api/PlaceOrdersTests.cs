@@ -1,6 +1,7 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests.Orders;
 using Betfair.Api.Responses.Orders;
+using Betfair.Core.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -33,6 +34,49 @@ public class PlaceOrdersTests : IDisposable
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.PlaceOrders);
 
         json.Should().Be("{\"marketId\":\"1.2345\",\"instructions\":[]}");
+    }
+
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        var expectedResponse = new PlaceExecutionReport
+        {
+            MarketId = "1.23456789",
+            Status = "SUCCESS",
+            ErrorCode = null,
+            CustomerRef = "test-ref",
+            InstructionReports = new List<PlaceInstructionReport>
+            {
+                new PlaceInstructionReport
+                {
+                    Status = "SUCCESS",
+                    ErrorCode = null,
+                    BetId = "123456789",
+                    PlacedDate = DateTimeOffset.UtcNow,
+                    AveragePriceMatched = 2.5,
+                    SizeMatched = 10.0,
+                    OrderStatus = "EXECUTION_COMPLETE",
+                    Instruction = new PlaceInstruction
+                    {
+                        SelectionId = 47972,
+                        Handicap = 0,
+                        Side = Side.Back,
+                        OrderType = OrderType.Limit,
+                        LimitOrder = new LimitOrder
+                        {
+                            Size = 10.0,
+                            Price = 2.5,
+                            PersistenceType = PersistenceType.Lapse
+                        }
+                    }
+                }
+            }
+        };
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.PlaceOrders(new PlaceOrders("1.23456789"));
+
+        response.Should().BeEquivalentTo(expectedResponse);
     }
 
     public void Dispose()
