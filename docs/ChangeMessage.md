@@ -66,3 +66,49 @@ If you fail to call either ```StreamClient.Subscribe()``` or ```StreamClient.Sub
 ```ErrorMessage``` will be "Connection is not subscribed and is idle: 15000 ms".
 
 ## Market Change Message
+Market change messages contain updates to market data. These are the most common messages you will receive when subscribed to a market stream.
+
+```Operation``` will be "mcm".
+```Id``` will be null for market change messages.
+```MarketChanges``` will contain an array of market changes, each representing updates to a specific market.
+
+### Market Change Properties
+Each market change contains:
+- ```Id``` - The market ID
+- ```MarketDefinition``` - Market definition updates (if subscribed to market definitions)
+- ```RunnerChanges``` - Array of runner changes containing price and volume updates
+- ```TotalMatched``` - Total amount matched on the market
+- ```Img``` - True if this is a full image, false if it's a delta update
+
+### Runner Changes
+Runner changes contain price and volume updates for individual selections:
+- ```Id``` - The selection ID
+- ```FullImage``` - Contains the full price ladder if this is a full image
+- ```Batb``` - Best available to back prices
+- ```Batl``` - Best available to lay prices
+- ```Tv``` - Total volume matched on this selection
+- ```Ltp``` - Last traded price
+- ```Spn``` - Starting price near
+- ```Spf``` - Starting price far
+
+## Order Change Message
+Order change messages contain updates to your orders. You will only receive these if you have subscribed to the order stream.
+
+```Operation``` will be "ocm".
+```Id``` will be null for order change messages.
+```OrderChanges``` will contain an array of order changes, each representing updates to orders in a specific market.
+
+### Order Change Properties
+Each order change contains:
+- ```Id``` - The market ID
+- ```OrderMarketChanges``` - Array of order changes for this market
+- ```FullImage``` - True if this is a full image, false if it's a delta update
+
+### Order Market Changes
+Order market changes contain updates to your orders:
+- ```Id``` - The selection ID
+- ```FullImage``` - Contains the full order information if this is a full image
+- ```Orc``` - Order changes array containing individual order updates
+- ```UnmatchedOrders``` - Array of unmatched orders
+- ```MatchedBacks``` - Array of matched back bets
+- ```MatchedLays``` - Array of matched lay bets
