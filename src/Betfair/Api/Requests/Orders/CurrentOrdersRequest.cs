@@ -1,4 +1,6 @@
-﻿﻿namespace Betfair.Api.Requests.Orders;
+﻿using Betfair.Core.Enums;
+
+namespace Betfair.Api.Requests.Orders;
 
 internal class CurrentOrdersRequest
 {

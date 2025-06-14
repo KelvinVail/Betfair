@@ -1,4 +1,4 @@
-﻿﻿namespace Betfair.Api.Requests.Orders;
+﻿namespace Betfair.Core.Enums;
 
 /// <summary>
 /// Bet status for cleared orders.

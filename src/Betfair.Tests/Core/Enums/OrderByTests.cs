@@ -1,6 +1,6 @@
-using Betfair.Api.Requests.Orders;
+using Betfair.Core.Enums;
 
-namespace Betfair.Tests.Api.Requests.Orders;
+namespace Betfair.Tests.Core.Enums;
 
 public class OrderByTests
 {

@@ -1,4 +1,4 @@
-﻿﻿namespace Betfair.Api.Requests.Orders;
+﻿namespace Betfair.Core.Enums;
 
 /// <summary>
 /// Optionally restricts the results to the specified order status.

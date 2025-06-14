@@ -1,3 +1,5 @@
+using Betfair.Core.Enums;
+
 namespace Betfair.Api.Requests.Orders;
 
 /// <summary>
@@ -181,7 +183,7 @@ public class ApiOrderFilter
     /// <returns>This <see cref="ApiOrderFilter"/>.</returns>
     public ApiOrderFilter ExecutableOnly()
     {
-        OrderProjection = Orders.OrderStatus.Executable;
+        OrderProjection = OrderStatus.Executable;
         return this;
     }
 
@@ -191,7 +193,7 @@ public class ApiOrderFilter
     /// <returns>This <see cref="ApiOrderFilter"/>.</returns>
     public ApiOrderFilter ExecutionCompleteOnly()
     {
-        OrderProjection = Orders.OrderStatus.ExecutionComplete;
+        OrderProjection = OrderStatus.ExecutionComplete;
         return this;
     }
 
@@ -201,7 +203,7 @@ public class ApiOrderFilter
     /// <returns>This <see cref="ApiOrderFilter"/>.</returns>
     public ApiOrderFilter MostRecentFirst()
     {
-        SortBy(Orders.SortDir.LatestToEarliest);
+        SortBy(Core.Enums.SortDir.LatestToEarliest);
         return this;
     }
 
@@ -211,7 +213,7 @@ public class ApiOrderFilter
     /// <returns>This <see cref="ApiOrderFilter"/>.</returns>
     public ApiOrderFilter OldestFirst()
     {
-        SortBy(Orders.SortDir.EarliestToLatest);
+        SortBy(Core.Enums.SortDir.EarliestToLatest);
         return this;
     }
 }

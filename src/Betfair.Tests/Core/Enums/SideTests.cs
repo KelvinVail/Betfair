@@ -1,6 +1,6 @@
-﻿using Betfair.Core;
+﻿using Betfair.Core.Enums;
 
-namespace Betfair.Tests.Core;
+namespace Betfair.Tests.Core.Enums;
 
 public class SideTests
 {

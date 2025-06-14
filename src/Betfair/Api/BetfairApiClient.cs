@@ -7,6 +7,7 @@ using Betfair.Api.Responses.Account;
 using Betfair.Api.Responses.Markets;
 using Betfair.Api.Responses.Orders;
 using Betfair.Core.Client;
+using Betfair.Core.Enums;
 using Betfair.Core.Login;
 
 namespace Betfair.Api;
@@ -231,7 +232,7 @@ public class BetfairApiClient : IDisposable
         IEnumerable<string>? betIds = null,
         IEnumerable<string>? customerOrderRefs = null,
         IEnumerable<string>? customerStrategyRefs = null,
-        BetSide? side = null,
+        Side? side = null,
         DateRange? settledDateRange = null,
         GroupBy? groupBy = null,
         bool includeItemDescription = false,

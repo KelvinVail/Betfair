@@ -1,7 +1,7 @@
-﻿﻿using Betfair.Api.Requests.Orders;
- using Betfair.Core;
+﻿using Betfair.Core;
+using Betfair.Core.Enums;
 
- namespace Betfair.Api.Responses.Orders;
+namespace Betfair.Api.Responses.Orders;
 
 /// <summary>
 /// Current order.

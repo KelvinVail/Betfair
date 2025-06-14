@@ -1,4 +1,4 @@
-﻿namespace Betfair.Core;
+﻿namespace Betfair.Core.Enums;
 
 [JsonConverter(typeof(UpperCaseEnumJsonConverter<Side>))]
 public enum Side
