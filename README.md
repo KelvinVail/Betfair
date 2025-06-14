@@ -13,6 +13,8 @@
 # Betfair
 Fast and simple classes for interacting with the Betfair API and Stream.
 
+I'm passionate about this library and love hearing from users! Join our [Discussions](https://github.com/KelvinVail/Betfair/discussions) to ask questions, share your experiences, or suggest new features. Your feedback helps make this library better for everyone.
+
 [Full documentation](/docs/README.md).
 
 ## Installation
