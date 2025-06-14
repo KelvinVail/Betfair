@@ -50,5 +50,5 @@ public class RunnerResponse
     /// Gets the exchange prices available for this runner.
     /// </summary>
     [JsonPropertyName("ex")]
-    public ExchangePrices? ExchangePrices { get; internal set; }
+    public ExchangePrices? ExchangePrices { get; init; }
 }

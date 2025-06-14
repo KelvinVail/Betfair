@@ -86,9 +86,8 @@ public class PlaceInstructionReportTests
     [Fact]
     public void PlacedDatePropertyShouldAcceptNonNullValue()
     {
-        var report = new PlaceInstructionReport();
         var date = DateTimeOffset.Now;
-        report.PlacedDate = date;
+        var report = new PlaceInstructionReport { PlacedDate = date };
         report.PlacedDate.Should().Be(date);
     }
 

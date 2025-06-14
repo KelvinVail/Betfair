@@ -1,6 +1,7 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Requests;
 using Betfair.Api.Responses;
+using Betfair.Api.Responses.Markets;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -14,7 +15,7 @@ public class MarketProfitAndLossTests : IDisposable
     public MarketProfitAndLossTests()
     {
         _api = new BetfairApiClient(_client);
-        _client.RespondsWithBody = Array.Empty<MarketCatalogue>();
+        _client.RespondsWithBody = Array.Empty<MarketProfitAndLoss>();
     }
 
     [Fact]
@@ -86,6 +87,43 @@ public class MarketProfitAndLossTests : IDisposable
                 IncludeBspBets = false,
                 NetOfCommission = true,
             });
+    }
+
+    [Fact]
+    public async Task RequestBodyShouldBeSerializable()
+    {
+        await _api.MarketProfitAndLoss(["1.23456789"], includeSettledBets: true, includeBspBets: true, netOfCommission: true);
+        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.MarketProfitAndLossRequest);
+
+        json.Should().Be("{\"marketIds\":[\"1.23456789\"],\"includeSettledBets\":true,\"includeBspBets\":true,\"netOfCommission\":true}");
+    }
+
+    [Fact]
+    public async Task ResponseShouldBeDeserializable()
+    {
+        var expectedResponse = new List<MarketProfitAndLoss>
+        {
+            new MarketProfitAndLoss
+            {
+                MarketId = "1.23456789",
+                CommissionApplied = 0.05,
+                ProfitAndLosses = new[]
+                {
+                    new RunnerProfitAndLoss
+                    {
+                        SelectionId = 47972,
+                        IfWin = 10.50,
+                        IfLose = -5.25,
+                        IfPlace = 2.75
+                    }
+                }
+            }
+        };
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.MarketProfitAndLoss(["1.23456789"]);
+
+        response.Should().BeEquivalentTo(expectedResponse);
     }
 
     public void Dispose()

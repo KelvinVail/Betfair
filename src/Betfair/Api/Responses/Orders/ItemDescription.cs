@@ -1,4 +1,4 @@
-﻿﻿namespace Betfair.Api.Responses.Orders;
+﻿namespace Betfair.Api.Responses.Orders;
 
 /// <summary>
 /// Item description for cleared orders.

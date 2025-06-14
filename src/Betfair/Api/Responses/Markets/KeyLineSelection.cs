@@ -9,11 +9,11 @@ public class KeyLineSelection
     /// Gets the selection ID of the runner in the key line handicap.
     /// </summary>
     [JsonPropertyName("selectionId")]
-    public long SelectionId { get; internal set; }
+    public long SelectionId { get; init; }
 
     /// <summary>
     /// Gets the handicap value of the key line.
     /// </summary>
     [JsonPropertyName("handicap")]
-    public double Handicap { get; internal set; }
+    public double Handicap { get; init; }
 }

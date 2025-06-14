@@ -69,6 +69,8 @@ public static class SerializerContextExtensions
         { typeof(CancelExecutionReport), SerializerContext.Default.CancelExecutionReport },
         { typeof(MarketProfitAndLossRequest), SerializerContext.Default.MarketProfitAndLossRequest },
         { typeof(MarketProfitAndLoss), SerializerContext.Default.MarketProfitAndLoss },
+        { typeof(MarketProfitAndLoss[]), SerializerContext.Default.MarketProfitAndLossArray },
+        { typeof(List<MarketProfitAndLoss>), SerializerContext.Default.ListMarketProfitAndLoss },
         { typeof(IEnumerable<MarketProfitAndLoss>), SerializerContext.Default.IEnumerableMarketProfitAndLoss },
         { typeof(RunnerProfitAndLoss), SerializerContext.Default.RunnerProfitAndLoss },
         { typeof(EventTypesRequest), SerializerContext.Default.EventTypesRequest },

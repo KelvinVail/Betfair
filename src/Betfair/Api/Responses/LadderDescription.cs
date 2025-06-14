@@ -3,5 +3,5 @@
 public sealed class LadderDescription
 {
     [JsonPropertyName("type")]
-    public string Type { get; set; } = string.Empty;
+    public string Type { get; init; } = string.Empty;
 }

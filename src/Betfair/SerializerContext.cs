@@ -83,6 +83,8 @@ namespace Betfair;
 // Market Profit and Loss
 [JsonSerializable(typeof(MarketProfitAndLossRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(MarketProfitAndLoss))]
+[JsonSerializable(typeof(MarketProfitAndLoss[]))]
+[JsonSerializable(typeof(List<MarketProfitAndLoss>))]
 [JsonSerializable(typeof(IEnumerable<MarketProfitAndLoss>))]
 [JsonSerializable(typeof(RunnerProfitAndLoss))]
 

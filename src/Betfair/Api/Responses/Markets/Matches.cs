@@ -9,5 +9,5 @@ public class Matches
     /// Gets the list of matches.
     /// </summary>
     [JsonPropertyName("matches")]
-    public List<Match>? MatchList { get; internal set; }
+    public List<Match>? MatchList { get; init; }
 }
