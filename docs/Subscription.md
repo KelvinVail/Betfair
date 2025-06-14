@@ -22,7 +22,7 @@ using var subscription = new Subscription(credentials);
 
 ## Subscribe to a Market Stream
 To subscribe to a market stream we need to define which markets to subscribe to and what data we want returned in the stream.
-For more information on filters see [StreamMarketFilter](/docs/StreamMarketFilter.md) and [DataFilter](/docs/MarketFilter.md).
+For more information on filters see [StreamMarketFilter](/docs/StreamMarketFilter.md) and [DataFilter](/docs/DataFilter.md).
 In this example we are subscribing to a single market and requesting that only the best available prices are returned in the data stream.
 
 The DataFilter is optional, if it is not included Best Available Prices will be returned.
@@ -53,7 +53,7 @@ You will only receive updates to new orders or orders that are open at the time 
 
 ## Conflate the Subscription
 Either the market or order subscription can be conflated. Data will be rolled up and sent on each increment of the interval specified.
-```charp
+```csharp
 var conflate = TimeSpan.FromSeconds(1);
 await subscription.Subscribe(marketFilter, dataFilter, conflate: conflate);
 await subscription.SubscribeToOrders(conflate: conflate);
