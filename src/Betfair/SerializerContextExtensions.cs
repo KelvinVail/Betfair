@@ -1,161 +1,89 @@
-﻿using Betfair.Api.Requests;
-using Betfair.Api.Requests.Account;
-using Betfair.Api.Requests.Markets;
-using Betfair.Api.Requests.Orders;
-using Betfair.Api.Responses;
-using Betfair.Api.Responses.Account;
-using Betfair.Api.Responses.Markets;
-using Betfair.Api.Responses.Orders;
-using Betfair.Core.Client;
-using Betfair.Core.Login;
-using Betfair.Stream.Messages;
-using Betfair.Stream.Responses;
-using RunnerResponse = Betfair.Api.Responses.RunnerResponse;
-#pragma warning disable CA1506
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Betfair;
 
 [ExcludeFromCodeCoverage]
 public static class SerializerContextExtensions
 {
-    private static readonly Dictionary<Type, JsonTypeInfo> _internalTypes = new ()
+    private static readonly ConcurrentDictionary<Type, JsonTypeInfo> _typeInfoCache = new ();
+
+    static SerializerContextExtensions()
     {
-        { typeof(LoginResponse), SerializerContext.Default.LoginResponse },
-        { typeof(BadRequestResponse), SerializerContext.Default.BadRequestResponse },
-        { typeof(BadRequestDetail), SerializerContext.Default.BadRequestDetail },
-        { typeof(BadRequestErrorCode), SerializerContext.Default.BadRequestErrorCode },
-    };
+        // Pre-populate cache with all available JsonTypeInfo properties from SerializerContext.Default
+        PopulateTypeInfoCache();
+    }
 
-    private static readonly Dictionary<Type, JsonTypeInfo> _typeInfo = new ()
-    {
-        { typeof(Authentication), SerializerContext.Default.Authentication },
-        { typeof(DataFilter), SerializerContext.Default.DataFilter },
-        { typeof(MarketSubscription), SerializerContext.Default.MarketSubscription },
-        { typeof(StreamOrderFilter), SerializerContext.Default.StreamOrderFilter },
-        { typeof(OrderSubscription), SerializerContext.Default.OrderSubscription },
-        { typeof(StreamMarketFilter), SerializerContext.Default.StreamMarketFilter },
-        { typeof(ChangeMessage), SerializerContext.Default.ChangeMessage },
-        { typeof(MarketChange), SerializerContext.Default.MarketChange },
-        { typeof(MarketDefinition), SerializerContext.Default.MarketDefinition },
-        { typeof(OrderChange), SerializerContext.Default.OrderChange },
-        { typeof(OrderRunnerChange), SerializerContext.Default.OrderRunnerChange },
-        { typeof(RunnerChange), SerializerContext.Default.RunnerChange },
-        { typeof(RunnerDefinition), SerializerContext.Default.RunnerDefinition },
-        { typeof(UnmatchedOrder), SerializerContext.Default.UnmatchedOrder },
-        { typeof(ApiMarketFilter), SerializerContext.Default.ApiMarketFilter },
-        { typeof(DateRange), SerializerContext.Default.DateRange },
-        { typeof(MarketCatalogueQuery), SerializerContext.Default.MarketCatalogueQuery },
-        { typeof(Competition), SerializerContext.Default.Competition },
-        { typeof(LadderDescription), SerializerContext.Default.LadderDescription },
-        { typeof(MarketCatalogue[]), SerializerContext.Default.MarketCatalogueArray },
-        { typeof(MarketCatalogue), SerializerContext.Default.MarketCatalogue },
-        { typeof(MarketDescription), SerializerContext.Default.MarketDescription },
-        { typeof(MarketEvent), SerializerContext.Default.MarketEvent },
-        { typeof(RunnerResponse), SerializerContext.Default.RunnerResponse },
-        { typeof(MarketCatalogueRequest), SerializerContext.Default.MarketCatalogueRequest },
-        { typeof(MarketBookRequest), SerializerContext.Default.MarketBookRequest },
-        { typeof(LimitOrder), SerializerContext.Default.LimitOrder },
-        { typeof(PlaceInstruction), SerializerContext.Default.PlaceInstruction },
-        { typeof(PlaceOrders), SerializerContext.Default.PlaceOrders },
-        { typeof(PlaceExecutionReport), SerializerContext.Default.PlaceExecutionReport },
-        { typeof(UpdateInstruction), SerializerContext.Default.UpdateInstruction },
-        { typeof(UpdateOrders), SerializerContext.Default.UpdateOrders },
-        { typeof(UpdateExecutionReport), SerializerContext.Default.UpdateExecutionReport },
-        { typeof(ReplaceInstruction), SerializerContext.Default.ReplaceInstruction },
-        { typeof(ReplaceOrders), SerializerContext.Default.ReplaceOrders },
-        { typeof(ReplaceExecutionReport), SerializerContext.Default.ReplaceExecutionReport },
-        { typeof(CancelInstruction), SerializerContext.Default.CancelInstruction },
-        { typeof(CancelOrders), SerializerContext.Default.CancelOrders },
-        { typeof(CancelExecutionReport), SerializerContext.Default.CancelExecutionReport },
-        { typeof(MarketProfitAndLossRequest), SerializerContext.Default.MarketProfitAndLossRequest },
-        { typeof(MarketProfitAndLoss), SerializerContext.Default.MarketProfitAndLoss },
-        { typeof(MarketProfitAndLoss[]), SerializerContext.Default.MarketProfitAndLossArray },
-        { typeof(List<MarketProfitAndLoss>), SerializerContext.Default.ListMarketProfitAndLoss },
-        { typeof(IEnumerable<MarketProfitAndLoss>), SerializerContext.Default.IEnumerableMarketProfitAndLoss },
-        { typeof(RunnerProfitAndLoss), SerializerContext.Default.RunnerProfitAndLoss },
-        { typeof(EventTypesRequest), SerializerContext.Default.EventTypesRequest },
-        { typeof(EventTypeResult), SerializerContext.Default.EventTypeResult },
-        { typeof(EventTypeResult[]), SerializerContext.Default.EventTypeResultArray },
-        { typeof(EventsRequest), SerializerContext.Default.EventsRequest },
-        { typeof(EventResult), SerializerContext.Default.EventResult },
-        { typeof(EventResult[]), SerializerContext.Default.EventResultArray },
-
-        // New API endpoints
-        { typeof(CompetitionsRequest), SerializerContext.Default.CompetitionsRequest },
-        { typeof(CompetitionResult), SerializerContext.Default.CompetitionResult },
-        { typeof(CompetitionResult[]), SerializerContext.Default.CompetitionResultArray },
-        { typeof(CountriesRequest), SerializerContext.Default.CountriesRequest },
-        { typeof(CountryCodeResult), SerializerContext.Default.CountryCodeResult },
-        { typeof(CountryCodeResult[]), SerializerContext.Default.CountryCodeResultArray },
-        { typeof(MarketTypesRequest), SerializerContext.Default.MarketTypesRequest },
-        { typeof(MarketTypeResult), SerializerContext.Default.MarketTypeResult },
-        { typeof(MarketTypeResult[]), SerializerContext.Default.MarketTypeResultArray },
-        { typeof(TimeRangesRequest), SerializerContext.Default.TimeRangesRequest },
-        { typeof(TimeRangeResult), SerializerContext.Default.TimeRangeResult },
-        { typeof(TimeRangeResult[]), SerializerContext.Default.TimeRangeResultArray },
-        { typeof(VenuesRequest), SerializerContext.Default.VenuesRequest },
-        { typeof(VenueResult), SerializerContext.Default.VenueResult },
-        { typeof(VenueResult[]), SerializerContext.Default.VenueResultArray },
-        { typeof(CurrentOrdersRequest), SerializerContext.Default.CurrentOrdersRequest },
-        { typeof(CurrentOrderSummaryReport), SerializerContext.Default.CurrentOrderSummaryReport },
-        { typeof(CurrentOrder), SerializerContext.Default.CurrentOrder },
-        { typeof(PriceSize), SerializerContext.Default.PriceSize },
-        { typeof(ClearedOrdersRequest), SerializerContext.Default.ClearedOrdersRequest },
-        { typeof(ClearedOrderSummaryReport), SerializerContext.Default.ClearedOrderSummaryReport },
-        { typeof(ClearedOrder), SerializerContext.Default.ClearedOrder },
-        { typeof(ItemDescription), SerializerContext.Default.ItemDescription },
-        { typeof(PriceProjection), SerializerContext.Default.PriceProjection },
-        { typeof(ExBestOffersOverrides), SerializerContext.Default.ExBestOffersOverrides },
-        { typeof(RunnerBookRequest), SerializerContext.Default.RunnerBookRequest },
-        { typeof(MarketBook[]), SerializerContext.Default.MarketBookArray },
-
-        // Account API
-        { typeof(AccountFundsRequest), SerializerContext.Default.AccountFundsRequest },
-        { typeof(AccountFundsResponse), SerializerContext.Default.AccountFundsResponse },
-        { typeof(AccountDetailsRequest), SerializerContext.Default.AccountDetailsRequest },
-        { typeof(AccountDetailsResponse), SerializerContext.Default.AccountDetailsResponse },
-        { typeof(AccountStatementRequest), SerializerContext.Default.AccountStatementRequest },
-        { typeof(AccountStatementReport), SerializerContext.Default.AccountStatementReport },
-        { typeof(StatementItem), SerializerContext.Default.StatementItem },
-        { typeof(StatementLegacyData), SerializerContext.Default.StatementLegacyData },
-        { typeof(CurrencyRatesRequest), SerializerContext.Default.CurrencyRatesRequest },
-        { typeof(CurrencyRate), SerializerContext.Default.CurrencyRate },
-        { typeof(CurrencyRate[]), SerializerContext.Default.CurrencyRateArray },
-        { typeof(TransferFundsRequest), SerializerContext.Default.TransferFundsRequest },
-        { typeof(TransferResponse), SerializerContext.Default.TransferResponse },
-    };
-
+    /// <summary>
+    /// Gets the JsonTypeInfo for the specified object instance.
+    /// </summary>
+    /// <typeparam name="T">The type of the object.</typeparam>
+    /// <param name="obj">The object instance.</param>
+    /// <returns>The JsonTypeInfo for the object's type.</returns>
     public static JsonTypeInfo GetContext<T>([NotNull] this T obj)
         where T : class => GetTypeInfo(obj.GetType());
 
+    /// <summary>
+    /// Gets the strongly-typed JsonTypeInfo for the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type to get JsonTypeInfo for.</typeparam>
+    /// <returns>The strongly-typed JsonTypeInfo for the specified type.</returns>
     public static JsonTypeInfo<T> GetTypeInfo<T>()
         where T : class => (JsonTypeInfo<T>)GetTypeInfo(typeof(T));
 
+    /// <summary>
+    /// Gets the JsonTypeInfo for the specified object instance, with internal type support.
+    /// </summary>
+    /// <typeparam name="T">The type of the object.</typeparam>
+    /// <param name="obj">The object instance.</param>
+    /// <returns>The JsonTypeInfo for the object's type.</returns>
     internal static JsonTypeInfo GetInternalContext<T>([NotNull] this T obj)
-        where T : class => GetTypeInfoWithFallback(obj.GetType(), GetInternalTypeInfo);
+        where T : class => GetTypeInfo(obj.GetType());
 
+    /// <summary>
+    /// Gets the strongly-typed JsonTypeInfo for the specified type, with internal type support.
+    /// </summary>
+    /// <typeparam name="T">The type to get JsonTypeInfo for.</typeparam>
+    /// <returns>The strongly-typed JsonTypeInfo for the specified type.</returns>
     internal static JsonTypeInfo<T> GetInternalTypeInfo<T>()
-        where T : class => (JsonTypeInfo<T>)GetTypeInfoWithFallback(typeof(T), GetInternalTypeInfo);
+        where T : class => (JsonTypeInfo<T>)GetTypeInfo(typeof(T));
 
-    private static JsonTypeInfo GetTypeInfo(Type type) => GetTypeInfoFromDictionary(type, _typeInfo);
-
-    private static JsonTypeInfo GetInternalTypeInfo(Type type) => GetTypeInfoFromDictionary(type, _internalTypes);
-
-    private static JsonTypeInfo GetTypeInfoWithFallback(Type type, Func<Type, JsonTypeInfo> primaryGetter)
+    /// <summary>
+    /// Automatically discovers and caches all JsonTypeInfo properties from SerializerContext.Default.
+    /// </summary>
+    private static void PopulateTypeInfoCache()
     {
-        try
+        var contextType = typeof(SerializerContext);
+        var defaultInstance = SerializerContext.Default;
+
+        // Get all public properties that return JsonTypeInfo or JsonTypeInfo<T>
+        var properties = contextType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => typeof(JsonTypeInfo).IsAssignableFrom(p.PropertyType));
+
+        foreach (var property in properties)
         {
-            return primaryGetter(type);
-        }
-        catch (InvalidOperationException)
-        {
-            return GetTypeInfo(type);
+            try
+            {
+                var jsonTypeInfo = (JsonTypeInfo)property.GetValue(defaultInstance)!;
+                var type = jsonTypeInfo.Type;
+                _typeInfoCache.TryAdd(type, jsonTypeInfo);
+            }
+            catch (Exception ex) when (ex is TargetInvocationException or ArgumentException or InvalidOperationException)
+            {
+                // Skip properties that can't be accessed or don't have valid JsonTypeInfo
+            }
         }
     }
 
-    private static JsonTypeInfo GetTypeInfoFromDictionary(Type type, Dictionary<Type, JsonTypeInfo> dictionary)
+    /// <summary>
+    /// Gets the JsonTypeInfo for the specified type from the cache.
+    /// </summary>
+    /// <param name="type">The type to get JsonTypeInfo for.</param>
+    /// <returns>The JsonTypeInfo for the specified type.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the type is not supported.</exception>
+    private static JsonTypeInfo GetTypeInfo(Type type)
     {
-        if (dictionary.TryGetValue(type, out var value))
+        if (_typeInfoCache.TryGetValue(type, out var value))
             return value;
 
         throw new InvalidOperationException($"Type {type} is not supported.");
