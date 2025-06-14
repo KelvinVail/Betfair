@@ -6,13 +6,8 @@ namespace Betfair;
 [ExcludeFromCodeCoverage]
 public static class SerializerContextExtensions
 {
-    private static readonly ConcurrentDictionary<Type, JsonTypeInfo> _typeInfoCache = new ();
-
-    static SerializerContextExtensions()
-    {
-        // Pre-populate cache with all available JsonTypeInfo properties from SerializerContext.Default
-        PopulateTypeInfoCache();
-    }
+    private static readonly Lazy<ConcurrentDictionary<Type, JsonTypeInfo>> _typeInfoCache =
+        new (PopulateTypeInfoCache, LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
     /// Gets the JsonTypeInfo for the specified object instance.
@@ -32,27 +27,30 @@ public static class SerializerContextExtensions
         where T : class => (JsonTypeInfo<T>)GetTypeInfo(typeof(T));
 
     /// <summary>
-    /// Gets the JsonTypeInfo for the specified object instance, with internal type support.
+    /// Gets the JsonTypeInfo for the specified object instance.
+    /// This method is identical to GetContext but kept for backward compatibility.
     /// </summary>
     /// <typeparam name="T">The type of the object.</typeparam>
     /// <param name="obj">The object instance.</param>
     /// <returns>The JsonTypeInfo for the object's type.</returns>
     internal static JsonTypeInfo GetInternalContext<T>([NotNull] this T obj)
-        where T : class => GetTypeInfo(obj.GetType());
+        where T : class => GetContext(obj);
 
     /// <summary>
-    /// Gets the strongly-typed JsonTypeInfo for the specified type, with internal type support.
+    /// Gets the strongly-typed JsonTypeInfo for the specified type.
+    /// This method is identical to GetTypeInfo but kept for backward compatibility.
     /// </summary>
     /// <typeparam name="T">The type to get JsonTypeInfo for.</typeparam>
     /// <returns>The strongly-typed JsonTypeInfo for the specified type.</returns>
     internal static JsonTypeInfo<T> GetInternalTypeInfo<T>()
-        where T : class => (JsonTypeInfo<T>)GetTypeInfo(typeof(T));
+        where T : class => GetTypeInfo<T>();
 
     /// <summary>
     /// Automatically discovers and caches all JsonTypeInfo properties from SerializerContext.Default.
     /// </summary>
-    private static void PopulateTypeInfoCache()
+    private static ConcurrentDictionary<Type, JsonTypeInfo> PopulateTypeInfoCache()
     {
+        var cache = new ConcurrentDictionary<Type, JsonTypeInfo>();
         var contextType = typeof(SerializerContext);
         var defaultInstance = SerializerContext.Default;
 
@@ -66,13 +64,15 @@ public static class SerializerContextExtensions
             {
                 var jsonTypeInfo = (JsonTypeInfo)property.GetValue(defaultInstance)!;
                 var type = jsonTypeInfo.Type;
-                _typeInfoCache.TryAdd(type, jsonTypeInfo);
+                cache.TryAdd(type, jsonTypeInfo);
             }
             catch (Exception ex) when (ex is TargetInvocationException or ArgumentException or InvalidOperationException)
             {
                 // Skip properties that can't be accessed or don't have valid JsonTypeInfo
             }
         }
+
+        return cache;
     }
 
     /// <summary>
@@ -83,7 +83,7 @@ public static class SerializerContextExtensions
     /// <exception cref="InvalidOperationException">Thrown when the type is not supported.</exception>
     private static JsonTypeInfo GetTypeInfo(Type type)
     {
-        if (_typeInfoCache.TryGetValue(type, out var value))
+        if (_typeInfoCache.Value.TryGetValue(type, out var value))
             return value;
 
         throw new InvalidOperationException($"Type {type} is not supported.");
