@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
@@ -78,17 +79,17 @@ public class MarketBookTests : IDisposable
                         RemovalDate = null,
                         ExchangePrices = new ExchangePrices
                         {
-                            AvailableToBack = new List<List<double>>
+                            AvailableToBack = new List<PriceSize>
                             {
-                                new List<double> { 2.5, 100.0 },
+                                new PriceSize { Price = 2.5, Size = 100.0 },
                             },
-                            AvailableToLay = new List<List<double>>
+                            AvailableToLay = new List<PriceSize>
                             {
-                                new List<double> { 2.6, 100.0 },
+                                new PriceSize { Price = 2.6, Size = 100.0 },
                             },
-                            TradedVolume = new List<List<double>>
+                            TradedVolume = new List<PriceSize>
                             {
-                                new List<double> { 2.4, 50.0 },
+                                new PriceSize { Price = 2.4, Size = 50.0 },
                             },
                         },
                     },
@@ -100,6 +101,58 @@ public class MarketBookTests : IDisposable
         var response = await _api.MarketBook(new[] { "1.23456789" });
 
         response.Should().BeEquivalentTo(expectedResponse);
+    }
+
+    [Fact]
+    public void RealWorldJsonShouldBeDeserializable()
+    {
+        const string json = """
+            [{"marketId":"1.244846171","isMarketDataDelayed":false,"status":"OPEN","betDelay":0,"bspReconciled":false,"complete":true,"inplay":false,"numberOfWinners":1,"numberOfRunners":20,"numberOfActiveRunners":20,"lastMatchTime":"2025-06-17T15:55:19.851Z","totalMatched":974693.96,"totalAvailable":3.375962291E7,"crossMatching":true,"runnersVoidable":false,"version":6701554910,"runners":[{"selectionId":61291656,"handicap":0.0,"status":"ACTIVE","adjustmentFactor":22.772,"lastPriceTraded":4.3,"totalMatched":297427.02,"ex":{"availableToBack":[{"price":4.3,"size":768.84},{"price":4.2,"size":4371.66},{"price":4.1,"size":2651.28}],"availableToLay":[{"price":4.4,"size":2456.5},{"price":4.5,"size":1206.82},{"price":4.6,"size":1491.02}],"tradedVolume":[]}}]}]
+            """;
+
+        var response = JsonSerializer.Deserialize(json, SerializerContext.Default.MarketBookArray);
+
+        response.Should().NotBeNull();
+        response.Should().HaveCount(1);
+
+        var marketBook = response![0];
+        marketBook.MarketId.Should().Be("1.244846171");
+        marketBook.Runners.Should().HaveCount(1);
+
+        var runner = marketBook.Runners![0];
+        runner.SelectionId.Should().Be(61291656);
+        runner.ExchangePrices.Should().NotBeNull();
+        runner.ExchangePrices!.AvailableToBack.Should().HaveCount(3);
+        runner.ExchangePrices.AvailableToBack![0].Price.Should().Be(4.3);
+        runner.ExchangePrices.AvailableToBack[0].Size.Should().Be(768.84);
+        runner.ExchangePrices.AvailableToLay.Should().HaveCount(3);
+        runner.ExchangePrices.AvailableToLay![0].Price.Should().Be(4.4);
+        runner.ExchangePrices.AvailableToLay[0].Size.Should().Be(2456.5);
+        runner.ExchangePrices.TradedVolume.Should().HaveCount(0);
+    }
+
+    [Fact]
+    public async Task OriginalFailingJsonShouldNowWork()
+    {
+        const string json = @"[{""marketId"":""1.244846171"",""isMarketDataDelayed"":false,""status"":""OPEN"",""betDelay"":0,""bspReconciled"":false,""complete"":true,""inplay"":false,""numberOfWinners"":1,""numberOfRunners"":20,""numberOfActiveRunners"":20,""lastMatchTime"":""2025-06-17T15:55:19.851Z"",""totalMatched"":974693.96,""totalAvailable"":3.375962291E7,""crossMatching"":true,""runnersVoidable"":false,""version"":6701554910,""runners"":[{""selectionId"":61291656,""handicap"":0.0,""status"":""ACTIVE"",""adjustmentFactor"":22.772,""lastPriceTraded"":4.3,""totalMatched"":297427.02,""ex"":{""availableToBack"":[{""price"":4.3,""size"":768.84},{""price"":4.2,""size"":4371.66},{""price"":4.1,""size"":2651.28}],""availableToLay"":[{""price"":4.4,""size"":2456.5},{""price"":4.5,""size"":1206.82},{""price"":4.6,""size"":1491.02}],""tradedVolume"":[]}},{""selectionId"":59505697,""handicap"":0.0,""status"":""ACTIVE"",""adjustmentFactor"":20.833,""lastPriceTraded"":4.4,""totalMatched"":248166.17,""ex"":{""availableToBack"":[{""price"":4.3,""size"":3884.84},{""price"":4.2,""size"":2556.63},{""price"":4.1,""size"":1291.72}],""availableToLay"":[{""price"":4.4,""size"":595.11},{""price"":4.5,""size"":1070.35},{""price"":4.6,""size"":792.06}],""tradedVolume"":[]}},{""selectionId"":62041210,""handicap"":0.0,""status"":""ACTIVE"",""adjustmentFactor"":17.241,""lastPriceTraded"":5.6,""totalMatched"":169912.68,""ex"":{""availableToBack"":[{""price"":5.6,""size"":669.36},{""price"":5.5,""size"":1973.49},{""price"":5.4,""size"":872.55}],""availableToLay"":[{""price"":5.7,""size"":1191.87},{""price"":5.8,""size"":1835.52},{""price"":5.9,""size"":803.3}],""tradedVolume"":[]}}]}]";
+
+        _client.RespondsWithBody = json;
+
+        var response = await _api.MarketBook(new[] { "1.244846171" });
+
+        response.Should().NotBeNull();
+        response.Should().HaveCount(1);
+
+        var marketBook = response[0];
+        marketBook.MarketId.Should().Be("1.244846171");
+        marketBook.Runners.Should().HaveCount(3);
+
+        var firstRunner = marketBook.Runners![0];
+        firstRunner.SelectionId.Should().Be(61291656);
+        firstRunner.ExchangePrices.Should().NotBeNull();
+        firstRunner.ExchangePrices!.AvailableToBack.Should().HaveCount(3);
+        firstRunner.ExchangePrices.AvailableToBack![0].Price.Should().Be(4.3);
+        firstRunner.ExchangePrices.AvailableToBack[0].Size.Should().Be(768.84);
     }
 
     public void Dispose()

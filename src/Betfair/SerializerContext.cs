@@ -172,7 +172,7 @@ namespace Betfair;
 [JsonSerializable(typeof(CurrentOrdersRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(CurrentOrderSummaryReport))]
 [JsonSerializable(typeof(CurrentOrder))]
-[JsonSerializable(typeof(PriceSize))]
+[JsonSerializable(typeof(Betfair.Api.Betting.Endpoints.ListCurrentOrders.Responses.PriceSize), TypeInfoPropertyName = "CurrentOrdersPriceSize")]
 
 // Cleared Orders
 [JsonSerializable(typeof(ClearedOrdersRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
@@ -184,7 +184,16 @@ namespace Betfair;
 [JsonSerializable(typeof(PriceProjection), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(ExBestOffersOverrides), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(RunnerBookRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSerializable(typeof(MarketBook))]
 [JsonSerializable(typeof(MarketBook[]))]
+[JsonSerializable(typeof(Runner))]
+[JsonSerializable(typeof(ExchangePrices))]
+[JsonSerializable(typeof(StartingPrices))]
+[JsonSerializable(typeof(KeyLineDescription))]
+[JsonSerializable(typeof(Order))]
+[JsonSerializable(typeof(Match))]
+[JsonSerializable(typeof(Matches))]
+[JsonSerializable(typeof(Betfair.Api.Betting.Endpoints.ListMarketBook.Responses.PriceSize), TypeInfoPropertyName = "MarketBookPriceSize")]
 
 // Account API
 [JsonSerializable(typeof(AccountFundsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]

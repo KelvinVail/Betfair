@@ -1,11 +1,25 @@
 namespace Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 
+/// <summary>
+/// Exchange prices available for a runner.
+/// </summary>
 public class ExchangePrices
 {
-    public List<List<double>>? AvailableToBack { get; init; }
+    /// <summary>
+    /// Gets the prices available to back.
+    /// </summary>
+    [JsonPropertyName("availableToBack")]
+    public List<PriceSize>? AvailableToBack { get; init; }
 
-    public List<List<double>>? AvailableToLay { get; init; }
+    /// <summary>
+    /// Gets the prices available to lay.
+    /// </summary>
+    [JsonPropertyName("availableToLay")]
+    public List<PriceSize>? AvailableToLay { get; init; }
 
-    public List<List<double>>? TradedVolume { get; init; }
+    /// <summary>
+    /// Gets the traded volume.
+    /// </summary>
+    [JsonPropertyName("tradedVolume")]
+    public List<PriceSize>? TradedVolume { get; init; }
 }
-

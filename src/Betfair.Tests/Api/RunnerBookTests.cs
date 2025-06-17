@@ -88,17 +88,17 @@ public class RunnerBookTests : IDisposable
                         RemovalDate = null,
                         ExchangePrices = new ExchangePrices
                         {
-                            AvailableToBack = new List<List<double>>
+                            AvailableToBack = new List<PriceSize>
                             {
-                                new List<double> { 2.5, 100.0 }
+                                new PriceSize { Price = 2.5, Size = 100.0 }
                             },
-                            AvailableToLay = new List<List<double>>
+                            AvailableToLay = new List<PriceSize>
                             {
-                                new List<double> { 2.6, 100.0 }
+                                new PriceSize { Price = 2.6, Size = 100.0 }
                             },
-                            TradedVolume = new List<List<double>>
+                            TradedVolume = new List<PriceSize>
                             {
-                                new List<double> { 2.4, 50.0 }
+                                new PriceSize { Price = 2.4, Size = 50.0 }
                             }
                         }
                     }
