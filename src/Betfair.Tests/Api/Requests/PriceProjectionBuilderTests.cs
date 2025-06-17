@@ -1,4 +1,4 @@
-using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 
 namespace Betfair.Tests.Api.Requests;
 

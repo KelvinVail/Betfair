@@ -1,9 +1,12 @@
 using Betfair.Api;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
-using Betfair.Api.Betting.Endpoints.ListClearedOrders;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Requests;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Responses;
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
-using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Requests;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Enums;
 using Betfair.Tests.Api.TestDoubles;

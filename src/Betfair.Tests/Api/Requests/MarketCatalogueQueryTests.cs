@@ -1,4 +1,4 @@
-﻿using Betfair.Api.Betting.Endpoints.ListMarketCatalogue;
+﻿using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Enums;
 
 namespace Betfair.Tests.Api.Requests;

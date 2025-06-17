@@ -1,4 +1,4 @@
-using Betfair.Api.Betting.Endpoints.ListClearedOrders;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Requests;
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
 using Betfair.Api.Betting.Enums;
 

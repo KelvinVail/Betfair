@@ -1,5 +1,6 @@
 using Betfair.Api;
-using Betfair.Api.Betting.Endpoints.ListClearedOrders;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Requests;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;

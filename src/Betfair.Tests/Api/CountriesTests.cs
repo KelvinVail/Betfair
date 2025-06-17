@@ -1,6 +1,7 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Betting;
-using Betfair.Api.Betting.Endpoints.ListCountries;
+using Betfair.Api.Betting.Endpoints.ListCountries.Requests;
+using Betfair.Api.Betting.Endpoints.ListCountries.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;

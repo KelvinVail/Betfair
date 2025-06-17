@@ -1,5 +1,6 @@
 using Betfair.Api;
-using Betfair.Api.Accounts.Endpoints.ListCurrencyRates;
+using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Requests;
+using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;

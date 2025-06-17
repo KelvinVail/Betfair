@@ -1,4 +1,4 @@
-﻿using Betfair.Api.Betting.Endpoints.UpdateOrders;
+﻿using Betfair.Api.Betting.Endpoints.UpdateOrders.Responses;
 using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Api.Responses.Orders;

@@ -1,8 +1,9 @@
 ﻿using Betfair.Api;
 using Betfair.Api.Betting;
-using Betfair.Api.Betting.Endpoints.ListCompetitions;
-using Betfair.Api.Betting.Endpoints.ListEventTypes;
-using Betfair.Api.Betting.Endpoints.ListMarketCatalogue;
+using Betfair.Api.Betting.Endpoints.ListCompetitions.Responses;
+using Betfair.Api.Betting.Endpoints.ListEventTypes.Responses;
+using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Requests;
+using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Responses;
 using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Enums;
 using Betfair.Tests.Api.TestDoubles;
 

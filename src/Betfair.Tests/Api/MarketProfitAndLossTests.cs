@@ -1,5 +1,6 @@
 ﻿using Betfair.Api;
-using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss;
+using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss.Requests;
+using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
