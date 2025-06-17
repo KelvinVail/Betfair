@@ -68,8 +68,8 @@ public class AccountStatementTests : IDisposable
                         BetSize = 10.0,
                         BetType = "B",
 
-                        EventId = "29123456",
-                        EventTypeId = "1",
+                        EventId = 29123456,
+                        EventTypeId = 1,
                         FullMarketName = "Test Match/Match Odds",
                         GrossBetAmount = 10.0,
                         MarketName = "Match Odds",
@@ -79,7 +79,7 @@ public class AccountStatementTests : IDisposable
                         SelectionName = "Team A",
                         StartDate = DateTime.UtcNow,
                         TransactionType = "RESULT_WON",
-                        TransactionId = "987654321",
+                        TransactionId = 987654321,
                         WinLose = "RESULT_WON"
                     }
                 }

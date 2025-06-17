@@ -23,12 +23,12 @@ public class StatementLegacyData
     /// <summary>
     /// Gets the event ID.
     /// </summary>
-    public string? EventId { get; init; }
+    public long? EventId { get; init; }
 
     /// <summary>
     /// Gets the event type ID.
     /// </summary>
-    public string? EventTypeId { get; init; }
+    public long? EventTypeId { get; init; }
 
     /// <summary>
     /// Gets the full market name.
@@ -73,7 +73,7 @@ public class StatementLegacyData
     /// <summary>
     /// Gets the transaction ID.
     /// </summary>
-    public string? TransactionId { get; init; }
+    public long? TransactionId { get; init; }
 
     /// <summary>
     /// Gets the transaction type.

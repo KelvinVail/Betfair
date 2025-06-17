@@ -1,5 +1,8 @@
-﻿namespace Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
+﻿using Betfair.Api.Betting.Enums;
 
+namespace Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
+
+[JsonConverter(typeof(SnakeCaseEnumJsonConverter<OrderStatus>))]
 public enum OrderStatus
 {
     /// <summary>
