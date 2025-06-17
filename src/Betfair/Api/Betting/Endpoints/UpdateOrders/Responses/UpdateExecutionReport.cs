@@ -32,4 +32,3 @@ public class UpdateExecutionReport
     /// </summary>
     public List<UpdateInstructionReport>? InstructionReports { get; init; }
 }
-

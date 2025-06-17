@@ -17,4 +17,3 @@ public class TimeRange
     [JsonPropertyName("to")]
     public DateTimeOffset To { get; init; }
 }
-

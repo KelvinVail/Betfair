@@ -20,4 +20,3 @@ public class CompetitionResult
     /// </summary>
     public string? CompetitionRegion { get; init; }
 }
-

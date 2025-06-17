@@ -11,6 +11,26 @@ public class PriceProjectionBuilder
     private bool? _rolloverStakes;
 
     /// <summary>
+    /// Implicitly converts the builder to a PriceProjection.
+    /// </summary>
+    /// <param name="builder">The builder to convert.</param>
+    /// <returns>A configured <see cref="PriceProjection"/>.</returns>
+    public static implicit operator PriceProjection(PriceProjectionBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        return builder.Build();
+    }
+
+    /// <summary>
+    /// Creates a new PriceProjectionBuilder.
+    /// </summary>
+    /// <returns>A new <see cref="PriceProjectionBuilder"/>.</returns>
+    public static PriceProjectionBuilder Create()
+    {
+        return new PriceProjectionBuilder();
+    }
+
+    /// <summary>
     /// Includes best prices in the projection.
     /// </summary>
     /// <returns>This <see cref="PriceProjectionBuilder"/>.</returns>
@@ -187,25 +207,4 @@ public class PriceProjectionBuilder
     {
         return Build();
     }
-
-    /// <summary>
-    /// Creates a new PriceProjectionBuilder.
-    /// </summary>
-    /// <returns>A new <see cref="PriceProjectionBuilder"/>.</returns>
-    public static PriceProjectionBuilder Create()
-    {
-        return new PriceProjectionBuilder();
-    }
-
-    /// <summary>
-    /// Implicitly converts the builder to a PriceProjection.
-    /// </summary>
-    /// <param name="builder">The builder to convert.</param>
-    /// <returns>A configured <see cref="PriceProjection"/>.</returns>
-    public static implicit operator PriceProjection(PriceProjectionBuilder builder)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        return builder.Build();
-    }
 }
-

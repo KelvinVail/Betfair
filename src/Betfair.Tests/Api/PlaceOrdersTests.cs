@@ -66,11 +66,11 @@ public class PlaceOrdersTests : IDisposable
                         {
                             Size = 10.0,
                             Price = 2.5,
-                            PersistenceType = PersistenceType.Lapse
-                        }
-                    }
-                }
-            }
+                            PersistenceType = PersistenceType.Lapse,
+                        },
+                    },
+                },
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

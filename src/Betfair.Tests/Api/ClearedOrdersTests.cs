@@ -7,7 +7,7 @@ namespace Betfair.Tests.Api;
 
 public class ClearedOrdersTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -70,11 +70,11 @@ public class ClearedOrdersTests : IDisposable
                         EventTypeDesc = "Soccer",
                         EventDesc = "Test Match",
                         MarketDesc = "Match Odds",
-                        RunnerDesc = "Team A"
-                    }
-                }
+                        RunnerDesc = "Team A",
+                    },
+                },
             },
-            MoreAvailable = false
+            MoreAvailable = false,
         };
         _client.RespondsWithBody = expectedResponse;
 

@@ -1,4 +1,4 @@
-﻿﻿using Betfair.Api;
+﻿using Betfair.Api;
 using Betfair.Api.Betting;
 using Betfair.Api.Betting.Endpoints.ListCompetitions.Requests;
 using Betfair.Api.Betting.Endpoints.ListCompetitions.Responses;

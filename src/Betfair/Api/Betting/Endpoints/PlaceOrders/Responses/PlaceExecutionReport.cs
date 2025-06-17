@@ -33,4 +33,3 @@ public class PlaceExecutionReport
     /// </summary>
     public List<PlaceInstructionReport>? InstructionReports { get; init; }
 }
-

@@ -3,7 +3,9 @@ namespace Betfair.Api.Betting.Endpoints.PlaceOrders.Requests;
 /// <summary>
 /// Represents a request to place orders on a market.
 /// </summary>
+#pragma warning disable CA1724 // Type names should not match namespaces
 public class PlaceOrders
+#pragma warning restore CA1724
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaceOrders"/> class.
@@ -59,4 +61,3 @@ public class PlaceOrders
     /// </summary>
     public bool? Async { get; set; }
 }
-

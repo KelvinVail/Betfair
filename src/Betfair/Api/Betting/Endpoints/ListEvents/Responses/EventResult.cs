@@ -5,7 +5,7 @@ using Betfair.Api.Betting.Endpoints.ListEventTypes.Responses;
 namespace Betfair.Api.Betting.Endpoints.ListEvents.Responses;
 
 /// <summary>
-/// Event Result.
+/// BetfairEvent Result.
 /// </summary>
 public class EventResult
 {
@@ -16,9 +16,8 @@ public class EventResult
     public EventType? Event { get; init; } = null;
 
     /// <summary>
-    /// Gets the count of markets associated with this Event.
+    /// Gets the count of markets associated with this BetfairEvent.
     /// </summary>
     [JsonPropertyName("marketCount")]
     public int MarketCount { get; init; } = 0;
 }
-

@@ -54,4 +54,3 @@ public class PlaceInstructionReport
     /// </summary>
     public PlaceInstruction? Instruction { get; init; }
 }
-

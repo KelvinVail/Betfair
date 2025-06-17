@@ -23,4 +23,3 @@ public enum TimeGranularity
     /// </summary>
     Minutes,
 }
-

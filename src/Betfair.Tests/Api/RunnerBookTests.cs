@@ -1,7 +1,7 @@
 using Betfair.Api;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
-using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListRunnerBook.Requests;
 using Betfair.Tests.Api.TestDoubles;
 
@@ -9,7 +9,7 @@ namespace Betfair.Tests.Api;
 
 public class RunnerBookTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -22,7 +22,7 @@ public class RunnerBookTests : IDisposable
             {
                 MarketId = "1.23456789",
                 Status = MarketStatus.Open,
-            }
+            },
         };
     }
 
@@ -90,20 +90,20 @@ public class RunnerBookTests : IDisposable
                         {
                             AvailableToBack = new List<PriceSize>
                             {
-                                new PriceSize { Price = 2.5, Size = 100.0 }
+                                new PriceSize { Price = 2.5, Size = 100.0 },
                             },
                             AvailableToLay = new List<PriceSize>
                             {
-                                new PriceSize { Price = 2.6, Size = 100.0 }
+                                new PriceSize { Price = 2.6, Size = 100.0 },
                             },
                             TradedVolume = new List<PriceSize>
                             {
-                                new PriceSize { Price = 2.4, Size = 50.0 }
-                            }
-                        }
-                    }
-                }
-            }
+                                new PriceSize { Price = 2.4, Size = 50.0 },
+                            },
+                        },
+                    },
+                },
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

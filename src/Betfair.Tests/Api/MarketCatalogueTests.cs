@@ -2,9 +2,9 @@
 using Betfair.Api.Betting;
 using Betfair.Api.Betting.Endpoints.ListCompetitions.Responses;
 using Betfair.Api.Betting.Endpoints.ListEventTypes.Responses;
+using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Responses;
-using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -67,7 +67,7 @@ public class MarketCatalogueTests : IDisposable
                 Competition = new Competition
                 {
                     Id = "10932509",
-                    Name = "English Premier League"
+                    Name = "English Premier League",
                 },
                 Event = new MarketEvent
                 {
@@ -75,14 +75,14 @@ public class MarketCatalogueTests : IDisposable
                     Name = "Test Match",
                     CountryCode = "GB",
                     Timezone = "GMT",
-                    OpenDate = DateTimeOffset.UtcNow.AddDays(1)
+                    OpenDate = DateTimeOffset.UtcNow.AddDays(1),
                 },
                 EventType = new EventType
                 {
                     Id = "1",
-                    Name = "Soccer"
-                }
-            }
+                    Name = "Soccer",
+                },
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

@@ -22,4 +22,3 @@ public class UpdateInstructionReport
     /// </summary>
     public UpdateInstruction? Instruction { get; init; }
 }
-

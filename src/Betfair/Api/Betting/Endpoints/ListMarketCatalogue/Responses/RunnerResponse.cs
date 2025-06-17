@@ -35,4 +35,3 @@ public sealed class RunnerResponse
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; init; }
 }
-

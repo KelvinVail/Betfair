@@ -63,7 +63,7 @@ public class UnmatchedOrder
     public long? MatchedDate { get; init; }
 
     /// <summary>
-    /// Gets the date the order was cancelled (null if the order is not cancelled)
+    /// Gets the date the order was cancelled (null if the order is not cancelled).
     /// </summary>
     [JsonPropertyName("cd")]
     public long? CancelledDate { get; init; }

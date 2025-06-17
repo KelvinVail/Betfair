@@ -15,4 +15,3 @@ public class VenueResult
     /// </summary>
     public int MarketCount { get; init; }
 }
-

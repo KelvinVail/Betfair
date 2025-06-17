@@ -110,14 +110,12 @@ public class ClearedOrdersQuery
     /// <returns>This <see cref="ClearedOrdersQuery"/>.</returns>
     public ClearedOrdersQuery WithEventTypes(params string[] eventTypeIds)
     {
-        if (eventTypeIds?.Length > 0)
-        {
-            _eventTypeIds ??= new HashSet<string>();
-            foreach (var id in eventTypeIds.Where(x => !string.IsNullOrWhiteSpace(x)))
-            {
-                _eventTypeIds.Add(id);
-            }
-        }
+        if (!(eventTypeIds?.Length > 0))
+            return this;
+
+        _eventTypeIds ??= [];
+        foreach (var id in eventTypeIds.Where(x => !string.IsNullOrWhiteSpace(x)))
+            _eventTypeIds.Add(id);
 
         return this;
     }

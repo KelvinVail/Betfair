@@ -35,4 +35,3 @@ internal class CurrentOrdersRequest
     [JsonPropertyName("recordCount")]
     public int RecordCount { get; set; } = 1000;
 }
-

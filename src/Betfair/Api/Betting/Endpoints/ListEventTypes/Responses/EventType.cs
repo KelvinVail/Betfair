@@ -1,7 +1,7 @@
 namespace Betfair.Api.Betting.Endpoints.ListEventTypes.Responses;
 
 /// <summary>
-/// Event Type.
+/// BetfairEvent Type.
 /// </summary>
 public class EventType
 {
@@ -17,4 +17,3 @@ public class EventType
     [JsonPropertyName("name")]
     public string? Name { get; init; }
 }
-

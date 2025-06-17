@@ -20,4 +20,3 @@ public class UpdateInstruction
     /// </summary>
     public PersistenceType NewPersistenceType { get; set; } = PersistenceType.Lapse;
 }
-

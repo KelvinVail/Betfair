@@ -8,7 +8,9 @@ namespace Betfair.Api.Betting.Endpoints.ReplaceOrders.Requests;
 /// In the case where the new orders cannot be placed the cancellations
 /// will not be rolled back.
 /// </summary>
+#pragma warning disable CA1724 // Type names should not match namespaces
 public class ReplaceOrders
+#pragma warning restore CA1724
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ReplaceOrders"/> class.
@@ -64,4 +66,3 @@ public class ReplaceOrders
     /// </summary>
     public bool? Async { get; set; }
 }
-

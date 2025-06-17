@@ -17,7 +17,7 @@ public class UpdateOrdersTests
     [Fact]
     public void InstructionsPropertyShouldAcceptNonNullValue()
     {
-        var orders = new UpdateOrders("1.23456789") { Instructions = new List<UpdateInstruction> { new UpdateInstruction() } };
+        var orders = new UpdateOrders("1.23456789") { Instructions = [new UpdateInstruction()] };
         orders.Instructions.Should().NotBeNull();
     }
 

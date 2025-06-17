@@ -7,7 +7,7 @@ namespace Betfair.Tests.Api;
 
 public class AccountFundsTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -45,7 +45,7 @@ public class AccountFundsTests : IDisposable
             RetainedCommission = 15.25,
             ExposureLimit = 5000.00,
             DiscountRate = 0.05,
-            PointsBalance = 100
+            PointsBalance = 100,
         };
         _client.RespondsWithBody = expectedResponse;
 
@@ -67,6 +67,7 @@ public class AccountFundsTests : IDisposable
             if (disposing)
             {
                 _api?.Dispose();
+                _client?.Dispose();
             }
 
             _disposedValue = true;

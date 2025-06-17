@@ -1,4 +1,5 @@
-﻿using Betfair.Core;
+﻿using System.Globalization;
+using Betfair.Core;
 
 namespace Betfair.Tests.Core;
 
@@ -91,8 +92,8 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     {
         WithEventTypes(EventType.HorseRacing, EventType.AmericanFootball);
 
-        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString());
-        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id.ToString());
+        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString(CultureInfo.InvariantCulture));
+        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id.ToString(CultureInfo.InvariantCulture));
     }
 
     [Fact]
@@ -101,8 +102,8 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
         WithEventTypes(EventType.HorseRacing);
         WithEventTypes(EventType.AmericanFootball);
 
-        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString());
-        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id.ToString());
+        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString(CultureInfo.InvariantCulture));
+        EventTypeIds.Should().Contain(EventType.AmericanFootball.Id.ToString(CultureInfo.InvariantCulture));
     }
 
     [Fact]
@@ -119,7 +120,7 @@ public class MarketFilterTests : MarketFilter<MarketFilterTests>
     {
         WithEventTypes(EventType.HorseRacing, null!);
 
-        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString());
+        EventTypeIds.Should().Contain(EventType.HorseRacing.Id.ToString(CultureInfo.InvariantCulture));
         EventTypeIds.Should().NotContainNulls();
     }
 

@@ -19,4 +19,3 @@ public class ReplaceInstruction
     /// </summary>
     public double NewPrice { get; set; }
 }
-

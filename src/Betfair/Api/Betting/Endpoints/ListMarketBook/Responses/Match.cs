@@ -42,4 +42,3 @@ public class Match
     [JsonPropertyName("matchDate")]
     public DateTimeOffset? MatchDate { get; init; }
 }
-

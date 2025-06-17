@@ -61,4 +61,3 @@ public class MarketCatalogueQuery
         return this;
     }
 }
-

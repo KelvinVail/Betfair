@@ -1,7 +1,6 @@
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
-using Betfair.Api.Betting.Enums;
-
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Api.Betting.Endpoints.ListMarketBook.Requests;
 
@@ -40,4 +39,3 @@ internal class MarketBookRequest
     [JsonPropertyName("betIds")]
     public List<string>? BetIds { get; set; }
 }
-

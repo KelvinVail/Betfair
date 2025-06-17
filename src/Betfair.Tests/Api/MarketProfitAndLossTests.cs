@@ -113,10 +113,10 @@ public class MarketProfitAndLossTests : IDisposable
                         SelectionId = 47972,
                         IfWin = 10.50,
                         IfLose = -5.25,
-                        IfPlace = 2.75
-                    }
-                }
-            }
+                        IfPlace = 2.75,
+                    },
+                },
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

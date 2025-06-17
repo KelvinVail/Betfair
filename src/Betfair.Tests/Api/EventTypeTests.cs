@@ -57,10 +57,10 @@ public class EventTypeTests : IDisposable
                 EventType = new EventType
                 {
                     Id = "1",
-                    Name = "Soccer"
+                    Name = "Soccer",
                 },
-                MarketCount = 150
-            }
+                MarketCount = 150,
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

@@ -15,4 +15,3 @@ public class MarketTypeResult
     /// </summary>
     public int MarketCount { get; init; }
 }
-

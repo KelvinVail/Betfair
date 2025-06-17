@@ -11,4 +11,3 @@ public class MarketOnCloseOrder
     /// </summary>
     public double Liability { get; set; }
 }
-

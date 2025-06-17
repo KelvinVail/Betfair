@@ -15,4 +15,3 @@ public class CountryCodeResult
     /// </summary>
     public int MarketCount { get; init; }
 }
-

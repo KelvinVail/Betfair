@@ -19,4 +19,3 @@ internal class MarketCatalogueRequest
     [JsonPropertyName("locale")]
     public string? Locale { get; set; }
 }
-

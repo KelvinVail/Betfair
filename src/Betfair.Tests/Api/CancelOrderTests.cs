@@ -66,12 +66,12 @@ public class CancelOrderTests : IDisposable
                     Instruction = new CancelInstruction
                     {
                         BetId = "123456789",
-                        SizeReduction = 10.0
+                        SizeReduction = 10.0,
                     },
                     SizeCancelled = 10.0,
-                    CancelledDate = DateTimeOffset.UtcNow
-                }
-            }
+                    CancelledDate = DateTimeOffset.UtcNow,
+                },
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

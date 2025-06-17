@@ -1,5 +1,5 @@
-using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Responses;
 using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
+using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Responses;
 using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Api.Requests.Orders;
@@ -526,7 +526,9 @@ public class ApiOrderFilterTests
     [Theory]
     [InlineData(-1)]
     [InlineData(int.MinValue)]
+#pragma warning disable S4144 // Methods should not have identical implementations
     public void FromAcceptsNegativeValues(int fromRecord)
+#pragma warning restore S4144
     {
         var filter = new ApiOrderFilter();
 
@@ -567,7 +569,9 @@ public class ApiOrderFilterTests
     [Theory]
     [InlineData(-1)]
     [InlineData(int.MinValue)]
+#pragma warning disable S4144 // Methods should not have identical implementations
     public void TakeAcceptsNegativeValues(int recordCount)
+#pragma warning restore S4144
     {
         var filter = new ApiOrderFilter();
 

@@ -17,4 +17,3 @@ public class KeyLineSelection
     [JsonPropertyName("handicap")]
     public double Handicap { get; init; }
 }
-

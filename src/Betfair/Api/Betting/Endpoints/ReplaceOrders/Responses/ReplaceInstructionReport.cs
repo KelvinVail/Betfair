@@ -1,7 +1,6 @@
 using Betfair.Api.Betting.Endpoints.CancelOrders;
-using Betfair.Api.Betting.Endpoints.PlaceOrders;
-
 using Betfair.Api.Betting.Endpoints.CancelOrders.Responses;
+using Betfair.Api.Betting.Endpoints.PlaceOrders;
 using Betfair.Api.Betting.Endpoints.PlaceOrders.Responses;
 
 namespace Betfair.Api.Betting.Endpoints.ReplaceOrders.Responses;
@@ -32,4 +31,3 @@ public class ReplaceInstructionReport
     /// </summary>
     public PlaceInstructionReport? PlaceInstructionReport { get; init; }
 }
-

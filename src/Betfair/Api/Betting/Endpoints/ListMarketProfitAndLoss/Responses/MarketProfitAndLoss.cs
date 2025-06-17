@@ -18,4 +18,3 @@ public class MarketProfitAndLoss
     /// </summary>
     public IEnumerable<RunnerProfitAndLoss>? ProfitAndLosses { get; init; }
 }
-

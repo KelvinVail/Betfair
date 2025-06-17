@@ -64,4 +64,3 @@ public class LimitOrder
     /// </summary>
     public double? BetTargetSize { get; set; }
 }
-

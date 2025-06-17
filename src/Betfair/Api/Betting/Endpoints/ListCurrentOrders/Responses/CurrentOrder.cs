@@ -31,7 +31,7 @@ public class CurrentOrder
     /// <summary>
     /// Gets the price and size.
     /// </summary>
-    public PriceSize PriceSize { get; init; }
+    required public PriceSize PriceSize { get; init; }
 
     /// <summary>
     /// Gets the BSP liability.
@@ -127,4 +127,3 @@ public class CurrentOrder
     /// </summary>
     public string? CustomerStrategyRef { get; init; }
 }
-

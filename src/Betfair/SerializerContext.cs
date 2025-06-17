@@ -127,10 +127,10 @@ namespace Betfair;
 [JsonSerializable(typeof(BadRequestDetail))]
 [JsonSerializable(typeof(BadRequestErrorCode))]
 
-// Event Types Requests
+// BetfairEvent Types Requests
 [JsonSerializable(typeof(EventTypesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
-// Event Types
+// BetfairEvent Types
 [JsonSerializable(typeof(EventType))]
 [JsonSerializable(typeof(EventTypeResult))]
 [JsonSerializable(typeof(EventTypeResult[]))]
@@ -139,7 +139,7 @@ namespace Betfair;
 [JsonSerializable(typeof(EventsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 
 // Events
-[JsonSerializable(typeof(Event))]
+[JsonSerializable(typeof(BetfairEvent))]
 [JsonSerializable(typeof(EventResult))]
 [JsonSerializable(typeof(EventResult[]))]
 
@@ -208,6 +208,8 @@ namespace Betfair;
 [JsonSerializable(typeof(CurrencyRate))]
 [JsonSerializable(typeof(CurrencyRate[]))]
 [ExcludeFromCodeCoverage]
+#pragma warning disable CA1506 // Avoid excessive class coupling
 internal partial class SerializerContext : JsonSerializerContext
+#pragma warning restore CA1506
 {
 }

@@ -1,4 +1,5 @@
-﻿using Betfair.Core;
+﻿using System.Globalization;
+using Betfair.Core;
 using Betfair.Stream.Messages;
 
 namespace Betfair.Tests.Stream;
@@ -220,7 +221,7 @@ public class StreamMarketFilterTests
     {
         _filter.WithEventTypes(eventTypeId);
 
-        _filter.EventTypeIds.Should().Contain(eventTypeId.ToString());
+        _filter.EventTypeIds.Should().Contain(eventTypeId.ToString(CultureInfo.InvariantCulture));
     }
 
     [Fact]

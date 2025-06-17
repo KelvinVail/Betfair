@@ -17,4 +17,3 @@ public class CurrentOrderSummaryReport
     /// </summary>
     public bool MoreAvailable { get; init; }
 }
-

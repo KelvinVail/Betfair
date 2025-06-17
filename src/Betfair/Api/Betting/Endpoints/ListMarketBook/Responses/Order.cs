@@ -108,4 +108,3 @@ public class Order
     [JsonPropertyName("customerStrategyRef")]
     public string? CustomerStrategyRef { get; init; }
 }
-

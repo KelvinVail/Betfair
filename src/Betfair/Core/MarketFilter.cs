@@ -4,7 +4,7 @@ public abstract class MarketFilter<T>
     where T : MarketFilter<T>, new()
 {
     /// <summary>
-    /// Restrict markets by any text associated with the market such as the Name, Event, Competition, etc.
+    /// Restrict markets by any text associated with the market such as the Name, BetfairEvent, Competition, etc.
     /// You can include a wildcard (*) character as long as it is not the first character.
     /// </summary>
     [JsonPropertyName("textQuery")]
@@ -104,7 +104,7 @@ public abstract class MarketFilter<T>
     public HashSet<string>? CountryCodes { get; private set; }
 
     /// <summary>
-    /// Restrict markets by any text associated with the market such as the Name, Event, Competition, etc.
+    /// Restrict markets by any text associated with the market such as the Name, BetfairEvent, Competition, etc.
     /// </summary>
     /// <param name="textQuery">The text query to search for.</param>
     /// <returns>This <typeparamref name="T"/>.</returns>
@@ -133,10 +133,10 @@ public abstract class MarketFilter<T>
     /// <summary>
     /// Restrict markets by event type associated with the market.
     /// </summary>
-    /// <param name="eventTypes">Event Types to include.</param>
+    /// <param name="eventTypes">BetfairEvent Types to include.</param>
     /// <returns>This <typeparamref name="T"/>.</returns>
     public T WithEventTypes(params EventType[] eventTypes) =>
-        eventTypes is null ? This() : WithEventTypes(eventTypes.Where(x => x is not null).Select(x => x.Id.ToString()).ToArray());
+        eventTypes is null ? This() : WithEventTypes(eventTypes.Where(x => x is not null).Select(x => x.Id.ToString(CultureInfo.InvariantCulture)).ToArray());
 
     /// <inheritdoc cref="MarketFilter{T}.WithEventTypes(EventType[])"/>
     public T WithEventTypes(params string[] eventTypes)
@@ -157,7 +157,7 @@ public abstract class MarketFilter<T>
 
         EventTypeIds ??= [];
         foreach (var eventType in eventTypes)
-            EventTypeIds.Add(eventType.ToString());
+            EventTypeIds.Add(eventType.ToString(CultureInfo.InvariantCulture));
 
         return This();
     }
@@ -165,7 +165,7 @@ public abstract class MarketFilter<T>
     /// <summary>
     /// Restrict markets by the event id associated with the market.
     /// </summary>
-    /// <param name="eventIds">Event IDs to include.</param>
+    /// <param name="eventIds">BetfairEvent IDs to include.</param>
     /// <returns>This <typeparamref name="T"/>.</returns>
     public T WithEventIds(params string[] eventIds)
     {
@@ -355,5 +355,5 @@ public abstract class MarketFilter<T>
         return This();
     }
 
-    private T This() => (this as T)!;
+    private T This() => (this as T) !;
 }

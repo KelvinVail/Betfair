@@ -5,7 +5,9 @@ namespace Betfair.Api.Betting.Endpoints.UpdateOrders.Requests;
 /// Represents a request to update orders on Betfair.
 /// Update non-exposure changing fields.
 /// </summary>
+#pragma warning disable CA1724 // Type names should not match namespaces
 public class UpdateOrders
+#pragma warning restore CA1724
 {
     public UpdateOrders(string marketId) =>
         MarketId = marketId ?? throw new ArgumentNullException(nameof(marketId));
@@ -28,4 +30,3 @@ public class UpdateOrders
     /// </summary>
     public string? CustomerRef { get; set; }
 }
-

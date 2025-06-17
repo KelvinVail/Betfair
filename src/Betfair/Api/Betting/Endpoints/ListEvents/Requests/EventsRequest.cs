@@ -8,4 +8,3 @@ internal class EventsRequest
     [JsonPropertyName("locale")]
     public string? Locale { get; set; }
 }
-

@@ -1,5 +1,4 @@
 using Betfair.Api;
-using Betfair.Api.Accounts.Endpoints.GetAccountDetails.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountDetails.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
@@ -7,7 +6,7 @@ namespace Betfair.Tests.Api;
 
 public class AccountDetailsTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -48,7 +47,7 @@ public class AccountDetailsTests : IDisposable
             Timezone = "GMT",
             DiscountRate = 0.05,
             PointsBalance = 100,
-            CountryCode = "GB"
+            CountryCode = "GB",
         };
         _client.RespondsWithBody = expectedResponse;
 

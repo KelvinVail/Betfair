@@ -7,7 +7,7 @@ namespace Betfair.Tests.Api;
 
 public class CurrencyRatesTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -61,13 +61,13 @@ public class CurrencyRatesTests : IDisposable
             new CurrencyRate
             {
                 CurrencyCode = "GBP",
-                Rate = 0.85
+                Rate = 0.85,
             },
             new CurrencyRate
             {
                 CurrencyCode = "EUR",
-                Rate = 0.92
-            }
+                Rate = 0.92,
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

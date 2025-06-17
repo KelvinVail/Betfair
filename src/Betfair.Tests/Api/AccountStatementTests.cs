@@ -7,7 +7,7 @@ namespace Betfair.Tests.Api;
 
 public class AccountStatementTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
@@ -60,7 +60,7 @@ public class AccountStatementTests : IDisposable
                     ItemClassData = new Dictionary<string, string>
                     {
                         { "commission", "0.05" },
-                        { "exchangeRate", "1.0" }
+                        { "exchangeRate", "1.0" },
                     },
                     LegacyData = new StatementLegacyData
                     {
@@ -80,11 +80,11 @@ public class AccountStatementTests : IDisposable
                         StartDate = DateTime.UtcNow,
                         TransactionType = "RESULT_WON",
                         TransactionId = 987654321,
-                        WinLose = "RESULT_WON"
-                    }
-                }
+                        WinLose = "RESULT_WON",
+                    },
+                },
             },
-            MoreAvailable = false
+            MoreAvailable = false,
         };
         _client.RespondsWithBody = expectedResponse;
 

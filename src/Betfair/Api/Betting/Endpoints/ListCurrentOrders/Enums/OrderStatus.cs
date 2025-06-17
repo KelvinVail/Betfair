@@ -14,7 +14,7 @@ public enum OrderStatus
     Pending,
 
     /// <summary>
-    /// An order that does not have any remaining unmatched portion. 
+    /// An order that does not have any remaining unmatched portion.
     /// </summary>
     ExecutionComplete,
 

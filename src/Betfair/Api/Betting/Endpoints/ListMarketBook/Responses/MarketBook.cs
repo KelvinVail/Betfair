@@ -122,4 +122,3 @@ public class MarketBook
     [JsonPropertyName("keyLineDescription")]
     public KeyLineDescription? KeyLineDescription { get; init; }
 }
-

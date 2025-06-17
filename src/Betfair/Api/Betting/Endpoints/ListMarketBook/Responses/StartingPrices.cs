@@ -45,4 +45,3 @@ public class StartingPrices
     [JsonPropertyName("actualSP")]
     public double? ActualSp { get; init; }
 }
-

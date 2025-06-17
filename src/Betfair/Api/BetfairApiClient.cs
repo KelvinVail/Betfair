@@ -2,9 +2,9 @@
 using Betfair.Api.Accounts.Endpoints.GetAccountDetails.Responses;
 using Betfair.Api.Accounts.Endpoints.GetAccountFunds.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountFunds.Responses;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
 using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Requests;
 using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Responses;
 using Betfair.Api.Betting;
@@ -22,9 +22,9 @@ using Betfair.Api.Betting.Endpoints.ListEvents.Requests;
 using Betfair.Api.Betting.Endpoints.ListEvents.Responses;
 using Betfair.Api.Betting.Endpoints.ListEventTypes.Requests;
 using Betfair.Api.Betting.Endpoints.ListEventTypes.Responses;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
-using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Responses;
 using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss.Requests;
@@ -73,7 +73,7 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns a list of Event Types (i.e. Sports) associated with the markets selected by the MarketFilter.
+    /// Returns a list of BetfairEvent Types (i.e. Sports) associated with the markets selected by the MarketFilter.
     /// </summary>
     /// <param name="filter">The filter to select desired markets. All markets that match the criteria in the filter are selected.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
@@ -266,9 +266,11 @@ public class BetfairApiClient : IDisposable
     /// <param name="query">The query parameters for filtering cleared orders.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A <see cref="ClearedOrderSummaryReport"/>.</returns>
+#pragma warning disable CA1502 // Avoid excessive complexity
     public virtual Task<ClearedOrderSummaryReport> ClearedOrders(
         ClearedOrdersQuery query,
         CancellationToken cancellationToken = default)
+#pragma warning restore CA1502
     {
         ArgumentNullException.ThrowIfNull(query);
 
@@ -394,12 +396,14 @@ public class BetfairApiClient : IDisposable
     /// <param name="query">The query parameters for the runner book request.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A <see cref="MarketBook"/>.</returns>
+#pragma warning disable CA1502 // Avoid excessive complexity
     public virtual async Task<MarketBook?> RunnerBook(
         string marketId,
         long selectionId,
         double? handicap = null,
         MarketBookQuery? query = null,
         CancellationToken cancellationToken = default)
+#pragma warning restore CA1502
     {
         query ??= new MarketBookQuery();
         var request = new RunnerBookRequest

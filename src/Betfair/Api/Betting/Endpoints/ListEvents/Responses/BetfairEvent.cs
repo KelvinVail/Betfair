@@ -1,9 +1,9 @@
 namespace Betfair.Api.Betting.Endpoints.ListEvents.Responses;
 
 /// <summary>
-/// Event.
+/// BetfairEvent.
 /// </summary>
-public class Event
+public class BetfairEvent
 {
     /// <summary>
     /// Gets the unique identifier for the event.
@@ -41,4 +41,3 @@ public class Event
     [JsonPropertyName("openDate")]
     public DateTimeOffset OpenDate { get; init; } = default;
 }
-

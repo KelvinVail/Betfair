@@ -6,7 +6,9 @@ namespace Betfair.Api.Betting.Endpoints.CancelOrders.Requests;
 /// OR fully or partially cancel particular orders on a market.
 /// Only LIMIT orders can be cancelled or partially cancelled once placed.
 /// </summary>
+#pragma warning disable CA1724 // Type names should not match namespaces
 public class CancelOrders
+#pragma warning restore CA1724
 {
     /// <summary>
     /// Gets or sets the market ID.

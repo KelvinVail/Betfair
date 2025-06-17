@@ -1,13 +1,13 @@
 using Betfair.Api;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Requests;
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Responses;
-using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
-using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
@@ -179,7 +179,12 @@ public class FluentApiIntegrationTests : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _api.Dispose();
+        if (disposing)
+        {
+            _api.Dispose();
+            _client.Dispose();
+        }
+
         _disposedValue = true;
     }
 }

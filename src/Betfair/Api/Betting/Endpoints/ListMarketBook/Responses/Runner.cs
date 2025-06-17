@@ -79,4 +79,3 @@ public class Runner
     [JsonPropertyName("matchesByStrategy")]
     public Dictionary<string, Matches>? MatchesByStrategy { get; init; }
 }
-

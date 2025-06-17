@@ -45,4 +45,3 @@ internal class RunnerBookRequest
     [JsonPropertyName("betIds")]
     public List<string>? BetIds { get; set; }
 }
-

@@ -101,4 +101,3 @@ public sealed class MarketDescription
     [JsonPropertyName("priceLadderDescription")]
     public LadderDescription PriceLadderDescription { get; init; } = new ();
 }
-

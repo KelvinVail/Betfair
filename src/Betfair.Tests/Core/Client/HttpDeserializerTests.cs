@@ -1,5 +1,5 @@
-﻿using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
-using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
+﻿using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 

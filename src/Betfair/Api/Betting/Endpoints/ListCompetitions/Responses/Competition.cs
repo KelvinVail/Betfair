@@ -15,4 +15,3 @@ public sealed class Competition
     /// </summary>
     public string Name { get; init; } = string.Empty;
 }
-

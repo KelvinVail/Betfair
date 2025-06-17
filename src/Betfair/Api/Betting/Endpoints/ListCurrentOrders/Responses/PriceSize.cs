@@ -15,4 +15,3 @@ public class PriceSize
     /// </summary>
     public double Size { get; init; }
 }
-

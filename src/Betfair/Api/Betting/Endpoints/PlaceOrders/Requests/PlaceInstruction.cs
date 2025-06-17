@@ -1,6 +1,5 @@
-using Betfair.Api.Betting.Enums;
-
 using Betfair.Api.Betting.Endpoints.PlaceOrders.Responses;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Api.Betting.Endpoints.PlaceOrders.Requests;
 
@@ -54,4 +53,3 @@ public class PlaceInstruction
     /// </summary>
     public string? CustomerOrderRef { get; set; }
 }
-

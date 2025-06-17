@@ -1,15 +1,14 @@
-using System.Text.Json;
 using Betfair.Api;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
-using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
 public class MarketBookTests : IDisposable
 {
-    private readonly HttpAdapterStub _client = new();
+    private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 

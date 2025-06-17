@@ -8,13 +8,13 @@ using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
 
-public class EventTests : IDisposable
+public class BetfairEventTests : IDisposable
 {
     private readonly HttpAdapterStub _client = new ();
     private readonly BetfairApiClient _api;
     private bool _disposedValue;
 
-    public EventTests()
+    public BetfairEventTests()
     {
         _api = new BetfairApiClient(_client);
         _client.RespondsWithBody = Array.Empty<EventResult>();
@@ -59,10 +59,10 @@ public class EventTests : IDisposable
                 Event = new EventType
                 {
                     Id = "29301",
-                    Name = "Test Event"
+                    Name = "Test BetfairEvent",
                 },
-                MarketCount = 5
-            }
+                MarketCount = 5,
+            },
         };
         _client.RespondsWithBody = expectedResponse;
 

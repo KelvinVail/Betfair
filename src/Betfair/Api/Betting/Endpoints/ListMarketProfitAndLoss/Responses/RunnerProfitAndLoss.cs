@@ -22,4 +22,3 @@ public class RunnerProfitAndLoss
     /// </summary>
     public double? IfPlace { get; init; }
 }
-

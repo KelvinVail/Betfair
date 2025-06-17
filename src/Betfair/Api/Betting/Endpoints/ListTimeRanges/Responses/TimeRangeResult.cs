@@ -17,4 +17,3 @@ public class TimeRangeResult
     [JsonPropertyName("marketCount")]
     public int MarketCount { get; init; }
 }
-

@@ -10,4 +10,3 @@ internal class MarketProfitAndLossRequest
 
     public bool? NetOfCommission { get; set; }
 }
-

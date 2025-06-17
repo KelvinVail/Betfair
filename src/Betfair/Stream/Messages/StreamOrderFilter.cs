@@ -51,7 +51,7 @@ public class StreamOrderFilter
     /// <summary>
     /// Restricts to specified customerStrategyRefs (specified in placeOrders).
     /// This will filter orders and StrategyMatchChanges accordingly
-    /// (Note: overall position is not filtered)
+    /// (Note: overall position is not filtered).
     /// </summary>
     /// <param name="strategyRefs">A set of strategy references (specified in placeOrders).</param>
     /// <returns>This <see cref="StreamOrderFilter"/>.</returns>

@@ -20,4 +20,3 @@ public sealed class MarketEvent
     [JsonPropertyName("openDate")]
     public DateTimeOffset OpenDate { get; init; }
 }
-

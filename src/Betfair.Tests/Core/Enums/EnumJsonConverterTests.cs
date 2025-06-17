@@ -1,15 +1,17 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Betfair.Api.Betting.Enums;
 using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Core.Enums;
 
 public class EnumJsonConverterTests
 {
     [Fact]
+#pragma warning disable CA1502 // Avoid excessive complexity
     public void AllEnumsHaveJsonConverter()
+#pragma warning restore CA1502
     {
         var betfairAssembly = typeof(Side).Assembly;
         var enumTypes = betfairAssembly.GetTypes()
@@ -75,8 +77,7 @@ public class EnumJsonConverterTests
 
                 // Verify it's in UPPER_SNAKE_CASE format
                 var jsonValue = serialized.Trim('"');
-                jsonValue.Should().MatchRegex(@"^[A-Z_]+$",
-                    $"Enum {enumType.Name}.{enumValue} should serialize to UPPER_SNAKE_CASE format, but got: {jsonValue}");
+                jsonValue.Should().MatchRegex(@"^[A-Z_]+$", $"Enum {enumType.Name}.{enumValue} should serialize to UPPER_SNAKE_CASE format, but got: {jsonValue}");
             }
         }
     }
@@ -117,7 +118,9 @@ public class EnumJsonConverterTests
                converterType.GetGenericTypeDefinition() == typeof(SnakeCaseEnumJsonConverter<>);
     }
 
+#pragma warning disable CA1502 // Avoid excessive complexity
     private static bool HasCustomConverter(Type enumType)
+#pragma warning restore CA1502
     {
         var jsonConverterAttribute = enumType.GetCustomAttribute<JsonConverterAttribute>();
         if (jsonConverterAttribute == null) return false;

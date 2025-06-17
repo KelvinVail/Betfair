@@ -1,7 +1,7 @@
 namespace Betfair.Api.Betting.Endpoints.ListEventTypes.Responses;
 
 /// <summary>
-/// Event Type Result.
+/// BetfairEvent Type Result.
 /// </summary>
 public class EventTypeResult
 {
@@ -12,9 +12,8 @@ public class EventTypeResult
     public EventType? EventType { get; init; } = null;
 
     /// <summary>
-    /// Gets the count of markets associated with this Event Type.
+    /// Gets the count of markets associated with this BetfairEvent Type.
     /// </summary>
     [JsonPropertyName("marketCount")]
     public int MarketCount { get; init; } = 0;
 }
-
