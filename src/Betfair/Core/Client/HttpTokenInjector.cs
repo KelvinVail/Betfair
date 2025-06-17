@@ -1,4 +1,4 @@
-﻿using Betfair.Core.Login;
+﻿using Betfair.Core.Authentication;
 
 namespace Betfair.Core.Client;
 

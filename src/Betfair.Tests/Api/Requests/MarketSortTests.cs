@@ -1,4 +1,4 @@
-﻿using Betfair.Api.Requests;
+﻿using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Enums;
 
 namespace Betfair.Tests.Api.Requests;
 
@@ -6,25 +6,25 @@ public class MarketSortTests
 {
     [Fact]
     public void CanCreateMarketSortMinimumTraded() =>
-        MarketSort.MinimumTraded.Value.Should().Be("MINIMUM_TRADED");
+        JsonSerializer.Serialize(MarketSort.MinimumTraded).Should().Be("\"MINIMUM_TRADED\"");
 
     [Fact]
     public void CanCreateMarketSortMaximumTraded() =>
-        MarketSort.MaximumTraded.Value.Should().Be("MAXIMUM_TRADED");
+        JsonSerializer.Serialize(MarketSort.MaximumTraded).Should().Be("\"MAXIMUM_TRADED\"");
 
     [Fact]
     public void CanCreateMarketSortMinimumAvailable() =>
-        MarketSort.MinimumAvailable.Value.Should().Be("MINIMUM_AVAILABLE");
+        JsonSerializer.Serialize(MarketSort.MinimumAvailable).Should().Be("\"MINIMUM_AVAILABLE\"");
 
     [Fact]
     public void CanCreateMarketSortMaximumAvailable() =>
-        MarketSort.MaximumAvailable.Value.Should().Be("MAXIMUM_AVAILABLE");
+        JsonSerializer.Serialize(MarketSort.MaximumAvailable).Should().Be("\"MAXIMUM_AVAILABLE\"");
 
     [Fact]
     public void CanCreateMarketSortFirstToStart() =>
-        MarketSort.FirstToStart.Value.Should().Be("FIRST_TO_START");
+        JsonSerializer.Serialize(MarketSort.FirstToStart).Should().Be("\"FIRST_TO_START\"");
 
     [Fact]
     public void CanCreateMarketSortLastToStart() =>
-        MarketSort.LastToStart.Value.Should().Be("LAST_TO_START");
+        JsonSerializer.Serialize(MarketSort.LastToStart).Should().Be("\"LAST_TO_START\"");
 }

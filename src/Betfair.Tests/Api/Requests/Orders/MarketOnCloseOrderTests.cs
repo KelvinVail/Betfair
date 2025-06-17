@@ -1,4 +1,4 @@
-﻿using Betfair.Api.Requests.Orders;
+﻿using Betfair.Api.Betting.Endpoints.PlaceOrders;
 
 namespace Betfair.Tests.Api.Requests.Orders;
 

@@ -1,5 +1,6 @@
-﻿﻿using Betfair.Api;
-using Betfair.Api.Responses.Markets;
+﻿using Betfair.Api;
+using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -35,21 +36,21 @@ public class MarketStatusTests : IDisposable
     }
 
     [Fact]
-    public async Task IfResponseIsEmptyReturnNone()
+    public async Task IfResponseIsEmptyReturnInactive()
     {
         _client.RespondsWithBody = Array.Empty<MarketBook>();
 
         var response = await _api.MarketStatus("1.2345", default);
 
-        response.Should().Be("NONE");
+        response.Should().Be(MarketStatus.Inactive);
     }
 
     [Theory]
-    [InlineData("INACTIVE")]
-    [InlineData("OPEN")]
-    [InlineData("SUSPENDED")]
-    [InlineData("CLOSED")]
-    public async Task ReturnStatusFromResponse(string status)
+    [InlineData(MarketStatus.Inactive)]
+    [InlineData(MarketStatus.Open)]
+    [InlineData(MarketStatus.Suspended)]
+    [InlineData(MarketStatus.Closed)]
+    public async Task ReturnStatusFromResponse(MarketStatus status)
     {
         _client.RespondsWithBody = new MarketBook[] { new () { Status = status } };
 
@@ -75,7 +76,7 @@ public class MarketStatusTests : IDisposable
             new MarketBook
             {
                 MarketId = "1.23456789",
-                Status = "OPEN",
+                Status = MarketStatus.Open,
                 IsMarketDataDelayed = false,
                 BetDelay = 0,
                 BspReconciled = false,
@@ -96,7 +97,7 @@ public class MarketStatusTests : IDisposable
 
         var response = await _api.MarketStatus("1.23456789", default);
 
-        response.Should().Be("OPEN");
+        response.Should().Be(MarketStatus.Open);
     }
 
     public void Dispose()

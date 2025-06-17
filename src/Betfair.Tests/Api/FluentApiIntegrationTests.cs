@@ -1,12 +1,11 @@
 using Betfair.Api;
-using Betfair.Api.Requests;
-using Betfair.Api.Requests.Account;
-using Betfair.Api.Requests.Markets;
-using Betfair.Api.Requests.Orders.Queries;
-using Betfair.Api.Responses.Account;
-using Betfair.Api.Responses.Markets;
-using Betfair.Api.Responses.Orders;
-using Betfair.Core.Enums;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
+using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
+using Betfair.Api.Betting.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -159,7 +158,7 @@ public class FluentApiIntegrationTests : IDisposable
         clearedOrdersQuery.MarketIds.Should().HaveCount(3);
         clearedOrdersQuery.Side.Should().Be(Side.Back);
 
-        marketBookQuery.OrderProjection.Should().Be(OrderStatus.Executable);
+        marketBookQuery.OrderProjection.Should().Be(OrderProjection.Executable);
         marketBookQuery.MatchProjection.Should().Be(MatchProjection.RolledUpByAvgPrice);
         marketBookQuery.PriceProjection.Should().NotBeNull();
 

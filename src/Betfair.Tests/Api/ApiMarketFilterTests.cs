@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using Betfair.Api.Requests;
+using Betfair.Api.Betting;
 using Betfair.Core;
 
 namespace Betfair.Tests.Api;

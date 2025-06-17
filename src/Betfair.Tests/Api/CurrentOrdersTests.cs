@@ -1,8 +1,7 @@
 ﻿using Betfair.Api;
-using Betfair.Api.Requests.Orders;
-using Betfair.Api.Requests.Orders.Filters;
-using Betfair.Api.Responses.Orders;
-using Betfair.Core.Enums;
+using Betfair.Api.Betting.Endpoints.ListCurrentOrders;
+using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
+using Betfair.Api.Betting.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -46,7 +45,7 @@ public class CurrentOrdersTests : IDisposable
         var filter = new ApiOrderFilter()
             .WithBetIds(betIds)
             .WithMarketIds(marketIds)
-            .WithOrderStatus(OrderStatus.Executable)
+            .WithOrderProjection(OrderProjection.Executable)
             .From(10)
             .Take(50);
 
@@ -57,7 +56,7 @@ public class CurrentOrdersTests : IDisposable
             {
                 BetIds = betIds.ToList(),
                 MarketIds = marketIds.ToList(),
-                OrderProjection = OrderStatus.Executable,
+                OrderProjection = OrderProjection.Executable,
                 FromRecord = 10,
                 RecordCount = 50,
             });
@@ -76,7 +75,7 @@ public class CurrentOrdersTests : IDisposable
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrentOrdersRequest
             {
-                OrderProjection = OrderStatus.Executable,
+                OrderProjection = OrderProjection.Executable,
                 SortDir = SortDir.LatestToEarliest,
                 RecordCount = 100,
             });
@@ -98,7 +97,7 @@ public class CurrentOrdersTests : IDisposable
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrentOrdersRequest
             {
-                OrderProjection = OrderStatus.ExecutionComplete,
+                OrderProjection = OrderProjection.ExecutionComplete,
                 CustomerOrderRefs = customerOrderRefs.ToList(),
                 CustomerStrategyRefs = customerStrategyRefs.ToList(),
             });

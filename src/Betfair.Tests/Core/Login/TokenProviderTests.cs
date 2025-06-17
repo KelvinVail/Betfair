@@ -1,5 +1,5 @@
-﻿using Betfair.Core.Client;
-using Betfair.Core.Login;
+﻿using Betfair.Core.Authentication;
+using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 
 namespace Betfair.Tests.Core.Login;

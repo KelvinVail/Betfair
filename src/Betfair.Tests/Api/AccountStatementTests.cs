@@ -1,7 +1,5 @@
 using Betfair.Api;
-using Betfair.Api.Requests.Account;
-using Betfair.Api.Responses.Account;
-using Betfair.Core.Enums;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;

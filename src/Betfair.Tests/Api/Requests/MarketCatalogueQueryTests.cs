@@ -1,4 +1,5 @@
-﻿using Betfair.Api.Requests;
+﻿using Betfair.Api.Betting.Endpoints.ListMarketCatalogue;
+using Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Enums;
 
 namespace Betfair.Tests.Api.Requests;
 
@@ -16,18 +17,7 @@ public class MarketCatalogueQueryTests
         _query.Include(MarketProjection.MarketStartTime);
 
         _query.MarketProjection.Should()
-            .Contain(MarketProjection.MarketStartTime.Value);
-    }
-
-    [Fact]
-    public void AddingANullMarketProjectionHasNoEffect()
-    {
-        _query.Include(MarketProjection.MarketStartTime)
-            .Include(null!);
-
-        _query.MarketProjection.Should()
-            .Contain(MarketProjection.MarketStartTime.Value);
-        _query.MarketProjection.Should().NotContainNulls();
+            .Contain(MarketProjection.MarketStartTime);
     }
 
     [Fact]
@@ -40,7 +30,7 @@ public class MarketCatalogueQueryTests
         _query.OrderBy(MarketSort.FirstToStart);
 
         _query.Sort.Should()
-            .Be(MarketSort.FirstToStart.Value);
+            .Be(MarketSort.FirstToStart);
     }
 
     [Fact]

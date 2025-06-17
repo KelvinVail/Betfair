@@ -1,6 +1,6 @@
 using Betfair.Api;
-using Betfair.Api.Requests.Markets;
-using Betfair.Api.Responses.Markets;
+using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -50,7 +50,7 @@ public class MarketBookTests : IDisposable
             {
                 MarketId = "1.23456789",
                 IsMarketDataDelayed = false,
-                Status = "OPEN",
+                Status = MarketStatus.Open,
                 BetDelay = 0,
                 BspReconciled = false,
                 Complete = true,
@@ -70,7 +70,7 @@ public class MarketBookTests : IDisposable
                     {
                         SelectionId = 47972,
                         Handicap = 0,
-                        Status = "ACTIVE",
+                        Status = RunnerStatus.Active,
                         AdjustmentFactor = 1.0,
                         LastPriceTraded = 2.5,
                         TotalMatched = 500.0,

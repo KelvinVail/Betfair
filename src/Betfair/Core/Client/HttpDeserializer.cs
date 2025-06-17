@@ -28,6 +28,7 @@ internal class HttpDeserializer : IHttpClient
         where T : class
     {
         var stream = await response.Content.ReadAsStreamAsync(ct);
+        var str = await response.Content.ReadAsStringAsync(ct);
         return (await JsonSerializer.DeserializeAsync(stream, SerializerContextExtensions.GetInternalTypeInfo<T>(), ct)) !;
     }
 

@@ -1,5 +1,5 @@
-﻿using Betfair.Api.Responses;
-using Betfair.Api.Responses.Markets;
+﻿using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 
@@ -23,7 +23,7 @@ public class HttpDeserializerTests : IDisposable
     [Fact]
     public async Task ResponsesShouldBeDeserialized()
     {
-        var expectedResponse = new MarketBook[] { new () { Status = "test" } };
+        var expectedResponse = new MarketBook[] { new () { Status = MarketStatus.Open } };
         _handler.RespondsWithBody = expectedResponse;
 
         var response = await _client.PostAsync<MarketBook[]>(_uri, _content);

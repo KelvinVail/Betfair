@@ -1,4 +1,4 @@
-﻿using Betfair.Core.Login;
+﻿using Betfair.Core.Authentication;
 using Betfair.Stream;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;

@@ -1,5 +1,6 @@
-using Betfair.Api.Requests.Orders.Queries;
-using Betfair.Core.Enums;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Api.Requests.Orders.Queries;
 

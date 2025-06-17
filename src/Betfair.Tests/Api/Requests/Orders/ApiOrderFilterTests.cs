@@ -1,5 +1,6 @@
-using Betfair.Api.Requests.Orders.Filters;
-using Betfair.Core.Enums;
+using Betfair.Api.Betting.Endpoints.ListCurrentOrders;
+using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Api.Requests.Orders;
 
@@ -194,14 +195,14 @@ public class ApiOrderFilterTests
     }
 
     [Theory]
-    [InlineData(OrderStatus.All)]
-    [InlineData(OrderStatus.Executable)]
-    [InlineData(OrderStatus.ExecutionComplete)]
-    public void WithOrderStatusSetsOrderProjection(OrderStatus orderStatus)
+    [InlineData(OrderProjection.All)]
+    [InlineData(OrderProjection.Executable)]
+    [InlineData(OrderProjection.ExecutionComplete)]
+    public void WithOrderStatusSetsOrderProjection(OrderProjection orderStatus)
     {
         var filter = new ApiOrderFilter();
 
-        var result = filter.WithOrderStatus(orderStatus);
+        var result = filter.WithOrderProjection(orderStatus);
 
         result.Should().BeSameAs(filter);
         filter.OrderProjection.Should().Be(orderStatus);
@@ -212,11 +213,11 @@ public class ApiOrderFilterTests
     {
         var filter = new ApiOrderFilter();
 
-        var result = filter.WithOrderStatus(OrderStatus.Executable)
-                          .WithOrderStatus(OrderStatus.ExecutionComplete);
+        var result = filter.WithOrderProjection(OrderProjection.Executable)
+                          .WithOrderProjection(OrderProjection.ExecutionComplete);
 
         result.Should().BeSameAs(filter);
-        filter.OrderProjection.Should().Be(OrderStatus.ExecutionComplete);
+        filter.OrderProjection.Should().Be(OrderProjection.ExecutionComplete);
     }
 
     [Fact]
@@ -584,7 +585,7 @@ public class ApiOrderFilterTests
         var result = filter.ExecutableOnly();
 
         result.Should().BeSameAs(filter);
-        filter.OrderProjection.Should().Be(OrderStatus.Executable);
+        filter.OrderProjection.Should().Be(OrderProjection.Executable);
     }
 
     [Fact]
@@ -592,11 +593,11 @@ public class ApiOrderFilterTests
     {
         var filter = new ApiOrderFilter();
 
-        var result = filter.WithOrderStatus(OrderStatus.ExecutionComplete)
+        var result = filter.WithOrderProjection(OrderProjection.ExecutionComplete)
                           .ExecutableOnly();
 
         result.Should().BeSameAs(filter);
-        filter.OrderProjection.Should().Be(OrderStatus.Executable);
+        filter.OrderProjection.Should().Be(OrderProjection.Executable);
     }
 
     [Fact]
@@ -607,7 +608,7 @@ public class ApiOrderFilterTests
         var result = filter.ExecutionCompleteOnly();
 
         result.Should().BeSameAs(filter);
-        filter.OrderProjection.Should().Be(OrderStatus.ExecutionComplete);
+        filter.OrderProjection.Should().Be(OrderProjection.ExecutionComplete);
     }
 
     [Fact]
@@ -615,11 +616,11 @@ public class ApiOrderFilterTests
     {
         var filter = new ApiOrderFilter();
 
-        var result = filter.WithOrderStatus(OrderStatus.Executable)
+        var result = filter.WithOrderProjection(OrderProjection.Executable)
                           .ExecutionCompleteOnly();
 
         result.Should().BeSameAs(filter);
-        filter.OrderProjection.Should().Be(OrderStatus.ExecutionComplete);
+        filter.OrderProjection.Should().Be(OrderProjection.ExecutionComplete);
     }
 
     [Fact]
@@ -676,7 +677,7 @@ public class ApiOrderFilterTests
         var result = filter
             .WithBetIds("bet1")
             .WithMarketIds("market1")
-            .WithOrderStatus(OrderStatus.Executable)
+            .WithOrderProjection(OrderProjection.Executable)
             .WithCustomerOrderRefs("ref1")
             .WithCustomerStrategyRefs("strategy1")
             .WithDateRange(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1))

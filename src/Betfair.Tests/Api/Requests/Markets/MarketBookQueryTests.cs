@@ -1,6 +1,6 @@
-using Betfair.Api.Requests;
-using Betfair.Api.Requests.Markets;
-using Betfair.Core.Enums;
+using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Api.Requests.Markets;
 
@@ -40,10 +40,10 @@ public class MarketBookQueryTests
     {
         var query = new MarketBookQuery();
 
-        var result = query.WithOrderProjection(OrderStatus.Executable);
+        var result = query.WithOrderProjection(OrderProjection.Executable);
 
         result.Should().BeSameAs(query);
-        query.OrderProjection.Should().Be(OrderStatus.Executable);
+        query.OrderProjection.Should().Be(OrderProjection.Executable);
     }
 
     [Fact]
@@ -163,7 +163,7 @@ public class MarketBookQueryTests
         var result = query.IncludeAllOrders();
 
         result.Should().BeSameAs(query);
-        query.OrderProjection.Should().Be(OrderStatus.All);
+        query.OrderProjection.Should().Be(OrderProjection.All);
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public class MarketBookQueryTests
         var result = query.ExecutableOrdersOnly();
 
         result.Should().BeSameAs(query);
-        query.OrderProjection.Should().Be(OrderStatus.Executable);
+        query.OrderProjection.Should().Be(OrderProjection.Executable);
     }
 
     [Fact]
@@ -185,7 +185,7 @@ public class MarketBookQueryTests
         var result = query.ExecutionCompleteOrdersOnly();
 
         result.Should().BeSameAs(query);
-        query.OrderProjection.Should().Be(OrderStatus.ExecutionComplete);
+        query.OrderProjection.Should().Be(OrderProjection.ExecutionComplete);
     }
 
     [Fact]
@@ -240,7 +240,7 @@ public class MarketBookQueryTests
             .WithBets("bet1", "bet2");
 
         query.PriceProjection.Should().BeSameAs(priceProjection);
-        query.OrderProjection.Should().Be(OrderStatus.Executable);
+        query.OrderProjection.Should().Be(OrderProjection.Executable);
         query.MatchProjection.Should().Be(MatchProjection.RolledUpByPrice);
         query.IncludeOverallPosition.Should().BeTrue();
         query.PartitionMatchedByStrategyRef.Should().BeTrue();

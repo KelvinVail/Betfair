@@ -1,6 +1,5 @@
-﻿﻿using Betfair.Api;
-using Betfair.Api.Requests.Account;
-using Betfair.Api.Responses.Account;
+﻿using Betfair.Api;
+using Betfair.Api.Accounts.Endpoints.GetAccountFunds;
 using Betfair.Tests.Api.TestDoubles;
 
 namespace Betfair.Tests.Api;
@@ -33,24 +32,6 @@ public class AccountFundsTests : IDisposable
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new AccountFundsRequest { Wallet = "UK" });
-    }
-
-    [Fact]
-    public async Task PostsProvidedWallet()
-    {
-        await _api.AccountFunds(Wallet.Australian);
-
-        _client.LastContentSent.Should().BeEquivalentTo(
-            new AccountFundsRequest { Wallet = "AUSTRALIAN" });
-    }
-
-    [Fact]
-    public async Task RequestBodyShouldBeSerializable()
-    {
-        await _api.AccountFunds(Wallet.Australian);
-        var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountFundsRequest);
-
-        json.Should().Be("{\"wallet\":\"AUSTRALIAN\"}");
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-using Betfair.Core.Enums;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Core.Enums;
 

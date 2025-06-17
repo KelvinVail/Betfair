@@ -1,16 +1,30 @@
-﻿using Betfair.Api.Requests;
-using Betfair.Api.Requests.Account;
-using Betfair.Api.Requests.Markets;
-using Betfair.Api.Requests.Orders;
-using Betfair.Api.Responses;
-using Betfair.Api.Responses.Account;
-using Betfair.Api.Responses.Markets;
-using Betfair.Api.Responses.Orders;
+﻿using Betfair.Api.Accounts.Endpoints.GetAccountDetails;
+using Betfair.Api.Accounts.Endpoints.GetAccountFunds;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement;
+using Betfair.Api.Accounts.Endpoints.ListCurrencyRates;
+using Betfair.Api.Betting;
+using Betfair.Api.Betting.Endpoints.CancelOrders;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders;
+using Betfair.Api.Betting.Endpoints.ListCompetitions;
+using Betfair.Api.Betting.Endpoints.ListCountries;
+using Betfair.Api.Betting.Endpoints.ListCurrentOrders;
+using Betfair.Api.Betting.Endpoints.ListEvents;
+using Betfair.Api.Betting.Endpoints.ListEventTypes;
+using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketCatalogue;
+using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss;
+using Betfair.Api.Betting.Endpoints.ListMarketTypes;
+using Betfair.Api.Betting.Endpoints.ListRunnerBook;
+using Betfair.Api.Betting.Endpoints.ListTimeRanges;
+using Betfair.Api.Betting.Endpoints.ListVenues;
+using Betfair.Api.Betting.Endpoints.PlaceOrders;
+using Betfair.Api.Betting.Endpoints.ReplaceOrders;
+using Betfair.Api.Betting.Endpoints.UpdateOrders;
+using Betfair.Core.Authentication;
 using Betfair.Core.Client;
-using Betfair.Core.Login;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
-using RunnerResponse = Betfair.Api.Responses.RunnerResponse;
+using RunnerResponse = Betfair.Api.Betting.Endpoints.ListMarketCatalogue.RunnerResponse;
 
 namespace Betfair;
 
@@ -164,8 +178,6 @@ namespace Betfair;
 [JsonSerializable(typeof(CurrencyRatesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
 [JsonSerializable(typeof(CurrencyRate))]
 [JsonSerializable(typeof(CurrencyRate[]))]
-[JsonSerializable(typeof(TransferFundsRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]
-[JsonSerializable(typeof(TransferResponse))]
 [ExcludeFromCodeCoverage]
 internal partial class SerializerContext : JsonSerializerContext
 {

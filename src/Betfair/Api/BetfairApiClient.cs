@@ -1,16 +1,29 @@
-﻿using Betfair.Api.Requests;
-using Betfair.Api.Requests.Account;
-using Betfair.Api.Requests.Markets;
-using Betfair.Api.Requests.Orders;
-using Betfair.Api.Requests.Orders.Filters;
-using Betfair.Api.Requests.Orders.Queries;
-using Betfair.Api.Responses;
-using Betfair.Api.Responses.Account;
-using Betfair.Api.Responses.Markets;
-using Betfair.Api.Responses.Orders;
+﻿using Betfair.Api.Accounts.Endpoints.GetAccountDetails;
+using Betfair.Api.Accounts.Endpoints.GetAccountFunds;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement;
+using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
+using Betfair.Api.Accounts.Endpoints.ListCurrencyRates;
+using Betfair.Api.Betting;
+using Betfair.Api.Betting.Endpoints.CancelOrders;
+using Betfair.Api.Betting.Endpoints.ListClearedOrders;
+using Betfair.Api.Betting.Endpoints.ListCompetitions;
+using Betfair.Api.Betting.Endpoints.ListCountries;
+using Betfair.Api.Betting.Endpoints.ListCurrentOrders;
+using Betfair.Api.Betting.Endpoints.ListEvents;
+using Betfair.Api.Betting.Endpoints.ListEventTypes;
+using Betfair.Api.Betting.Endpoints.ListMarketBook;
+using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
+using Betfair.Api.Betting.Endpoints.ListMarketCatalogue;
+using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss;
+using Betfair.Api.Betting.Endpoints.ListMarketTypes;
+using Betfair.Api.Betting.Endpoints.ListRunnerBook;
+using Betfair.Api.Betting.Endpoints.ListTimeRanges;
+using Betfair.Api.Betting.Endpoints.ListVenues;
+using Betfair.Api.Betting.Endpoints.PlaceOrders;
+using Betfair.Api.Betting.Endpoints.ReplaceOrders;
+using Betfair.Api.Betting.Endpoints.UpdateOrders;
+using Betfair.Core.Authentication;
 using Betfair.Core.Client;
-using Betfair.Core.Enums;
-using Betfair.Core.Login;
 
 namespace Betfair.Api;
 
@@ -337,8 +350,8 @@ public class BetfairApiClient : IDisposable
         {
             MarketIds = marketIds.ToList(),
             PriceProjection = query.PriceProjection,
-            OrderProjection = query.OrderProjection?.ToString().ToUpperInvariant(),
-            MatchProjection = query.MatchProjection?.ToString().ToUpperInvariant(),
+            OrderProjection = query.OrderProjection,
+            MatchProjection = query.MatchProjection,
             IncludeOverallPosition = query.IncludeOverallPosition,
             PartitionMatchedByStrategyRef = query.PartitionMatchedByStrategyRef,
             CustomerStrategyRefs = query.CustomerStrategyRefs?.ToList(),
@@ -395,7 +408,7 @@ public class BetfairApiClient : IDisposable
     /// <param name="marketId">The market ID to get the status for.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The market status as a string.</returns>
-    public virtual async Task<string> MarketStatus(
+    public virtual async Task<MarketStatus> MarketStatus(
         string marketId,
         CancellationToken cancellationToken)
     {
@@ -404,7 +417,7 @@ public class BetfairApiClient : IDisposable
             new MarketBookRequest { MarketIds = [marketId] },
             cancellationToken);
 
-        return response?.FirstOrDefault()?.Status ?? "NONE";
+        return response?.FirstOrDefault()?.Status ?? Betting.Endpoints.ListMarketBook.Enums.MarketStatus.Inactive;
     }
 
     // Account API Endpoints
@@ -471,29 +484,6 @@ public class BetfairApiClient : IDisposable
     {
         var request = new CurrencyRatesRequest { FromCurrency = fromCurrency };
         return _client.PostAsync<CurrencyRate[]>(new Uri($"{_account}/listCurrencyRates/"), request, cancellationToken);
-    }
-
-    /// <summary>
-    /// Transfer funds between wallets.
-    /// </summary>
-    /// <param name="from">Source wallet.</param>
-    /// <param name="toWallet">Destination wallet.</param>
-    /// <param name="amount">The amount to transfer.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>A <see cref="TransferResponse"/>.</returns>
-    public virtual Task<TransferResponse> TransferFunds(
-        Wallet from,
-        Wallet toWallet,
-        double amount,
-        CancellationToken cancellationToken = default)
-    {
-        var request = new TransferFundsRequest
-        {
-            From = from.ToString().ToUpperInvariant(),
-            To = toWallet.ToString().ToUpperInvariant(),
-            Amount = amount,
-        };
-        return _client.PostAsync<TransferResponse>(new Uri($"{_account}/transferFunds/"), request, cancellationToken);
     }
 
     [ExcludeFromCodeCoverage]

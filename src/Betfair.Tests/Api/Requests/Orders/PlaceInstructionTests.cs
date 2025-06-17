@@ -1,5 +1,5 @@
-﻿using Betfair.Api.Requests.Orders;
-using Betfair.Core.Enums;
+﻿using Betfair.Api.Betting.Endpoints.PlaceOrders;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Api.Requests.Orders;
 

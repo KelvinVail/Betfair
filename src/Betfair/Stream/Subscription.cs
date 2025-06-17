@@ -1,5 +1,5 @@
-﻿using Betfair.Core.Client;
-using Betfair.Core.Login;
+﻿using Betfair.Core.Authentication;
+using Betfair.Core.Client;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 
