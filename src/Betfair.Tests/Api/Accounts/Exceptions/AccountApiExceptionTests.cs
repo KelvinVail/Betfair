@@ -1,152 +1,197 @@
 using System.Net;
+using System.Reflection;
 using Betfair.Api.Accounts.Exceptions;
 
 namespace Betfair.Tests.Api.Accounts.Exceptions;
 
 public class AccountApiExceptionTests
 {
-    [Fact]
-    public void InvalidSessionInformationExceptionHasCorrectDefaultMessage()
+    private static readonly Dictionary<Type, string> ExpectedDefaultMessages = new ()
     {
-        var exception = new InvalidSessionInformationException();
+        { typeof(InvalidSessionInformationException), "The session token hasn't been provided, is invalid or has expired. You must login again to create a new session token." },
+        { typeof(NoSessionException), "A session token header ('X-Authentication') has not been provided in the request." },
+        { typeof(NoAppKeyException), "An application key header ('X-Application') has not been provided in the request." },
+        { typeof(InvalidAppKeyException), "The application key passed is invalid or is not present." },
+        { typeof(InvalidInputDataException), "Invalid input data. Please check the format of your request." },
+        { typeof(InvalidClientRefException), "Invalid length for the client reference." },
+        { typeof(ServiceBusyException), "The service is currently too busy to service this request." },
+        { typeof(TimeoutErrorException), "The internal call to downstream service timed out." },
+        { typeof(UnexpectedErrorException), "An unexpected internal error occurred that prevented successful request processing." },
+        { typeof(TooManyRequestsException), "Too many requests. For more details relating to this error please see FAQ's." },
+        { typeof(CustomerAccountClosedException), "A token could not be created because the customer's account is CLOSED." },
+        { typeof(DuplicateAppNameException), "Duplicate application name." },
+        { typeof(SubscriptionExpiredException), "An application key is required for this operation." },
+    };
 
-        exception.Message.Should().Be("The session token hasn't been provided, is invalid or has expired. You must login again to create a new session token.");
+    public static IEnumerable<object[]> GetAccountExceptionTypes()
+    {
+        return typeof(AccountApiException).Assembly
+            .GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(AccountApiException)) && !t.IsAbstract)
+            .Select(t => new object[] { t });
     }
 
-    [Fact]
-    public void NoSessionExceptionHasCorrectDefaultMessage()
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveDefaultConstructor(Type exceptionType)
     {
-        var exception = new NoSessionException();
+        ArgumentNullException.ThrowIfNull(exceptionType);
 
-        exception.Message.Should().Be("A session token header ('X-Authentication') has not been provided in the request.");
+        var constructor = exceptionType.GetConstructor(Type.EmptyTypes);
+
+        constructor.Should().NotBeNull($"{exceptionType.Name} should have a parameterless constructor");
+
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType) !;
+        exception.Should().NotBeNull();
+        exception.Message.Should().NotBeNullOrEmpty();
     }
 
-    [Fact]
-    public void NoAppKeyExceptionHasCorrectDefaultMessage()
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveCorrectDefaultMessage(Type exceptionType)
     {
-        var exception = new NoAppKeyException();
+        ArgumentNullException.ThrowIfNull(exceptionType);
 
-        exception.Message.Should().Be("An application key header ('X-Application') has not been provided in the request.");
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType) !;
+
+        if (ExpectedDefaultMessages.TryGetValue(exceptionType, out var expectedMessage))
+        {
+            exception.Message.Should().Be(expectedMessage);
+        }
+        else
+        {
+            exception.Message.Should().NotBeNullOrEmpty($"{exceptionType.Name} should have a non-empty default message");
+        }
     }
 
-    [Fact]
-    public void InvalidAppKeyExceptionHasCorrectDefaultMessage()
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveMessageConstructor(Type exceptionType)
     {
-        var exception = new InvalidAppKeyException();
+        ArgumentNullException.ThrowIfNull(exceptionType);
 
-        exception.Message.Should().Be("The application key passed is invalid or is not present.");
-    }
+        var constructor = exceptionType.GetConstructor([typeof(string)]);
 
-    [Fact]
-    public void InvalidInputDataExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new InvalidInputDataException();
+        constructor.Should().NotBeNull($"{exceptionType.Name} should have a constructor that takes a string message");
 
-        exception.Message.Should().Be("Invalid input data. Please check the format of your request.");
-    }
-
-    [Fact]
-    public void ServiceBusyExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new ServiceBusyException();
-
-        exception.Message.Should().Be("The service is currently too busy to service this request.");
-    }
-
-    [Fact]
-    public void TimeoutErrorExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new TimeoutErrorException();
-
-        exception.Message.Should().Be("The internal call to downstream service timed out.");
-    }
-
-    [Fact]
-    public void UnexpectedErrorExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new UnexpectedErrorException();
-
-        exception.Message.Should().Be("An unexpected internal error occurred that prevented successful request processing.");
-    }
-
-    [Fact]
-    public void TooManyRequestsExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new TooManyRequestsException();
-
-        exception.Message.Should().Be("Too many requests. For more details relating to this error please see FAQ's.");
-    }
-
-    [Fact]
-    public void CustomerAccountClosedExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new CustomerAccountClosedException();
-
-        exception.Message.Should().Be("A token could not be created because the customer's account is CLOSED.");
-    }
-
-    [Fact]
-    public void DuplicateAppNameExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new DuplicateAppNameException();
-
-        exception.Message.Should().Be("Duplicate application name.");
-    }
-
-    [Fact]
-    public void SubscriptionExpiredExceptionHasCorrectDefaultMessage()
-    {
-        var exception = new SubscriptionExpiredException();
-
-        exception.Message.Should().Be("An application key is required for this operation.");
-    }
-
-    [Fact]
-    public void ExceptionsCanBeCreatedWithCustomMessage()
-    {
         const string customMessage = "Custom error message";
-
-        var exception = new InvalidSessionInformationException(customMessage);
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType, customMessage) !;
 
         exception.Message.Should().Be(customMessage);
     }
 
-    [Fact]
-    public void ExceptionsCanBeCreatedWithInnerException()
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveMessageAndInnerExceptionConstructor(Type exceptionType)
     {
+        ArgumentNullException.ThrowIfNull(exceptionType);
+
+        var constructor = exceptionType.GetConstructor([typeof(string), typeof(Exception)]);
+
+        constructor.Should().NotBeNull($"{exceptionType.Name} should have a constructor that takes a string message and inner exception");
+
         const string message = "Test message";
         var innerException = new InvalidOperationException("Inner exception");
-
-        var exception = new InvalidSessionInformationException(message, innerException);
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType, message, innerException) !;
 
         exception.Message.Should().Be(message);
         exception.InnerException.Should().Be(innerException);
     }
 
-    [Fact]
-    public void ExceptionsCanBeCreatedWithStatusCode()
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveMessageAndStatusCodeConstructor(Type exceptionType)
     {
-        const string message = "Test message";
-        const HttpStatusCode statusCode = HttpStatusCode.Unauthorized;
+        ArgumentNullException.ThrowIfNull(exceptionType);
 
-        var exception = new InvalidSessionInformationException(message, statusCode);
+        var constructor = exceptionType.GetConstructor([typeof(string), typeof(HttpStatusCode)]);
+
+        constructor.Should().NotBeNull($"{exceptionType.Name} should have a constructor that takes a string message and HttpStatusCode");
+
+        const string message = "Test message";
+        const HttpStatusCode statusCode = HttpStatusCode.BadRequest;
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType, message, statusCode) !;
 
         exception.Message.Should().Be(message);
     }
 
-    [Fact]
-    public void ExceptionsInheritFromAccountApiException()
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveMessageInnerExceptionAndStatusCodeConstructor(Type exceptionType)
     {
-        var exception = new InvalidSessionInformationException();
+        ArgumentNullException.ThrowIfNull(exceptionType);
+
+        var constructor = exceptionType.GetConstructor([typeof(string), typeof(Exception), typeof(HttpStatusCode)]);
+
+        constructor.Should().NotBeNull($"{exceptionType.Name} should have a constructor that takes a string message, inner exception, and HttpStatusCode");
+
+        const string message = "Test message";
+        var innerException = new InvalidOperationException("Inner exception");
+        const HttpStatusCode statusCode = HttpStatusCode.BadRequest;
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType, message, innerException, statusCode) !;
+
+        exception.Message.Should().Be(message);
+        exception.InnerException.Should().Be(innerException);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsInheritFromAccountApiException(Type exceptionType)
+    {
+        ArgumentNullException.ThrowIfNull(exceptionType);
+
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType) !;
 
         exception.Should().BeAssignableTo<AccountApiException>();
     }
 
-    [Fact]
-    public void ExceptionsInheritFromHttpRequestException()
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsInheritFromHttpRequestException(Type exceptionType)
     {
-        var exception = new InvalidSessionInformationException();
+        ArgumentNullException.ThrowIfNull(exceptionType);
+
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType) !;
 
         exception.Should().BeAssignableTo<HttpRequestException>();
+    }
+
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveErrorDetailsProperty(Type exceptionType)
+    {
+        ArgumentNullException.ThrowIfNull(exceptionType);
+
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType) !;
+        const string errorDetails = "Stack trace details";
+
+        exception.ErrorDetails = errorDetails;
+
+        exception.ErrorDetails.Should().Be(errorDetails);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetAccountExceptionTypes))]
+    public void AllAccountExceptionsHaveRequestUUIDProperty(Type exceptionType)
+    {
+        ArgumentNullException.ThrowIfNull(exceptionType);
+
+        var exception = (AccountApiException)Activator.CreateInstance(exceptionType) !;
+        const string requestUuid = "12345-67890-abcdef";
+
+        exception.RequestUUID = requestUuid;
+
+        exception.RequestUUID.Should().Be(requestUuid);
+    }
+
+    [Fact]
+    public void AllAccountExceptionTypesAreDiscovered()
+    {
+        var discoveredTypes = GetAccountExceptionTypes().Select(data => (Type)data[0]).ToHashSet();
+        var expectedTypes = ExpectedDefaultMessages.Keys.ToHashSet();
+
+        discoveredTypes.Should().BeEquivalentTo(
+            expectedTypes,
+            "All account exception types should be discovered by reflection and have expected default messages defined");
     }
 }
