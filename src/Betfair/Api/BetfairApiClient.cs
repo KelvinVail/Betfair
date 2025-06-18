@@ -480,7 +480,7 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Returns a list of currency rates based on given currency.
+    /// Returns a list of currency rates based on given currency. Please note: the currency rates are updated once every hour a few seconds after the hour.
     /// </summary>
     /// <param name="fromCurrency">The currency from which the rates are computed. Please note that EUR is not a valid from currency.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
