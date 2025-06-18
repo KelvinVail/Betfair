@@ -1,3 +1,4 @@
+using System.Globalization;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
 using Betfair.Api.Betting;
@@ -12,11 +13,6 @@ public class AccountStatementBuilder
 {
     private readonly HttpAdapter _client;
     private readonly string _baseUrl;
-    private string? _locale;
-    private int _fromRecord;
-    private int _recordCount = 100;
-    private DateRange? _itemDateRange;
-    private IncludeItem _includeItem = IncludeItem.All;
 
     internal AccountStatementBuilder(HttpAdapter client, string baseUrl)
     {
@@ -25,13 +21,38 @@ public class AccountStatementBuilder
     }
 
     /// <summary>
-    /// Protected constructor for testing purposes. Derived classes can override ExecuteAsync for custom behavior.
+    /// Initializes a new instance of the <see cref="AccountStatementBuilder"/> class for testing purposes.
     /// </summary>
     protected AccountStatementBuilder()
     {
         _client = null!;
         _baseUrl = string.Empty;
     }
+
+    /// <summary>
+    /// Gets the locale that will be used for the request.
+    /// </summary>
+    public string? Locale { get; private set; }
+
+    /// <summary>
+    /// Gets the starting record index for the request.
+    /// </summary>
+    public int FromRecord { get; private set; }
+
+    /// <summary>
+    /// Gets the number of records that will be returned.
+    /// </summary>
+    public int RecordCount { get; private set; } = 100;
+
+    /// <summary>
+    /// Gets the date range filter for the request.
+    /// </summary>
+    public DateRange? ItemDateRange { get; private set; }
+
+    /// <summary>
+    /// Gets the include item filter for the request.
+    /// </summary>
+    public IncludeItem IncludeItem { get; private set; } = IncludeItem.All;
 
     /// <summary>
     /// Implicitly converts the builder to a Task by executing the request.
@@ -51,7 +72,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder WithLocale(string locale)
     {
-        _locale = locale;
+        Locale = locale;
         return this;
     }
 
@@ -62,7 +83,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder From(int fromRecord)
     {
-        _fromRecord = Math.Max(0, fromRecord);
+        FromRecord = Math.Max(0, fromRecord);
         return this;
     }
 
@@ -73,7 +94,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder Take(int recordCount)
     {
-        _recordCount = Math.Max(1, recordCount);
+        RecordCount = Math.Max(1, recordCount);
         return this;
     }
 
@@ -85,7 +106,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder WithItemDateRange(DateTimeOffset from, DateTimeOffset to)
     {
-        _itemDateRange = new DateRange
+        ItemDateRange = new DateRange
         {
             From = from.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
             To = to.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
@@ -100,7 +121,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder WithItemDateRange(DateRange dateRange)
     {
-        _itemDateRange = dateRange;
+        ItemDateRange = dateRange;
         return this;
     }
 
@@ -110,7 +131,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder IncludeAll()
     {
-        _includeItem = IncludeItem.All;
+        IncludeItem = IncludeItem.All;
         return this;
     }
 
@@ -120,7 +141,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder DepositsAndWithdrawalsOnly()
     {
-        _includeItem = IncludeItem.DepositsWithdrawals;
+        IncludeItem = IncludeItem.DepositsWithdrawals;
         return this;
     }
 
@@ -130,7 +151,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder ExchangeOnly()
     {
-        _includeItem = IncludeItem.Exchange;
+        IncludeItem = IncludeItem.Exchange;
         return this;
     }
 
@@ -140,7 +161,7 @@ public class AccountStatementBuilder
     /// <returns>This <see cref="AccountStatementBuilder"/>.</returns>
     public AccountStatementBuilder PokerRoomOnly()
     {
-        _includeItem = IncludeItem.PokerRoom;
+        IncludeItem = IncludeItem.PokerRoom;
         return this;
     }
 
@@ -203,11 +224,11 @@ public class AccountStatementBuilder
     {
         var request = new AccountStatementRequest
         {
-            Locale = _locale,
-            FromRecord = _fromRecord,
-            RecordCount = _recordCount,
-            ItemDateRange = _itemDateRange,
-            IncludeItem = _includeItem,
+            Locale = Locale,
+            FromRecord = FromRecord,
+            RecordCount = RecordCount,
+            ItemDateRange = ItemDateRange,
+            IncludeItem = IncludeItem,
         };
 
         return _client.PostAsync<AccountStatementReport>(
