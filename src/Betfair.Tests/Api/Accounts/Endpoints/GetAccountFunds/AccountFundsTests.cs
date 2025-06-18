@@ -3,7 +3,7 @@ using Betfair.Api.Accounts.Endpoints.GetAccountFunds.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountFunds.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
-namespace Betfair.Tests.Api;
+namespace Betfair.Tests.Api.Accounts.Endpoints.GetAccountFunds;
 
 public class AccountFundsTests : IDisposable
 {
@@ -32,7 +32,7 @@ public class AccountFundsTests : IDisposable
         await _api.AccountFunds();
 
         _client.LastContentSent.Should().BeEquivalentTo(
-            new AccountFundsRequest { Wallet = "UK" });
+            new AccountFundsRequest());
     }
 
     [Fact]

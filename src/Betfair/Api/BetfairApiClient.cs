@@ -447,21 +447,19 @@ public class BetfairApiClient : IDisposable
     // Account API Endpoints
 
     /// <summary>
-    /// Get available to bet amount.
+    /// Returns the available to bet amount, exposure and commission information.
     /// </summary>
-    /// <param name="wallet">Name of the wallet. Defaults to UK wallet if not specified.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An <see cref="AccountFundsResponse"/>.</returns>
     public virtual Task<AccountFundsResponse> AccountFunds(
-        Wallet wallet = Wallet.Uk,
         CancellationToken cancellationToken = default)
     {
-        var request = new AccountFundsRequest { Wallet = wallet.ToString().ToUpperInvariant() };
+        var request = new AccountFundsRequest();
         return _client.PostAsync<AccountFundsResponse>(new Uri($"{_account}/getAccountFunds/"), request, cancellationToken);
     }
 
     /// <summary>
-    /// Get Account details.
+    /// Returns the details relating your account, including your discount rate and Betfair point balance.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An <see cref="AccountDetailsResponse"/>.</returns>
@@ -473,27 +471,12 @@ public class BetfairApiClient : IDisposable
     }
 
     /// <summary>
-    /// Get account statement.
+    /// Creates a fluent builder for account statement requests.
     /// </summary>
-    /// <param name="query">The query parameters for the account statement request.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>An <see cref="AccountStatementReport"/>.</returns>
-    public virtual Task<AccountStatementReport> AccountStatement(
-        AccountStatementQuery query,
-        CancellationToken cancellationToken = default)
+    /// <returns>An <see cref="AccountStatementBuilder"/>.</returns>
+    public virtual AccountStatementBuilder AccountStatement()
     {
-        ArgumentNullException.ThrowIfNull(query);
-
-        var request = new AccountStatementRequest
-        {
-            Locale = query.Locale,
-            FromRecord = query.FromRecord,
-            RecordCount = query.RecordCount,
-            ItemDateRange = query.ItemDateRange,
-            IncludeItem = query.IncludeItem.ToString().ToUpperInvariant(),
-            Wallet = query.Wallet.ToString().ToUpperInvariant(),
-        };
-        return _client.PostAsync<AccountStatementReport>(new Uri($"{_account}/getAccountStatement/"), request, cancellationToken);
+        return new AccountStatementBuilder(_client, _account);
     }
 
     /// <summary>

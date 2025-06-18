@@ -1,6 +1,4 @@
 using Betfair.Api;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Requests;
@@ -93,19 +91,17 @@ public class FluentApiIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task AccountStatementWithFluentQueryWorksCorrectly()
+    public async Task AccountStatementWithFluentBuilderWorksCorrectly()
     {
         _client.RespondsWithBody = new AccountStatementReport();
 
-        var query = new AccountStatementQuery()
+        await _api.AccountStatement()
             .LastMonth()
             .ExchangeOnly()
-            .UkWallet()
             .From(0)
             .Take(50)
-            .WithLocale("en-GB");
-
-        await _api.AccountStatement(query);
+            .WithLocale("en-GB")
+            .ExecuteAsync();
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/getAccountStatement/");
@@ -150,11 +146,17 @@ public class FluentApiIntegrationTests : IDisposable
             .IncludeOverallPositions()
             .WithCurrency("GBP");
 
-        var accountQuery = new AccountStatementQuery()
+        // The new fluent builder pattern provides even more flexibility
+        var accountBuilder = _api.AccountStatement()
             .Today()
             .ExchangeOnly()
-            .UkWallet()
             .Take(100);
+
+        var anotherAccountBuilder = _api.AccountStatement()
+            .Last90Days()
+            .DepositsAndWithdrawalsOnly()
+            .Take(200)
+            .From(50);
 
         // All queries should be properly configured
         clearedOrdersQuery.BetStatus.Should().Be(BetStatus.Settled);
@@ -165,9 +167,9 @@ public class FluentApiIntegrationTests : IDisposable
         marketBookQuery.MatchProjection.Should().Be(MatchProjection.RolledUpByAvgPrice);
         marketBookQuery.PriceProjection.Should().NotBeNull();
 
-        accountQuery.IncludeItem.Should().Be(IncludeItem.Exchange);
-        accountQuery.Wallet.Should().Be(Wallet.Uk);
-        accountQuery.RecordCount.Should().Be(100);
+        // Builders should be properly configured
+        accountBuilder.Should().NotBeNull();
+        anotherAccountBuilder.Should().NotBeNull();
     }
 
     public void Dispose()

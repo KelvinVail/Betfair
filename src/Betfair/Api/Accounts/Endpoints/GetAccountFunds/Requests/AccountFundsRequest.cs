@@ -1,9 +1,7 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Betfair.Api.Accounts.Endpoints.GetAccountFunds.Requests;
+﻿namespace Betfair.Api.Accounts.Endpoints.GetAccountFunds.Requests;
 
 internal class AccountFundsRequest
 {
     [JsonPropertyName("wallet")]
-    public string? Wallet { get; set; }
+    public string Wallet { get; } = "UK";
 }

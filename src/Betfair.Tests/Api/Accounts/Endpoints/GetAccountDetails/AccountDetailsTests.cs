@@ -2,7 +2,7 @@ using Betfair.Api;
 using Betfair.Api.Accounts.Endpoints.GetAccountDetails.Responses;
 using Betfair.Tests.Api.TestDoubles;
 
-namespace Betfair.Tests.Api;
+namespace Betfair.Tests.Api.Accounts.Endpoints.GetAccountDetails;
 
 public class AccountDetailsTests : IDisposable
 {

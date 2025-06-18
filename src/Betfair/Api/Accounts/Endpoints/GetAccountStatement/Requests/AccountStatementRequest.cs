@@ -1,4 +1,5 @@
-﻿using Betfair.Api.Betting;
+﻿using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
+using Betfair.Api.Betting;
 
 namespace Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
 
@@ -17,7 +18,7 @@ internal class AccountStatementRequest
     public DateRange? ItemDateRange { get; set; }
 
     [JsonPropertyName("includeItem")]
-    public string? IncludeItem { get; set; }
+    public IncludeItem? IncludeItem { get; set; }
 
     [JsonPropertyName("wallet")]
     public string? Wallet { get; set; }

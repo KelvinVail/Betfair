@@ -6,17 +6,17 @@
 public class AccountFundsResponse
 {
     /// <summary>
-    /// Gets the available to bet amount.
+    /// Gets the amount available to bet.
     /// </summary>
     public double AvailableToBetBalance { get; init; }
 
     /// <summary>
-    /// Gets the exposure.
+    /// Gets the current exposure.
     /// </summary>
     public double Exposure { get; init; }
 
     /// <summary>
-    /// Gets the retained commission.
+    /// Gets the sum of retained commission.
     /// </summary>
     public double RetainedCommission { get; init; }
 
@@ -26,17 +26,13 @@ public class AccountFundsResponse
     public double ExposureLimit { get; init; }
 
     /// <summary>
-    /// Gets the discount rate.
+    /// Gets the user discount rate.
+    /// Please note: Betfair AUS/NZ customers should not rely on this to determine their discount rates which are now applied at the account level.
     /// </summary>
     public double DiscountRate { get; init; }
 
     /// <summary>
-    /// Gets the points balance.
+    /// Gets the Betfair points balance.
     /// </summary>
     public int PointsBalance { get; init; }
-
-    /// <summary>
-    /// Gets the wallet.
-    /// </summary>
-    public string? Wallet { get; init; }
 }
