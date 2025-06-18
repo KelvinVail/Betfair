@@ -6,6 +6,17 @@ namespace Betfair.Core.Client;
 
 internal static class BetfairExceptionFactory
 {
+    // Error code constants to avoid string literal duplication
+    private const string InvalidInputData = "INVALID_INPUT_DATA";
+    private const string InvalidSessionInformation = "INVALID_SESSION_INFORMATION";
+    private const string NoAppKey = "NO_APP_KEY";
+    private const string NoSession = "NO_SESSION";
+    private const string InvalidAppKey = "INVALID_APP_KEY";
+    private const string UnexpectedError = "UNEXPECTED_ERROR";
+    private const string TooManyRequests = "TOO_MANY_REQUESTS";
+    private const string ServiceBusy = "SERVICE_BUSY";
+    private const string TimeoutError = "TIMEOUT_ERROR";
+
     public static Exception CreateBettingException(BetfairErrorResponse errorResponse, HttpStatusCode statusCode)
     {
         var apiException = errorResponse.Detail.APINGException;
@@ -15,16 +26,16 @@ internal static class BetfairExceptionFactory
         BettingApiException exception = errorCode switch
         {
             "TOO_MUCH_DATA" => new TooMuchDataException(),
-            "INVALID_INPUT_DATA" => new BettingInvalidInputDataException(),
-            "INVALID_SESSION_INFORMATION" => new BettingInvalidSessionInformationException(),
-            "NO_APP_KEY" => new BettingNoAppKeyException(),
-            "NO_SESSION" => new BettingNoSessionException(),
-            "INVALID_APP_KEY" => new BettingInvalidAppKeyException(),
+            InvalidInputData => new BettingInvalidInputDataException(),
+            InvalidSessionInformation => new BettingInvalidSessionInformationException(),
+            NoAppKey => new BettingNoAppKeyException(),
+            NoSession => new BettingNoSessionException(),
+            InvalidAppKey => new BettingInvalidAppKeyException(),
             "ACCESS_DENIED" => new AccessDeniedException(),
-            "UNEXPECTED_ERROR" => new BettingUnexpectedErrorException(),
-            "TOO_MANY_REQUESTS" => new BettingTooManyRequestsException(),
-            "SERVICE_BUSY" => new BettingServiceBusyException(),
-            "TIMEOUT_ERROR" => new BettingTimeoutErrorException(),
+            UnexpectedError => new BettingUnexpectedErrorException(),
+            TooManyRequests => new BettingTooManyRequestsException(),
+            ServiceBusy => new BettingServiceBusyException(),
+            TimeoutError => new BettingTimeoutErrorException(),
             "REQUEST_SIZE_EXCEEDS_LIMIT" => new RequestSizeExceedsLimitException(),
             "INVALID_JSON" => new InvalidJsonException(),
             "METHOD_NOT_FOUND" => new MethodNotFoundException(),
@@ -53,16 +64,16 @@ internal static class BetfairExceptionFactory
         // Create exception with default message first, then enhance it
         AccountApiException exception = errorCode switch
         {
-            "INVALID_SESSION_INFORMATION" => new InvalidSessionInformationException(),
-            "NO_SESSION" => new NoSessionException(),
-            "NO_APP_KEY" => new NoAppKeyException(),
-            "INVALID_APP_KEY" => new InvalidAppKeyException(),
-            "INVALID_INPUT_DATA" => new InvalidInputDataException(),
+            InvalidSessionInformation => new InvalidSessionInformationException(),
+            NoSession => new NoSessionException(),
+            NoAppKey => new NoAppKeyException(),
+            InvalidAppKey => new InvalidAppKeyException(),
+            InvalidInputData => new InvalidInputDataException(),
             "INVALID_CLIENT_REF" => new InvalidClientRefException(),
-            "SERVICE_BUSY" => new ServiceBusyException(),
-            "TIMEOUT_ERROR" => new TimeoutErrorException(),
-            "UNEXPECTED_ERROR" => new UnexpectedErrorException(),
-            "TOO_MANY_REQUESTS" => new TooManyRequestsException(),
+            ServiceBusy => new ServiceBusyException(),
+            TimeoutError => new TimeoutErrorException(),
+            UnexpectedError => new UnexpectedErrorException(),
+            TooManyRequests => new TooManyRequestsException(),
             "CUSTOMER_ACCOUNT_CLOSED" => new CustomerAccountClosedException(),
             "DUPLICATE_APP_NAME" => new DuplicateAppNameException(),
             "SUBSCRIPTION_EXPIRED" => new SubscriptionExpiredException(),
@@ -108,16 +119,16 @@ internal static class BetfairExceptionFactory
         return errorCode switch
         {
             "TOO_MUCH_DATA" => new TooMuchDataException(message, statusCode),
-            "INVALID_INPUT_DATA" => new BettingInvalidInputDataException(message, statusCode),
-            "INVALID_SESSION_INFORMATION" => new BettingInvalidSessionInformationException(message, statusCode),
-            "NO_APP_KEY" => new BettingNoAppKeyException(message, statusCode),
-            "NO_SESSION" => new BettingNoSessionException(message, statusCode),
-            "INVALID_APP_KEY" => new BettingInvalidAppKeyException(message, statusCode),
+            InvalidInputData => new BettingInvalidInputDataException(message, statusCode),
+            InvalidSessionInformation => new BettingInvalidSessionInformationException(message, statusCode),
+            NoAppKey => new BettingNoAppKeyException(message, statusCode),
+            NoSession => new BettingNoSessionException(message, statusCode),
+            InvalidAppKey => new BettingInvalidAppKeyException(message, statusCode),
             "ACCESS_DENIED" => new AccessDeniedException(message, statusCode),
-            "UNEXPECTED_ERROR" => new BettingUnexpectedErrorException(message, statusCode),
-            "TOO_MANY_REQUESTS" => new BettingTooManyRequestsException(message, statusCode),
-            "SERVICE_BUSY" => new BettingServiceBusyException(message, statusCode),
-            "TIMEOUT_ERROR" => new BettingTimeoutErrorException(message, statusCode),
+            UnexpectedError => new BettingUnexpectedErrorException(message, statusCode),
+            TooManyRequests => new BettingTooManyRequestsException(message, statusCode),
+            ServiceBusy => new BettingServiceBusyException(message, statusCode),
+            TimeoutError => new BettingTimeoutErrorException(message, statusCode),
             "REQUEST_SIZE_EXCEEDS_LIMIT" => new RequestSizeExceedsLimitException(message, statusCode),
             "INVALID_JSON" => new InvalidJsonException(message, statusCode),
             "METHOD_NOT_FOUND" => new MethodNotFoundException(message, statusCode),
@@ -131,16 +142,16 @@ internal static class BetfairExceptionFactory
     {
         return errorCode switch
         {
-            "INVALID_SESSION_INFORMATION" => new InvalidSessionInformationException(message, statusCode),
-            "NO_SESSION" => new NoSessionException(message, statusCode),
-            "NO_APP_KEY" => new NoAppKeyException(message, statusCode),
-            "INVALID_APP_KEY" => new InvalidAppKeyException(message, statusCode),
-            "INVALID_INPUT_DATA" => new InvalidInputDataException(message, statusCode),
+            InvalidSessionInformation => new InvalidSessionInformationException(message, statusCode),
+            NoSession => new NoSessionException(message, statusCode),
+            NoAppKey => new NoAppKeyException(message, statusCode),
+            InvalidAppKey => new InvalidAppKeyException(message, statusCode),
+            InvalidInputData => new InvalidInputDataException(message, statusCode),
             "INVALID_CLIENT_REF" => new InvalidClientRefException(message, statusCode),
-            "SERVICE_BUSY" => new ServiceBusyException(message, statusCode),
-            "TIMEOUT_ERROR" => new TimeoutErrorException(message, statusCode),
-            "UNEXPECTED_ERROR" => new UnexpectedErrorException(message, statusCode),
-            "TOO_MANY_REQUESTS" => new TooManyRequestsException(message, statusCode),
+            ServiceBusy => new ServiceBusyException(message, statusCode),
+            TimeoutError => new TimeoutErrorException(message, statusCode),
+            UnexpectedError => new UnexpectedErrorException(message, statusCode),
+            TooManyRequests => new TooManyRequestsException(message, statusCode),
             "CUSTOMER_ACCOUNT_CLOSED" => new CustomerAccountClosedException(message, statusCode),
             "DUPLICATE_APP_NAME" => new DuplicateAppNameException(message, statusCode),
             "SUBSCRIPTION_EXPIRED" => new SubscriptionExpiredException(message, statusCode),

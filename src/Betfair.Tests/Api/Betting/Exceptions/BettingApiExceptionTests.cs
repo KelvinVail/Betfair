@@ -26,12 +26,20 @@ public class BettingApiExceptionTests
         { typeof(InternalJsonRpcErrorException), "An internal JSON-RPC error occurred." },
     };
 
-    public static IEnumerable<object[]> GetBettingExceptionTypes()
+    public static TheoryData<Type> GetBettingExceptionTypes()
     {
-        return typeof(BettingApiException).Assembly
+        var theoryData = new TheoryData<Type>();
+
+        var exceptionTypes = typeof(BettingApiException).Assembly
             .GetTypes()
-            .Where(t => t.IsSubclassOf(typeof(BettingApiException)) && !t.IsAbstract)
-            .Select(t => new object[] { t });
+            .Where(t => t.IsSubclassOf(typeof(BettingApiException)) && !t.IsAbstract);
+
+        foreach (var type in exceptionTypes)
+        {
+            theoryData.Add(type);
+        }
+
+        return theoryData;
     }
 
     [Theory]
@@ -190,11 +198,18 @@ public class BettingApiExceptionTests
     [Fact]
     public void AllBettingExceptionTypesAreDiscovered()
     {
-        var discoveredTypes = GetBettingExceptionTypes().Select(data => (Type)data[0]).ToHashSet();
+        var discoveredTypes = GetBettingExceptionTypesForValidation().ToHashSet();
         var expectedTypes = ExpectedDefaultMessages.Keys.ToHashSet();
 
         discoveredTypes.Should().BeEquivalentTo(
             expectedTypes,
             "All betting exception types should be discovered by reflection and have expected default messages defined");
+    }
+
+    private static IEnumerable<Type> GetBettingExceptionTypesForValidation()
+    {
+        return typeof(BettingApiException).Assembly
+            .GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(BettingApiException)) && !t.IsAbstract);
     }
 }

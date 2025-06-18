@@ -23,12 +23,20 @@ public class AccountApiExceptionTests
         { typeof(SubscriptionExpiredException), "An application key is required for this operation." },
     };
 
-    public static IEnumerable<object[]> GetAccountExceptionTypes()
+    public static TheoryData<Type> GetAccountExceptionTypes()
     {
-        return typeof(AccountApiException).Assembly
+        var theoryData = new TheoryData<Type>();
+
+        var exceptionTypes = typeof(AccountApiException).Assembly
             .GetTypes()
-            .Where(t => t.IsSubclassOf(typeof(AccountApiException)) && !t.IsAbstract)
-            .Select(t => new object[] { t });
+            .Where(t => t.IsSubclassOf(typeof(AccountApiException)) && !t.IsAbstract);
+
+        foreach (var type in exceptionTypes)
+        {
+            theoryData.Add(type);
+        }
+
+        return theoryData;
     }
 
     [Theory]
@@ -187,11 +195,18 @@ public class AccountApiExceptionTests
     [Fact]
     public void AllAccountExceptionTypesAreDiscovered()
     {
-        var discoveredTypes = GetAccountExceptionTypes().Select(data => (Type)data[0]).ToHashSet();
+        var discoveredTypes = GetAccountExceptionTypesForValidation().ToHashSet();
         var expectedTypes = ExpectedDefaultMessages.Keys.ToHashSet();
 
         discoveredTypes.Should().BeEquivalentTo(
             expectedTypes,
             "All account exception types should be discovered by reflection and have expected default messages defined");
+    }
+
+    private static IEnumerable<Type> GetAccountExceptionTypesForValidation()
+    {
+        return typeof(AccountApiException).Assembly
+            .GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(AccountApiException)) && !t.IsAbstract);
     }
 }
