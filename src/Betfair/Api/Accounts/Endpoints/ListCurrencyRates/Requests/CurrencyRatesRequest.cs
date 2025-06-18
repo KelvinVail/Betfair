@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Requests;
+﻿namespace Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Requests;
 
 internal class CurrencyRatesRequest
 {
