@@ -6,6 +6,7 @@ using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
 using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Requests;
 using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Responses;
+using Betfair.Api.Accounts.Exceptions;
 using Betfair.Api.Betting;
 using Betfair.Api.Betting.Endpoints.CancelOrders.Requests;
 using Betfair.Api.Betting.Endpoints.CancelOrders.Responses;
@@ -40,6 +41,7 @@ using Betfair.Api.Betting.Endpoints.ReplaceOrders.Requests;
 using Betfair.Api.Betting.Endpoints.ReplaceOrders.Responses;
 using Betfair.Api.Betting.Endpoints.UpdateOrders.Requests;
 using Betfair.Api.Betting.Endpoints.UpdateOrders.Responses;
+using Betfair.Api.Betting.Exceptions;
 using Betfair.Core.Authentication;
 using Betfair.Core.Client;
 using Betfair.Stream.Messages;
@@ -123,9 +125,44 @@ namespace Betfair;
 [JsonSerializable(typeof(RunnerProfitAndLoss))]
 
 // Error Responses
-[JsonSerializable(typeof(BadRequestResponse))]
-[JsonSerializable(typeof(BadRequestDetail))]
-[JsonSerializable(typeof(BadRequestErrorCode))]
+[JsonSerializable(typeof(BetfairErrorResponse))]
+[JsonSerializable(typeof(BetfairErrorDetail))]
+[JsonSerializable(typeof(BetfairApiNgError))]
+
+// Account Exceptions
+[JsonSerializable(typeof(AccountApiException))]
+[JsonSerializable(typeof(InvalidSessionInformationException))]
+[JsonSerializable(typeof(NoSessionException))]
+[JsonSerializable(typeof(NoAppKeyException))]
+[JsonSerializable(typeof(InvalidAppKeyException))]
+[JsonSerializable(typeof(InvalidInputDataException))]
+[JsonSerializable(typeof(InvalidClientRefException))]
+[JsonSerializable(typeof(ServiceBusyException))]
+[JsonSerializable(typeof(TimeoutErrorException))]
+[JsonSerializable(typeof(UnexpectedErrorException))]
+[JsonSerializable(typeof(TooManyRequestsException))]
+[JsonSerializable(typeof(CustomerAccountClosedException))]
+[JsonSerializable(typeof(DuplicateAppNameException))]
+[JsonSerializable(typeof(SubscriptionExpiredException))]
+
+// Betting Exceptions
+[JsonSerializable(typeof(BettingApiException))]
+[JsonSerializable(typeof(TooMuchDataException))]
+[JsonSerializable(typeof(BettingInvalidInputDataException))]
+[JsonSerializable(typeof(BettingInvalidSessionInformationException))]
+[JsonSerializable(typeof(BettingNoAppKeyException))]
+[JsonSerializable(typeof(BettingNoSessionException))]
+[JsonSerializable(typeof(BettingInvalidAppKeyException))]
+[JsonSerializable(typeof(AccessDeniedException))]
+[JsonSerializable(typeof(BettingUnexpectedErrorException))]
+[JsonSerializable(typeof(BettingTooManyRequestsException))]
+[JsonSerializable(typeof(BettingServiceBusyException))]
+[JsonSerializable(typeof(BettingTimeoutErrorException))]
+[JsonSerializable(typeof(RequestSizeExceedsLimitException))]
+[JsonSerializable(typeof(InvalidJsonException))]
+[JsonSerializable(typeof(MethodNotFoundException))]
+[JsonSerializable(typeof(InvalidParametersException))]
+[JsonSerializable(typeof(InternalJsonRpcErrorException))]
 
 // BetfairEvent Types Requests
 [JsonSerializable(typeof(EventTypesRequest), GenerationMode = JsonSourceGenerationMode.Serialization)]

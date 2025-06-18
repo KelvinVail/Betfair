@@ -41,9 +41,6 @@
     <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.25" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Api\Accounts\Exceptions\" />
-    <Folder Include="Api\Betting\Exceptions\" />
-  </ItemGroup>
+
 
 </Project>

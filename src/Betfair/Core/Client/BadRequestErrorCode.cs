@@ -1,7 +1,13 @@
 ﻿namespace Betfair.Core.Client;
 
-internal class BadRequestErrorCode
+internal class BetfairApiNgError
 {
-    [JsonPropertyName("errorDetails")]
+    [JsonPropertyName("requestUUID")]
+    public string? RequestUUID { get; set; }
+
+    [JsonPropertyName("errorCode")]
     public string? ErrorCode { get; set; }
+
+    [JsonPropertyName("errorDetails")]
+    public string? ErrorDetails { get; set; }
 }

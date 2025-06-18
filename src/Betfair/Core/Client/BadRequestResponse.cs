@@ -1,7 +1,13 @@
 ﻿namespace Betfair.Core.Client;
 
-internal class BadRequestResponse
+internal class BetfairErrorResponse
 {
+    [JsonPropertyName("faultcode")]
+    public string? FaultCode { get; set; }
+
+    [JsonPropertyName("faultstring")]
+    public string? FaultString { get; set; }
+
     [JsonPropertyName("detail")]
-    public BadRequestDetail Detail { get; set; } = new ();
+    public BetfairErrorDetail Detail { get; set; } = new ();
 }

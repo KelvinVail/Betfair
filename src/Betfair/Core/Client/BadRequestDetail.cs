@@ -1,7 +1,10 @@
 ﻿namespace Betfair.Core.Client;
 
-internal class BadRequestDetail
+internal class BetfairErrorDetail
 {
-    [JsonPropertyName("apiNgException")]
-    public BadRequestErrorCode ApiNgException { get; set; } = new ();
+    [JsonPropertyName("APINGException")]
+    public BetfairApiNgError APINGException { get; set; } = new ();
+
+    [JsonPropertyName("exceptionname")]
+    public string? ExceptionName { get; set; }
 }

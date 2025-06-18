@@ -13,6 +13,8 @@ public class HttpMessageHandlerSpy : HttpClientHandler
 
     public object? RespondsWithBody { get; set; }
 
+    public string? RespondsWithStringBody { get; set; }
+
     public HttpMethod? MethodUsed { get; private set; }
 
     public Uri? UriCalled { get; private set; }
@@ -42,11 +44,16 @@ public class HttpMessageHandlerSpy : HttpClientHandler
         }
 
         var response = new HttpResponseMessage(RespondsWitHttpStatusCode);
-        if (RespondsWithBody is null)
-            return response;
 
-        var bodyString = JsonSerializer.Serialize(RespondsWithBody, RespondsWithBody.GetInternalContext());
-        response.Content = new StringContent(bodyString);
+        if (RespondsWithStringBody is not null)
+        {
+            response.Content = new StringContent(RespondsWithStringBody);
+        }
+        else if (RespondsWithBody is not null)
+        {
+            var bodyString = JsonSerializer.Serialize(RespondsWithBody, RespondsWithBody.GetInternalContext());
+            response.Content = new StringContent(bodyString);
+        }
 
         request.Dispose();
         return response;
