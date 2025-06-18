@@ -76,6 +76,63 @@ public class CurrencyRatesTests : IDisposable
         response.Should().BeEquivalentTo(expectedResponse);
     }
 
+    [Fact]
+    public async Task CanHandleEmptyResponse()
+    {
+        _client.RespondsWithBody = Array.Empty<CurrencyRate>();
+
+        var response = await _api.CurrencyRates();
+
+        response.Should().NotBeNull();
+        response.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CanHandleLargeResponse()
+    {
+        var expectedResponse = new CurrencyRate[100];
+        for (int i = 0; i < 100; i++)
+        {
+            expectedResponse[i] = new CurrencyRate
+            {
+                CurrencyCode = $"CUR{i:D3}",
+                Rate = i * 0.01,
+            };
+        }
+
+        _client.RespondsWithBody = expectedResponse;
+
+        var response = await _api.CurrencyRates("USD");
+
+        response.Should().HaveCount(100);
+        response.Should().BeEquivalentTo(expectedResponse);
+    }
+
+    [Theory]
+    [InlineData("USD")]
+    [InlineData("GBP")]
+    [InlineData("EUR")]
+    [InlineData("JPY")]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task CanHandleDifferentFromCurrencyValues(string fromCurrency)
+    {
+        await _api.CurrencyRates(fromCurrency);
+
+        _client.LastContentSent.Should().BeEquivalentTo(
+            new CurrencyRatesRequest { FromCurrency = fromCurrency });
+    }
+
+    [Fact]
+    public async Task CanPassCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+
+        var response = await _api.CurrencyRates(cancellationToken: cts.Token);
+
+        response.Should().NotBeNull();
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

@@ -21,7 +21,7 @@ public class MarketBookTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.MarketBook(new[] { "1.23456789" });
+        await _api.MarketBook(["1.23456789"]);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketBook/");
@@ -34,7 +34,7 @@ public class MarketBookTests : IDisposable
             .WithCurrency("GBP")
             .IncludeOverallPositions();
 
-        await _api.MarketBook(new[] { "1.23456789" }, query);
+        await _api.MarketBook(["1.23456789"], query);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.MarketBookRequest);
 
         json.Should().Contain("\"marketIds\":[\"1.23456789\"]");
@@ -97,7 +97,7 @@ public class MarketBookTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.MarketBook(new[] { "1.23456789" });
+        var response = await _api.MarketBook(["1.23456789"]);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -137,7 +137,7 @@ public class MarketBookTests : IDisposable
 
         _client.RespondsWithBody = json;
 
-        var response = await _api.MarketBook(new[] { "1.244846171" });
+        var response = await _api.MarketBook(["1.244846171"]);
 
         response.Should().NotBeNull();
         response.Should().HaveCount(1);

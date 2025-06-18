@@ -66,7 +66,7 @@ public class FluentApiIntegrationTests : IDisposable
             .WithCurrency("GBP")
             .WithLocale("en-GB");
 
-        await _api.MarketBook(new[] { "1.123", "1.456" }, query);
+        await _api.MarketBook(["1.123", "1.456"], query);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketBook/");
