@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>9.0.0-alpha</Version>
+    <Version>9.0.1-alpha</Version>
     <Authors>Kelvin Vail</Authors>
     <Company>Kelvin Vail</Company>
     <Product>Betfair</Product>
@@ -14,11 +14,18 @@
     <RepositoryUrl>https://github.com/KelvinVail/Betfair</RepositoryUrl>
     <PackageTags>Betfair API;Betfair Stream;Betfair</PackageTags>
 	<IsAOTCompatible>true</IsAOTCompatible>
+    <!-- Suppress IL2026 warnings from generated JSON serialization code for Exception.TargetSite -->
+    <NoWarn>$(NoWarn);IL2026</NoWarn>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <AdditionalFiles Include="..\.config\CodeMetricsConfig.txt" Link="CodeMetricsConfig.txt" />
     <AdditionalFiles Include="..\.config\StyleCop.json" Link="StyleCop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
