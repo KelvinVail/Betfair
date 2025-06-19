@@ -96,7 +96,7 @@ public class MarketBookQuery
     }
 
     /// <summary>
-    /// Enables including overall position in the response.
+    /// If you ask for orders, returns matches for each selection. Defaults to true if unspecified.
     /// </summary>
     /// <returns>This <see cref="MarketBookQuery"/>.</returns>
     public MarketBookQuery IncludeOverallPositions()

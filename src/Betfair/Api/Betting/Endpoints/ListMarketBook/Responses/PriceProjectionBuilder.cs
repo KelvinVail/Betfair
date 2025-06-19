@@ -7,7 +7,7 @@ public class PriceProjectionBuilder
 {
     private readonly HashSet<string> _priceData = new ();
     private ExBestOffersOverrides? _exBestOffersOverrides;
-    private bool? _virtualise;
+    private bool? _virtualize;
     private bool? _rolloverStakes;
 
     /// <summary>
@@ -31,7 +31,7 @@ public class PriceProjectionBuilder
     }
 
     /// <summary>
-    /// Includes best prices in the projection.
+    /// Includes only the best prices available for each runner.
     /// </summary>
     /// <returns>This <see cref="PriceProjectionBuilder"/>.</returns>
     public PriceProjectionBuilder IncludeBestPrices()
@@ -61,20 +61,20 @@ public class PriceProjectionBuilder
     }
 
     /// <summary>
-    /// Includes starting price back prices in the projection.
+    /// Includes amount available for the BSP auction.
     /// </summary>
     /// <returns>This <see cref="PriceProjectionBuilder"/>.</returns>
-    public PriceProjectionBuilder IncludeStartingPriceBack()
+    public PriceProjectionBuilder IncludeStartingPriceAvailable()
     {
         _priceData.Add("SP_AVAILABLE");
         return this;
     }
 
     /// <summary>
-    /// Includes starting price lay prices in the projection.
+    /// Includes amount traded in the BSP auction.
     /// </summary>
     /// <returns>This <see cref="PriceProjectionBuilder"/>.</returns>
-    public PriceProjectionBuilder IncludeStartingPriceLay()
+    public PriceProjectionBuilder IncludeStartingPriceTraded()
     {
         _priceData.Add("SP_TRADED");
         return this;
@@ -86,7 +86,7 @@ public class PriceProjectionBuilder
     /// <returns>This <see cref="PriceProjectionBuilder"/>.</returns>
     public PriceProjectionBuilder WithVirtualPrices()
     {
-        _virtualise = true;
+        _virtualize = true;
         return this;
     }
 
@@ -160,7 +160,7 @@ public class PriceProjectionBuilder
     }
 
     /// <summary>
-    /// Configures the projection for comprehensive price data.
+    /// Configures the projection for comprehensive price data (all offers and traded price).
     /// </summary>
     /// <returns>This <see cref="PriceProjectionBuilder"/>.</returns>
     public PriceProjectionBuilder ComprehensivePrices()
@@ -194,7 +194,7 @@ public class PriceProjectionBuilder
         {
             PriceData = _priceData.Count > 0 ? _priceData.ToList() : null,
             ExBestOffersOverrides = _exBestOffersOverrides,
-            Virtualise = _virtualise,
+            Virtualise = _virtualize,
             RolloverStakes = _rolloverStakes,
         };
     }

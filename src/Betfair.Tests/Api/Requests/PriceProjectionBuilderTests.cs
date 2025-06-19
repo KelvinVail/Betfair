@@ -45,7 +45,7 @@ public class PriceProjectionBuilderTests
     {
         var builder = new PriceProjectionBuilder();
 
-        var result = builder.IncludeStartingPriceBack();
+        var result = builder.IncludeStartingPriceAvailable();
 
         result.Should().BeSameAs(builder);
         var projection = builder.Build();
@@ -57,7 +57,7 @@ public class PriceProjectionBuilderTests
     {
         var builder = new PriceProjectionBuilder();
 
-        var result = builder.IncludeStartingPriceLay();
+        var result = builder.IncludeStartingPriceTraded();
 
         result.Should().BeSameAs(builder);
         var projection = builder.Build();
