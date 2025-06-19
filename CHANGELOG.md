@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.1-alpha] - 2025-06-19
+
+### Added
+- **Multi-Framework Targeting**
+  - Added support for .NET 9.0 alongside existing .NET 8.0 support
+  - Library now targets both `net8.0` and `net9.0` frameworks
+  - Test project updated to run on both target frameworks
+- **NuGet Package Enhancements**
+  - Added README.md to NuGet package for better discoverability
+  - Package now displays full documentation, installation instructions, and code examples on nuget.org
+  - Improved developer experience with comprehensive package information
+
+### Changed
+- **Build Configuration**
+  - Suppressed IL2026 warnings from generated JSON serialization code
+  - These warnings are expected when using AOT compilation with System.Text.Json
+  - Maintained AOT compatibility while ensuring clean builds
+
+### Fixed
+- **Build Warnings**
+  - Eliminated IL2026 warnings related to `Exception.TargetSite` usage in generated code
+  - Clean builds with no warnings on both .NET 8.0 and .NET 9.0 frameworks
+
 ## [9.0.0-alpha] - 2025-06-19
 
 ### Added
