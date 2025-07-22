@@ -72,6 +72,7 @@ namespace Betfair;
 [JsonSerializable(typeof(OrderRunnerChange))]
 [JsonSerializable(typeof(RunnerChange))]
 [JsonSerializable(typeof(RunnerDefinition))]
+[JsonSerializable(typeof(StrategyMatchedData))]
 [JsonSerializable(typeof(UnmatchedOrder))]
 
 [JsonSerializable(typeof(ApiMarketFilter), GenerationMode = JsonSourceGenerationMode.Serialization)]

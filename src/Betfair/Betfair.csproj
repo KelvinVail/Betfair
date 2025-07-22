@@ -4,7 +4,7 @@
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>9.0.1-alpha</Version>
+    <Version>9.0.1-alpha-1</Version>
     <Authors>Kelvin Vail</Authors>
     <Company>Kelvin Vail</Company>
     <Product>Betfair</Product>
