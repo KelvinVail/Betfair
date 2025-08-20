@@ -96,7 +96,7 @@ public class SubscriptionTests
 
         await sub.Subscribe(filter);
 
-        var subMessage = new MarketSubscription(2, filter);
+        var subMessage = new MarketSubscription(2, filter, null, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
     }
 
@@ -109,8 +109,8 @@ public class SubscriptionTests
         await sub.Subscribe(filter);
         await sub.Subscribe(filter);
 
-        var first = new MarketSubscription(2, filter);
-        var second = new MarketSubscription(3, filter);
+        var first = new MarketSubscription(2, filter, null, null, null, null);
+        var second = new MarketSubscription(3, filter, null, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(first);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(second);
     }
@@ -124,7 +124,7 @@ public class SubscriptionTests
 
         await sub.Subscribe(marketFilter, dataFilter);
 
-        var subMessage = new MarketSubscription(2, marketFilter, dataFilter);
+        var subMessage = new MarketSubscription(2, marketFilter, dataFilter, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
     }
 
@@ -139,8 +139,36 @@ public class SubscriptionTests
 
         await sub.Subscribe(marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs));
 
-        var subMessage = new MarketSubscription(2, marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs));
+        var subMessage = new MarketSubscription(2, marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs), initialClk: null, clk: null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
+    }
+
+    [Fact]
+    public async Task CapturesClockTokensFromChangeMessages()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var change1 = new ChangeMessage { Operation = "mcm", InitialClock = "ic1", Clock = "c1" };
+        var change2 = new ChangeMessage { Operation = "mcm", Clock = "c2" };
+        _pipe.ObjectsToBeRead.Add(change1);
+        _pipe.ObjectsToBeRead.Add(change2);
+
+        var last = default(ChangeMessage);
+        await foreach (var msg in sub.ReadLines(default)) last = msg;
+
+        last.Should().NotBeNull();
+        last!.Clock.Should().Be("c2");
+    }
+
+    [Fact]
+    public async Task SubscribeWithResumeTokensWritesClkFields()
+    {
+        using var sub = new Subscription(_tokenProvider, "a", _pipe);
+        var filter = new StreamMarketFilter().WithMarketIds("1.2345");
+
+        await sub.Subscribe(filter, initialClk: "ic", clk: "c");
+
+        var expected = new MarketSubscription(2, filter, null, null, "ic", "c");
+        _pipe.ObjectsWritten.Should().ContainEquivalentOf(expected);
     }
 
     [Fact]
@@ -150,7 +178,7 @@ public class SubscriptionTests
 
         await sub.SubscribeToOrders();
 
-        var subMessage = new OrderSubscription(2);
+        var subMessage = new OrderSubscription(2, null, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
     }
 
@@ -164,7 +192,7 @@ public class SubscriptionTests
 
         await sub.SubscribeToOrders(orderFilter);
 
-        var subMessage = new OrderSubscription(2, orderFilter);
+        var subMessage = new OrderSubscription(2, orderFilter, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
     }
 
@@ -178,7 +206,7 @@ public class SubscriptionTests
 
         await sub.SubscribeToOrders(conflate: TimeSpan.FromMilliseconds(conflateMs));
 
-        var subMessage = new OrderSubscription(2, conflate: TimeSpan.FromMilliseconds(conflateMs));
+        var subMessage = new OrderSubscription(2, null, TimeSpan.FromMilliseconds(conflateMs), null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
     }
 

@@ -6,12 +6,16 @@ internal class MarketSubscription : MessageBase
         int id,
         StreamMarketFilter marketFiler,
         DataFilter? dataFilter = null,
-        TimeSpan? conflate = null)
+        TimeSpan? conflate = null,
+        string? initialClk = null,
+        string? clk = null)
         : base("marketSubscription", id)
     {
         MarketFilter = marketFiler;
         MarketDataFilter = dataFilter ?? new DataFilter().WithBestPrices();
         ConflateMs = (int)(conflate?.TotalMilliseconds ?? 0);
+        InitialClk = initialClk;
+        Clk = clk;
     }
 
     [JsonPropertyName("marketFilter")]
@@ -22,4 +26,10 @@ internal class MarketSubscription : MessageBase
 
     [JsonPropertyName("conflateMs")]
     public int ConflateMs { get; }
+
+    [JsonPropertyName("initialClk")]
+    public string? InitialClk { get; }
+
+    [JsonPropertyName("clk")]
+    public string? Clk { get; }
 }
