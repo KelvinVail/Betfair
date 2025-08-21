@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.1-alpha-2] - 2025-08-21
+
+### Added
+- **Comprehensive Subscription Retry Logic Tests**
+  - Added 18 unit tests covering all retry scenarios in Subscription class
+  - Tests verify two-tier retry system behavior:
+    * When reader not active: Direct message writing, no retry logic
+    * When reader active: In-band status waiting with retry logic
+  - Coverage includes edge cases: status failures, wrong IDs, null responses, timeouts
+  - Added PipelineStubWithRetry test double for reliable retry behavior mocking
+- **Stream Enhancements**
+  - Added StrategyMatchedData class for dynamic strategy deserialization in OrderRunnerChange
+  - Enhanced OrderRunnerChange.StrategyMatchedChange to use Dictionary<string, StrategyMatchedData>
+  - Added StrategyMatchedData to SerializerContext for proper JSON serialization support
+- **Stream Reconnection Improvements**
+  - Simplified reconnection logic with explicit ownership flag
+  - Consolidated last-subscription state management
+  - Added IdleWatchdogExtensions for connection monitoring
+  - Enhanced StyleCop compliance and code organization
+
+### Changed
+- **Test Suite Expansion**
+  - Total test count increased to 2890 tests (all passing)
+  - Enhanced test coverage for stream functionality
+  - Improved test reliability and maintainability
+- **Code Quality**
+  - Improved StyleCop ordering and compliance
+  - Enhanced code organization and documentation
+
+### Fixed
+- **Stream Reliability**
+  - Improved connection stability and retry mechanisms
+  - Better handling of edge cases in subscription management
+  - Enhanced error recovery in stream operations
+
 ## [9.0.1-alpha] - 2025-06-19
 
 ### Added
