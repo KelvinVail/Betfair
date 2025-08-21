@@ -12,5 +12,5 @@ internal abstract class MessageBase
     public string Op { get; }
 
     [JsonPropertyName("id")]
-    public int Id { get; }
+    public int Id { get; internal set; }
 }
