@@ -13,15 +13,13 @@ namespace Betfair.Stream;
 /// </summary>
 public class Subscription : IDisposable
 {
-    private readonly BetfairTcpClient _tcpClient = new ();
     private readonly TokenProvider _tokenProvider;
     private readonly string _appKey;
     private readonly BetfairHttpClient? _httpClient;
-
     private readonly bool _ownsTransport;
-
-    // Status awaiting and reader activity tracking (readonly first per SA1214)
     private readonly ConcurrentDictionary<int, TaskCompletionSource<ChangeMessage>> _statusAwaiters = new ();
+
+    private BetfairTcpClient _tcpClient = new ();
 
     private System.IO.Stream? _stream;
     private IPipeline _pipe;
@@ -312,6 +310,10 @@ public class Subscription : IDisposable
             {
                 // ignore
             }
+
+            // Dispose the old TcpClient and create a new one for reconnection
+            _tcpClient.Dispose();
+            _tcpClient = new BetfairTcpClient();
 
             _stream = _tcpClient.GetAuthenticatedSslStream();
             _pipe = new Pipeline(_stream);
