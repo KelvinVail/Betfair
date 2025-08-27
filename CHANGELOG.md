@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.1-alpha-3] - 2025-08-27
+
+### Fixed
+- **Critical Stream Reconnection Issue**
+  - Fixed ObjectDisposedException when stream reconnection attempts to use disposed socket
+  - Changed _tcpClient from readonly to mutable field to allow replacement during reconnection
+  - ReconnectAndResubscribe now disposes old TcpClient and creates new instance for each reconnection
+  - Prevents "Cannot access a disposed object. Object name: 'System.Net.Sockets.Socket'" error
+  - Ensures robust and reliable streaming connections with multiple reconnection attempts
+- **Test Coverage**
+  - Added test to verify _tcpClient field mutability enabling reconnection fix
+  - Total test count increased to 2890 tests (all passing)
+
 ## [9.0.1-alpha-2] - 2025-08-21
 
 ### Added
