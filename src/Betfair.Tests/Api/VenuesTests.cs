@@ -21,7 +21,7 @@ public class VenuesTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.Venues();
+        await _api.Venues(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listVenues/");
@@ -30,7 +30,7 @@ public class VenuesTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.Venues();
+        await _api.Venues(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new VenuesRequest());
@@ -41,7 +41,7 @@ public class VenuesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithEventTypes(Betfair.Core.EventType.Of(1));
 
-        await _api.Venues(filter);
+        await _api.Venues(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new VenuesRequest
@@ -55,7 +55,7 @@ public class VenuesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithEventTypes(Betfair.Core.EventType.Of(1));
 
-        await _api.Venues(filter);
+        await _api.Venues(filter, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.VenuesRequest);
 
         json.Should().Be("{\"filter\":{\"eventTypeIds\":[\"1\"]}}");
@@ -74,7 +74,7 @@ public class VenuesTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Venues();
+        var response = await _api.Venues(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

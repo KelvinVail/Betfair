@@ -23,7 +23,7 @@ public class SubscriptionRetryTests
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 2, Operation = "status", StatusCode = "FAILURE" });
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 3, Operation = "status", StatusCode = "SUCCESS" });
 
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         // Should only have auth and subscription, no retry when reader not active
         _pipe.ObjectsWritten.Should().HaveCount(2);
@@ -42,7 +42,7 @@ public class SubscriptionRetryTests
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 3, Operation = "status", StatusCode = "FAILURE" });
 
         // Should not throw when reader is not active
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         _pipe.ObjectsWritten.Should().HaveCount(2);
     }
@@ -57,7 +57,7 @@ public class SubscriptionRetryTests
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 999, Operation = "status", StatusCode = "SUCCESS" });
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 3, Operation = "status", StatusCode = "SUCCESS" });
 
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         // Should only have auth and subscription, no retry when reader not active
         _pipe.ObjectsWritten.Should().HaveCount(2);
@@ -75,7 +75,7 @@ public class SubscriptionRetryTests
         _pipe.StatusResponses.Enqueue(null!);
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 3, Operation = "status", StatusCode = "SUCCESS" });
 
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         // Should only have auth and subscription, no retry when reader not active
         _pipe.ObjectsWritten.Should().HaveCount(2);
@@ -92,7 +92,7 @@ public class SubscriptionRetryTests
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 2, Operation = "status", StatusCode = "FAILURE" });
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 3, Operation = "status", StatusCode = "SUCCESS" });
 
-        await sub.SubscribeToOrders();
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
 
         // Should only have auth and subscription, no retry when reader not active
         _pipe.ObjectsWritten.Should().HaveCount(2);
@@ -111,7 +111,7 @@ public class SubscriptionRetryTests
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 2, Operation = "status", StatusCode = "SUCCESS" });
         _pipe.StatusResponses.Enqueue(new ChangeMessage { Id = 3, Operation = "status", StatusCode = "SUCCESS" });
 
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         // Should only have auth and subscription, no retry when reader not active
         _pipe.ObjectsWritten.Should().HaveCount(2);
@@ -129,7 +129,7 @@ public class SubscriptionRetryTests
         _pipe.SimulateTimeout = true;
 
         // Should not throw when reader is not active
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         _pipe.ObjectsWritten.Should().HaveCount(2);
     }
@@ -145,7 +145,7 @@ public class SubscriptionRetryTests
         _pipe.SimulateTimeoutOnRetry = true;
 
         // Should not throw when reader is not active
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         _pipe.ObjectsWritten.Should().HaveCount(2);
     }
@@ -157,7 +157,7 @@ public class SubscriptionRetryTests
         var filter = new StreamMarketFilter().WithMarketIds("1.2345");
 
         // When reader is not active, messages are written directly without status waiting
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         // Should only have auth and subscription, no retry logic
         _pipe.ObjectsWritten.Should().HaveCount(2);

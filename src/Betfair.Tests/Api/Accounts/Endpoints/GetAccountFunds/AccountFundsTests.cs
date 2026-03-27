@@ -20,7 +20,7 @@ public class AccountFundsTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.AccountFunds();
+        await _api.AccountFunds(TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/getAccountFunds/");
@@ -29,7 +29,7 @@ public class AccountFundsTests : IDisposable
     [Fact]
     public async Task PostsDefaultWallet()
     {
-        await _api.AccountFunds();
+        await _api.AccountFunds(TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new AccountFundsRequest());
@@ -49,7 +49,7 @@ public class AccountFundsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountFunds();
+        var response = await _api.AccountFunds(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -68,7 +68,7 @@ public class AccountFundsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountFunds();
+        var response = await _api.AccountFunds(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -87,7 +87,7 @@ public class AccountFundsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountFunds();
+        var response = await _api.AccountFunds(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -106,7 +106,7 @@ public class AccountFundsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountFunds();
+        var response = await _api.AccountFunds(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -137,8 +137,8 @@ public class AccountFundsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response1 = await _api.AccountFunds();
-        var response2 = await _api.AccountFunds();
+        var response1 = await _api.AccountFunds(TestContext.Current.CancellationToken);
+        var response2 = await _api.AccountFunds(TestContext.Current.CancellationToken);
 
         response1.Should().BeEquivalentTo(expectedResponse);
         response2.Should().BeEquivalentTo(expectedResponse);

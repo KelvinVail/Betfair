@@ -20,7 +20,7 @@ public class ReplaceOrderTests : IDisposable
     [Fact]
     public async Task ReplaceOrdersCallsTheCorrectEndpoint()
     {
-        await _api.ReplaceOrders(new ReplaceOrders("1.23456789"));
+        await _api.ReplaceOrders(new ReplaceOrders("1.23456789"), TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
                        "https://api.betfair.com/exchange/betting/rest/v1.0/replaceOrders/");
@@ -32,7 +32,7 @@ public class ReplaceOrderTests : IDisposable
         var replaceOrders = new ReplaceOrders("1.23456789");
         replaceOrders.Instructions.Add(new ReplaceInstruction { BetId = "12345", NewPrice = 1.01 });
 
-        await _api.ReplaceOrders(replaceOrders);
+        await _api.ReplaceOrders(replaceOrders, TestContext.Current.CancellationToken);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.ReplaceOrders);
 

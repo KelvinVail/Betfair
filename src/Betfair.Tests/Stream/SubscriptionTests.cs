@@ -27,7 +27,7 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var filter = new StreamMarketFilter().WithMarketIds("1.2345");
 
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         var authMessage = new Authentication(1, "Token", "a");
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
@@ -38,7 +38,7 @@ public class SubscriptionTests
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
 
-        await sub.SubscribeToOrders();
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
 
         var authMessage = new Authentication(1, "Token", "a");
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
@@ -50,9 +50,9 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var filter = new StreamMarketFilter().WithMarketIds("1.2345");
 
-        await sub.Subscribe(filter);
-        await sub.SubscribeToOrders();
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         _pipe.ObjectsWritten.Should().ContainSingle(x => x.GetType() == typeof(Authentication));
     }
@@ -65,7 +65,7 @@ public class SubscriptionTests
     {
         using var sub = new Subscription(_tokenProvider, appKey, _pipe);
 
-        await sub.SubscribeToOrders();
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
 
         var authMessage = new Authentication(1, "Token", appKey);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
@@ -80,7 +80,7 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         _tokenProvider.RespondsWithToken.Add(sessionToken);
 
-        await sub.SubscribeToOrders();
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
 
         var authMessage = new Authentication(1, sessionToken, "a");
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(authMessage);
@@ -94,7 +94,7 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var filter = new StreamMarketFilter().WithMarketIds(marketId);
 
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         var subMessage = new MarketSubscription(2, filter, null, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
@@ -106,8 +106,8 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var filter = new StreamMarketFilter().WithMarketIds("1.2345");
 
-        await sub.Subscribe(filter);
-        await sub.Subscribe(filter);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await sub.Subscribe(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         var first = new MarketSubscription(2, filter, null, null, null, null);
         var second = new MarketSubscription(3, filter, null, null, null, null);
@@ -122,7 +122,7 @@ public class SubscriptionTests
         var marketFilter = new StreamMarketFilter().WithMarketIds("1.2345");
         var dataFilter = new DataFilter().WithBestPrices();
 
-        await sub.Subscribe(marketFilter, dataFilter);
+        await sub.Subscribe(marketFilter, dataFilter, cancellationToken: TestContext.Current.CancellationToken);
 
         var subMessage = new MarketSubscription(2, marketFilter, dataFilter, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
@@ -137,7 +137,7 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var marketFilter = new StreamMarketFilter().WithMarketIds("1.2345");
 
-        await sub.Subscribe(marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs));
+        await sub.Subscribe(marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs), cancellationToken: TestContext.Current.CancellationToken);
 
         var subMessage = new MarketSubscription(2, marketFilter, conflate: TimeSpan.FromMilliseconds(conflateMs), initialClk: null, clk: null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
@@ -153,7 +153,7 @@ public class SubscriptionTests
         _pipe.ObjectsToBeRead.Add(change2);
 
         var last = default(ChangeMessage);
-        await foreach (var msg in sub.ReadLines(default)) last = msg;
+        await foreach (var msg in sub.ReadLines(TestContext.Current.CancellationToken)) last = msg;
 
         last.Should().NotBeNull();
         last!.Clock.Should().Be("c2");
@@ -165,7 +165,7 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var filter = new StreamMarketFilter().WithMarketIds("1.2345");
 
-        await sub.Subscribe(filter, initialClk: "ic", clk: "c");
+        await sub.Subscribe(filter, initialClk: "ic", clk: "c", cancellationToken: TestContext.Current.CancellationToken);
 
         var expected = new MarketSubscription(2, filter, null, null, "ic", "c");
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(expected);
@@ -176,7 +176,7 @@ public class SubscriptionTests
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
 
-        await sub.SubscribeToOrders();
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
 
         var subMessage = new OrderSubscription(2, null, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
@@ -190,7 +190,7 @@ public class SubscriptionTests
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
         var orderFilter = new StreamOrderFilter().WithStrategyRefs(strategyRef);
 
-        await sub.SubscribeToOrders(orderFilter);
+        await sub.SubscribeToOrders(orderFilter, cancellationToken: TestContext.Current.CancellationToken);
 
         var subMessage = new OrderSubscription(2, orderFilter, null, null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
@@ -204,7 +204,7 @@ public class SubscriptionTests
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
 
-        await sub.SubscribeToOrders(conflate: TimeSpan.FromMilliseconds(conflateMs));
+        await sub.SubscribeToOrders(conflate: TimeSpan.FromMilliseconds(conflateMs), cancellationToken: TestContext.Current.CancellationToken);
 
         var subMessage = new OrderSubscription(2, null, TimeSpan.FromMilliseconds(conflateMs), null, null);
         _pipe.ObjectsWritten.Should().ContainEquivalentOf(subMessage);
@@ -215,8 +215,8 @@ public class SubscriptionTests
     {
         using var sub = new Subscription(_tokenProvider, "a", _pipe);
 
-        await sub.SubscribeToOrders();
-        await sub.SubscribeToOrders();
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
+        await sub.SubscribeToOrders(cancellationToken: TestContext.Current.CancellationToken);
 
         var first = new OrderSubscription(2);
         var second = new OrderSubscription(3);
@@ -232,7 +232,7 @@ public class SubscriptionTests
         _pipe.ObjectsToBeRead.Add(message);
 
         var read = new List<object>();
-        await foreach (var line in sub.ReadLines(default))
+        await foreach (var line in sub.ReadLines(TestContext.Current.CancellationToken))
             read.Add(line);
 
         read.Should().ContainEquivalentOf(message, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));
@@ -248,7 +248,7 @@ public class SubscriptionTests
         _pipe.ObjectsToBeRead.Add(message2);
 
         var read = new List<object>();
-        await foreach (var line in sub.ReadLines(default))
+        await foreach (var line in sub.ReadLines(TestContext.Current.CancellationToken))
             read.Add(line);
 
         read.Should().ContainEquivalentOf(message1, o => o.Excluding(m => m.ReceivedTick).Excluding(m => m.DeserializedTick));

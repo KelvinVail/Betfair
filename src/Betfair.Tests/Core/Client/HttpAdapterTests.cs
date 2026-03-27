@@ -29,7 +29,7 @@ public class HttpAdapterTests : IDisposable
     {
         var uri = new Uri($"http://{value}.com");
 
-        await _adapter.PostAsync(uri, _content);
+        await _adapter.PostAsync(uri, _content, TestContext.Current.CancellationToken);
 
         _handler.MethodUsed.Should().Be(HttpMethod.Post);
         _handler.UriCalled.Should().Be(uri);
@@ -38,7 +38,7 @@ public class HttpAdapterTests : IDisposable
     [Fact]
     public async Task PostPutsContentTypeInContentHeader()
     {
-        await _adapter.PostAsync(_uri, _content);
+        await _adapter.PostAsync(_uri, _content, TestContext.Current.CancellationToken);
 
         _handler.ContentHeadersSent.Should().ContainKey("Content-Type")
             .WhoseValue.Should().Contain("application/json");
@@ -51,7 +51,7 @@ public class HttpAdapterTests : IDisposable
     {
         var auth = new Authentication(1, body, "a");
 
-        await _adapter.PostAsync(_uri, auth);
+        await _adapter.PostAsync(_uri, auth, TestContext.Current.CancellationToken);
 
         _handler.StringContentSent.Should().BeEquivalentTo(JsonSerializer.Serialize(auth, SerializerContext.Default.Authentication));
     }

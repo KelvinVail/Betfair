@@ -29,7 +29,7 @@ public class RunnerBookTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.RunnerBook("1.23456789", 47972);
+        await _api.RunnerBook("1.23456789", 47972, cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listRunnerBook/");
@@ -42,7 +42,7 @@ public class RunnerBookTests : IDisposable
             .WithCurrency("GBP")
             .IncludeOverallPositions();
 
-        await _api.RunnerBook("1.23456789", 47972, 0.5, query);
+        await _api.RunnerBook("1.23456789", 47972, 0.5, query, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.RunnerBookRequest);
 
         json.Should().Contain("\"marketId\":\"1.23456789\"");
@@ -107,7 +107,7 @@ public class RunnerBookTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.RunnerBook("1.23456789", 47972);
+        var response = await _api.RunnerBook("1.23456789", 47972, cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse.FirstOrDefault());
     }

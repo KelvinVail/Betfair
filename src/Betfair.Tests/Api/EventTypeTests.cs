@@ -21,7 +21,7 @@ public class EventTypeTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.EventTypes();
+        await _api.EventTypes(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listEventTypes/");
@@ -30,7 +30,7 @@ public class EventTypeTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.EventTypes();
+        await _api.EventTypes(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new EventTypesRequest());
@@ -41,7 +41,7 @@ public class EventTypeTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.EventTypes(filter);
+        await _api.EventTypes(filter, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.EventTypesRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
@@ -64,7 +64,7 @@ public class EventTypeTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.EventTypes();
+        var response = await _api.EventTypes(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

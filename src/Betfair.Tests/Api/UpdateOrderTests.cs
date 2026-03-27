@@ -22,7 +22,7 @@ public class UpdateOrderTests : IDisposable
     [Fact]
     public async Task UpdateOrdersCallsTheCorrectEndpoint()
     {
-        await _api.UpdateOrders(new UpdateOrders("1.23456789"));
+        await _api.UpdateOrders(new UpdateOrders("1.23456789"), TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
                        "https://api.betfair.com/exchange/betting/rest/v1.0/updateOrders/");
@@ -43,7 +43,7 @@ public class UpdateOrderTests : IDisposable
             },
         };
 
-        await _api.UpdateOrders(updateOrders);
+        await _api.UpdateOrders(updateOrders, TestContext.Current.CancellationToken);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.UpdateOrders);
 

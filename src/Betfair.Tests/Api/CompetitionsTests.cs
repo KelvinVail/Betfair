@@ -22,7 +22,7 @@ public class CompetitionsTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.Competitions();
+        await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listCompetitions/");
@@ -31,7 +31,7 @@ public class CompetitionsTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.Competitions();
+        await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CompetitionsRequest());
@@ -42,7 +42,7 @@ public class CompetitionsTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.Competitions(filter);
+        await _api.Competitions(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CompetitionsRequest { Filter = filter });
@@ -53,7 +53,7 @@ public class CompetitionsTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.Competitions(filter);
+        await _api.Competitions(filter, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CompetitionsRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
@@ -76,7 +76,7 @@ public class CompetitionsTests : IDisposable
             },
         };
 
-        var response = await _api.Competitions();
+        var response = await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().HaveCount(1);
         response[0].MarketCount.Should().Be(2);
@@ -116,7 +116,7 @@ public class CompetitionsTests : IDisposable
             .WithCountries("GB", "US")
             .WithMarketTypes("MATCH_ODDS", "OVER_UNDER_25");
 
-        await _api.Competitions(filter);
+        await _api.Competitions(filter, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CompetitionsRequest);
 
         json.Should().Contain("\"eventTypeIds\":[\"1\",\"2\"]");
@@ -132,7 +132,7 @@ public class CompetitionsTests : IDisposable
         var to = new DateTimeOffset(2023, 6, 30, 23, 59, 59, TimeSpan.Zero);
         var filter = new ApiMarketFilter().FromMarketStart(from).ToMarketStart(to);
 
-        await _api.Competitions(filter);
+        await _api.Competitions(filter, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CompetitionsRequest);
 
         json.Should().Contain("\"marketStartTime\":");
@@ -145,7 +145,7 @@ public class CompetitionsTests : IDisposable
     {
         var filter = new ApiMarketFilter();
 
-        await _api.Competitions(filter);
+        await _api.Competitions(filter, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CompetitionsRequest);
 
         json.Should().Be("{\"filter\":{}}");
@@ -156,7 +156,7 @@ public class CompetitionsTests : IDisposable
     {
         _client.RespondsWithBody = Array.Empty<CompetitionResult>();
 
-        var response = await _api.Competitions();
+        var response = await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().NotBeNull();
         response.Should().BeEmpty();
@@ -200,7 +200,7 @@ public class CompetitionsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Competitions();
+        var response = await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -219,7 +219,7 @@ public class CompetitionsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Competitions();
+        var response = await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
         response[0].Competition.Should().BeNull();
@@ -243,7 +243,7 @@ public class CompetitionsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Competitions();
+        var response = await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
         response[0].CompetitionRegion.Should().BeNull();
@@ -267,7 +267,7 @@ public class CompetitionsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Competitions();
+        var response = await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
         response[0].MarketCount.Should().Be(0);
@@ -291,7 +291,7 @@ public class CompetitionsTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Competitions();
+        var response = await _api.Competitions(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
         response[0].MarketCount.Should().Be(999999);

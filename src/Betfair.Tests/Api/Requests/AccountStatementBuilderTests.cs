@@ -1,5 +1,4 @@
 using System.Globalization;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
 using Betfair.Api.Betting;
@@ -159,7 +158,7 @@ public class AccountStatementBuilderTests : IDisposable
     [Fact]
     public async Task ExecuteAsyncCallsCorrectEndpoint()
     {
-        await _builder.ExecuteAsync();
+        await _builder.ExecuteAsync(TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/getAccountStatement/");
@@ -173,7 +172,7 @@ public class AccountStatementBuilderTests : IDisposable
             .From(10)
             .Take(50)
             .ExchangeOnly()
-            .ExecuteAsync();
+            .ExecuteAsync(TestContext.Current.CancellationToken);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountStatementRequest);
 

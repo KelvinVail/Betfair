@@ -6,11 +6,9 @@ internal class SnakeCaseEnumJsonConverter<T> : JsonConverter<T>
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var enumString = reader.GetString() !;
-        foreach (var name in Enum.GetNames(typeToConvert))
-        {
-            if (ToUpperSnakeCase(name) == enumString)
-                return (T)Enum.Parse(typeToConvert, name, true);
-        }
+        var result = Enum.GetNames(typeToConvert).Select(ToUpperSnakeCase).FirstOrDefault(x => x == enumString);
+        if (result is not null)
+            return (T)Enum.Parse(typeToConvert, result, true);
 
         throw new JsonException($"Unable to convert \"{enumString}\" to Enum \"{typeToConvert}\".");
     }

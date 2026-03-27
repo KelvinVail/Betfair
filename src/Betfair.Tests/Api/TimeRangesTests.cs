@@ -21,7 +21,7 @@ public class TimeRangesTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.TimeRanges();
+        await _api.TimeRanges(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listTimeRanges/");
@@ -30,7 +30,7 @@ public class TimeRangesTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.TimeRanges();
+        await _api.TimeRanges(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new TimeRangesRequest
@@ -44,7 +44,7 @@ public class TimeRangesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.TimeRanges(filter);
+        await _api.TimeRanges(filter, cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new TimeRangesRequest
@@ -60,7 +60,7 @@ public class TimeRangesTests : IDisposable
     [InlineData(TimeGranularity.Minutes)]
     public async Task PostsProvidedGranularity(TimeGranularity granularity)
     {
-        await _api.TimeRanges(granularity: granularity);
+        await _api.TimeRanges(granularity: granularity, cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new TimeRangesRequest
@@ -74,7 +74,7 @@ public class TimeRangesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.TimeRanges(filter, TimeGranularity.Hours);
+        await _api.TimeRanges(filter, TimeGranularity.Hours, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.TimeRangesRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]},\"granularity\":\"HOURS\"}");
@@ -97,7 +97,7 @@ public class TimeRangesTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.TimeRanges();
+        var response = await _api.TimeRanges(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

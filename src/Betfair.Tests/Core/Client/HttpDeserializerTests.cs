@@ -28,7 +28,7 @@ public class HttpDeserializerTests : IDisposable
         var expectedResponse = new MarketBook[] { new () { Status = MarketStatus.Open } };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _client.PostAsync<MarketBook[]>(_uri, _content);
+        var response = await _client.PostAsync<MarketBook[]>(_uri, _content, TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -54,7 +54,7 @@ public class HttpDeserializerTests : IDisposable
         };
         _handler.RespondsWithBody = response;
 
-        var act = async () => { await _client.PostAsync<MarketBook>(_uri, _content); };
+        var act = async () => { await _client.PostAsync<MarketBook>(_uri, _content, TestContext.Current.CancellationToken); };
 
         var exception = await act.Should().ThrowAsync<BettingInvalidSessionInformationException>();
         exception.Which.Message.Should().StartWith("The session token hasn't been provided, is invalid or has expired. You must login again to create a new session token.");

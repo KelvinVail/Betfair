@@ -39,7 +39,7 @@ public class FluentApiIntegrationTests : IDisposable
             .From(10)
             .Take(100);
 
-        await _api.ClearedOrders(query);
+        await _api.ClearedOrders(query, TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listClearedOrders/");
@@ -66,7 +66,7 @@ public class FluentApiIntegrationTests : IDisposable
             .WithCurrency("GBP")
             .WithLocale("en-GB");
 
-        await _api.MarketBook(["1.123", "1.456"], query);
+        await _api.MarketBook(["1.123", "1.456"], query, cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketBook/");
@@ -83,7 +83,7 @@ public class FluentApiIntegrationTests : IDisposable
             .ExecutableOrdersOnly()
             .NoMatchRollup();
 
-        await _api.RunnerBook("1.123", 456789L, query: query);
+        await _api.RunnerBook("1.123", 456789L, query: query, cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listRunnerBook/");
@@ -101,7 +101,7 @@ public class FluentApiIntegrationTests : IDisposable
             .From(0)
             .Take(50)
             .WithLocale("en-GB")
-            .ExecuteAsync();
+            .ExecuteAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/getAccountStatement/");

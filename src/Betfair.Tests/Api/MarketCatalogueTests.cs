@@ -24,7 +24,7 @@ public class MarketCatalogueTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.MarketCatalogue();
+        await _api.MarketCatalogue(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketCatalogue/");
@@ -33,7 +33,7 @@ public class MarketCatalogueTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.MarketCatalogue();
+        await _api.MarketCatalogue(cancellationToken: TestContext.Current.CancellationToken);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new MarketCatalogueQuery());
@@ -48,7 +48,7 @@ public class MarketCatalogueTests : IDisposable
             .OrderBy(MarketSort.MaximumTraded)
             .Take(10);
 
-        await _api.MarketCatalogue(filter, query);
+        await _api.MarketCatalogue(filter, query, cancellationToken: TestContext.Current.CancellationToken);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.MarketCatalogueRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]},\"marketProjection\":[\"MARKET_START_TIME\"],\"sort\":\"MAXIMUM_TRADED\",\"maxResults\":10}");
@@ -86,7 +86,7 @@ public class MarketCatalogueTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.MarketCatalogue();
+        var response = await _api.MarketCatalogue(cancellationToken: TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

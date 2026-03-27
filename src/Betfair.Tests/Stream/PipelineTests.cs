@@ -59,7 +59,7 @@ public class PipelineTests : IDisposable
         await _pipeline.WriteLine(auth2);
         _stream.Position = 0;
 
-        var result = await _pipeline.ReadLines(CancellationToken.None).ToListAsync();
+        var result = await _pipeline.ReadLines(CancellationToken.None).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(2);
         result[0].Should().BeEquivalentTo(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(auth1));
@@ -72,9 +72,9 @@ public class PipelineTests : IDisposable
         var stream = new MemoryStream("Line\nNoNewlineHere"u8.ToArray());
         var pipeline = new Pipeline(stream);
 
-        var asyncEnumerable = pipeline.ReadLines(default);
+        var asyncEnumerable = pipeline.ReadLines(TestContext.Current.CancellationToken);
 
-        var lines = await asyncEnumerable.ToListAsync();
+        var lines = await asyncEnumerable.ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         lines.Should().ContainSingle();
     }
 

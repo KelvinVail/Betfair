@@ -432,7 +432,7 @@ public class BetfairApiClient : IDisposable
     /// <returns>The market status as a string.</returns>
     public virtual async Task<MarketStatus> MarketStatus(
         string marketId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var response = await _client.PostAsync<MarketBook[]>(
             new Uri($"{_betting}/listMarketBook/"),
