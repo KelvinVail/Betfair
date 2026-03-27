@@ -3,6 +3,7 @@
 [![NuGet downloads](https://img.shields.io/nuget/v/Betfair.svg)](https://www.nuget.org/packages/Betfair/)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=bugs)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=KelvinVail_Betfair&metric=coverage)](https://sonarcloud.io/summary/new_code?id=KelvinVail_Betfair)
