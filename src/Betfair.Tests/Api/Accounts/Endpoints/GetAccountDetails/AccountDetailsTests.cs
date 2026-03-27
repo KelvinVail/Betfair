@@ -1,4 +1,3 @@
-using System.Net;
 using Betfair.Api;
 using Betfair.Api.Accounts.Endpoints.GetAccountDetails.Responses;
 using Betfair.Api.Accounts.Exceptions;
@@ -27,7 +26,7 @@ public class AccountDetailsTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.AccountDetails();
+        await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         _handler.UriCalled.Should().Be(
             new Uri("https://api.betfair.com/exchange/account/rest/v1.0/getAccountDetails/"));
@@ -36,7 +35,7 @@ public class AccountDetailsTests : IDisposable
     [Fact]
     public async Task UsesPostMethod()
     {
-        await _api.AccountDetails();
+        await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         _handler.MethodUsed.Should().Be(HttpMethod.Post);
     }
@@ -44,7 +43,7 @@ public class AccountDetailsTests : IDisposable
     [Fact]
     public async Task RequestBodyShouldBeSerializable()
     {
-        await _api.AccountDetails();
+        await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         _handler.StringContentSent.Should().Be("{}");
     }
@@ -52,7 +51,7 @@ public class AccountDetailsTests : IDisposable
     [Fact]
     public async Task RequestBodyShouldBeEmptyJson()
     {
-        await _api.AccountDetails();
+        await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         var json = _handler.StringContentSent;
         json.Should().Be("{}");
@@ -75,7 +74,7 @@ public class AccountDetailsTests : IDisposable
         };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountDetails();
+        var response = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -97,7 +96,7 @@ public class AccountDetailsTests : IDisposable
         };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountDetails();
+        var response = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -112,7 +111,7 @@ public class AccountDetailsTests : IDisposable
         };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountDetails();
+        var response = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -134,7 +133,7 @@ public class AccountDetailsTests : IDisposable
         };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountDetails();
+        var response = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -156,7 +155,7 @@ public class AccountDetailsTests : IDisposable
         };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountDetails();
+        var response = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -386,7 +385,7 @@ public class AccountDetailsTests : IDisposable
     [Fact]
     public async Task ShouldSetCorrectContentTypeHeader()
     {
-        await _api.AccountDetails();
+        await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         _handler.ContentHeadersSent.Should().NotBeNull();
         _handler.ContentHeadersSent!.ContentType.Should().NotBeNull();
@@ -418,7 +417,7 @@ public class AccountDetailsTests : IDisposable
     {
         _handler.RespondsWithBody = "null";
 
-        var response = await _api.AccountDetails();
+        var response = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response.Should().BeNull();
     }
@@ -444,7 +443,7 @@ public class AccountDetailsTests : IDisposable
             """;
         _handler.RespondsWithBody = jsonWithExtraProperties;
 
-        var response = await _api.AccountDetails();
+        var response = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response.Should().NotBeNull();
         response!.CurrencyCode.Should().Be("GBP");
@@ -481,8 +480,8 @@ public class AccountDetailsTests : IDisposable
         };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response1 = await _api.AccountDetails();
-        var response2 = await _api.AccountDetails();
+        var response1 = await _api.AccountDetails(TestContext.Current.CancellationToken);
+        var response2 = await _api.AccountDetails(TestContext.Current.CancellationToken);
 
         response1.Should().BeEquivalentTo(expectedResponse);
         response2.Should().BeEquivalentTo(expectedResponse);

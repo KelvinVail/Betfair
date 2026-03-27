@@ -2,9 +2,7 @@
 using Betfair.Api.Accounts.Endpoints.GetAccountDetails.Responses;
 using Betfair.Api.Accounts.Endpoints.GetAccountFunds.Requests;
 using Betfair.Api.Accounts.Endpoints.GetAccountFunds.Responses;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Requests;
-using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
 using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Requests;
 using Betfair.Api.Accounts.Endpoints.ListCurrencyRates.Responses;
 using Betfair.Api.Betting;
