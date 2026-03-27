@@ -17,10 +17,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
+      env:
+        STRYKER_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
       with:
         dotnet-version: |
           8.0.x
           9.0.x
+          10.0.x
 
     - name: Install dependencies
       working-directory: src
@@ -40,4 +43,4 @@ jobs:
 
     - name: Run dotnet-stryker
       working-directory: src
-      run: dotnet stryker --reporter "dashboard" --dashboard-api-key ${{ secrets.STRYKER_DASHBOARD_API_KEY }} --version "master"
+      run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_KEY" --version "master"
