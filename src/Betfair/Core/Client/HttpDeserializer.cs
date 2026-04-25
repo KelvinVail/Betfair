@@ -2,9 +2,9 @@
 
 internal class HttpDeserializer : IHttpClient
 {
-    private readonly BetfairHttpClient _httpClient;
+    private readonly HttpClient _httpClient;
 
-    internal HttpDeserializer(BetfairHttpClient httpClient) =>
+    internal HttpDeserializer(HttpClient httpClient) =>
         _httpClient = httpClient;
 
     public async Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)

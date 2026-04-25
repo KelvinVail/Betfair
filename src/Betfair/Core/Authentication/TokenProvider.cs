@@ -6,10 +6,10 @@ internal class TokenProvider
 {
     private const string _apiLogin = "https://identitysso.betfair.com/api/login";
     private const string _certLogin = "https://identitysso-cert.betfair.com/api/certlogin";
-    private readonly BetfairHttpClient? _client;
+    private readonly HttpClient? _client;
     private readonly Credentials? _credentials;
 
-    internal TokenProvider(BetfairHttpClient client, Credentials credentials)
+    internal TokenProvider(HttpClient client, Credentials credentials)
     {
         _client = client;
         _credentials = credentials;

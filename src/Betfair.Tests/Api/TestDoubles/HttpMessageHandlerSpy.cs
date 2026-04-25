@@ -6,6 +6,9 @@ namespace Betfair.Tests.Api.TestDoubles;
 
 public class HttpMessageHandlerSpy : HttpClientHandler
 {
+    private static readonly string _loginResponse =
+        """{"token":"test-token","status":"SUCCESS","error":"","sessionToken":"","loginStatus":""}""";
+
     public HttpMessageHandlerSpy() =>
         CheckCertificateRevocationList = true;
 
@@ -29,6 +32,13 @@ public class HttpMessageHandlerSpy : HttpClientHandler
         [NotNull]HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
+        // Intercept login calls so TokenProvider can authenticate without a real Betfair endpoint
+        if (IsLoginRequest(request))
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(_loginResponse),
+            };
+
         MethodUsed = request.Method;
         UriCalled = request.RequestUri;
         TimesUriCalled.TryAdd(request.RequestUri!, 0);
@@ -51,4 +61,7 @@ public class HttpMessageHandlerSpy : HttpClientHandler
         request.Dispose();
         return response;
     }
+
+    private static bool IsLoginRequest(HttpRequestMessage request) =>
+        request.RequestUri?.Host.Contains("identitysso", StringComparison.OrdinalIgnoreCase) == true;
 }

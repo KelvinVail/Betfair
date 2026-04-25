@@ -13,4 +13,14 @@ internal static class BetfairHttpFactory
         var tokenInjector = new HttpTokenInjector(deserializer, tokenProvider, credentials.AppKey);
         return new HttpAdapter(tokenInjector);
     }
+
+    internal static HttpAdapter Create(
+        Credentials credentials,
+        TokenProvider tokenProvider,
+        HttpClient client)
+    {
+        var deserializer = new HttpDeserializer(client);
+        var tokenInjector = new HttpTokenInjector(deserializer, tokenProvider, credentials.AppKey);
+        return new HttpAdapter(tokenInjector);
+    }
 }

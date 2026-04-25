@@ -63,6 +63,39 @@ public class BetfairApiClient : IDisposable
         _client = BetfairHttpFactory.Create(credentials, tokenProvider, _httpClient);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BetfairApiClient"/> class using an
+    /// <see cref="IHttpClientFactory"/>. Use this constructor when you want to integrate
+    /// with the .NET HTTP client pipeline — for example to add logging via
+    /// <c>AddExtendedHttpClientLogging</c> or other delegating handlers registered through DI.
+    /// The factory must have a client registered under the name <c>"Betfair"</c>.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// builder.Services.AddRedaction();
+    /// builder.Services.AddHttpClient("Betfair")
+    ///     .ConfigurePrimaryHttpMessageHandler(() => new BetfairClientHandler(cert))
+    ///     .AddExtendedHttpClientLogging();
+    /// builder.Services.AddSingleton(sp =>
+    ///     new BetfairApiClient(credentials, sp.GetRequiredService&lt;IHttpClientFactory&gt;()));
+    /// </code>
+    /// </example>
+    /// <param name="credentials">The credentials used to authenticate with Betfair.</param>
+    /// <param name="httpClientFactory">
+    /// The factory used to create the named <c>"Betfair"</c> <see cref="HttpClient"/>.
+    /// The factory manages the client lifetime; this instance will not dispose it.
+    /// </param>
+    public BetfairApiClient(Credentials credentials, IHttpClientFactory httpClientFactory)
+    {
+        ArgumentNullException.ThrowIfNull(credentials);
+        ArgumentNullException.ThrowIfNull(httpClientFactory);
+        _httpClient = null!;
+        _disposeHttpClient = false;
+        var httpClient = httpClientFactory.CreateClient("Betfair");
+        var tokenProvider = new TokenProvider(httpClient, credentials);
+        _client = BetfairHttpFactory.Create(credentials, tokenProvider, httpClient);
+    }
+
     internal BetfairApiClient(HttpAdapter adapter)
     {
         _disposeHttpClient = false;
