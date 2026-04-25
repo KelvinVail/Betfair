@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.1-alpha-5] - 2026-04-25
+
+### Added
+- **IHttpClientFactory support in BetfairApiClient**
+  - New `BetfairApiClient(Credentials, IHttpClientFactory)` constructor allows consumers to supply their own HTTP pipeline via DI
+  - Enables integration with `AddExtendedHttpClientLogging`, `AddHttpClientLatencyTelemetry`, and custom `DelegatingHandler` implementations without any changes to calling code
+  - The factory manages the `HttpClient` lifetime; `BetfairApiClient` will not dispose it
+  - The named client `"Betfair"` is resolved from the factory on construction
+- **BetfairClientHandler made public**
+  - Consumers can now register `BetfairClientHandler` as the primary handler when configuring a named client with `IHttpClientFactory`
+  - Preserves the same transport settings (certificate revocation checking, GZip decompression, proxy disabled) used by the default constructor
+  - Accepts an optional `X509Certificate2` for certificate-based authentication
+- **HTTP client logging documentation**
+  - New `docs/HttpClientLogging.md` covering basic factory setup, extended HTTP logging, phase-level latency telemetry, log consumption (console, Application Insights, Seq), and custom log enrichers
+  - Includes full registration examples with correct ordering for `AddHttpClientLatencyTelemetry` and `AddExtendedHttpClientLogging`
+  - Documents the `LatencyInfo` log field format and how to export phase timings as metrics via a custom `DelegatingHandler`
+
+### Changed
+- **Internal HTTP pipeline loosened**
+  - `HttpDeserializer` and `TokenProvider` now accept `HttpClient` instead of `BetfairHttpClient`, enabling the factory-based path without duplicating pipeline logic
+  - `BetfairHttpFactory` gains a second `Create` overload accepting `HttpClient`
+- **Dependencies**
+  - Added `Microsoft.Extensions.Http 9.0.0`
+
+### Fixed
+- **BetfairExceptionFactory duplicate switch expressions**
+  - Each error code was previously matched in two separate switch expressions — once to create a default exception and read its message, then again to create the final exception. The first switch was immediately discarded.
+  - Collapsed to a single switch per domain using `GetDefaultBettingMessage` / `GetDefaultAccountMessage` helpers. No behaviour change.
+
 ## [9.0.1-alpha-3] - 2025-08-27
 
 ### Fixed
