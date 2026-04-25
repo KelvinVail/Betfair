@@ -21,102 +21,9 @@ internal static class BetfairExceptionFactory
     {
         var apiException = errorResponse.Detail.APINGException;
         var errorCode = apiException.ErrorCode;
+        var message = EnhanceErrorMessage(GetDefaultBettingMessage(errorCode), errorResponse, apiException);
 
-        // Create exception with default message first, then enhance it
         BettingApiException exception = errorCode switch
-        {
-            "TOO_MUCH_DATA" => new TooMuchDataException(),
-            InvalidInputData => new BettingInvalidInputDataException(),
-            InvalidSessionInformation => new BettingInvalidSessionInformationException(),
-            NoAppKey => new BettingNoAppKeyException(),
-            NoSession => new BettingNoSessionException(),
-            InvalidAppKey => new BettingInvalidAppKeyException(),
-            "ACCESS_DENIED" => new AccessDeniedException(),
-            UnexpectedError => new BettingUnexpectedErrorException(),
-            TooManyRequests => new BettingTooManyRequestsException(),
-            ServiceBusy => new BettingServiceBusyException(),
-            TimeoutError => new BettingTimeoutErrorException(),
-            "REQUEST_SIZE_EXCEEDS_LIMIT" => new RequestSizeExceedsLimitException(),
-            "INVALID_JSON" => new InvalidJsonException(),
-            "METHOD_NOT_FOUND" => new MethodNotFoundException(),
-            "INVALID_PARAMETERS" => new InvalidParametersException(),
-            "INTERNAL_JSON_RPC_ERROR" => new InternalJsonRpcErrorException(),
-            _ => new BettingUnexpectedErrorException()
-        };
-
-        // Enhance the message with Betfair error details
-        var enhancedMessage = EnhanceErrorMessage(exception.Message, errorResponse, apiException);
-
-        // Create new exception with enhanced message and status code
-        exception = CreateBettingExceptionWithEnhancedMessage(errorCode, enhancedMessage, statusCode);
-
-        // Set the additional properties from the Betfair response
-        exception.ErrorDetails = apiException.ErrorDetails;
-        exception.RequestUUID = apiException.RequestUUID;
-        return exception;
-    }
-
-    public static Exception CreateAccountException(BetfairErrorResponse errorResponse, HttpStatusCode statusCode)
-    {
-        var apiException = errorResponse.Detail.APINGException;
-        var errorCode = apiException.ErrorCode;
-
-        // Create exception with default message first, then enhance it
-        AccountApiException exception = errorCode switch
-        {
-            InvalidSessionInformation => new InvalidSessionInformationException(),
-            NoSession => new NoSessionException(),
-            NoAppKey => new NoAppKeyException(),
-            InvalidAppKey => new InvalidAppKeyException(),
-            InvalidInputData => new InvalidInputDataException(),
-            "INVALID_CLIENT_REF" => new InvalidClientRefException(),
-            ServiceBusy => new ServiceBusyException(),
-            TimeoutError => new TimeoutErrorException(),
-            UnexpectedError => new UnexpectedErrorException(),
-            TooManyRequests => new TooManyRequestsException(),
-            "CUSTOMER_ACCOUNT_CLOSED" => new CustomerAccountClosedException(),
-            "DUPLICATE_APP_NAME" => new DuplicateAppNameException(),
-            "SUBSCRIPTION_EXPIRED" => new SubscriptionExpiredException(),
-            _ => new UnexpectedErrorException()
-        };
-
-        // Enhance the message with Betfair error details
-        var enhancedMessage = EnhanceErrorMessage(exception.Message, errorResponse, apiException);
-
-        // Create new exception with enhanced message and status code
-        exception = CreateAccountExceptionWithEnhancedMessage(errorCode, enhancedMessage, statusCode);
-
-        // Set the additional properties from the Betfair response
-        exception.ErrorDetails = apiException.ErrorDetails;
-        exception.RequestUUID = apiException.RequestUUID;
-        return exception;
-    }
-
-    private static string EnhanceErrorMessage(string originalMessage, BetfairErrorResponse errorResponse, BetfairApiNgError apiException)
-    {
-        var betfairMessage = errorResponse.FaultString;
-        var errorCode = apiException.ErrorCode;
-
-        // Start with the original descriptive message
-        var enhancedMessage = originalMessage;
-
-        // Add Betfair error details if available
-        if (!string.IsNullOrEmpty(betfairMessage))
-        {
-            enhancedMessage += $" Betfair error: {betfairMessage}";
-        }
-
-        if (!string.IsNullOrEmpty(errorCode))
-        {
-            enhancedMessage += $" (Error code: {errorCode})";
-        }
-
-        return enhancedMessage;
-    }
-
-    private static BettingApiException CreateBettingExceptionWithEnhancedMessage(string? errorCode, string message, HttpStatusCode statusCode)
-    {
-        return errorCode switch
         {
             "TOO_MUCH_DATA" => new TooMuchDataException(message, statusCode),
             InvalidInputData => new BettingInvalidInputDataException(message, statusCode),
@@ -136,11 +43,19 @@ internal static class BetfairExceptionFactory
             "INTERNAL_JSON_RPC_ERROR" => new InternalJsonRpcErrorException(message, statusCode),
             _ => new BettingUnexpectedErrorException(message, statusCode)
         };
+
+        exception.ErrorDetails = apiException.ErrorDetails;
+        exception.RequestUUID = apiException.RequestUUID;
+        return exception;
     }
 
-    private static AccountApiException CreateAccountExceptionWithEnhancedMessage(string? errorCode, string message, HttpStatusCode statusCode)
+    public static Exception CreateAccountException(BetfairErrorResponse errorResponse, HttpStatusCode statusCode)
     {
-        return errorCode switch
+        var apiException = errorResponse.Detail.APINGException;
+        var errorCode = apiException.ErrorCode;
+        var message = EnhanceErrorMessage(GetDefaultAccountMessage(errorCode), errorResponse, apiException);
+
+        AccountApiException exception = errorCode switch
         {
             InvalidSessionInformation => new InvalidSessionInformationException(message, statusCode),
             NoSession => new NoSessionException(message, statusCode),
@@ -157,5 +72,63 @@ internal static class BetfairExceptionFactory
             "SUBSCRIPTION_EXPIRED" => new SubscriptionExpiredException(message, statusCode),
             _ => new UnexpectedErrorException(message, statusCode)
         };
+
+        exception.ErrorDetails = apiException.ErrorDetails;
+        exception.RequestUUID = apiException.RequestUUID;
+        return exception;
     }
+
+    private static string EnhanceErrorMessage(string defaultMessage, BetfairErrorResponse errorResponse, BetfairApiNgError apiException)
+    {
+        var message = defaultMessage;
+        var betfairMessage = errorResponse.FaultString;
+        var errorCode = apiException.ErrorCode;
+
+        if (!string.IsNullOrEmpty(betfairMessage))
+            message += $" Betfair error: {betfairMessage}";
+
+        if (!string.IsNullOrEmpty(errorCode))
+            message += $" (Error code: {errorCode})";
+
+        return message;
+    }
+
+    private static string GetDefaultBettingMessage(string? errorCode) =>
+        errorCode switch
+        {
+            "TOO_MUCH_DATA" => new TooMuchDataException().Message,
+            InvalidInputData => new BettingInvalidInputDataException().Message,
+            InvalidSessionInformation => new BettingInvalidSessionInformationException().Message,
+            NoAppKey => new BettingNoAppKeyException().Message,
+            NoSession => new BettingNoSessionException().Message,
+            InvalidAppKey => new BettingInvalidAppKeyException().Message,
+            "ACCESS_DENIED" => new AccessDeniedException().Message,
+            TooManyRequests => new BettingTooManyRequestsException().Message,
+            ServiceBusy => new BettingServiceBusyException().Message,
+            TimeoutError => new BettingTimeoutErrorException().Message,
+            "REQUEST_SIZE_EXCEEDS_LIMIT" => new RequestSizeExceedsLimitException().Message,
+            "INVALID_JSON" => new InvalidJsonException().Message,
+            "METHOD_NOT_FOUND" => new MethodNotFoundException().Message,
+            "INVALID_PARAMETERS" => new InvalidParametersException().Message,
+            "INTERNAL_JSON_RPC_ERROR" => new InternalJsonRpcErrorException().Message,
+            _ => new BettingUnexpectedErrorException().Message
+        };
+
+    private static string GetDefaultAccountMessage(string? errorCode) =>
+        errorCode switch
+        {
+            InvalidSessionInformation => new InvalidSessionInformationException().Message,
+            NoSession => new NoSessionException().Message,
+            NoAppKey => new NoAppKeyException().Message,
+            InvalidAppKey => new InvalidAppKeyException().Message,
+            InvalidInputData => new InvalidInputDataException().Message,
+            "INVALID_CLIENT_REF" => new InvalidClientRefException().Message,
+            ServiceBusy => new ServiceBusyException().Message,
+            TimeoutError => new TimeoutErrorException().Message,
+            TooManyRequests => new TooManyRequestsException().Message,
+            "CUSTOMER_ACCOUNT_CLOSED" => new CustomerAccountClosedException().Message,
+            "DUPLICATE_APP_NAME" => new DuplicateAppNameException().Message,
+            "SUBSCRIPTION_EXPIRED" => new SubscriptionExpiredException().Message,
+            _ => new UnexpectedErrorException().Message
+        };
 }
