@@ -10,7 +10,7 @@ namespace Betfair.Stream.MarketCache;
 /// </summary>
 public sealed class MarketCacheProcessor
 {
-    // Property name bytes — static ReadOnlySpan avoids array allocation on AOT
+    // Property name bytes — only keep those still needed for ValueTextEquals
     private static ReadOnlySpan<byte> PropOp => "op"u8;
     private static ReadOnlySpan<byte> PropId => "id"u8;
     private static ReadOnlySpan<byte> PropClk => "clk"u8;
@@ -20,20 +20,7 @@ public sealed class MarketCacheProcessor
     private static ReadOnlySpan<byte> PropMc => "mc"u8;
     private static ReadOnlySpan<byte> PropRc => "rc"u8;
     private static ReadOnlySpan<byte> PropTv => "tv"u8;
-    private static ReadOnlySpan<byte> PropLtp => "ltp"u8;
     private static ReadOnlySpan<byte> PropImg => "img"u8;
-    private static ReadOnlySpan<byte> PropAtb => "atb"u8;
-    private static ReadOnlySpan<byte> PropAtl => "atl"u8;
-    private static ReadOnlySpan<byte> PropBatb => "batb"u8;
-    private static ReadOnlySpan<byte> PropBatl => "batl"u8;
-    private static ReadOnlySpan<byte> PropTrd => "trd"u8;
-    private static ReadOnlySpan<byte> PropSpb => "spb"u8;
-    private static ReadOnlySpan<byte> PropSpl => "spl"u8;
-    private static ReadOnlySpan<byte> PropSpf => "spf"u8;
-    private static ReadOnlySpan<byte> PropSpn => "spn"u8;
-    private static ReadOnlySpan<byte> PropBdatb => "bdatb"u8;
-    private static ReadOnlySpan<byte> PropBdatl => "bdatl"u8;
-    private static ReadOnlySpan<byte> PropHc => "hc"u8;
     private static ReadOnlySpan<byte> PropMarketDefinition => "marketDefinition"u8;
     private static ReadOnlySpan<byte> PropCon => "con"u8;
     private static ReadOnlySpan<byte> PropConflateMs => "conflateMs"u8;
@@ -42,14 +29,13 @@ public sealed class MarketCacheProcessor
     private static ReadOnlySpan<byte> OpMcm => "mcm"u8;
 
     // Single-market fast path: most subscriptions have 1 market.
-    // Avoids dictionary lookup entirely for the common case.
     private MarketCache? _singleMarket;
 
     // Fallback for multi-market subscriptions
     private Dictionary<string, MarketCache>? _multiMarkets;
 
-    // Reusable buffer for deferred ladder updates (instance-level, always hot in cache)
-    private DeferredLadderUpdate[] _deferredBuffer = new DeferredLadderUpdate[512];
+    // Reusable buffer for deferred ladder updates (instance-level, stays in L1 cache)
+    private DeferredLadderUpdate[] _deferredBuffer = new DeferredLadderUpdate[256];
 
     // Reusable clock buffers to avoid string allocation on every message
     private byte[] _clockBuffer = new byte[64];
@@ -117,10 +103,6 @@ public sealed class MarketCacheProcessor
                 if (reader.TokenType == JsonTokenType.String && !reader.ValueTextEquals(OpMcm))
                     return;
             }
-            else if (reader.ValueTextEquals(PropId))
-            {
-                reader.Read();
-            }
             else if (reader.ValueTextEquals(PropPt))
             {
                 reader.Read();
@@ -132,10 +114,18 @@ public sealed class MarketCacheProcessor
                 reader.Read();
                 CopyTokenToBuffer(ref reader, ref _clockBuffer, out _clockLength);
             }
+            else if (reader.ValueTextEquals(PropMc))
+            {
+                ReadMarketChanges(ref reader, pt);
+            }
             else if (reader.ValueTextEquals(PropInitialClk))
             {
                 reader.Read();
                 CopyTokenToBuffer(ref reader, ref _initialClockBuffer, out _initialClockLength);
+            }
+            else if (reader.ValueTextEquals(PropId))
+            {
+                reader.Read();
             }
             else if (reader.ValueTextEquals(PropCt))
             {
@@ -149,10 +139,6 @@ public sealed class MarketCacheProcessor
             {
                 reader.Read();
             }
-            else if (reader.ValueTextEquals(PropMc))
-            {
-                ReadMarketChanges(ref reader, pt);
-            }
             else if (reader.ValueTextEquals(PropOc))
             {
                 SkipValue(ref reader);
@@ -164,6 +150,7 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadMarketChanges(ref Utf8JsonReader reader, long publishTime)
     {
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray)
@@ -187,6 +174,16 @@ public sealed class MarketCacheProcessor
                 cache = ResolveMarket(ref reader);
                 if (cache != null) cache.PublishTime = publishTime;
             }
+            else if (reader.ValueTextEquals(PropRc))
+            {
+                ReadRunnerChanges(ref reader, cache);
+            }
+            else if (reader.ValueTextEquals(PropTv))
+            {
+                reader.Read();
+                if (cache != null)
+                    cache.TotalMatched = reader.GetDouble();
+            }
             else if (reader.ValueTextEquals(PropImg))
             {
                 reader.Read();
@@ -196,12 +193,6 @@ public sealed class MarketCacheProcessor
                     cache.ClearRunners();
                 }
             }
-            else if (reader.ValueTextEquals(PropTv))
-            {
-                reader.Read();
-                if (cache != null)
-                    cache.TotalMatched = reader.GetDouble();
-            }
             else if (reader.ValueTextEquals(PropCon))
             {
                 reader.Read();
@@ -210,10 +201,6 @@ public sealed class MarketCacheProcessor
             {
                 ReadMarketDefinition(ref reader, cache);
             }
-            else if (reader.ValueTextEquals(PropRc))
-            {
-                ReadRunnerChanges(ref reader, cache);
-            }
             else
             {
                 SkipValue(ref reader);
@@ -221,11 +208,6 @@ public sealed class MarketCacheProcessor
         }
     }
 
-    /// <summary>
-    /// Resolves a market cache from the reader's current string token.
-    /// For the common single-market case, compares bytes directly against
-    /// the pre-computed market ID bytes to avoid string allocation.
-    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private MarketCache ResolveMarket(ref Utf8JsonReader reader)
     {
@@ -272,6 +254,7 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadRunnerChanges(ref Utf8JsonReader reader, MarketCache? cache)
     {
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray)
@@ -305,11 +288,13 @@ public sealed class MarketCacheProcessor
 
             switch (propSpan[0])
             {
-                case (byte)'i': // id (most common — always first in runner change)
-                    if (reader.ValueTextEquals(PropId))
+                case (byte)'a': // atb, atl (highest frequency on deltas)
+                    if (propSpan.Length == 3)
                     {
-                        reader.Read();
-                        selectionId = reader.GetInt64();
+                        if (propSpan[2] == (byte)'b')
+                            ReadPriceSizePairs(ref reader, LadderType.Atb, ref deferredCount);
+                        else
+                            ReadPriceSizePairs(ref reader, LadderType.Atl, ref deferredCount);
                     }
                     else
                     {
@@ -318,94 +303,67 @@ public sealed class MarketCacheProcessor
 
                     break;
 
-                case (byte)'a': // atb, atl (high frequency on deltas)
-                    if (reader.ValueTextEquals(PropAtb))
-                    {
-                        ReadAndDeferLadder(ref reader, LadderType.Atb, ref deferredCount);
-                    }
-                    else if (reader.ValueTextEquals(PropAtl))
-                    {
-                        ReadAndDeferLadder(ref reader, LadderType.Atl, ref deferredCount);
-                    }
-                    else
-                    {
-                        SkipValue(ref reader);
-                    }
-
+                case (byte)'i': // id
+                    reader.Read();
+                    selectionId = reader.GetInt64();
                     break;
 
-                case (byte)'l': // ltp (high frequency)
-                    if (reader.ValueTextEquals(PropLtp))
-                    {
-                        reader.Read();
-                        ltp = reader.GetDouble();
-                    }
-                    else
-                    {
-                        SkipValue(ref reader);
-                    }
-
+                case (byte)'l': // ltp
+                    reader.Read();
+                    ltp = reader.GetDouble();
                     break;
 
                 case (byte)'t': // tv, trd
-                    if (reader.ValueTextEquals(PropTv))
+                    if (propSpan.Length == 2)
                     {
                         reader.Read();
                         tv = reader.GetDouble();
                     }
-                    else if (reader.ValueTextEquals(PropTrd))
-                    {
-                        ReadAndDeferLadder(ref reader, LadderType.Trd, ref deferredCount);
-                    }
                     else
                     {
-                        SkipValue(ref reader);
+                        ReadPriceSizePairs(ref reader, LadderType.Trd, ref deferredCount);
                     }
 
                     break;
 
                 case (byte)'b': // batb, batl, bdatb, bdatl
-                    if (reader.ValueTextEquals(PropBatb))
+                    if (propSpan.Length == 4)
                     {
-                        ReadAndDeferPositionLadder(ref reader, LadderType.Batb, ref deferredCount);
-                    }
-                    else if (reader.ValueTextEquals(PropBatl))
-                    {
-                        ReadAndDeferPositionLadder(ref reader, LadderType.Batl, ref deferredCount);
-                    }
-                    else if (reader.ValueTextEquals(PropBdatb))
-                    {
-                        ReadAndDeferPositionLadder(ref reader, LadderType.Bdatb, ref deferredCount);
-                    }
-                    else if (reader.ValueTextEquals(PropBdatl))
-                    {
-                        ReadAndDeferPositionLadder(ref reader, LadderType.Bdatl, ref deferredCount);
+                        // batb or batl — distinguish by last byte
+                        if (propSpan[3] == (byte)'b')
+                            ReadPositionPriceSizeTriples(ref reader, LadderType.Batb, ref deferredCount);
+                        else
+                            ReadPositionPriceSizeTriples(ref reader, LadderType.Batl, ref deferredCount);
                     }
                     else
                     {
-                        SkipValue(ref reader);
+                        // bdatb or bdatl
+                        if (propSpan[4] == (byte)'b')
+                            ReadPositionPriceSizeTriples(ref reader, LadderType.Bdatb, ref deferredCount);
+                        else
+                            ReadPositionPriceSizeTriples(ref reader, LadderType.Bdatl, ref deferredCount);
                     }
 
                     break;
 
                 case (byte)'s': // spb, spl, spn, spf
-                    if (reader.ValueTextEquals(PropSpn))
+                    if (propSpan.Length == 3 && propSpan[2] == (byte)'n')
                     {
                         reader.Read();
                         spn = reader.GetDouble();
                     }
-                    else if (reader.ValueTextEquals(PropSpf))
+                    else if (propSpan.Length == 3 && propSpan[2] == (byte)'f')
                     {
                         reader.Read();
                         spf = reader.GetDouble();
                     }
-                    else if (reader.ValueTextEquals(PropSpb))
+                    else if (propSpan.Length == 3 && propSpan[2] == (byte)'b')
                     {
-                        ReadAndDeferLadder(ref reader, LadderType.Spb, ref deferredCount);
+                        ReadPriceSizePairs(ref reader, LadderType.Spb, ref deferredCount);
                     }
-                    else if (reader.ValueTextEquals(PropSpl))
+                    else if (propSpan.Length == 3 && propSpan[2] == (byte)'l')
                     {
-                        ReadAndDeferLadder(ref reader, LadderType.Spl, ref deferredCount);
+                        ReadPriceSizePairs(ref reader, LadderType.Spl, ref deferredCount);
                     }
                     else
                     {
@@ -415,16 +373,8 @@ public sealed class MarketCacheProcessor
                     break;
 
                 case (byte)'h': // hc
-                    if (reader.ValueTextEquals(PropHc))
-                    {
-                        reader.Read();
-                        handicap = reader.GetDouble();
-                    }
-                    else
-                    {
-                        SkipValue(ref reader);
-                    }
-
+                    reader.Read();
+                    handicap = reader.GetDouble();
                     break;
 
                 default:
@@ -451,101 +401,105 @@ public sealed class MarketCacheProcessor
     {
         for (int i = 0; i < count; i++)
         {
-            ref var update = ref _deferredBuffer[i];
-            switch (update.Type)
+            ref var u = ref _deferredBuffer[i];
+            switch (u.Type)
             {
                 case LadderType.Atb:
-                    runner.AvailableToBack.Update(update.Price, update.Size);
+                    runner.AvailableToBack.Update(u.Price, u.Size);
                     break;
                 case LadderType.Atl:
-                    runner.AvailableToLay.Update(update.Price, update.Size);
+                    runner.AvailableToLay.Update(u.Price, u.Size);
                     break;
                 case LadderType.Batb:
-                    runner.BestAvailableToBack.Update((int)update.Position, update.Price, update.Size);
+                    runner.BestAvailableToBack.Update((int)u.Position, u.Price, u.Size);
                     break;
                 case LadderType.Batl:
-                    runner.BestAvailableToLay.Update((int)update.Position, update.Price, update.Size);
+                    runner.BestAvailableToLay.Update((int)u.Position, u.Price, u.Size);
                     break;
                 case LadderType.Bdatb:
-                    runner.BestDisplayAvailableToBack.Update((int)update.Position, update.Price, update.Size);
+                    runner.BestDisplayAvailableToBack.Update((int)u.Position, u.Price, u.Size);
                     break;
                 case LadderType.Bdatl:
-                    runner.BestDisplayAvailableToLay.Update((int)update.Position, update.Price, update.Size);
+                    runner.BestDisplayAvailableToLay.Update((int)u.Position, u.Price, u.Size);
                     break;
                 case LadderType.Trd:
-                    runner.Traded.Update(update.Price, update.Size);
+                    runner.Traded.Update(u.Price, u.Size);
                     break;
                 case LadderType.Spb:
-                    runner.StartingPriceBack.Update(update.Price, update.Size);
+                    runner.StartingPriceBack.Update(u.Price, u.Size);
                     break;
                 default: // Spl
-                    runner.StartingPriceLay.Update(update.Price, update.Size);
+                    runner.StartingPriceLay.Update(u.Price, u.Size);
                     break;
             }
         }
     }
 
-    private void ReadAndDeferLadder(ref Utf8JsonReader reader, LadderType type, ref int deferredCount)
+    /// <summary>
+    /// Reads a [[price, size], [price, size], ...] array directly into the deferred buffer.
+    /// Inlined tight loop — no method calls per element.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ReadPriceSizePairs(ref Utf8JsonReader reader, LadderType type, ref int deferredCount)
     {
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray)
             return;
 
         while (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
         {
-            double v0 = 0, v1 = 0;
-            int count = 0;
+            reader.Read();
+            double price = reader.GetDouble();
+            reader.Read();
+            double size = reader.GetDouble();
 
+            // Skip any trailing elements in the inner array
             while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
             {
-                switch (count)
-                {
-                    case 0: v0 = reader.GetDouble(); break;
-                    case 1: v1 = reader.GetDouble(); break;
-                }
-
-                count++;
             }
 
-            if (count >= 2)
-            {
-                if (deferredCount >= _deferredBuffer.Length)
-                    Array.Resize(ref _deferredBuffer, _deferredBuffer.Length * 2);
+            if (deferredCount >= _deferredBuffer.Length)
+                Array.Resize(ref _deferredBuffer, _deferredBuffer.Length * 2);
 
-                _deferredBuffer[deferredCount++] = new DeferredLadderUpdate(type, v0, v1, 0);
-            }
+            ref var slot = ref _deferredBuffer[deferredCount];
+            slot.Type = type;
+            slot.Price = price;
+            slot.Size = size;
+            deferredCount++;
         }
     }
 
-    private void ReadAndDeferPositionLadder(ref Utf8JsonReader reader, LadderType type, ref int deferredCount)
+    /// <summary>
+    /// Reads a [[position, price, size], ...] array directly into the deferred buffer.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ReadPositionPriceSizeTriples(ref Utf8JsonReader reader, LadderType type, ref int deferredCount)
     {
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray)
             return;
 
         while (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
         {
-            double v0 = 0, v1 = 0, v2 = 0;
-            int count = 0;
+            reader.Read();
+            double position = reader.GetDouble();
+            reader.Read();
+            double price = reader.GetDouble();
+            reader.Read();
+            double size = reader.GetDouble();
 
+            // Skip any trailing elements in the inner array
             while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
             {
-                switch (count)
-                {
-                    case 0: v0 = reader.GetDouble(); break;
-                    case 1: v1 = reader.GetDouble(); break;
-                    case 2: v2 = reader.GetDouble(); break;
-                }
-
-                count++;
             }
 
-            if (count >= 3)
-            {
-                if (deferredCount >= _deferredBuffer.Length)
-                    Array.Resize(ref _deferredBuffer, _deferredBuffer.Length * 2);
+            if (deferredCount >= _deferredBuffer.Length)
+                Array.Resize(ref _deferredBuffer, _deferredBuffer.Length * 2);
 
-                // Position ladders: [position, price, size]
-                _deferredBuffer[deferredCount++] = new DeferredLadderUpdate(type, v1, v2, v0);
-            }
+            ref var slot = ref _deferredBuffer[deferredCount];
+            slot.Type = type;
+            slot.Price = price;
+            slot.Size = size;
+            slot.Position = position;
+            deferredCount++;
         }
     }
 
@@ -596,15 +550,6 @@ public sealed class MarketCacheProcessor
         public LadderType Type;
         public double Price;
         public double Size;
-        public double Position; // Only used for position ladders (Batb, Batl, Bdatb, Bdatl)
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public DeferredLadderUpdate(LadderType type, double price, double size, double position)
-        {
-            Type = type;
-            Price = price;
-            Size = size;
-            Position = position;
-        }
+        public double Position;
     }
 }
