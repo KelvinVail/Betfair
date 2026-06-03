@@ -17,17 +17,72 @@ internal class Pipeline : IPipeline
 
     public async IAsyncEnumerable<byte[]> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        _ = CopyDataFromSteamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
+        _ = CopyDataFromStreamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
         await foreach (var line in ReadPipeAsync(_pipe.Reader, cancellationToken))
             yield return line.Slice(0, line.Length).ToArray();
     }
 
-    private static async Task CopyDataFromSteamToPipeAsync(
+    /// <summary>
+    /// Zero-copy line reading. Invokes the processor delegate for each line
+    /// directly from the pipe buffer without allocating a byte[] copy.
+    /// Uses TryRead before ReadAsync to avoid async state machine overhead
+    /// when data is already buffered (common during message bursts).
+    /// </summary>
+    internal async Task ProcessLines(ReadOnlySpanAction<byte> lineProcessor, CancellationToken cancellationToken)
+    {
+        _ = CopyDataFromStreamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
+        var reader = _pipe.Reader;
+
+        while (true)
+        {
+            ReadResult result;
+
+            // Fast path: if data is already buffered, avoid async state machine entirely
+            if (!reader.TryRead(out result))
+            {
+                try
+                {
+                    result = await reader.ReadAsync(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+
+            var buffer = result.Buffer;
+
+            while (TryReadLine(ref buffer, out var line))
+            {
+                if (line.IsSingleSegment)
+                {
+                    lineProcessor.Invoke(line.FirstSpan);
+                }
+                else
+                {
+                    // Multi-segment: must copy to contiguous buffer
+                    var length = (int)line.Length;
+                    var rented = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
+                    line.CopyTo(rented);
+                    lineProcessor.Invoke(rented.AsSpan(0, length));
+                    System.Buffers.ArrayPool<byte>.Shared.Return(rented);
+                }
+            }
+
+            reader.AdvanceTo(buffer.Start, buffer.End);
+
+            if (result.IsCompleted) break;
+        }
+
+        await reader.CompleteAsync();
+    }
+
+    private static async Task CopyDataFromStreamToPipeAsync(
         System.IO.Stream stream,
         PipeWriter writer,
         CancellationToken cancellationToken)
     {
-        const int minimumBufferSize = 512;
+        const int minimumBufferSize = 4096;
 
         while (true)
         {
