@@ -118,6 +118,21 @@ public class Subscription : IDisposable
     }
 
     /// <summary>
+    /// Asynchronously iterate raw byte sequences as they become available on the stream,
+    /// in the exact order they arrived. Each element represents one newline-delimited message
+    /// before JSON deserialization. Useful for logging, recording, or custom parsing.
+    /// </summary>
+    /// <param name="cancellationToken">CancellationToken.</param>
+    /// <returns>An Async Enumerable of <see cref="ReadOnlyMemory{Byte}"/> representing each raw message.</returns>
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadRawLines([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await Authenticate(cancellationToken).ConfigureAwait(false);
+
+        await foreach (var line in _pipe.ReadLines(cancellationToken).ConfigureAwait(false))
+            yield return line;
+    }
+
+    /// <summary>
     /// Asynchronously iterate ChangeMessages as they become available on the stream.
     /// </summary>
     /// <param name="cancellationToken">CancellationToken.</param>
