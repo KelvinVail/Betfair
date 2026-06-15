@@ -1,4 +1,6 @@
 ﻿using System.Security.AccessControl;
+using Betfair.Api.Accounts.Exceptions;
+using Betfair.Api.Betting.Exceptions;
 using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 using Betfair.Tests.TestDoubles;
@@ -55,7 +57,17 @@ public class HttpTokenInjectorTests : IDisposable
     [Fact]
     public async Task TokenIsRefreshedIfSessionIsInvalid()
     {
-        _httpClient.ThrowsError = "INVALID_SESSION_INFORMATION";
+        _httpClient.ThrowsException = new BettingInvalidSessionInformationException();
+
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+
+        _tokenProvider.TokensUsed.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task TokenIsRefreshedIfAccountSessionIsInvalid()
+    {
+        _httpClient.ThrowsException = new InvalidSessionInformationException();
 
         await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
 
@@ -69,7 +81,7 @@ public class HttpTokenInjectorTests : IDisposable
     {
         _tokenProvider.RespondsWithToken.Add(first);
         _tokenProvider.RespondsWithToken.Add(second);
-        _httpClient.ThrowsError = "INVALID_SESSION_INFORMATION";
+        _httpClient.ThrowsException = new BettingInvalidSessionInformationException();
 
         await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
 
