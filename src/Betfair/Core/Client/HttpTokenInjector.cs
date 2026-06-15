@@ -1,4 +1,6 @@
-﻿using Betfair.Core.Authentication;
+﻿using Betfair.Api.Accounts.Exceptions;
+using Betfair.Api.Betting.Exceptions;
+using Betfair.Core.Authentication;
 
 namespace Betfair.Core.Client;
 
@@ -36,7 +38,7 @@ internal class HttpTokenInjector : IHttpClient
     }
 
     private static bool SessionIsValid(HttpRequestException e) =>
-        e.Message != "INVALID_SESSION_INFORMATION";
+        e is not BettingInvalidSessionInformationException and not InvalidSessionInformationException;
 
     private async Task<T> PostFunc<T>(Func<Task<T>> func, HttpContent content, CancellationToken ct)
         where T : class
