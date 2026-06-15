@@ -62,6 +62,16 @@ public class HttpTokenInjectorTests : IDisposable
         _tokenProvider.TokensUsed.Should().Be(2);
     }
 
+    [Fact]
+    public async Task TokenIsRefreshedIfSessionIsInvalidWhenErrorCodeIsInEnhancedMessage()
+    {
+        _httpClient.ThrowsError = "Invalid session information. (Error code: INVALID_SESSION_INFORMATION)";
+
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+
+        _tokenProvider.TokensUsed.Should().Be(2);
+    }
+
     [Theory]
     [InlineData("FirstToken", "SecondToken")]
     [InlineData("OtherToken", "NewToken")]
