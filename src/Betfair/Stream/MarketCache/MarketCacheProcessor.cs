@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Betfair.Stream.MarketCache;
@@ -12,20 +13,35 @@ public sealed class MarketCacheProcessor
 {
     // Property name bytes — only keep those still needed for ValueTextEquals
     private static ReadOnlySpan<byte> PropOp => "op"u8;
+
     private static ReadOnlySpan<byte> PropId => "id"u8;
+
     private static ReadOnlySpan<byte> PropClk => "clk"u8;
+
     private static ReadOnlySpan<byte> PropInitialClk => "initialClk"u8;
+
     private static ReadOnlySpan<byte> PropPt => "pt"u8;
+
     private static ReadOnlySpan<byte> PropCt => "ct"u8;
+
     private static ReadOnlySpan<byte> PropMc => "mc"u8;
+
     private static ReadOnlySpan<byte> PropRc => "rc"u8;
+
     private static ReadOnlySpan<byte> PropTv => "tv"u8;
+
     private static ReadOnlySpan<byte> PropImg => "img"u8;
+
     private static ReadOnlySpan<byte> PropMarketDefinition => "marketDefinition"u8;
+
     private static ReadOnlySpan<byte> PropCon => "con"u8;
+
     private static ReadOnlySpan<byte> PropConflateMs => "conflateMs"u8;
+
     private static ReadOnlySpan<byte> PropHeartbeatMs => "heartbeatMs"u8;
+
     private static ReadOnlySpan<byte> PropOc => "oc"u8;
+
     private static ReadOnlySpan<byte> OpMcm => "mcm"u8;
 
     // Single-market fast path: most subscriptions have 1 market.
@@ -58,6 +74,9 @@ public sealed class MarketCacheProcessor
     /// <summary>Gets the last publish time.</summary>
     public long PublishTime { get; private set; }
 
+    /// <summary>Gets the processing duration of the last message (line-ready to Process complete).</summary>
+    public TimeSpan LastProcessingTime { get; private set; }
+
     /// <summary>Gets all market caches.</summary>
     public IReadOnlyDictionary<string, MarketCache> Markets
     {
@@ -88,10 +107,15 @@ public sealed class MarketCacheProcessor
     /// </summary>
     public void Process(ReadOnlySpan<byte> data)
     {
+        long start = Stopwatch.GetTimestamp();
+
         var reader = new Utf8JsonReader(data);
 
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
+        {
+            LastProcessingTime = Stopwatch.GetElapsedTime(start);
             return;
+        }
 
         long pt = 0;
 
@@ -148,6 +172,8 @@ public sealed class MarketCacheProcessor
                 SkipValue(ref reader);
             }
         }
+
+        LastProcessingTime = Stopwatch.GetElapsedTime(start);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

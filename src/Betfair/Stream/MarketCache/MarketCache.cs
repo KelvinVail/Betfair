@@ -25,9 +25,6 @@ public sealed class MarketCache
     /// <summary>Gets the market ID (e.g. "1.241629436").</summary>
     public string MarketId { get; }
 
-    /// <summary>Gets the pre-computed UTF-8 bytes of the market ID for zero-allocation comparison.</summary>
-    internal byte[] MarketIdBytes { get; }
-
     /// <summary>Gets the total matched volume on this market.</summary>
     public double? TotalMatched { get; internal set; }
 
@@ -42,6 +39,9 @@ public sealed class MarketCache
 
     /// <summary>Gets the number of runners in this market.</summary>
     public int RunnerCount => _runnerCount;
+
+    /// <summary>Gets the pre-computed UTF-8 bytes of the market ID for zero-allocation comparison.</summary>
+    internal byte[] MarketIdBytes { get; }
 
     /// <summary>Gets a runner by selection ID.</summary>
     public RunnerCache? GetRunner(long selectionId)
