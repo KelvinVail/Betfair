@@ -13,8 +13,10 @@
       "!Betfair/SerializerContext.cs"
     ],
     "reporters": ["dashboard", "progress"],
-    "threshold-high": 80,
-    "threshold-low": 60,
-    "threshold-break": 40
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 40
+    }
   }
 }
