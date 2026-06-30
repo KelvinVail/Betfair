@@ -77,16 +77,29 @@ internal static class IdleWatchdogExtensions
         {
             await foreach (var msg in source.WithCancellation(linked.Token).ConfigureAwait(false))
             {
+                if (linked.Token.IsCancellationRequested) break;
+
                 UpdateHeartbeat(msg);
                 lastSeen = DateTimeOffset.UtcNow;
                 yield return msg;
+
+                if (linked.Token.IsCancellationRequested) break;
             }
         }
         finally
         {
-            // Ensure background task ends (no exceptions should be thrown here)
+            // Signal the watchdog to stop if it hasn't already.
             await stallCts.CancelAsync().ConfigureAwait(false);
-            await Task.WhenAny(watchdog, Task.Delay(TimeSpan.FromMilliseconds(1), CancellationToken.None)).ConfigureAwait(false);
+
+            // Wait for the watchdog to finish so that onStall completes before we return.
+            try
+            {
+                await watchdog.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Normal shutdown of the watchdog task.
+            }
         }
     }
 
@@ -139,6 +152,6 @@ internal static class IdleWatchdogExtensions
                     // normal shutdown
                 }
             },
-            token);
+            CancellationToken.None);
     }
 }
