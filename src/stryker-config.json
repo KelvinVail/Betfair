@@ -3,18 +3,20 @@
     "project": "Betfair.csproj",
     "test-projects": ["./Betfair.Tests/Betfair.Tests.csproj"],
     "target-framework": "net10.0",
-    "concurrency": 4,
+    "concurrency": 2,
     "mutation-level": "Standard",
     "mutate": [
-      "Betfair/**/*.cs",
-      "!Betfair/**/obj/**",
-      "!Betfair/**/bin/**",
-      "!Betfair/GlobalUsings.cs",
-      "!Betfair/SerializerContext.cs"
+      "**/*.cs",
+      "!**/obj/**",
+      "!**/bin/**",
+      "!**/GlobalUsings.cs",
+      "!**/SerializerContext.cs"
     ],
     "reporters": ["dashboard", "progress"],
-    "threshold-high": 80,
-    "threshold-low": 60,
-    "threshold-break": 40
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 40
+    }
   }
 }
