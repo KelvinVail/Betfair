@@ -53,13 +53,17 @@ jobs:
       working-directory: src
       run: dotnet tool install -g dotnet-stryker
 
+    - name: Create diff target ref
+      if: ${{ github.event_name == 'push' && inputs.full_run != true }}
+      run: git branch stryker-diff-target ${{ github.event.before }}
+
     - name: Run dotnet-stryker
       working-directory: src
       env:
         STRYKER_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
       run: |
-        if [ "${{ inputs.full_run }}" == "true" ]; then
+        if [ "${{ inputs.full_run }}" == "true" ] || [ "${{ github.event_name }}" != "push" ]; then
           dotnet stryker --dashboard-api-key "$STRYKER_KEY" --version "master"
         else
-          dotnet stryker --since:HEAD~1 --dashboard-api-key "$STRYKER_KEY" --version "master"
+          dotnet stryker --since:stryker-diff-target --dashboard-api-key "$STRYKER_KEY" --version "master"
         fi
