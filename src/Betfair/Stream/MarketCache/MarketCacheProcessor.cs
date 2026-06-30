@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Stream.MarketCache;
 
@@ -558,6 +559,7 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    [JsonConverter(typeof(SnakeCaseEnumJsonConverter<LadderType>))]
     private enum LadderType : byte
     {
         Atb,
