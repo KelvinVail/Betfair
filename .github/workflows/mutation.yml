@@ -14,16 +14,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
-      env:
-        STRYKER_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
       with:
         dotnet-version: |
           8.0.x
           9.0.x
           10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('src/**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Install dependencies
       working-directory: src
@@ -33,10 +40,6 @@ jobs:
       working-directory: src
       run: dotnet build --no-restore
 
-    - name: Test
-      working-directory: src
-      run: dotnet test --no-build --verbosity normal
-
     - name: Install dotnet-stryker
       working-directory: src
       run: dotnet tool install -g dotnet-stryker
@@ -45,4 +48,4 @@ jobs:
       working-directory: src
       env:
         STRYKER_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-      run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_KEY" --version "master"
+      run: dotnet stryker --dashboard-api-key "$STRYKER_KEY" --version "master"
