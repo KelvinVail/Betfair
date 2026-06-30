@@ -1,4 +1,3 @@
-using System.Globalization;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Enums;
 using Betfair.Api.Accounts.Endpoints.GetAccountStatement.Responses;
 using Betfair.Api.Betting;

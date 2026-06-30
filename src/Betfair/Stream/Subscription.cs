@@ -1,8 +1,7 @@
-﻿using System.Buffers;
-using System.Collections.Concurrent;
-using System.Text;
+﻿using System.Collections.Concurrent;
 using Betfair.Core.Authentication;
 using Betfair.Core.Client;
+using Betfair.Stream.MarketCache;
 using Betfair.Stream.Messages;
 using Betfair.Stream.Responses;
 
@@ -65,6 +64,13 @@ public class Subscription : IDisposable
     }
 
     /// <summary>
+    /// Gets the zero-allocation market cache processor that maintains live market state.
+    /// Access this property at any time to read the latest market/runner data.
+    /// Populated when <see cref="RunMarketCache"/> is active.
+    /// </summary>
+    public MarketCacheProcessor MarketProcessor { get; } = new ();
+
+    /// <summary>
     /// Subscribe to a market stream.
     /// </summary>
     /// <param name="marketFilter">Used to define which markets to subscribe to.</param>
@@ -118,6 +124,21 @@ public class Subscription : IDisposable
     }
 
     /// <summary>
+    /// Asynchronously iterate raw byte sequences as they become available on the stream,
+    /// in the exact order they arrived. Each element represents one newline-delimited message
+    /// before JSON deserialization. Useful for logging, recording, or custom parsing.
+    /// </summary>
+    /// <param name="cancellationToken">CancellationToken.</param>
+    /// <returns>An Async Enumerable of <see cref="ReadOnlyMemory{Byte}"/> representing each raw message.</returns>
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadRawLines([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await Authenticate(cancellationToken).ConfigureAwait(false);
+
+        await foreach (var line in _pipe.ReadLines(cancellationToken).ConfigureAwait(false))
+            yield return line;
+    }
+
+    /// <summary>
     /// Asynchronously iterate ChangeMessages as they become available on the stream.
     /// </summary>
     /// <param name="cancellationToken">CancellationToken.</param>
@@ -133,6 +154,59 @@ public class Subscription : IDisposable
         finally
         {
             Interlocked.Exchange(ref _readerActive, 0);
+        }
+    }
+
+    /// <summary>
+    /// Subscribes to a market stream and processes all messages directly into <see cref="MarketProcessor"/>
+    /// using the zero-copy pipeline. No intermediate ChangeMessage objects are allocated.
+    /// This method blocks until the stream ends or the cancellation token is triggered.
+    /// </summary>
+    /// <param name="marketFilter">Used to define which markets to subscribe to.</param>
+    /// <param name="dataFilter">Optional: Used to define what data to include in the market stream.</param>
+    /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
+    /// <param name="onUpdate">Optional: Callback invoked after each message is processed into the cache.
+    /// Use for latency-sensitive consumers that need to react immediately to price changes.</param>
+    /// <param name="cancellationToken">A cancellation token to stop the stream.</param>
+    /// <returns>A task that completes when the stream ends or is cancelled.</returns>
+    public async Task RunMarketCache(
+        StreamMarketFilter marketFilter,
+        DataFilter? dataFilter = null,
+        TimeSpan? conflate = null,
+        Action<MarketCacheProcessor>? onUpdate = null,
+        CancellationToken cancellationToken = default)
+    {
+        await Subscribe(marketFilter, dataFilter, conflate, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        if (_pipe is Pipeline pipeline)
+        {
+            if (onUpdate is null)
+            {
+                await pipeline.ProcessLines(MarketProcessor.Process, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var callback = onUpdate;
+                var processor = MarketProcessor;
+                await pipeline.ProcessLines(
+                    span =>
+                    {
+                        processor.Process(span);
+                        callback(processor);
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+        else
+        {
+            // Fallback for test doubles using IPipeline
+            await foreach (var line in _pipe.ReadLines(cancellationToken).ConfigureAwait(false))
+            {
+                MarketProcessor.Process(line);
+                onUpdate?.Invoke(MarketProcessor);
+            }
         }
     }
 

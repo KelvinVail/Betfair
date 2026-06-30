@@ -1,5 +1,3 @@
-using Betfair.Stream.Responses;
-
 namespace Betfair.Tests.Stream.Responses;
 
 public class OrderRunnerChangeTests

@@ -2,7 +2,6 @@
 using System.Text.Json;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
-using Betfair.Stream.Deserializers;
 using Betfair.Stream.Responses;
 using Utf8Json.Resolvers;
 
@@ -98,23 +97,23 @@ public class JsonReadBenchmarks
     //    }
     //}
 
-    [Benchmark]
-    public void DeserializeAllLinesWithCustomDeserializer()
-    {
-        foreach (var line in _byteLines)
-        {
-            var _ = UltraFastChangeMessageDeserializer.Deserialize(line.AsSpan());
-        }
-    }
+    //[Benchmark]
+    //public void DeserializeAllLinesWithCustomDeserializer()
+    //{
+    //    foreach (var line in _byteLines)
+    //    {
+    //        var _ = UltraFastChangeMessageDeserializer.Deserialize(line.AsSpan());
+    //    }
+    //}
 
-    [Benchmark]
-    public void DeserializeAllLinesWithCustomDeserializerFromMem()
-    {
-        foreach (var line in _memoryLines)
-        {
-            var _ = UltraFastChangeMessageDeserializer.Deserialize(line.Span);
-        }
-    }
+    //[Benchmark]
+    //public void DeserializeAllLinesWithCustomDeserializerFromMem()
+    //{
+    //    foreach (var line in _memoryLines)
+    //    {
+    //        var _ = UltraFastChangeMessageDeserializer.Deserialize(line.Span);
+    //    }
+    //}
 
     //[Benchmark]
     //public void DeserializeAllLinesWithStructDeserializer()

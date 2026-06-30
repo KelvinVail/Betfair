@@ -40,11 +40,11 @@ public class IdleWatchdogExtensionsTests
     public async Task TriggersOnStallWhenNoMessagesArriveWithinThreshold()
     {
         var tcs = new TaskCompletionSource();
-        var hbMs = 100; // 100ms heartbeat
+        var hbMs = 200; // 200ms heartbeat
         var items = new (ChangeMessage, int)[]
         {
             (new ChangeMessage { HeartbeatMs = hbMs }, 0),
-            (new ChangeMessage(), hbMs),
+            (new ChangeMessage(), 50), // well within threshold
 
             // next gap intentionally long to trigger stall
         };
@@ -56,8 +56,8 @@ public class IdleWatchdogExtensionsTests
                 tcs.TrySetResult();
                 await Task.CompletedTask;
             },
-            defaultHeartbeat: TimeSpan.FromMilliseconds(100),
-            thresholdMultiplier: 2.0, // 2x hb => 200ms
+            defaultHeartbeat: TimeSpan.FromMilliseconds(200),
+            thresholdMultiplier: 2.0, // 2x hb => 400ms
             pollInterval: TimeSpan.FromMilliseconds(25),
             token: TestContext.Current.CancellationToken))
         {
@@ -65,7 +65,7 @@ public class IdleWatchdogExtensionsTests
             if (list.Count == 2)
             {
                 // wait long enough to pass threshold so watchdog cancels
-                await Task.Delay(300, TestContext.Current.CancellationToken);
+                await Task.Delay(600, TestContext.Current.CancellationToken);
             }
         }
 

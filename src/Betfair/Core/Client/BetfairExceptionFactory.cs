@@ -1,4 +1,3 @@
-using System.Net;
 using Betfair.Api.Accounts.Exceptions;
 using Betfair.Api.Betting.Exceptions;
 

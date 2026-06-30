@@ -41,7 +41,7 @@ var marketFilter = new StreamMarketFilter().WithEventTypes(EventType.HorseRacing
 
 A set of popular event types have been provided for convenience. However, this is not a complete list.
 If you want to subscribe to an event type that is not available in the helper class you can pass the event type id value defined by Betfair into the filter. (i.e., "1" for Soccer, "7" for Horse Racing, etc)
-<!-- For a full list of event types available see the ```ApiClient.GetEventTypes()``` method. -->
+<!-- For a full list of event types available see the ```BetfairApiClient.EventTypes()``` method. -->
 ```csharp
 var marketFilter = new StreamMarketFilter().WithEventTypes(7, 1);
 ```
@@ -54,7 +54,7 @@ var marketFilter = new StreamMarketFilter().WithMarketTypes(MarketType.Win, Mark
 
 A set of popular market types have been provided for convenience. However, this is not a complete list.
 If you want to subscribe to a market type that is not available in the helper class you can pass the string value defined by Betfair into the filter.
-<!-- For a full list of market types available see the ```ApiClient.GetMarketTypes()``` method. -->
+<!-- For a full list of market types available see the ```BetfairApiClient.MarketTypes()``` method. -->
 ```csharp
 var marketFilter = new StreamMarketFilter().WithMarketTypes("ROOKIE_OF_THE_YEAR");
 ```
@@ -79,16 +79,16 @@ var marketFilter = new StreamMarketFilter().WithVenues(Venue.Kelso, Venue.Wolver
 
 A set of popular venues have been provided for convenience. However, this is not a complete list.
 If you want to subscribe to a venue that is not available in the helper class you can pass the string value defined by Betfair into the filter.
-<!-- For a full list of venues available see the ```ApiClient.GetVenues()``` method. -->
+<!-- For a full list of venues available see the ```BetfairApiClient.Venues()``` method. -->
 ```csharp
 var marketFilter = new StreamMarketFilter().WithVenues("Santa Anita Park", "Golden Gate Fields");
 ```
 
 ### Events (Lingfield 14th Jan, Kelso 14th Jan...)
 Restrict markets by the event ID associated with the market.
-<!-- For a full list of events available see the ```ApiClient.GetEvents()``` method. -->
+<!-- For a full list of events available see the ```BetfairApiClient.Events()``` method. -->
 ```csharp
-var marketFilter = new StreamMarketFilter().WithEventIds("32935031", "32935029");
+var marketFilter = new StreamMarketFilter().WithEventsIds("32935031", "32935029");
 ```
 
 ### Turn In Play

@@ -1,6 +1,4 @@
-using Betfair.Api.Betting.Endpoints.ListCompetitions;
 using Betfair.Api.Betting.Endpoints.ListCompetitions.Responses;
-using Betfair.Api.Betting.Endpoints.ListEventTypes;
 using Betfair.Api.Betting.Endpoints.ListEventTypes.Responses;
 
 namespace Betfair.Api.Betting.Endpoints.ListMarketCatalogue.Responses;
