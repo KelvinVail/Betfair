@@ -7,14 +7,23 @@ on:
     paths:
       - 'src/**'
   workflow_dispatch:
+    inputs:
+      full_run:
+        description: 'Run mutation testing on all files (slow without coverage optimisation)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+    timeout-minutes: 120
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -48,4 +57,9 @@ jobs:
       working-directory: src
       env:
         STRYKER_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-      run: dotnet stryker --dashboard-api-key "$STRYKER_KEY" --version "master"
+      run: |
+        if [ "${{ inputs.full_run }}" == "true" ]; then
+          dotnet stryker --dashboard-api-key "$STRYKER_KEY" --version "master"
+        else
+          dotnet stryker --since:HEAD~1 --dashboard-api-key "$STRYKER_KEY" --version "master"
+        fi

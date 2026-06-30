@@ -4,6 +4,7 @@
     "test-projects": ["./Betfair.Tests/Betfair.Tests.csproj"],
     "target-framework": "net10.0",
     "concurrency": 2,
+    "coverage-analysis": "off",
     "mutation-level": "Standard",
     "mutate": [
       "**/*.cs",
