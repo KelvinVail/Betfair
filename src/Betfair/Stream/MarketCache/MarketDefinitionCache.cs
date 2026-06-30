@@ -122,7 +122,7 @@ public sealed class MarketDefinitionCache
     /// Only allocates strings when values actually change.
     /// </summary>
     /// <param name="reader">The UTF-8 JSON reader positioned at the start of the market definition object.</param>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Minimal dispatch loop — cannot be simplified further.")]
     internal void ReadFrom(ref Utf8JsonReader reader)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
@@ -130,142 +130,50 @@ public sealed class MarketDefinitionCache
 
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
         {
-            if (reader.ValueTextEquals(PropStatus))
+            if (!TryReadProperty(ref reader))
             {
-                reader.Read();
-                ReadCachedString(ref reader, ref _statusBytes, out var val);
-                Status = val ?? Status;
-                if (val != null) Status = val;
-            }
-            else if (reader.ValueTextEquals(PropInPlay))
-            {
-                reader.Read();
-                InPlay = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropBetDelay))
-            {
-                reader.Read();
-                BetDelay = reader.GetInt32();
-            }
-            else if (reader.ValueTextEquals(PropNumberOfActiveRunners))
-            {
-                reader.Read();
-                NumberOfActiveRunners = reader.GetInt32();
-            }
-            else if (reader.ValueTextEquals(PropVersion))
-            {
-                reader.Read();
-                Version = reader.GetInt64();
-            }
-            else if (reader.ValueTextEquals(PropComplete))
-            {
-                reader.Read();
-                Complete = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropBspReconciled))
-            {
-                reader.Read();
-                BspReconciled = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropCrossMatching))
-            {
-                reader.Read();
-                CrossMatching = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropRunnersVoidable))
-            {
-                reader.Read();
-                RunnersVoidable = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropBspMarket))
-            {
-                reader.Read();
-                BspMarket = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropTurnInPlayEnabled))
-            {
-                reader.Read();
-                TurnInPlayEnabled = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropPersistenceEnabled))
-            {
-                reader.Read();
-                PersistenceEnabled = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropDiscountAllowed))
-            {
-                reader.Read();
-                DiscountAllowed = reader.GetBoolean();
-            }
-            else if (reader.ValueTextEquals(PropMarketBaseRate))
-            {
-                reader.Read();
-                MarketBaseRate = reader.GetDouble();
-            }
-            else if (reader.ValueTextEquals(PropEachWayDivisor))
-            {
-                reader.Read();
-                EachWayDivisor = reader.GetDouble();
-            }
-            else if (reader.ValueTextEquals(PropNumberOfWinners))
-            {
-                reader.Read();
-                NumberOfWinners = reader.GetInt32();
-            }
-            else if (reader.ValueTextEquals(PropBettingType))
-            {
-                reader.Read();
-                ReadCachedString(ref reader, ref _bettingTypeBytes, out var val);
-                if (val != null) BettingType = val;
-            }
-            else if (reader.ValueTextEquals(PropMarketType))
-            {
-                reader.Read();
-                ReadCachedString(ref reader, ref _marketTypeBytes, out var val);
-                if (val != null) MarketType = val;
-            }
-            else if (reader.ValueTextEquals(PropVenue))
-            {
-                reader.Read();
-                ReadCachedString(ref reader, ref _venueBytes, out var val);
-                if (val != null) Venue = val;
-            }
-            else if (reader.ValueTextEquals(PropTimezone))
-            {
-                reader.Read();
-                ReadCachedString(ref reader, ref _timezoneBytes, out var val);
-                if (val != null) Timezone = val;
-            }
-            else if (reader.ValueTextEquals(PropCountryCode))
-            {
-                reader.Read();
-                ReadCachedString(ref reader, ref _countryCodeBytes, out var val);
-                if (val != null) CountryCode = val;
-            }
-            else if (reader.ValueTextEquals(PropEventId))
-            {
-                reader.Read();
-                ReadCachedString(ref reader, ref _eventIdBytes, out var val);
-                if (val != null) EventId = val;
-            }
-            else if (reader.ValueTextEquals(PropEventTypeId))
-            {
-                reader.Read();
-                ReadCachedString(ref reader, ref _eventTypeIdBytes, out var val);
-                if (val != null) EventTypeId = val;
-            }
-            else if (reader.ValueTextEquals(PropRunners))
-            {
-                ReadRunners(ref reader);
-            }
-            else
-            {
-                // Skip settledTime, suspendTime, openDate, marketTime, regulators, and unknown fields
                 reader.Read();
                 if (reader.TokenType is JsonTokenType.StartObject or JsonTokenType.StartArray)
                     reader.Skip();
             }
         }
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    private static bool ReadBool(ref Utf8JsonReader reader, out bool value)
+    {
+        reader.Read();
+        value = reader.GetBoolean();
+        return true;
+    }
+
+    private static bool ReadInt(ref Utf8JsonReader reader, out int value)
+    {
+        reader.Read();
+        value = reader.GetInt32();
+        return true;
+    }
+
+    private static bool ReadLong(ref Utf8JsonReader reader, out long value)
+    {
+        reader.Read();
+        value = reader.GetInt64();
+        return true;
+    }
+
+    private static bool ReadDouble(ref Utf8JsonReader reader, out double value)
+    {
+        reader.Read();
+        value = reader.GetDouble();
+        return true;
+    }
+
+    private static bool ReadCachedStringField(ref Utf8JsonReader reader, ref byte[]? cachedBytes, Action<string> setter)
+    {
+        reader.Read();
+        ReadCachedString(ref reader, ref cachedBytes, out var val);
+        if (val != null) setter(val);
+        return true;
     }
 
     /// <summary>
@@ -292,6 +200,199 @@ public sealed class MarketDefinitionCache
         // Value changed — allocate new string and cache its bytes
         newValue = reader.GetString();
         cachedBytes = newValue != null ? System.Text.Encoding.UTF8.GetBytes(newValue) : null;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    private bool TryReadProperty(ref Utf8JsonReader reader)
+    {
+        return TryReadFrequentProperty(ref reader)
+            || TryReadBoolProperty(ref reader)
+            || TryReadNumericProperty(ref reader)
+            || TryReadStringProperty(ref reader)
+            || TryReadRunners(ref reader);
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    private bool TryReadFrequentProperty(ref Utf8JsonReader reader)
+    {
+        if (reader.ValueTextEquals(PropStatus))
+            return ReadStatus(ref reader);
+        if (reader.ValueTextEquals(PropInPlay))
+            return ReadBool(ref reader, out var v) && SetInPlay(v);
+        if (reader.ValueTextEquals(PropBetDelay))
+            return ReadInt(ref reader, out var v) && SetBetDelay(v);
+        if (reader.ValueTextEquals(PropNumberOfActiveRunners))
+            return ReadInt(ref reader, out var v) && SetNumberOfActiveRunners(v);
+        if (reader.ValueTextEquals(PropVersion))
+            return ReadLong(ref reader, out var v) && SetVersion(v);
+        if (reader.ValueTextEquals(PropComplete))
+            return ReadBool(ref reader, out var v) && SetComplete(v);
+
+        return false;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    private bool TryReadBoolProperty(ref Utf8JsonReader reader)
+    {
+        if (reader.ValueTextEquals(PropBspReconciled))
+            return ReadBool(ref reader, out var v) && SetBspReconciled(v);
+        if (reader.ValueTextEquals(PropCrossMatching))
+            return ReadBool(ref reader, out var v) && SetCrossMatching(v);
+        if (reader.ValueTextEquals(PropRunnersVoidable))
+            return ReadBool(ref reader, out var v) && SetRunnersVoidable(v);
+        if (reader.ValueTextEquals(PropBspMarket))
+            return ReadBool(ref reader, out var v) && SetBspMarket(v);
+        if (reader.ValueTextEquals(PropTurnInPlayEnabled))
+            return ReadBool(ref reader, out var v) && SetTurnInPlayEnabled(v);
+        if (reader.ValueTextEquals(PropPersistenceEnabled))
+            return ReadBool(ref reader, out var v) && SetPersistenceEnabled(v);
+        if (reader.ValueTextEquals(PropDiscountAllowed))
+            return ReadBool(ref reader, out var v) && SetDiscountAllowed(v);
+
+        return false;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    private bool TryReadNumericProperty(ref Utf8JsonReader reader)
+    {
+        if (reader.ValueTextEquals(PropMarketBaseRate))
+            return ReadDouble(ref reader, out var v) && SetMarketBaseRate(v);
+        if (reader.ValueTextEquals(PropEachWayDivisor))
+            return ReadDouble(ref reader, out var v) && SetEachWayDivisor(v);
+        if (reader.ValueTextEquals(PropNumberOfWinners))
+            return ReadInt(ref reader, out var v) && SetNumberOfWinners(v);
+
+        return false;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    private bool TryReadStringProperty(ref Utf8JsonReader reader)
+    {
+        if (reader.ValueTextEquals(PropBettingType))
+            return ReadCachedStringField(ref reader, ref _bettingTypeBytes, v => BettingType = v);
+        if (reader.ValueTextEquals(PropMarketType))
+            return ReadCachedStringField(ref reader, ref _marketTypeBytes, v => MarketType = v);
+        if (reader.ValueTextEquals(PropVenue))
+            return ReadCachedStringField(ref reader, ref _venueBytes, v => Venue = v);
+        if (reader.ValueTextEquals(PropTimezone))
+            return ReadCachedStringField(ref reader, ref _timezoneBytes, v => Timezone = v);
+        if (reader.ValueTextEquals(PropCountryCode))
+            return ReadCachedStringField(ref reader, ref _countryCodeBytes, v => CountryCode = v);
+        if (reader.ValueTextEquals(PropEventId))
+            return ReadCachedStringField(ref reader, ref _eventIdBytes, v => EventId = v);
+        if (reader.ValueTextEquals(PropEventTypeId))
+            return ReadCachedStringField(ref reader, ref _eventTypeIdBytes, v => EventTypeId = v);
+
+        return false;
+    }
+
+    private bool TryReadRunners(ref Utf8JsonReader reader)
+    {
+        if (reader.ValueTextEquals(PropRunners))
+        {
+            ReadRunners(ref reader);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool ReadStatus(ref Utf8JsonReader reader)
+    {
+        reader.Read();
+        ReadCachedString(ref reader, ref _statusBytes, out var val);
+        if (val != null) Status = val;
+        return true;
+    }
+
+    private bool SetInPlay(bool v)
+    {
+        InPlay = v;
+        return true;
+    }
+
+    private bool SetBetDelay(int v)
+    {
+        BetDelay = v;
+        return true;
+    }
+
+    private bool SetNumberOfActiveRunners(int v)
+    {
+        NumberOfActiveRunners = v;
+        return true;
+    }
+
+    private bool SetVersion(long v)
+    {
+        Version = v;
+        return true;
+    }
+
+    private bool SetComplete(bool v)
+    {
+        Complete = v;
+        return true;
+    }
+
+    private bool SetBspReconciled(bool v)
+    {
+        BspReconciled = v;
+        return true;
+    }
+
+    private bool SetCrossMatching(bool v)
+    {
+        CrossMatching = v;
+        return true;
+    }
+
+    private bool SetRunnersVoidable(bool v)
+    {
+        RunnersVoidable = v;
+        return true;
+    }
+
+    private bool SetBspMarket(bool v)
+    {
+        BspMarket = v;
+        return true;
+    }
+
+    private bool SetTurnInPlayEnabled(bool v)
+    {
+        TurnInPlayEnabled = v;
+        return true;
+    }
+
+    private bool SetPersistenceEnabled(bool v)
+    {
+        PersistenceEnabled = v;
+        return true;
+    }
+
+    private bool SetDiscountAllowed(bool v)
+    {
+        DiscountAllowed = v;
+        return true;
+    }
+
+    private bool SetMarketBaseRate(double v)
+    {
+        MarketBaseRate = v;
+        return true;
+    }
+
+    private bool SetEachWayDivisor(double v)
+    {
+        EachWayDivisor = v;
+        return true;
+    }
+
+    private bool SetNumberOfWinners(int v)
+    {
+        NumberOfWinners = v;
+        return true;
     }
 
     private void ReadRunners(ref Utf8JsonReader reader)

@@ -115,36 +115,7 @@ internal static class IdleWatchdogExtensions
             {
                 try
                 {
-                    while (!token.IsCancellationRequested)
-                    {
-                        if (isStalled())
-                        {
-                            if (tryTriggerStall())
-                            {
-                                try
-                                {
-                                    await onStall().ConfigureAwait(false);
-                                }
-                                catch (OperationCanceledException)
-                                {
-                                    // ignore cancellation in user callback
-                                }
-
-                                await stallCts.CancelAsync().ConfigureAwait(false);
-                            }
-
-                            break;
-                        }
-
-                        try
-                        {
-                            await Task.Delay(poll, token).ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            break;
-                        }
-                    }
+                    await MonitorForStallAsync(isStalled, tryTriggerStall, onStall, stallCts, poll, token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -152,5 +123,52 @@ internal static class IdleWatchdogExtensions
                 }
             },
             CancellationToken.None);
+    }
+
+    private static async Task MonitorForStallAsync(
+        Func<bool> isStalled,
+        Func<bool> tryTriggerStall,
+        Func<Task> onStall,
+        CancellationTokenSource stallCts,
+        TimeSpan poll,
+        CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            if (isStalled() && tryTriggerStall())
+            {
+                await InvokeStallCallbackAsync(onStall).ConfigureAwait(false);
+                await stallCts.CancelAsync().ConfigureAwait(false);
+                break;
+            }
+
+            if (!await TryDelayAsync(poll, token).ConfigureAwait(false))
+                break;
+        }
+    }
+
+    private static async Task InvokeStallCallbackAsync(Func<Task> onStall)
+    {
+        try
+        {
+            await onStall().ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            // ignore cancellation in user callback
+        }
+    }
+
+    private static async Task<bool> TryDelayAsync(TimeSpan poll, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(poll, token).ConfigureAwait(false);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
     }
 }

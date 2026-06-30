@@ -9,7 +9,7 @@ public class ApiMarketFilterTests
     [Fact]
     public void ExtendsMarketFilter() =>
         new ApiMarketFilter().Should()
-            .BeAssignableTo(typeof(MarketFilter<ApiMarketFilter>));
+            .BeAssignableTo<MarketFilter<ApiMarketFilter>>();
 
     [Fact]
     public void CreatedWithNullFromDate() =>

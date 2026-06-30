@@ -888,3 +888,83 @@ dotnet_style_prefer_simplified_interpolation = true:suggestion
 dotnet_style_namespace_match_folder = true:suggestion
 dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
 dotnet_style_readonly_field = true:suggestion
+
+# SonarAnalyzer rules (match SonarCloud quality profile)
+
+# S3776: Cognitive Complexity of methods should not be too high
+dotnet_diagnostic.S3776.severity = warning
+
+# S1144: Unused private types or members should be removed
+dotnet_diagnostic.S1144.severity = warning
+
+# S4136: Method overloads should be grouped together
+dotnet_diagnostic.S4136.severity = warning
+
+# S2589: Boolean expressions should not be gratuitous
+dotnet_diagnostic.S2589.severity = warning
+
+# S1481: Unused local variables should be removed
+dotnet_diagnostic.S1481.severity = warning
+
+# S1125: Boolean literals should not be redundant
+dotnet_diagnostic.S1125.severity = warning
+
+# S3267: Loops should be simplified with LINQ
+dotnet_diagnostic.S3267.severity = suggestion
+
+# S3358: Ternary operators should not be nested
+dotnet_diagnostic.S3358.severity = warning
+
+# S1854: Unused assignments should be removed
+dotnet_diagnostic.S1854.severity = warning
+
+# S3928: Parameter names used into ArgumentException constructors should match an existing one
+dotnet_diagnostic.S3928.severity = warning
+
+# S2234: Parameters should be passed in the correct order
+dotnet_diagnostic.S2234.severity = warning
+
+# S2583: Conditionally executed code should be reachable
+dotnet_diagnostic.S2583.severity = warning
+
+# S4158: Empty collections should not be accessed or iterated
+dotnet_diagnostic.S4158.severity = warning
+
+# S2259: Null pointers should not be dereferenced
+dotnet_diagnostic.S2259.severity = warning
+
+# S3949: Calculations should not overflow
+dotnet_diagnostic.S3949.severity = warning
+
+# S2190: Loops and recursions should not be infinite
+dotnet_diagnostic.S2190.severity = warning
+
+# S1118: Utility classes should not have public constructors
+dotnet_diagnostic.S1118.severity = warning
+
+# S1066: Mergeable if statements should be combined
+dotnet_diagnostic.S1066.severity = warning
+
+# S1939: Inheritance list should not be redundant
+dotnet_diagnostic.S1939.severity = warning
+
+# S3604: Member initializer values should not be redundant
+dotnet_diagnostic.S3604.severity = warning
+
+# S6602: Prefer generic collection type over "IndexOf" method
+dotnet_diagnostic.S6602.severity = warning
+
+# S6603: Prefer generic collection type over "Contains" method
+dotnet_diagnostic.S6603.severity = warning
+
+# S6608: Prefer indexing instead of "Enumerable" methods on types implementing "IList"
+dotnet_diagnostic.S6608.severity = warning
+
+# S6610: Prefer "string.Empty" over empty string literal
+dotnet_diagnostic.S6610.severity = warning
+
+# S6618: Prefer "static readonly" fields over constant array arguments
+dotnet_diagnostic.S6618.severity = warning
+
+# S6640: Prefer the generic overload when available
+dotnet_diagnostic.S6640.severity = warning

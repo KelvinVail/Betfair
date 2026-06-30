@@ -48,7 +48,7 @@ public class ClearedOrdersQueryTests
     [Fact]
     public void WithEventTypesFiltersWhitespace()
     {
-        _query.WithEventTypes("7", "", "  ");
+        _query.WithEventTypes("7", string.Empty, "  ");
 
         _query.EventTypeIds.Should().ContainSingle().Which.Should().Be("7");
     }

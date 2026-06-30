@@ -278,7 +278,7 @@ public class AccountDetailsResponseTests
         var contextProperty = typeof(SerializerContext).GetProperty("AccountDetailsResponse");
 
         contextProperty.Should().NotBeNull();
-        contextProperty!.PropertyType.Should().Be(typeof(JsonTypeInfo<AccountDetailsResponse>));
+        contextProperty!.PropertyType.Should().Be<JsonTypeInfo<AccountDetailsResponse>>();
     }
 
     [Fact]

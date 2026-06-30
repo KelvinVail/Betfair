@@ -2,6 +2,10 @@ namespace Betfair.Tests.Stream.Responses;
 
 public class OrderRunnerChangeTests
 {
+    private static readonly double[] ExpectedPriceSize32And1 = [3.2, 1.0];
+    private static readonly double[] ExpectedPriceSize335And1 = [3.35, 1.0];
+    private static readonly double[] ExpectedPriceSize335And2 = [3.35, 2.0];
+
     [Fact]
     public void CanDeserializeOrderRunnerChangeWithStrategyMatchedData()
     {
@@ -50,10 +54,10 @@ public class OrderRunnerChangeTests
         result!.FullImage.Should().BeTrue();
         result.SelectionId.Should().Be(80990361);
         result.MatchedBacks.Should().HaveCount(2);
-        result.MatchedBacks![0].Should().BeEquivalentTo(new[] { 3.2, 1.0 });
-        result.MatchedBacks[1].Should().BeEquivalentTo(new[] { 3.35, 1.0 });
+        result.MatchedBacks![0].Should().BeEquivalentTo(ExpectedPriceSize32And1);
+        result.MatchedBacks[1].Should().BeEquivalentTo(ExpectedPriceSize335And1);
         result.MatchedLays.Should().HaveCount(1);
-        result.MatchedLays![0].Should().BeEquivalentTo(new[] { 3.35, 1.0 });
+        result.MatchedLays![0].Should().BeEquivalentTo(ExpectedPriceSize335And1);
 
         result.UnmatchedOrders.Should().HaveCount(1);
         var unmatchedOrder = result.UnmatchedOrders![0];
@@ -70,14 +74,14 @@ public class OrderRunnerChangeTests
 
         var otherStrategy = result.StrategyMatchedChange!["other"];
         otherStrategy.MatchedBacks.Should().HaveCount(1);
-        otherStrategy.MatchedBacks![0].Should().BeEquivalentTo(new[] { 3.2, 1.0 });
+        otherStrategy.MatchedBacks![0].Should().BeEquivalentTo(ExpectedPriceSize32And1);
         otherStrategy.MatchedLays.Should().BeNull();
 
         var myStrategy = result.StrategyMatchedChange["myStrategy"];
         myStrategy.MatchedBacks.Should().HaveCount(1);
-        myStrategy.MatchedBacks![0].Should().BeEquivalentTo(new[] { 3.35, 1.0 });
+        myStrategy.MatchedBacks![0].Should().BeEquivalentTo(ExpectedPriceSize335And1);
         myStrategy.MatchedLays.Should().HaveCount(1);
-        myStrategy.MatchedLays![0].Should().BeEquivalentTo(new[] { 3.35, 1.0 });
+        myStrategy.MatchedLays![0].Should().BeEquivalentTo(ExpectedPriceSize335And1);
     }
 
     [Fact]
@@ -116,8 +120,8 @@ public class OrderRunnerChangeTests
 
         result.Should().NotBeNull();
         result!.MatchedBacks.Should().HaveCount(2);
-        result.MatchedBacks![0].Should().BeEquivalentTo(new[] { 3.2, 1.0 });
-        result.MatchedBacks[1].Should().BeEquivalentTo(new[] { 3.35, 2.0 });
+        result.MatchedBacks![0].Should().BeEquivalentTo(ExpectedPriceSize32And1);
+        result.MatchedBacks[1].Should().BeEquivalentTo(ExpectedPriceSize335And2);
         result.MatchedLays.Should().BeNull();
     }
 
@@ -134,7 +138,7 @@ public class OrderRunnerChangeTests
 
         result.Should().NotBeNull();
         result!.MatchedLays.Should().HaveCount(1);
-        result.MatchedLays![0].Should().BeEquivalentTo(new[] { 3.35, 1.0 });
+        result.MatchedLays![0].Should().BeEquivalentTo(ExpectedPriceSize335And1);
         result.MatchedBacks.Should().BeNull();
     }
 
@@ -152,8 +156,8 @@ public class OrderRunnerChangeTests
 
         result.Should().NotBeNull();
         result!.MatchedBacks.Should().HaveCount(1);
-        result.MatchedBacks![0].Should().BeEquivalentTo(new[] { 3.2, 1.0 });
+        result.MatchedBacks![0].Should().BeEquivalentTo(ExpectedPriceSize32And1);
         result.MatchedLays.Should().HaveCount(1);
-        result.MatchedLays![0].Should().BeEquivalentTo(new[] { 3.35, 1.0 });
+        result.MatchedLays![0].Should().BeEquivalentTo(ExpectedPriceSize335And1);
     }
 }

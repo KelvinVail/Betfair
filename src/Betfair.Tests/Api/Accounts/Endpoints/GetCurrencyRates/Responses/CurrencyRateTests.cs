@@ -217,7 +217,7 @@ public class CurrencyRateTests
         var contextProperty = typeof(SerializerContext).GetProperty("CurrencyRate");
 
         contextProperty.Should().NotBeNull();
-        contextProperty!.PropertyType.Should().Be(typeof(JsonTypeInfo<CurrencyRate>));
+        contextProperty!.PropertyType.Should().Be<JsonTypeInfo<CurrencyRate>>();
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public class CurrencyRateTests
         var contextProperty = typeof(SerializerContext).GetProperty("CurrencyRateArray");
 
         contextProperty.Should().NotBeNull();
-        contextProperty!.PropertyType.Should().Be(typeof(JsonTypeInfo<CurrencyRate[]>));
+        contextProperty!.PropertyType.Should().Be<JsonTypeInfo<CurrencyRate[]>>();
     }
 
     [Fact]
@@ -303,7 +303,7 @@ public class CurrencyRateTests
         var property = responseType.GetProperty("CurrencyCode");
 
         property.Should().NotBeNull();
-        property!.PropertyType.Should().Be(typeof(string));
+        property!.PropertyType.Should().Be<string>();
 
         // Check if the property allows null values by checking the nullable reference type annotation
         var nullabilityContext = new NullabilityInfoContext();
@@ -318,7 +318,7 @@ public class CurrencyRateTests
         var property = responseType.GetProperty("Rate");
 
         property.Should().NotBeNull();
-        property!.PropertyType.Should().Be(typeof(double));
+        property!.PropertyType.Should().Be<double>();
     }
 
     [Fact]

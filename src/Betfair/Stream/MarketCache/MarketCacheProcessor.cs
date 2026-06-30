@@ -84,8 +84,6 @@ public sealed class MarketCacheProcessor
 
     private static ReadOnlySpan<byte> PropPt => "pt"u8;
 
-    private static ReadOnlySpan<byte> PropCt => "ct"u8;
-
     private static ReadOnlySpan<byte> PropMc => "mc"u8;
 
     private static ReadOnlySpan<byte> PropRc => "rc"u8;
@@ -97,12 +95,6 @@ public sealed class MarketCacheProcessor
     private static ReadOnlySpan<byte> PropMarketDefinition => "marketDefinition"u8;
 
     private static ReadOnlySpan<byte> PropCon => "con"u8;
-
-    private static ReadOnlySpan<byte> PropConflateMs => "conflateMs"u8;
-
-    private static ReadOnlySpan<byte> PropHeartbeatMs => "heartbeatMs"u8;
-
-    private static ReadOnlySpan<byte> PropOc => "oc"u8;
 
     private static ReadOnlySpan<byte> OpMcm => "mcm"u8;
 
@@ -135,55 +127,10 @@ public sealed class MarketCacheProcessor
 
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
         {
-            if (reader.ValueTextEquals(PropOp))
+            if (!TryProcessProperty(ref reader, ref pt))
             {
-                reader.Read();
-                if (reader.TokenType == JsonTokenType.String && !reader.ValueTextEquals(OpMcm))
-                    return;
-            }
-            else if (reader.ValueTextEquals(PropPt))
-            {
-                reader.Read();
-                pt = reader.GetInt64();
-                PublishTime = pt;
-            }
-            else if (reader.ValueTextEquals(PropClk))
-            {
-                reader.Read();
-                CopyTokenToBuffer(ref reader, ref _clockBuffer, out _clockLength);
-            }
-            else if (reader.ValueTextEquals(PropMc))
-            {
-                ReadMarketChanges(ref reader, pt);
-            }
-            else if (reader.ValueTextEquals(PropInitialClk))
-            {
-                reader.Read();
-                CopyTokenToBuffer(ref reader, ref _initialClockBuffer, out _initialClockLength);
-            }
-            else if (reader.ValueTextEquals(PropId))
-            {
-                reader.Read();
-            }
-            else if (reader.ValueTextEquals(PropCt))
-            {
-                reader.Read();
-            }
-            else if (reader.ValueTextEquals(PropConflateMs))
-            {
-                reader.Read();
-            }
-            else if (reader.ValueTextEquals(PropHeartbeatMs))
-            {
-                reader.Read();
-            }
-            else if (reader.ValueTextEquals(PropOc))
-            {
-                SkipValue(ref reader);
-            }
-            else
-            {
-                SkipValue(ref reader);
+                LastProcessingTime = Stopwatch.GetElapsedTime(start);
+                return;
             }
         }
 
@@ -235,6 +182,65 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    private static void ReadTotalVolume(ref Utf8JsonReader reader, MarketCache? cache)
+    {
+        reader.Read();
+        if (cache != null)
+            cache.TotalMatched = reader.GetDouble();
+    }
+
+    private static bool ReadImageFlag(ref Utf8JsonReader reader, MarketCache? cache, bool runnersProcessed)
+    {
+        reader.Read();
+        if (!reader.GetBoolean()) return false;
+
+        if (cache != null)
+        {
+            cache.IsImage = true;
+            if (!runnersProcessed)
+                cache.ClearRunners();
+        }
+
+        return true;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
+    private bool TryProcessProperty(ref Utf8JsonReader reader, ref long pt)
+    {
+        if (reader.ValueTextEquals(PropOp))
+        {
+            reader.Read();
+            return reader.TokenType != JsonTokenType.String || reader.ValueTextEquals(OpMcm);
+        }
+
+        if (reader.ValueTextEquals(PropPt))
+        {
+            reader.Read();
+            pt = reader.GetInt64();
+            PublishTime = pt;
+        }
+        else if (reader.ValueTextEquals(PropClk))
+        {
+            reader.Read();
+            CopyTokenToBuffer(ref reader, ref _clockBuffer, out _clockLength);
+        }
+        else if (reader.ValueTextEquals(PropMc))
+        {
+            ReadMarketChanges(ref reader, pt);
+        }
+        else if (reader.ValueTextEquals(PropInitialClk))
+        {
+            reader.Read();
+            CopyTokenToBuffer(ref reader, ref _initialClockBuffer, out _initialClockLength);
+        }
+        else
+        {
+            SkipValue(ref reader);
+        }
+
+        return true;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadMarketChanges(ref Utf8JsonReader reader, long publishTime)
     {
@@ -264,31 +270,15 @@ public sealed class MarketCacheProcessor
             }
             else if (reader.ValueTextEquals(PropRc))
             {
-                if (isImage && cache != null)
-                    cache.ClearRunners();
-
-                ReadRunnerChanges(ref reader, cache);
-                runnersProcessed = true;
+                ProcessRunnerChanges(ref reader, cache, isImage, ref runnersProcessed);
             }
             else if (reader.ValueTextEquals(PropTv))
             {
-                reader.Read();
-                if (cache != null)
-                    cache.TotalMatched = reader.GetDouble();
+                ReadTotalVolume(ref reader, cache);
             }
             else if (reader.ValueTextEquals(PropImg))
             {
-                reader.Read();
-                if (reader.GetBoolean())
-                {
-                    isImage = true;
-                    if (cache != null)
-                    {
-                        cache.IsImage = true;
-                        if (!runnersProcessed)
-                            cache.ClearRunners();
-                    }
-                }
+                isImage = ReadImageFlag(ref reader, cache, runnersProcessed);
             }
             else if (reader.ValueTextEquals(PropCon))
             {
@@ -303,6 +293,15 @@ public sealed class MarketCacheProcessor
                 SkipValue(ref reader);
             }
         }
+    }
+
+    private void ProcessRunnerChanges(ref Utf8JsonReader reader, MarketCache? cache, bool isImage, ref bool runnersProcessed)
+    {
+        if (isImage && cache != null)
+            cache.ClearRunners();
+
+        ReadRunnerChanges(ref reader, cache);
+        runnersProcessed = true;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Fast-path market lookup — branches are necessary for performance.")]
@@ -361,7 +360,6 @@ public sealed class MarketCacheProcessor
 
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
         {
-            // First-byte dispatch: reduces average comparisons from ~5 to ~1-2
             var propSpan = reader.ValueSpan;
             if (propSpan.Length == 0)
             {
@@ -369,101 +367,7 @@ public sealed class MarketCacheProcessor
                 continue;
             }
 
-            switch (propSpan[0])
-            {
-                case (byte)'a': // atb, atl (highest frequency on deltas)
-                    if (propSpan.Length == 3)
-                    {
-                        if (propSpan[2] == (byte)'b')
-                            ReadPriceSizePairs(ref reader, LadderType.Atb, ref deferredCount);
-                        else
-                            ReadPriceSizePairs(ref reader, LadderType.Atl, ref deferredCount);
-                    }
-                    else
-                    {
-                        SkipValue(ref reader);
-                    }
-
-                    break;
-
-                case (byte)'i': // id
-                    reader.Read();
-                    selectionId = reader.GetInt64();
-                    break;
-
-                case (byte)'l': // ltp
-                    reader.Read();
-                    ltp = reader.GetDouble();
-                    break;
-
-                case (byte)'t': // tv, trd
-                    if (propSpan.Length == 2)
-                    {
-                        reader.Read();
-                        tv = reader.GetDouble();
-                    }
-                    else
-                    {
-                        ReadPriceSizePairs(ref reader, LadderType.Trd, ref deferredCount);
-                    }
-
-                    break;
-
-                case (byte)'b': // batb, batl, bdatb, bdatl
-                    if (propSpan.Length == 4)
-                    {
-                        // batb or batl — distinguish by last byte
-                        if (propSpan[3] == (byte)'b')
-                            ReadPositionPriceSizeTriples(ref reader, LadderType.Batb, ref deferredCount);
-                        else
-                            ReadPositionPriceSizeTriples(ref reader, LadderType.Batl, ref deferredCount);
-                    }
-                    else
-                    {
-                        // bdatb or bdatl
-                        if (propSpan[4] == (byte)'b')
-                            ReadPositionPriceSizeTriples(ref reader, LadderType.Bdatb, ref deferredCount);
-                        else
-                            ReadPositionPriceSizeTriples(ref reader, LadderType.Bdatl, ref deferredCount);
-                    }
-
-                    break;
-
-                case (byte)'s': // spb, spl, spn, spf
-                    if (propSpan.Length == 3 && propSpan[2] == (byte)'n')
-                    {
-                        reader.Read();
-                        spn = reader.GetDouble();
-                    }
-                    else if (propSpan.Length == 3 && propSpan[2] == (byte)'f')
-                    {
-                        reader.Read();
-                        spf = reader.GetDouble();
-                    }
-                    else if (propSpan.Length == 3 && propSpan[2] == (byte)'b')
-                    {
-                        ReadPriceSizePairs(ref reader, LadderType.Spb, ref deferredCount);
-                    }
-                    else if (propSpan.Length == 3 && propSpan[2] == (byte)'l')
-                    {
-                        ReadPriceSizePairs(ref reader, LadderType.Spl, ref deferredCount);
-                    }
-                    else
-                    {
-                        SkipValue(ref reader);
-                    }
-
-                    break;
-
-                case (byte)'h': // hc
-                    reader.Read();
-                    handicap = reader.GetDouble();
-                    break;
-
-                default:
-                    SkipValue(ref reader);
-                    break;
-            }
+            DispatchRunnerProperty(ref reader, propSpan, ref selectionId, ref handicap, ref ltp, ref tv, ref spn, ref spf, ref deferredCount);
         }
 
         if (cache == null || selectionId == 0)
@@ -477,6 +381,121 @@ public sealed class MarketCacheProcessor
         if (!double.IsNaN(spf)) runner.StartingPriceFar = spf;
 
         ApplyDeferredUpdates(runner, deferredCount);
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "First-byte dispatch for runner properties — performance-critical hot path.")]
+    private void DispatchRunnerProperty(
+        ref Utf8JsonReader reader,
+        ReadOnlySpan<byte> propSpan,
+        ref long selectionId,
+        ref double handicap,
+        ref double ltp,
+        ref double tv,
+        ref double spn,
+        ref double spf,
+        ref int deferredCount)
+    {
+        switch (propSpan[0])
+        {
+            case (byte)'a':
+                ReadAtbOrAtl(ref reader, propSpan, ref deferredCount);
+                break;
+            case (byte)'i':
+                reader.Read();
+                selectionId = reader.GetInt64();
+                break;
+            case (byte)'l':
+                reader.Read();
+                ltp = reader.GetDouble();
+                break;
+            case (byte)'t':
+                ReadTvOrTrd(ref reader, propSpan, ref tv, ref deferredCount);
+                break;
+            case (byte)'b':
+                ReadBestAvailable(ref reader, propSpan, ref deferredCount);
+                break;
+            case (byte)'s':
+                ReadStartingPrice(ref reader, propSpan, ref spn, ref spf, ref deferredCount);
+                break;
+            case (byte)'h':
+                reader.Read();
+                handicap = reader.GetDouble();
+                break;
+            default:
+                SkipValue(ref reader);
+                break;
+        }
+    }
+
+    private void ReadAtbOrAtl(ref Utf8JsonReader reader, ReadOnlySpan<byte> propSpan, ref int deferredCount)
+    {
+        if (propSpan.Length == 3)
+        {
+            var type = propSpan[2] == (byte)'b' ? LadderType.Atb : LadderType.Atl;
+            ReadPriceSizePairs(ref reader, type, ref deferredCount);
+        }
+        else
+        {
+            SkipValue(ref reader);
+        }
+    }
+
+    private void ReadTvOrTrd(ref Utf8JsonReader reader, ReadOnlySpan<byte> propSpan, ref double tv, ref int deferredCount)
+    {
+        if (propSpan.Length == 2)
+        {
+            reader.Read();
+            tv = reader.GetDouble();
+        }
+        else
+        {
+            ReadPriceSizePairs(ref reader, LadderType.Trd, ref deferredCount);
+        }
+    }
+
+    private void ReadBestAvailable(ref Utf8JsonReader reader, ReadOnlySpan<byte> propSpan, ref int deferredCount)
+    {
+        if (propSpan.Length == 4)
+        {
+            var type = propSpan[3] == (byte)'b' ? LadderType.Batb : LadderType.Batl;
+            ReadPositionPriceSizeTriples(ref reader, type, ref deferredCount);
+        }
+        else
+        {
+            var type = propSpan[4] == (byte)'b' ? LadderType.Bdatb : LadderType.Bdatl;
+            ReadPositionPriceSizeTriples(ref reader, type, ref deferredCount);
+        }
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Flat switch over starting price properties.")]
+    private void ReadStartingPrice(ref Utf8JsonReader reader, ReadOnlySpan<byte> propSpan, ref double spn, ref double spf, ref int deferredCount)
+    {
+        if (propSpan.Length != 3)
+        {
+            SkipValue(ref reader);
+            return;
+        }
+
+        switch (propSpan[2])
+        {
+            case (byte)'n':
+                reader.Read();
+                spn = reader.GetDouble();
+                break;
+            case (byte)'f':
+                reader.Read();
+                spf = reader.GetDouble();
+                break;
+            case (byte)'b':
+                ReadPriceSizePairs(ref reader, LadderType.Spb, ref deferredCount);
+                break;
+            case (byte)'l':
+                ReadPriceSizePairs(ref reader, LadderType.Spl, ref deferredCount);
+                break;
+            default:
+                SkipValue(ref reader);
+                break;
+        }
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Flat switch dispatch over ladder types — linear and readable.")]
