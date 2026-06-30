@@ -251,6 +251,8 @@ public sealed class MarketCacheProcessor
     private void ReadSingleMarketChange(ref Utf8JsonReader reader, long publishTime)
     {
         MarketCache? cache = null;
+        bool isImage = false;
+        bool runnersProcessed = false;
 
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
         {
@@ -262,7 +264,11 @@ public sealed class MarketCacheProcessor
             }
             else if (reader.ValueTextEquals(PropRc))
             {
+                if (isImage && cache != null)
+                    cache.ClearRunners();
+
                 ReadRunnerChanges(ref reader, cache);
+                runnersProcessed = true;
             }
             else if (reader.ValueTextEquals(PropTv))
             {
@@ -273,10 +279,15 @@ public sealed class MarketCacheProcessor
             else if (reader.ValueTextEquals(PropImg))
             {
                 reader.Read();
-                if (cache != null && reader.GetBoolean())
+                if (reader.GetBoolean())
                 {
-                    cache.IsImage = true;
-                    cache.ClearRunners();
+                    isImage = true;
+                    if (cache != null)
+                    {
+                        cache.IsImage = true;
+                        if (!runnersProcessed)
+                            cache.ClearRunners();
+                    }
                 }
             }
             else if (reader.ValueTextEquals(PropCon))

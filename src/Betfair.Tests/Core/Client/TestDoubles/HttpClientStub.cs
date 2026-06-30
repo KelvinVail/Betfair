@@ -17,6 +17,19 @@ public class HttpClientStub : IHttpClient
     public async Task<T> PostAsync<T>(Uri uri, HttpContent content, CancellationToken ct = default)
         where T : class
     {
+        ThrowIfConfigured();
+
+        HttpContentSent = content;
+        if (content is not null)
+            ContentSent = await content.ReadAsByteArrayAsync(ct);
+        return await Task.FromResult<T>(default!);
+    }
+
+    public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default) =>
+        await PostAsync<object>(uri, content, ct);
+
+    private void ThrowIfConfigured()
+    {
         if (ThrowsException is not null && TimesToThrowError > 0)
         {
             TimesToThrowError--;
@@ -28,13 +41,5 @@ public class HttpClientStub : IHttpClient
             TimesToThrowError--;
             throw new HttpRequestException(ThrowsError);
         }
-
-        HttpContentSent = content;
-        if (content is not null)
-            ContentSent = await content.ReadAsByteArrayAsync(ct);
-        return await Task.FromResult<T>(default!);
     }
-
-    public async Task PostAsync(Uri uri, HttpContent content, CancellationToken ct = default) =>
-        await PostAsync<object>(uri, content, ct);
 }
