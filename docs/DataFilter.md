@@ -87,7 +87,7 @@ var dataFilter = new DataFilter().WithStartingPriceProjection();
 ### Ladder Levels
 For depth-based ladders the number of levels to send (1 to 10). 1 is best price to back or lay etc.
 ```csharp
-var dataFilter = new DataFilter().WithLadderLevels();
+var dataFilter = new DataFilter().WithLadderLevels(3);
 ```
 
 ## Class

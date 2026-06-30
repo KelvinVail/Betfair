@@ -29,7 +29,7 @@ This will be the first status message you receive from Betfair, indicating if yo
 ```StatusCode``` will be either "SUCCESS" or "FAILURE".  
 ```Id``` will be 1. An authentication request is always the first message that must be sent after connecting to Betfair so will always be 1.
 ```ConnectionClosed``` will be either true or false. False if the connection is open or true if it is closed.  
-```ConnectionsAvailable``` an integer indicating the number of additional connections you can open. These are limited globally by Betfair, not by the ```StreamClient```.
+```ConnectionsAvailable``` an integer indicating the number of additional connections you can open. These are limited globally by Betfair, not by the ```Subscription```.
 
 ### Authentication failures
 If ```StatusCode``` is "FAILURE" you will receive the properties ```ErrorCode``` and ```ErrorMessage```.  
@@ -41,11 +41,11 @@ MAX_CONNECTION_LIMIT_EXCEEDED | Returned when you try to create more connections
 TOO_MANY_REQUESTS             | Returned when you make too many requests within a short time period.
 
 ### Subscription response 
-You will receive a separate status message on the stream for each call you make to either ```StreamClient.Subscribe()``` or ```StreamClient.SubscribeToOrders()```.  
+You will receive a separate status message on the stream for each call you make to either ```Subscription.Subscribe()``` or ```Subscription.SubscribeToOrders()```.  
 
 ```Operation``` will be "status".  
 ```StatusCode``` will be either "SUCCESS" or "FAILURE".  
-```Id``` starts at 2, then increments by 1 each time you have called either ```StreamClient.Subscribe()``` or ```StreamClient.SubscribeToOrders()```. Responses to the first of these method calls will receive and Id of 2 the next 3 and so on.  
+```Id``` starts at 2, then increments by 1 each time you have called either ```Subscription.Subscribe()``` or ```Subscription.SubscribeToOrders()```. Responses to the first of these method calls will receive and Id of 2 the next 3 and so on.  
 ```ConnectionClosed``` will be either true or false. False if the connection is open or true if it is closed.  
 
 ### Subscription failures
@@ -56,7 +56,7 @@ ErrorCode                   | Description
 SUBSCRIPTION_LIMIT_EXCEEDED | Returned when attempting to subscribe to more markets 200 markets.
 
 ### Timeout response
-If you fail to call either ```StreamClient.Subscribe()``` or ```StreamClient.SubscribeToOrders()``` with 15 seconds of creating the ```StreamClient``` you will receive a timeout response from Betfair.  
+If you fail to call either ```Subscription.Subscribe()``` or ```Subscription.SubscribeToOrders()``` within 15 seconds of creating the ```Subscription``` you will receive a timeout response from Betfair.  
 
 ```Operation``` will be "status".  
 ```StatusCode``` will be "FAILURE".  
