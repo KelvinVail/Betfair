@@ -7,46 +7,8 @@ namespace Betfair.Stream.MarketCache;
 /// </summary>
 public sealed class MarketDefinitionCache
 {
-    private static ReadOnlySpan<byte> PropBspMarket => "bspMarket"u8;
-    private static ReadOnlySpan<byte> PropTurnInPlayEnabled => "turnInPlayEnabled"u8;
-    private static ReadOnlySpan<byte> PropPersistenceEnabled => "persistenceEnabled"u8;
-    private static ReadOnlySpan<byte> PropMarketBaseRate => "marketBaseRate"u8;
-    private static ReadOnlySpan<byte> PropBettingType => "bettingType"u8;
-    private static ReadOnlySpan<byte> PropStatus => "status"u8;
-    private static ReadOnlySpan<byte> PropVenue => "venue"u8;
-    private static ReadOnlySpan<byte> PropSettledTime => "settledTime"u8;
-    private static ReadOnlySpan<byte> PropTimezone => "timezone"u8;
-    private static ReadOnlySpan<byte> PropEachWayDivisor => "eachWayDivisor"u8;
-    private static ReadOnlySpan<byte> PropRegulators => "regulators"u8;
-    private static ReadOnlySpan<byte> PropMarketType => "marketType"u8;
-    private static ReadOnlySpan<byte> PropNumberOfWinners => "numberOfWinners"u8;
-    private static ReadOnlySpan<byte> PropCountryCode => "countryCode"u8;
-    private static ReadOnlySpan<byte> PropInPlay => "inPlay"u8;
-    private static ReadOnlySpan<byte> PropBetDelay => "betDelay"u8;
-    private static ReadOnlySpan<byte> PropNumberOfActiveRunners => "numberOfActiveRunners"u8;
-    private static ReadOnlySpan<byte> PropEventId => "eventId"u8;
-    private static ReadOnlySpan<byte> PropCrossMatching => "crossMatching"u8;
-    private static ReadOnlySpan<byte> PropRunnersVoidable => "runnersVoidable"u8;
-    private static ReadOnlySpan<byte> PropSuspendTime => "suspendTime"u8;
-    private static ReadOnlySpan<byte> PropDiscountAllowed => "discountAllowed"u8;
-    private static ReadOnlySpan<byte> PropRunners => "runners"u8;
-    private static ReadOnlySpan<byte> PropVersion => "version"u8;
-    private static ReadOnlySpan<byte> PropEventTypeId => "eventTypeId"u8;
-    private static ReadOnlySpan<byte> PropComplete => "complete"u8;
-    private static ReadOnlySpan<byte> PropOpenDate => "openDate"u8;
-    private static ReadOnlySpan<byte> PropMarketTime => "marketTime"u8;
-    private static ReadOnlySpan<byte> PropBspReconciled => "bspReconciled"u8;
-
-    // Runner definition property names
-    private static ReadOnlySpan<byte> PropId => "id"u8;
-    private static ReadOnlySpan<byte> PropSortPriority => "sortPriority"u8;
-    private static ReadOnlySpan<byte> PropRemovalDate => "removalDate"u8;
-    private static ReadOnlySpan<byte> PropHc => "hc"u8;
-    private static ReadOnlySpan<byte> PropAdjustmentFactor => "adjustmentFactor"u8;
-    private static ReadOnlySpan<byte> PropBsp => "bsp"u8;
-
     // Reusable runner definitions list
-    private readonly List<RunnerDefinitionCache> _runners = new(16);
+    private readonly List<RunnerDefinitionCache> _runners = new (16);
 
     // Cached UTF-8 bytes for string fields — avoids Encoding.UTF8.GetBytes allocation on comparison
     private byte[]? _statusBytes;
@@ -106,11 +68,61 @@ public sealed class MarketDefinitionCache
 
     public IReadOnlyList<RunnerDefinitionCache> Runners => _runners;
 
+    private static ReadOnlySpan<byte> PropBspMarket => "bspMarket"u8;
+
+    private static ReadOnlySpan<byte> PropTurnInPlayEnabled => "turnInPlayEnabled"u8;
+
+    private static ReadOnlySpan<byte> PropPersistenceEnabled => "persistenceEnabled"u8;
+
+    private static ReadOnlySpan<byte> PropMarketBaseRate => "marketBaseRate"u8;
+
+    private static ReadOnlySpan<byte> PropBettingType => "bettingType"u8;
+
+    private static ReadOnlySpan<byte> PropStatus => "status"u8;
+
+    private static ReadOnlySpan<byte> PropVenue => "venue"u8;
+
+    private static ReadOnlySpan<byte> PropTimezone => "timezone"u8;
+
+    private static ReadOnlySpan<byte> PropEachWayDivisor => "eachWayDivisor"u8;
+
+    private static ReadOnlySpan<byte> PropMarketType => "marketType"u8;
+
+    private static ReadOnlySpan<byte> PropNumberOfWinners => "numberOfWinners"u8;
+
+    private static ReadOnlySpan<byte> PropCountryCode => "countryCode"u8;
+
+    private static ReadOnlySpan<byte> PropInPlay => "inPlay"u8;
+
+    private static ReadOnlySpan<byte> PropBetDelay => "betDelay"u8;
+
+    private static ReadOnlySpan<byte> PropNumberOfActiveRunners => "numberOfActiveRunners"u8;
+
+    private static ReadOnlySpan<byte> PropEventId => "eventId"u8;
+
+    private static ReadOnlySpan<byte> PropCrossMatching => "crossMatching"u8;
+
+    private static ReadOnlySpan<byte> PropRunnersVoidable => "runnersVoidable"u8;
+
+    private static ReadOnlySpan<byte> PropDiscountAllowed => "discountAllowed"u8;
+
+    private static ReadOnlySpan<byte> PropRunners => "runners"u8;
+
+    private static ReadOnlySpan<byte> PropVersion => "version"u8;
+
+    private static ReadOnlySpan<byte> PropEventTypeId => "eventTypeId"u8;
+
+    private static ReadOnlySpan<byte> PropComplete => "complete"u8;
+
+    private static ReadOnlySpan<byte> PropBspReconciled => "bspReconciled"u8;
+
     /// <summary>
     /// Reads and applies a market definition update from a Utf8JsonReader.
     /// The reader should be positioned at the StartObject token.
     /// Only allocates strings when values actually change.
     /// </summary>
+    /// <param name="reader">The UTF-8 JSON reader positioned at the start of the market definition object.</param>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
     internal void ReadFrom(ref Utf8JsonReader reader)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
@@ -256,21 +268,6 @@ public sealed class MarketDefinitionCache
         }
     }
 
-    private void ReadRunners(ref Utf8JsonReader reader)
-    {
-        if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray)
-            return;
-
-        _runners.Clear();
-
-        while (reader.Read() && reader.TokenType == JsonTokenType.StartObject)
-        {
-            var def = new RunnerDefinitionCache();
-            def.ReadFrom(ref reader);
-            _runners.Add(def);
-        }
-    }
-
     /// <summary>
     /// Reads a string value using cached UTF-8 bytes for comparison.
     /// If the value matches the cached bytes, returns null (meaning "unchanged").
@@ -296,6 +293,21 @@ public sealed class MarketDefinitionCache
         newValue = reader.GetString();
         cachedBytes = newValue != null ? System.Text.Encoding.UTF8.GetBytes(newValue) : null;
     }
+
+    private void ReadRunners(ref Utf8JsonReader reader)
+    {
+        if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray)
+            return;
+
+        _runners.Clear();
+
+        while (reader.Read() && reader.TokenType == JsonTokenType.StartObject)
+        {
+            var def = new RunnerDefinitionCache();
+            def.ReadFrom(ref reader);
+            _runners.Add(def);
+        }
+    }
 }
 
 /// <summary>
@@ -303,13 +315,6 @@ public sealed class MarketDefinitionCache
 /// </summary>
 public sealed class RunnerDefinitionCache
 {
-    private static ReadOnlySpan<byte> PropId => "id"u8;
-    private static ReadOnlySpan<byte> PropStatus => "status"u8;
-    private static ReadOnlySpan<byte> PropSortPriority => "sortPriority"u8;
-    private static ReadOnlySpan<byte> PropHc => "hc"u8;
-    private static ReadOnlySpan<byte> PropAdjustmentFactor => "adjustmentFactor"u8;
-    private static ReadOnlySpan<byte> PropBsp => "bsp"u8;
-
     public long SelectionId { get; private set; }
 
     public string? Status { get; private set; }
@@ -322,6 +327,19 @@ public sealed class RunnerDefinitionCache
 
     public double? BspLiability { get; private set; }
 
+    private static ReadOnlySpan<byte> PropId => "id"u8;
+
+    private static ReadOnlySpan<byte> PropStatus => "status"u8;
+
+    private static ReadOnlySpan<byte> PropSortPriority => "sortPriority"u8;
+
+    private static ReadOnlySpan<byte> PropHc => "hc"u8;
+
+    private static ReadOnlySpan<byte> PropAdjustmentFactor => "adjustmentFactor"u8;
+
+    private static ReadOnlySpan<byte> PropBsp => "bsp"u8;
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
     internal void ReadFrom(ref Utf8JsonReader reader)
     {
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)

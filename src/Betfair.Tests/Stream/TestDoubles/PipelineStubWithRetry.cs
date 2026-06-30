@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Betfair.Stream;
 using Betfair.Stream.Responses;

@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-using System.Collections.Concurrent;
-using System.Text;
+﻿using System.Collections.Concurrent;
 using Betfair.Core.Authentication;
 using Betfair.Core.Client;
 using Betfair.Stream.MarketCache;
@@ -64,6 +62,13 @@ public class Subscription : IDisposable
         _stream = null;
         _ownsTransport = false;
     }
+
+    /// <summary>
+    /// Gets the zero-allocation market cache processor that maintains live market state.
+    /// Access this property at any time to read the latest market/runner data.
+    /// Populated when <see cref="RunMarketCache"/> is active.
+    /// </summary>
+    public MarketCacheProcessor MarketProcessor { get; } = new ();
 
     /// <summary>
     /// Subscribe to a market stream.
@@ -151,13 +156,6 @@ public class Subscription : IDisposable
             Interlocked.Exchange(ref _readerActive, 0);
         }
     }
-
-    /// <summary>
-    /// Gets the zero-allocation market cache processor that maintains live market state.
-    /// Access this property at any time to read the latest market/runner data.
-    /// Populated when <see cref="RunMarketCache"/> is active.
-    /// </summary>
-    public MarketCacheProcessor MarketProcessor { get; } = new ();
 
     /// <summary>
     /// Subscribes to a market stream and processes all messages directly into <see cref="MarketProcessor"/>

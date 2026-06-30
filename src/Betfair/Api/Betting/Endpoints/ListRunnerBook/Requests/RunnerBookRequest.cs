@@ -1,5 +1,3 @@
-using Betfair.Api.Betting.Endpoints.ListMarketBook;
-
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 
 namespace Betfair.Api.Betting.Endpoints.ListRunnerBook.Requests;

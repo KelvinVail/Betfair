@@ -32,31 +32,31 @@ public sealed class RunnerCache
     public double StartingPriceFar { get; set; } = double.NaN;
 
     /// <summary>Gets the full depth available to back ladder (price → size).</summary>
-    public PriceLadder AvailableToBack { get; } = new();
+    public PriceLadder AvailableToBack { get; } = new ();
 
     /// <summary>Gets the full depth available to lay ladder (price → size).</summary>
-    public PriceLadder AvailableToLay { get; } = new();
+    public PriceLadder AvailableToLay { get; } = new ();
 
     /// <summary>Gets the best available to back ladder (position → price/size).</summary>
-    public PositionLadder BestAvailableToBack { get; } = new();
+    public PositionLadder BestAvailableToBack { get; } = new ();
 
     /// <summary>Gets the best available to lay ladder (position → price/size).</summary>
-    public PositionLadder BestAvailableToLay { get; } = new();
+    public PositionLadder BestAvailableToLay { get; } = new ();
 
     /// <summary>Gets the best display available to back ladder.</summary>
-    public PositionLadder BestDisplayAvailableToBack { get; } = new();
+    public PositionLadder BestDisplayAvailableToBack { get; } = new ();
 
     /// <summary>Gets the best display available to lay ladder.</summary>
-    public PositionLadder BestDisplayAvailableToLay { get; } = new();
+    public PositionLadder BestDisplayAvailableToLay { get; } = new ();
 
     /// <summary>Gets the traded volume ladder (price → cumulative size).</summary>
-    public PriceLadder Traded { get; } = new();
+    public PriceLadder Traded { get; } = new ();
 
     /// <summary>Gets the starting price back ladder.</summary>
-    public PriceLadder StartingPriceBack { get; } = new();
+    public PriceLadder StartingPriceBack { get; } = new ();
 
     /// <summary>Gets the starting price lay ladder.</summary>
-    public PriceLadder StartingPriceLay { get; } = new();
+    public PriceLadder StartingPriceLay { get; } = new ();
 
     /// <summary>Returns true if LastTradedPrice has been set.</summary>
     public bool HasLastTradedPrice => !double.IsNaN(LastTradedPrice);

@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Betfair.Stream.MarketCache;
 
 /// <summary>
@@ -7,14 +5,15 @@ namespace Betfair.Stream.MarketCache;
 /// Updated directly from raw stream bytes via <see cref="MarketCacheProcessor"/>.
 /// Uses a flat array indexed by runner ordinal for O(1) lookup.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1724:The type name MarketCache conflicts in whole or in part with the namespace name", Justification = "MarketCache is the canonical domain name; renaming would harm API clarity.")]
 public sealed class MarketCache
 {
+    // Map selection ID → ordinal index for O(1) lookup after first encounter
+    private readonly Dictionary<long, int> _selectionIdToIndex = new (16);
+
     // Start with capacity for typical horse race (16 runners), grows if needed
     private RunnerCache[] _runnerArray = new RunnerCache[16];
     private int _runnerCount;
-
-    // Map selection ID → ordinal index for O(1) lookup after first encounter
-    private readonly Dictionary<long, int> _selectionIdToIndex = new (16);
 
     public MarketCache(string marketId)
     {
@@ -28,7 +27,7 @@ public sealed class MarketCache
     /// <summary>Gets the total matched volume on this market.</summary>
     public double? TotalMatched { get; internal set; }
 
-    /// <summary>Gets whether the last update was a full image.</summary>
+    /// <summary>Gets a value indicating whether the last update was a full image.</summary>
     public bool IsImage { get; internal set; }
 
     /// <summary>Gets the last publish time from the stream.</summary>
@@ -39,17 +38,6 @@ public sealed class MarketCache
 
     /// <summary>Gets the number of runners in this market.</summary>
     public int RunnerCount => _runnerCount;
-
-    /// <summary>Gets the pre-computed UTF-8 bytes of the market ID for zero-allocation comparison.</summary>
-    internal byte[] MarketIdBytes { get; }
-
-    /// <summary>Gets a runner by selection ID.</summary>
-    public RunnerCache? GetRunner(long selectionId)
-    {
-        if (_selectionIdToIndex.TryGetValue(selectionId, out var idx))
-            return _runnerArray[idx];
-        return null;
-    }
 
     /// <summary>Gets all runners as a span for zero-allocation iteration.</summary>
     public ReadOnlySpan<RunnerCache> RunnerSpan => _runnerArray.AsSpan(0, _runnerCount);
@@ -69,7 +57,23 @@ public sealed class MarketCache
         }
     }
 
+    /// <summary>Gets the pre-computed UTF-8 bytes of the market ID for zero-allocation comparison.</summary>
+    internal byte[] MarketIdBytes { get; }
+
+    /// <summary>Gets a runner by selection ID.</summary>
+    /// <param name="selectionId">The selection (runner) ID to look up.</param>
+    /// <returns>The runner cache if found; otherwise, null.</returns>
+    public RunnerCache? GetRunner(long selectionId)
+    {
+        if (_selectionIdToIndex.TryGetValue(selectionId, out var idx))
+            return _runnerArray[idx];
+        return null;
+    }
+
     /// <summary>Gets or creates a runner cache for the given selection ID. O(1) after first encounter.</summary>
+    /// <param name="selectionId">The selection (runner) ID.</param>
+    /// <param name="handicap">The handicap value for the runner.</param>
+    /// <returns>The existing or newly created runner cache.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal RunnerCache GetOrAddRunner(long selectionId, double handicap = 0)
     {
@@ -77,6 +81,14 @@ public sealed class MarketCache
             return _runnerArray[idx];
 
         return AddRunner(selectionId, handicap);
+    }
+
+    /// <summary>Clears all runners (used before processing a full image).</summary>
+    internal void ClearRunners()
+    {
+        Array.Clear(_runnerArray, 0, _runnerCount);
+        _selectionIdToIndex.Clear();
+        _runnerCount = 0;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -92,13 +104,5 @@ public sealed class MarketCache
         _selectionIdToIndex[selectionId] = idx;
         _runnerCount++;
         return runner;
-    }
-
-    /// <summary>Clears all runners (used before processing a full image).</summary>
-    internal void ClearRunners()
-    {
-        Array.Clear(_runnerArray, 0, _runnerCount);
-        _selectionIdToIndex.Clear();
-        _runnerCount = 0;
     }
 }

@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Reflection;
 using Betfair.Stream;
 using Betfair.Stream.Messages;

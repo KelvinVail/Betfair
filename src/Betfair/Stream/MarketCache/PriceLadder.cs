@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Betfair.Stream.MarketCache;
 
 /// <summary>
@@ -9,21 +7,29 @@ namespace Betfair.Stream.MarketCache;
 /// </summary>
 public sealed class PriceLadder
 {
-    private readonly Dictionary<double, double> _levels = new(64);
+    private readonly Dictionary<double, double> _levels = new (64);
 
     /// <summary>Gets the number of active price levels.</summary>
     public int Count => _levels.Count;
 
     /// <summary>Gets the size at the specified price, or 0 if not present.</summary>
+    /// <param name="price">The price to look up.</param>
+    /// <returns>The size at the specified price, or 0 if the price is not present.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1043:Use Integral Or String Argument For Indexers", Justification = "Price values are the natural domain key for a price ladder.")]
     public double this[double price] => _levels.GetValueOrDefault(price);
 
     /// <summary>
     /// Applies a single price/size update. Removes the level if size is 0.
     /// </summary>
+    /// <param name="price">The price level to update.</param>
+    /// <param name="size">The new size; 0 removes the level.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update(double price, double size)
     {
+        // Betfair signals deletion with exactly 0.0 — intentional exact comparison
+#pragma warning disable S1244
         if (size == 0)
+#pragma warning restore S1244
             _levels.Remove(price);
         else
             _levels[price] = size;
@@ -33,6 +39,7 @@ public sealed class PriceLadder
     public void Clear() => _levels.Clear();
 
     /// <summary>Gets all active price levels.</summary>
+    /// <returns>An enumerator over all active price/size pairs.</returns>
     public Dictionary<double, double>.Enumerator GetEnumerator() => _levels.GetEnumerator();
 }
 
@@ -56,21 +63,31 @@ public sealed class PositionLadder
     public int Count => _count;
 
     /// <summary>Gets the price at the specified position, or 0 if not present.</summary>
+    /// <param name="position">The zero-based position index.</param>
+    /// <returns>The price at the specified position, or 0 if not present.</returns>
     public double GetPrice(int position) => (uint)position < MaxPositions ? _prices[position] : 0;
 
     /// <summary>Gets the size at the specified position, or 0 if not present.</summary>
+    /// <param name="position">The zero-based position index.</param>
+    /// <returns>The size at the specified position, or 0 if not present.</returns>
     public double GetSize(int position) => (uint)position < MaxPositions ? _sizes[position] : 0;
 
     /// <summary>
     /// Applies a position-based update. Removes the level if size is 0.
     /// Position is the first element in the [position, price, size] tuple.
     /// </summary>
+    /// <param name="position">The zero-based position index.</param>
+    /// <param name="price">The price at this position.</param>
+    /// <param name="size">The size; 0 removes the level.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update(int position, double price, double size)
     {
         if ((uint)position >= MaxPositions) return;
 
+        // Betfair signals deletion with exactly 0.0 — intentional exact comparison
+#pragma warning disable S1244
         if (size == 0)
+#pragma warning restore S1244
         {
             _prices[position] = 0;
             _sizes[position] = 0;
@@ -97,7 +114,14 @@ public sealed class PositionLadder
         int c = 0;
         for (int i = MaxPositions - 1; i >= 0; i--)
         {
-            if (_sizes[i] != 0) { c = i + 1; break; }
+            // Betfair signals deletion with exactly 0.0 — intentional exact comparison
+#pragma warning disable S1244
+            if (_sizes[i] != 0)
+#pragma warning restore S1244
+            {
+                c = i + 1;
+                break;
+            }
         }
 
         _count = c;

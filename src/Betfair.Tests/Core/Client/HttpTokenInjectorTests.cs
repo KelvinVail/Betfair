@@ -1,5 +1,4 @@
-﻿using System.Security.AccessControl;
-using Betfair.Core.Client;
+﻿using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 using Betfair.Tests.TestDoubles;
 

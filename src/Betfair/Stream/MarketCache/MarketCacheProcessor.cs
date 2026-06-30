@@ -1,6 +1,4 @@
-using System.Buffers;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Stream.MarketCache;
@@ -12,39 +10,6 @@ namespace Betfair.Stream.MarketCache;
 /// </summary>
 public sealed class MarketCacheProcessor
 {
-    // Property name bytes — only keep those still needed for ValueTextEquals
-    private static ReadOnlySpan<byte> PropOp => "op"u8;
-
-    private static ReadOnlySpan<byte> PropId => "id"u8;
-
-    private static ReadOnlySpan<byte> PropClk => "clk"u8;
-
-    private static ReadOnlySpan<byte> PropInitialClk => "initialClk"u8;
-
-    private static ReadOnlySpan<byte> PropPt => "pt"u8;
-
-    private static ReadOnlySpan<byte> PropCt => "ct"u8;
-
-    private static ReadOnlySpan<byte> PropMc => "mc"u8;
-
-    private static ReadOnlySpan<byte> PropRc => "rc"u8;
-
-    private static ReadOnlySpan<byte> PropTv => "tv"u8;
-
-    private static ReadOnlySpan<byte> PropImg => "img"u8;
-
-    private static ReadOnlySpan<byte> PropMarketDefinition => "marketDefinition"u8;
-
-    private static ReadOnlySpan<byte> PropCon => "con"u8;
-
-    private static ReadOnlySpan<byte> PropConflateMs => "conflateMs"u8;
-
-    private static ReadOnlySpan<byte> PropHeartbeatMs => "heartbeatMs"u8;
-
-    private static ReadOnlySpan<byte> PropOc => "oc"u8;
-
-    private static ReadOnlySpan<byte> OpMcm => "mcm"u8;
-
     // Single-market fast path: most subscriptions have 1 market.
     private MarketCache? _singleMarket;
 
@@ -59,6 +24,20 @@ public sealed class MarketCacheProcessor
     private int _clockLength;
     private byte[] _initialClockBuffer = new byte[64];
     private int _initialClockLength;
+
+    [JsonConverter(typeof(SnakeCaseEnumJsonConverter<LadderType>))]
+    private enum LadderType : byte
+    {
+        Atb,
+        Atl,
+        Batb,
+        Batl,
+        Bdatb,
+        Bdatl,
+        Trd,
+        Spb,
+        Spl,
+    }
 
     /// <summary>Gets the last clock token as a span (zero-allocation access).</summary>
     public ReadOnlySpan<byte> ClockBytes => _clockBuffer.AsSpan(0, _clockLength);
@@ -94,6 +73,39 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    // Property name bytes — only keep those still needed for ValueTextEquals
+    private static ReadOnlySpan<byte> PropOp => "op"u8;
+
+    private static ReadOnlySpan<byte> PropId => "id"u8;
+
+    private static ReadOnlySpan<byte> PropClk => "clk"u8;
+
+    private static ReadOnlySpan<byte> PropInitialClk => "initialClk"u8;
+
+    private static ReadOnlySpan<byte> PropPt => "pt"u8;
+
+    private static ReadOnlySpan<byte> PropCt => "ct"u8;
+
+    private static ReadOnlySpan<byte> PropMc => "mc"u8;
+
+    private static ReadOnlySpan<byte> PropRc => "rc"u8;
+
+    private static ReadOnlySpan<byte> PropTv => "tv"u8;
+
+    private static ReadOnlySpan<byte> PropImg => "img"u8;
+
+    private static ReadOnlySpan<byte> PropMarketDefinition => "marketDefinition"u8;
+
+    private static ReadOnlySpan<byte> PropCon => "con"u8;
+
+    private static ReadOnlySpan<byte> PropConflateMs => "conflateMs"u8;
+
+    private static ReadOnlySpan<byte> PropHeartbeatMs => "heartbeatMs"u8;
+
+    private static ReadOnlySpan<byte> PropOc => "oc"u8;
+
+    private static ReadOnlySpan<byte> OpMcm => "mcm"u8;
+
     /// <summary>Gets a market cache by ID, or null if not present.</summary>
     public MarketCache? GetMarket(string marketId)
     {
@@ -106,6 +118,7 @@ public sealed class MarketCacheProcessor
     /// Processes a single line of raw stream bytes, updating the market caches in-place.
     /// Zero allocation for typical delta messages.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
     public void Process(ReadOnlySpan<byte> data)
     {
         long start = Stopwatch.GetTimestamp();
@@ -178,6 +191,51 @@ public sealed class MarketCacheProcessor
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void SkipValue(ref Utf8JsonReader reader)
+    {
+        reader.Read();
+        if (reader.TokenType is JsonTokenType.StartObject or JsonTokenType.StartArray)
+            reader.Skip();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void CopyTokenToBuffer(ref Utf8JsonReader reader, ref byte[] buffer, out int length)
+    {
+        if (reader.HasValueSequence)
+        {
+            var seq = reader.ValueSequence;
+            length = (int)seq.Length;
+            if (length > buffer.Length)
+                buffer = new byte[length];
+            seq.CopyTo(buffer);
+        }
+        else
+        {
+            var span = reader.ValueSpan;
+            length = span.Length;
+            if (length > buffer.Length)
+                buffer = new byte[length];
+            span.CopyTo(buffer);
+        }
+    }
+
+    private static void ReadMarketDefinition(ref Utf8JsonReader reader, MarketCache? cache)
+    {
+        reader.Read();
+        if (reader.TokenType == JsonTokenType.StartObject)
+        {
+            if (cache != null)
+            {
+                cache.Definition.ReadFrom(ref reader);
+            }
+            else
+            {
+                reader.Skip();
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadMarketChanges(ref Utf8JsonReader reader, long publishTime)
     {
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray)
@@ -189,6 +247,7 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
     private void ReadSingleMarketChange(ref Utf8JsonReader reader, long publishTime)
     {
         MarketCache? cache = null;
@@ -235,6 +294,7 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Fast-path market lookup — branches are necessary for performance.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private MarketCache ResolveMarket(ref Utf8JsonReader reader)
     {
@@ -243,7 +303,7 @@ public sealed class MarketCacheProcessor
             return _singleMarket;
 
         // Need the string for multi-market lookup or first-time creation
-        var marketId = reader.GetString()!;
+        var marketId = reader.GetString() ?? string.Empty;
 
         if (_singleMarket == null)
         {
@@ -265,22 +325,6 @@ public sealed class MarketCacheProcessor
         return market;
     }
 
-    private static void ReadMarketDefinition(ref Utf8JsonReader reader, MarketCache? cache)
-    {
-        reader.Read();
-        if (reader.TokenType == JsonTokenType.StartObject)
-        {
-            if (cache != null)
-            {
-                cache.Definition.ReadFrom(ref reader);
-            }
-            else
-            {
-                reader.Skip();
-            }
-        }
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadRunnerChanges(ref Utf8JsonReader reader, MarketCache? cache)
     {
@@ -293,6 +337,7 @@ public sealed class MarketCacheProcessor
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "First-byte dispatch for runner properties — performance-critical hot path.")]
     private void ReadSingleRunnerChange(ref Utf8JsonReader reader, MarketCache? cache)
     {
         long selectionId = 0;
@@ -423,6 +468,7 @@ public sealed class MarketCacheProcessor
         ApplyDeferredUpdates(runner, deferredCount);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Flat switch dispatch over ladder types — linear and readable.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ApplyDeferredUpdates(RunnerCache runner, int count)
     {
@@ -466,6 +512,7 @@ public sealed class MarketCacheProcessor
     /// Reads a [[price, size], [price, size], ...] array directly into the deferred buffer.
     /// Inlined tight loop — no method calls per element.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Simple array parsing loop with bounds growth.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadPriceSizePairs(ref Utf8JsonReader reader, LadderType type, ref int deferredCount)
     {
@@ -482,6 +529,7 @@ public sealed class MarketCacheProcessor
             // Skip any trailing elements in the inner array
             while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
             {
+                // Intentionally empty — consume remaining tokens in inner array
             }
 
             if (deferredCount >= _deferredBuffer.Length)
@@ -498,6 +546,7 @@ public sealed class MarketCacheProcessor
     /// <summary>
     /// Reads a [[position, price, size], ...] array directly into the deferred buffer.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Simple array parsing loop with bounds growth.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadPositionPriceSizeTriples(ref Utf8JsonReader reader, LadderType type, ref int deferredCount)
     {
@@ -516,6 +565,7 @@ public sealed class MarketCacheProcessor
             // Skip any trailing elements in the inner array
             while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
             {
+                // Intentionally empty — consume remaining tokens in inner array
             }
 
             if (deferredCount >= _deferredBuffer.Length)
@@ -528,49 +578,6 @@ public sealed class MarketCacheProcessor
             slot.Position = position;
             deferredCount++;
         }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void SkipValue(ref Utf8JsonReader reader)
-    {
-        reader.Read();
-        if (reader.TokenType is JsonTokenType.StartObject or JsonTokenType.StartArray)
-            reader.Skip();
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void CopyTokenToBuffer(ref Utf8JsonReader reader, ref byte[] buffer, out int length)
-    {
-        if (reader.HasValueSequence)
-        {
-            var seq = reader.ValueSequence;
-            length = (int)seq.Length;
-            if (length > buffer.Length)
-                buffer = new byte[length];
-            seq.CopyTo(buffer);
-        }
-        else
-        {
-            var span = reader.ValueSpan;
-            length = span.Length;
-            if (length > buffer.Length)
-                buffer = new byte[length];
-            span.CopyTo(buffer);
-        }
-    }
-
-    [JsonConverter(typeof(SnakeCaseEnumJsonConverter<LadderType>))]
-    private enum LadderType : byte
-    {
-        Atb,
-        Atl,
-        Batb,
-        Batl,
-        Bdatb,
-        Bdatl,
-        Trd,
-        Spb,
-        Spl,
     }
 
     private struct DeferredLadderUpdate

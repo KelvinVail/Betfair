@@ -1,7 +1,5 @@
 using System.Reflection;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
 using Betfair.Api.Betting.Enums;
 
 namespace Betfair.Tests.Core.Enums;

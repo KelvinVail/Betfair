@@ -1,4 +1,3 @@
-using System.Globalization;
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
 using Betfair.Api.Betting.Enums;
 

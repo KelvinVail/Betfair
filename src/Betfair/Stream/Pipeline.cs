@@ -28,6 +28,7 @@ internal class Pipeline : IPipeline
     /// Uses TryRead before ReadAsync to avoid async state machine overhead
     /// when data is already buffered (common during message bursts).
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Pipeline read loop with fast-path TryRead — inherent branching for performance.")]
     internal async Task ProcessLines(ReadOnlySpanAction<byte> lineProcessor, CancellationToken cancellationToken)
     {
         _ = CopyDataFromStreamToPipeAsync(_stream, _pipe.Writer, cancellationToken);

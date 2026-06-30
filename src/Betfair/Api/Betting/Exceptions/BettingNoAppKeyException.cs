@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace Betfair.Api.Betting.Exceptions;
 
 /// <summary>
