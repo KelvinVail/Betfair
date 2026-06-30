@@ -43,4 +43,6 @@ jobs:
 
     - name: Run dotnet-stryker
       working-directory: src
+      env:
+        STRYKER_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
       run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_KEY" --version "master"
