@@ -2,7 +2,7 @@
 
 This document provides detailed release notes for the Betfair library.
 
-## 🚀 Version 9.0.1-alpha-5 (2025-07-01)
+## 🚀 Version 9.0.1-alpha-6 (2025-07-01)
 
 **Ultra-Low-Latency MarketCache, Raw Stream Access & Code Quality**
 
