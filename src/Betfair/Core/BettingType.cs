@@ -1,7 +1,7 @@
 ﻿namespace Betfair.Core;
 
 /// <summary>
-/// The betting type of the market (i.e. Odds, Asian Handicap Singles, or Asian Handicap Doubles)
+/// The betting type of the market (i.e. Odds, Asian Handicap Singles, or Asian Handicap Doubles).
 /// </summary>
 public sealed class BettingType
 {

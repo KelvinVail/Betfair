@@ -42,7 +42,7 @@ public class LimitOrder
     /// If no minFillSize is specified, the order is killed unless the entire size can be matched.
     /// If minFillSize is specified, the order is killed unless at least the minFillSize can be matched.
     /// The minFillSize cannot be greater than the order's size.
-    /// If specified for a BetTargetType and FILL_OR_KILL order, then this value will be ignored
+    /// If specified for a BetTargetType and FILL_OR_KILL order, then this value will be ignored.
     /// </summary>
     public double? MinFillSize { get; set; }
 

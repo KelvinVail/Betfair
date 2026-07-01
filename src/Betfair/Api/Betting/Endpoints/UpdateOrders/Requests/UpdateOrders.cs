@@ -20,7 +20,7 @@ public class UpdateOrders
 
     /// <summary>
     /// Gets or sets the list of instructions for updating orders.
-    /// The number of update instructions.  The limit of update instructions per request is 60
+    /// The number of update instructions.  The limit of update instructions per request is 60.
     /// </summary>
     public List<UpdateInstruction>? Instructions { get; set; }
 

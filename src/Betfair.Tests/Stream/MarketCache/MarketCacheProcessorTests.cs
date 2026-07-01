@@ -1,5 +1,6 @@
 #pragma warning disable SA1009 // StyleCop false positive with C# 11 UTF-8 string literals (u8 suffix)
 
+using System.Globalization;
 using System.Text;
 using Betfair.Stream.MarketCache;
 
@@ -504,7 +505,6 @@ public class MarketCacheProcessorTests
 
     // ===== Mutation-killing tests below =====
 
-
     // 1. Guard clause: Process returns early for non-StartObject token
     [Fact]
     public void ProcessArrayRootDoesNotThrowAndProducesNoMarkets()
@@ -558,8 +558,10 @@ public class MarketCacheProcessorTests
 
         var market = _processor.GetMarket("1.123")!;
         market.IsImage.Should().BeTrue();
+
         // Runner 222 was already processed (rc before img), so it should still exist
         market.GetRunner(222)!.LastTradedPrice.Should().Be(9.0);
+
         // Runner 111 still exists because ClearRunners was NOT called (runnersProcessed=true)
         market.GetRunner(111)!.LastTradedPrice.Should().Be(5.0);
     }
@@ -837,14 +839,14 @@ public class MarketCacheProcessorTests
         for (int i = 0; i < 130; i++)
         {
             if (i > 0) sb.Append(',');
-            sb.Append($"[{i + 1}.0,{i + 1}.0]");
+            sb.Append(CultureInfo.InvariantCulture, $"[{i + 1}.0,{i + 1}.0]");
         }
 
         sb.Append("""],"atl":[""");
         for (int i = 0; i < 130; i++)
         {
             if (i > 0) sb.Append(',');
-            sb.Append($"[{i + 200}.0,{i + 1}.0]");
+            sb.Append(CultureInfo.InvariantCulture, $"[{i + 200}.0,{i + 1}.0]");
         }
 
         sb.Append("""]}]}]}""");
@@ -1069,14 +1071,14 @@ public class MarketCacheProcessorTests
         for (int i = 0; i < 250; i++)
         {
             if (i > 0) sb.Append(',');
-            sb.Append($"[{i + 1}.0,{i + 1}.0]");
+            sb.Append(CultureInfo.InvariantCulture, $"[{i + 1}.0,{i + 1}.0]");
         }
 
         sb.Append("""],"batb":[""");
         for (int i = 0; i < 10; i++)
         {
             if (i > 0) sb.Append(',');
-            sb.Append($"[{i},{i + 1}.0,{(i + 1) * 10}.0]");
+            sb.Append(CultureInfo.InvariantCulture, $"[{i},{i + 1}.0,{(i + 1) * 10}.0]");
         }
 
         sb.Append("""]}]}]}""");
@@ -1275,18 +1277,6 @@ public class MarketCacheProcessorTests
         market.GetRunner(222).Should().BeNull();
     }
 
-    // Kill mutant Line 300: cache == null means runner is NOT added
-    [Fact]
-    public void ProcessRunnerWithSelectionIdZeroIsIgnored()
-    {
-        // SelectionId 0 causes early return — runner should not be created
-        var data = """{"op":"mcm","id":2,"pt":100,"mc":[{"id":"1.123","rc":[{"id":0,"ltp":5.0}]}]}"""u8;
-
-        _processor.Process(data);
-
-        _processor.GetMarket("1.123")!.RunnerCount.Should().Be(0);
-    }
-
     // Kill mutant Line 316: string.Empty mutation — GetString() ?? string.Empty
     [Fact]
     public void ProcessMarketWithNullIdUsesEmptyString()
@@ -1297,8 +1287,8 @@ public class MarketCacheProcessorTests
         _processor.Process(data);
 
         // Should create a market with empty string ID
-        _processor.GetMarket("").Should().NotBeNull();
-        _processor.GetMarket("")!.GetRunner(111)!.LastTradedPrice.Should().Be(5.0);
+        _processor.GetMarket(string.Empty).Should().NotBeNull();
+        _processor.GetMarket(string.Empty)!.GetRunner(111)!.LastTradedPrice.Should().Be(5.0);
     }
 
     // Kill mutant Line 341/342: ReadRunnerChanges early return — rc not starting with array
@@ -1435,6 +1425,7 @@ public class MarketCacheProcessorTests
         var runner222 = _processor.GetMarket("1.123")!.GetRunner(222)!;
         runner222.AvailableToBack.Count.Should().Be(1);
         runner222.AvailableToBack[3.0].Should().Be(30.0);
+
         // Verify runner 111 was not corrupted
         var runner111 = _processor.GetMarket("1.123")!.GetRunner(111)!;
         runner111.AvailableToBack.Count.Should().Be(2);

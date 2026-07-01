@@ -30,7 +30,7 @@ public class ApiOrderFilter
 
     /// <summary>
     /// Optionally restricts the results to the specified bet IDs.
-    /// A maximum of 250 betId's, or a combination of 250 betId's & marketId's are permitted.
+    /// A maximum of 250 betId's, or a combination of 250 betId's &amp; marketId's are permitted.
     /// </summary>
     /// <param name="betIds">The bet IDs to include.</param>
     /// <returns>This <see cref="ApiOrderFilter"/>.</returns>
@@ -47,7 +47,7 @@ public class ApiOrderFilter
 
     /// <summary>
     /// Optionally restricts the results to the specified market IDs.
-    /// A maximum of 250 marketId's, or a combination of 250 marketId's & betId's are permitted.
+    /// A maximum of 250 marketId's, or a combination of 250 marketId's &amp; betId's are permitted.
     /// </summary>
     /// <param name="marketIds">The market IDs to include.</param>
     /// <returns>This <see cref="ApiOrderFilter"/>.</returns>

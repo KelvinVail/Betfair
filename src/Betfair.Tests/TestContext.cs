@@ -1,3 +1,5 @@
+#pragma warning disable S3903 // Types should be defined in named namespaces
+
 using System.Threading;
 
 /// <summary>
@@ -9,6 +11,8 @@ internal static class TestContext
 
     internal sealed class TestContextCurrent
     {
+#pragma warning disable CA1822, S2325 // Instance access required for xUnit v3 compatibility
         public CancellationToken CancellationToken => CancellationToken.None;
+#pragma warning restore CA1822, S2325
     }
 }

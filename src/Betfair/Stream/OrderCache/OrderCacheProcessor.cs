@@ -141,6 +141,8 @@ public sealed class OrderCacheProcessor
     }
 
     /// <summary>Gets an order market cache by ID, or null if not present.</summary>
+    /// <param name="marketId">The market identifier to look up.</param>
+    /// <returns>The <see cref="OrderCache"/> for the given market, or null if not found.</returns>
     public OrderCache? GetMarket(string marketId)
     {
         if (_singleMarket != null
@@ -153,6 +155,7 @@ public sealed class OrderCacheProcessor
     /// Processes a single line of raw stream bytes, updating order caches in-place.
     /// Zero allocation for typical delta messages.
     /// </summary>
+    /// <param name="data">The raw bytes of a single stream message line.</param>
     [SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
     public void Process(ReadOnlySpan<byte> data)
     {

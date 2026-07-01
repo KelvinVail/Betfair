@@ -99,6 +99,8 @@ public sealed class MarketCacheProcessor
     private static ReadOnlySpan<byte> OpMcm => "mcm"u8;
 
     /// <summary>Gets a market cache by ID, or null if not present.</summary>
+    /// <param name="marketId">The market identifier to look up.</param>
+    /// <returns>The <see cref="MarketCache"/> for the given market, or null if not found.</returns>
     public MarketCache? GetMarket(string marketId)
     {
         if (_singleMarket != null && string.Equals(_singleMarket.MarketId, marketId, StringComparison.Ordinal))
@@ -110,6 +112,7 @@ public sealed class MarketCacheProcessor
     /// Processes a single line of raw stream bytes, updating the market caches in-place.
     /// Zero allocation for typical delta messages.
     /// </summary>
+    /// <param name="data">The raw bytes of a single stream message line.</param>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
     public void Process(ReadOnlySpan<byte> data)
     {

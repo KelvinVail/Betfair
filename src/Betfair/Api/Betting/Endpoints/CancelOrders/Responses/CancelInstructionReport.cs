@@ -12,7 +12,7 @@ public class CancelInstructionReport
 
     /// <summary>
     /// Gets the error code, if any, of the instruction report.
-    /// Cause of failure, or null if command succeeds
+    /// Cause of failure, or null if command succeeds.
     /// </summary>
     public string? ErrorCode { get; init; }
 

@@ -4,7 +4,7 @@ namespace Betfair.Api.Betting.Endpoints.UpdateOrders.Requests;
 
 /// <summary>
 /// Represents an instruction to update an order on Betfair.
-/// Update non-exposure changing fields
+/// Update non-exposure changing fields.
 /// </summary>
 public class UpdateInstruction
 {

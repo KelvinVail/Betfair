@@ -1,7 +1,7 @@
 namespace Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 
 /// <summary>
-/// Information about the Betfair Starting Price. Only available in BSP markets
+/// Information about the Betfair Starting Price. Only available in BSP markets.
 /// </summary>
 public class StartingPrices
 {

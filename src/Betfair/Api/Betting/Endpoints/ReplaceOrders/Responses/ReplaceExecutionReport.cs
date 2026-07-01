@@ -6,29 +6,29 @@ namespace Betfair.Api.Betting.Endpoints.ReplaceOrders.Responses;
 public class ReplaceExecutionReport
 {
     /// <summary>
-    /// Gets or sets the ID of the market.
-    /// Echo of marketId passed
+    /// Gets the ID of the market.
+    /// Echo of marketId passed.
     /// </summary>
     public string MarketId { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the status of the execution report.
+    /// Gets the status of the execution report.
     /// </summary>
     public string Status { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the error code, if any, of the execution report.
+    /// Gets the error code, if any, of the execution report.
     /// </summary>
     public string? ErrorCode { get; init; }
 
     /// <summary>
-    /// Gets or sets the customer reference.
+    /// Gets the customer reference.
     /// Echo of the customerRef if passed.
     /// </summary>
     public string? CustomerRef { get; init; }
 
     /// <summary>
-    /// Gets or sets the list of instruction reports associated with the execution report.
+    /// Gets the list of instruction reports associated with the execution report.
     /// </summary>
     public List<ReplaceInstructionReport>? InstructionReports { get; init; }
 }

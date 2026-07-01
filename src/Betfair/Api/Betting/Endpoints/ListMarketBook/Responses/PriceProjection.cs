@@ -6,7 +6,7 @@ namespace Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 public class PriceProjection
 {
     /// <summary>
-    /// Gets or sets the price data to include.
+    /// Gets the price data to include.
     /// </summary>
     [JsonPropertyName("priceData")]
     public List<string>? PriceData { get; init; }

@@ -8,7 +8,7 @@ namespace Betfair.Api.Betting.Endpoints.ReplaceOrders.Requests;
 public class ReplaceInstruction
 {
     /// <summary>
-    /// Gets or set the Bet ID.
+    /// Gets or sets the Bet ID.
     /// Unique identifier for the bet.
     /// </summary>
     public string BetId { get; set; } = string.Empty;

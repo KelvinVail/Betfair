@@ -58,16 +58,16 @@ public sealed class RunnerCache
     /// <summary>Gets the starting price lay ladder.</summary>
     public PriceLadder StartingPriceLay { get; } = new ();
 
-    /// <summary>Returns true if LastTradedPrice has been set.</summary>
+    /// <summary>Gets a value indicating whether LastTradedPrice has been set.</summary>
     public bool HasLastTradedPrice => !double.IsNaN(LastTradedPrice);
 
-    /// <summary>Returns true if TotalMatched has been set.</summary>
+    /// <summary>Gets a value indicating whether TotalMatched has been set.</summary>
     public bool HasTotalMatched => !double.IsNaN(TotalMatched);
 
-    /// <summary>Returns true if StartingPriceNear has been set.</summary>
+    /// <summary>Gets a value indicating whether StartingPriceNear has been set.</summary>
     public bool HasStartingPriceNear => !double.IsNaN(StartingPriceNear);
 
-    /// <summary>Returns true if StartingPriceFar has been set.</summary>
+    /// <summary>Gets a value indicating whether StartingPriceFar has been set.</summary>
     public bool HasStartingPriceFar => !double.IsNaN(StartingPriceFar);
 
     /// <summary>Clears all ladders (used on full image before repopulating).</summary>

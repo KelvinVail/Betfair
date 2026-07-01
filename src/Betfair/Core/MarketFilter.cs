@@ -4,94 +4,94 @@ public abstract class MarketFilter<T>
     where T : MarketFilter<T>, new()
 {
     /// <summary>
-    /// Restrict markets by any text associated with the market such as the Name, BetfairEvent, Competition, etc.
+    /// Gets the text query to restrict markets by any text associated with the market such as the Name, BetfairEvent, Competition, etc.
     /// You can include a wildcard (*) character as long as it is not the first character.
     /// </summary>
     [JsonPropertyName("textQuery")]
     public string? TextQuery { get; private set; }
 
     /// <summary>
-    /// Restrict markets by the Exchange where the market operates.
+    /// Gets the exchange IDs to restrict markets by the Exchange where the market operates.
     /// Note: This is not currently in use and only entities for the current exchange will be returned.
     /// </summary>
     [JsonPropertyName("exchangeIds")]
     public HashSet<string>? ExchangeIds { get; private set; }
 
     /// <summary>
-    /// Restrict markets by event type associated with the market. (i.e., Football, Hockey, etc)
+    /// Gets the event type IDs to restrict markets by event type associated with the market. (i.e., Football, Hockey, etc.)
     /// </summary>
     [JsonPropertyName("eventTypeIds")]
     public HashSet<string>? EventTypeIds { get; private set; }
 
     /// <summary>
-    /// Restrict markets by the event id associated with the market.
+    /// Gets the event IDs to restrict markets by the event id associated with the market.
     /// </summary>
     [JsonPropertyName("eventIds")]
     public HashSet<string>? EventIds { get; private set; }
 
     /// <summary>
-    /// Restrict markets by the competitions associated with the market.
+    /// Gets the competition IDs to restrict markets by the competitions associated with the market.
     /// </summary>
     [JsonPropertyName("competitionIds")]
     public HashSet<string>? CompetitionIds { get; private set; }
 
     /// <summary>
-    /// Restrict markets by the market id associated with the market.
+    /// Gets the market IDs to restrict markets by the market id associated with the market.
     /// </summary>
     [JsonPropertyName("marketIds")]
     public HashSet<string>? MarketIds { get; private set; }
 
     /// <summary>
-    /// Restrict markets by the venue associated with the market. Currently only Horse Racing markets have venues.
+    /// Gets the venues to restrict markets by the venue associated with the market. Currently only Horse Racing markets have venues.
     /// </summary>
     [JsonPropertyName("venues")]
     public HashSet<string>? Venues { get; private set; }
 
     /// <summary>
-    /// Restrict to bsp markets only, if True or non-bsp markets if False. If not specified then returns both BSP and non-BSP markets.
+    /// Gets a value indicating whether to restrict to bsp markets only, if True or non-bsp markets if False. If not specified then returns both BSP and non-BSP markets.
     /// </summary>
     [JsonPropertyName("bspOnly")]
     public bool? BspOnly { get; private set; }
 
     /// <summary>
-    /// Restrict to markets that will turn in play if True or will not turn in play if false. If not specified, returns both.
+    /// Gets a value indicating whether to restrict to markets that will turn in play if True or will not turn in play if false. If not specified, returns both.
     /// </summary>
     [JsonPropertyName("turnInPlayEnabled")]
     public bool? TurnInPlayEnabled { get; private set; }
 
     /// <summary>
-    /// Restrict to markets that are currently in play if True or not in play if false. If not specified, returns both.
+    /// Gets a value indicating whether to restrict to markets that are currently in play if True or not in play if false. If not specified, returns both.
     /// </summary>
     [JsonPropertyName("inPlayOnly")]
     public bool? InPlayOnly { get; private set; }
 
     /// <summary>
-    /// Restrict to markets that match the betting type of the market (i.e. Odds, Asian Handicap Singles, Asian Handicap Doubles or Line).
+    /// Gets the market betting types to restrict to markets that match the betting type of the market (i.e. Odds, Asian Handicap Singles, Asian Handicap Doubles or Line).
     /// </summary>
     [JsonPropertyName("marketBettingTypes")]
     public HashSet<string>? MarketBettingTypes { get; private set; }
 
     /// <summary>
-    /// Restrict to markets that are in the specified country or countries.
+    /// Gets the market countries to restrict to markets that are in the specified country or countries.
     /// </summary>
     [JsonPropertyName("marketCountries")]
     public HashSet<string>? MarketCountries { get; private set; }
 
     /// <summary>
-    /// Restrict to markets that match the type of the market (i.e., MATCH_ODDS, HALF_TIME_SCORE).
+    /// Gets the market type codes to restrict to markets that match the type of the market (i.e., MATCH_ODDS, HALF_TIME_SCORE).
     /// You should use this instead of relying on the market name as the market type codes are the same in all locales.
     /// </summary>
     [JsonPropertyName("marketTypeCodes")]
     public HashSet<string>? MarketTypeCodes { get; private set; }
 
     /// <summary>
-    /// Restrict to markets that I have one or more orders in these status.
+    /// Gets the order statuses to restrict to markets that I have one or more orders in these status.
     /// </summary>
     [JsonPropertyName("withOrders")]
     public HashSet<string>? WithOrdersFilter { get; private set; }
 
     /// <summary>
-    /// Restrict by race type.
+    /// Gets the race types to restrict by race type.
     /// </summary>
     [JsonPropertyName("raceTypes")]
     public HashSet<string>? RaceTypes { get; private set; }
@@ -307,7 +307,7 @@ public abstract class MarketFilter<T>
     public T WithCountries(params Country[] countries) =>
         countries is null ? This() : WithCountries(countries.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    /// <inheritdoc cref="MarketFilter{T}.WithCountries"/>
+    /// <inheritdoc cref="MarketFilter{T}.WithCountries(Country[])"/>
     public T WithCountries(params string[] isoCodes)
     {
         if (isoCodes is null) return This();

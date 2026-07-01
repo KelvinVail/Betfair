@@ -6,7 +6,7 @@ public class MarketBook
 {
     /// <summary>
     /// Gets the market ID.
-    /// The unique identifier for the market. MarketId's are prefixed with '1.'
+    /// The unique identifier for the market. MarketId's are prefixed with '1.'.
     /// </summary>
     [JsonPropertyName("marketId")]
     public string? MarketId { get; init; }

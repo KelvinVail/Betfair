@@ -47,7 +47,7 @@ public sealed class StreamMarketFilter : MarketFilter<StreamMarketFilter>
     public StreamMarketFilter WithVenues(params Venue[] venues) =>
         venues is null ? this : WithVenues(venues.Where(x => x is not null).Select(x => x.Id).ToArray());
 
-    /// <inheritdoc cref="StreamMarketFilter.WithVenues"/>
+    /// <inheritdoc cref="StreamMarketFilter.WithVenues(Venue[])"/>
     public new StreamMarketFilter WithVenues(params string[] venues)
     {
         if (venues is null) return this;
