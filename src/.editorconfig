@@ -44,10 +44,10 @@ dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:sil
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
 
 # Expression-level preferences
-dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_coalesce_expression = true:warning
 dotnet_style_collection_initializer = true:suggestion
 dotnet_style_explicit_tuple_names = true:suggestion
-dotnet_style_null_propagation = true:suggestion
+dotnet_style_null_propagation = true:warning
 dotnet_style_object_initializer = true:suggestion
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 dotnet_style_prefer_auto_properties = true:silent
@@ -107,12 +107,12 @@ csharp_prefer_simple_using_statement = true:suggestion
 # Expression-level preferences
 csharp_prefer_simple_default_expression = true:suggestion
 csharp_style_deconstructed_variable_declaration = true:suggestion
-csharp_style_inlined_variable_declaration = true:suggestion
+csharp_style_inlined_variable_declaration = true:warning
 csharp_style_pattern_local_over_anonymous_function = true:suggestion
 csharp_style_prefer_index_operator = true:suggestion
 csharp_style_prefer_range_operator = true:suggestion
 csharp_style_throw_expression = true:suggestion
-csharp_style_unused_value_assignment_preference = discard_variable:suggestion
+csharp_style_unused_value_assignment_preference = discard_variable:warning
 csharp_style_unused_value_expression_statement_preference = discard_variable:silent
 
 # 'using' directive preferences
@@ -229,12 +229,12 @@ dotnet_naming_style.begins_with_underscore.word_separator =
 dotnet_naming_style.begins_with_underscore.capitalization = camel_case
 csharp_style_namespace_declarations = file_scoped:warning
 csharp_style_prefer_method_group_conversion = true:silent
-csharp_style_prefer_null_check_over_type_check = true:suggestion
+csharp_style_prefer_null_check_over_type_check = true:warning
 csharp_style_prefer_top_level_statements = true:silent
 dotnet_diagnostic.CA1812.severity = silent
-csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_prefer_primary_constructors = true:warning
 csharp_style_prefer_local_over_anonymous_function = true:suggestion
-csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
+csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
 csharp_style_prefer_tuple_swap = true:suggestion
 csharp_style_prefer_utf8_string_literals = true:suggestion
 dotnet_diagnostic.SA1010.severity = none
@@ -871,8 +871,8 @@ dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 4
 indent_size = 4
 end_of_line = crlf
-dotnet_style_coalesce_expression = true:suggestion
-dotnet_style_null_propagation = true:suggestion
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_null_propagation = true:warning
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
 dotnet_style_prefer_auto_properties = true:silent
 dotnet_style_object_initializer = true:suggestion
@@ -968,3 +968,30 @@ dotnet_diagnostic.S6618.severity = warning
 
 # S6640: Prefer the generic overload when available
 dotnet_diagnostic.S6640.severity = warning
+
+# IDE0018: Inline variable declaration
+dotnet_diagnostic.IDE0018.severity = warning
+
+# IDE0028: Collection initialization can be simplified
+dotnet_diagnostic.IDE0028.severity = warning
+
+# IDE0059: Unnecessary value assignment
+dotnet_diagnostic.IDE0059.severity = warning
+
+# IDE0090: 'new' expression can be simplified
+dotnet_diagnostic.IDE0090.severity = warning
+
+# IDE0270: Null check can be simplified
+dotnet_diagnostic.IDE0270.severity = warning
+
+# IDE0031: Null check can be simplified (null propagation)
+dotnet_diagnostic.IDE0031.severity = warning
+
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = warning
+
+# IDE0300: Collection initialization can be simplified (collection expression)
+dotnet_diagnostic.IDE0300.severity = warning
+
+# IDE0305: Collection initialization can be simplified (fluent)
+dotnet_diagnostic.IDE0305.severity = warning
