@@ -7,12 +7,6 @@ on:
     paths:
       - 'src/**'
   workflow_dispatch:
-    inputs:
-      full_run:
-        description: 'Run mutation testing on all files (slow without coverage optimisation)'
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   build:
@@ -22,8 +16,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -53,17 +45,8 @@ jobs:
       working-directory: src
       run: dotnet tool install -g dotnet-stryker
 
-    - name: Create diff target ref
-      if: ${{ github.event_name == 'push' && inputs.full_run != true }}
-      run: git branch stryker-diff-target ${{ github.event.before }}
-
     - name: Run dotnet-stryker
       working-directory: src
       env:
         STRYKER_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-      run: |
-        if [ "${{ inputs.full_run }}" == "true" ] || [ "${{ github.event_name }}" != "push" ]; then
-          dotnet stryker --dashboard-api-key "$STRYKER_KEY" --version "master"
-        else
-          dotnet stryker --since:stryker-diff-target --dashboard-api-key "$STRYKER_KEY" --version "master"
-        fi
+      run: dotnet stryker --dashboard-api-key "$STRYKER_KEY" --version "master"
