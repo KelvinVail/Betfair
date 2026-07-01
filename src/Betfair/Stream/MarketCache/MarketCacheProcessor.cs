@@ -350,13 +350,7 @@ public sealed class MarketCacheProcessor
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "First-byte dispatch for runner properties — performance-critical hot path.")]
     private void ReadSingleRunnerChange(ref Utf8JsonReader reader, MarketCache? cache)
     {
-        long selectionId = 0;
-        double handicap = 0;
-        double ltp = double.NaN;
-        double tv = double.NaN;
-        double spn = double.NaN;
-        double spf = double.NaN;
-        int deferredCount = 0;
+        var state = RunnerChangeState.Create();
 
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
         {
@@ -367,59 +361,53 @@ public sealed class MarketCacheProcessor
                 continue;
             }
 
-            DispatchRunnerProperty(ref reader, propSpan, ref selectionId, ref handicap, ref ltp, ref tv, ref spn, ref spf, ref deferredCount);
+            DispatchRunnerProperty(ref reader, propSpan, ref state);
         }
 
-        if (cache == null || selectionId == 0)
+        if (cache == null || state.SelectionId == 0)
             return;
 
-        var runner = cache.GetOrAddRunner(selectionId, handicap);
+        var runner = cache.GetOrAddRunner(state.SelectionId, state.Handicap);
 
-        if (!double.IsNaN(ltp)) runner.LastTradedPrice = ltp;
-        if (!double.IsNaN(tv)) runner.TotalMatched = tv;
-        if (!double.IsNaN(spn)) runner.StartingPriceNear = spn;
-        if (!double.IsNaN(spf)) runner.StartingPriceFar = spf;
+        if (!double.IsNaN(state.Ltp)) runner.LastTradedPrice = state.Ltp;
+        if (!double.IsNaN(state.Tv)) runner.TotalMatched = state.Tv;
+        if (!double.IsNaN(state.Spn)) runner.StartingPriceNear = state.Spn;
+        if (!double.IsNaN(state.Spf)) runner.StartingPriceFar = state.Spf;
 
-        ApplyDeferredUpdates(runner, deferredCount);
+        ApplyDeferredUpdates(runner, state.DeferredCount);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "First-byte dispatch for runner properties — performance-critical hot path.")]
     private void DispatchRunnerProperty(
         ref Utf8JsonReader reader,
         ReadOnlySpan<byte> propSpan,
-        ref long selectionId,
-        ref double handicap,
-        ref double ltp,
-        ref double tv,
-        ref double spn,
-        ref double spf,
-        ref int deferredCount)
+        ref RunnerChangeState state)
     {
         switch (propSpan[0])
         {
             case (byte)'a':
-                ReadAtbOrAtl(ref reader, propSpan, ref deferredCount);
+                ReadAtbOrAtl(ref reader, propSpan, ref state.DeferredCount);
                 break;
             case (byte)'i':
                 reader.Read();
-                selectionId = reader.GetInt64();
+                state.SelectionId = reader.GetInt64();
                 break;
             case (byte)'l':
                 reader.Read();
-                ltp = reader.GetDouble();
+                state.Ltp = reader.GetDouble();
                 break;
             case (byte)'t':
-                ReadTvOrTrd(ref reader, propSpan, ref tv, ref deferredCount);
+                ReadTvOrTrd(ref reader, propSpan, ref state.Tv, ref state.DeferredCount);
                 break;
             case (byte)'b':
-                ReadBestAvailable(ref reader, propSpan, ref deferredCount);
+                ReadBestAvailable(ref reader, propSpan, ref state.DeferredCount);
                 break;
             case (byte)'s':
-                ReadStartingPrice(ref reader, propSpan, ref spn, ref spf, ref deferredCount);
+                ReadStartingPrice(ref reader, propSpan, ref state.Spn, ref state.Spf, ref state.DeferredCount);
                 break;
             case (byte)'h':
                 reader.Read();
-                handicap = reader.GetDouble();
+                state.Handicap = reader.GetDouble();
                 break;
             default:
                 SkipValue(ref reader);
@@ -616,5 +604,31 @@ public sealed class MarketCacheProcessor
         public double Price;
         public double Size;
         public double Position;
+    }
+
+    /// <summary>
+    /// Groups the mutable state accumulated while parsing a single runner change,
+    /// reducing the parameter count of <see cref="DispatchRunnerProperty"/>.
+    /// </summary>
+    private struct RunnerChangeState
+    {
+        public long SelectionId;
+        public double Handicap;
+        public double Ltp;
+        public double Tv;
+        public double Spn;
+        public double Spf;
+        public int DeferredCount;
+
+        public static RunnerChangeState Create() => new RunnerChangeState
+        {
+            SelectionId = 0,
+            Handicap = 0,
+            Ltp = double.NaN,
+            Tv = double.NaN,
+            Spn = double.NaN,
+            Spf = double.NaN,
+            DeferredCount = 0,
+        };
     }
 }
