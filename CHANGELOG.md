@@ -5,6 +5,78 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.1-alpha-5] - 2025-07-01
+
+### Added
+- **Ultra-Low-Latency MarketCache**
+  - New `MarketCacheProcessor` for zero-allocation stream processing using `Utf8JsonReader`
+  - `MarketCache`, `RunnerCache`, `PriceLadder`, and `PositionLadder` types for in-memory market state
+  - `MarketDefinitionCache` and `RunnerDefinitionCache` for mutable market definition tracking
+  - First-byte dispatch pattern for minimal branching on hot paths
+  - Deferred ladder update buffer to batch runner price/size updates
+- **Raw Stream Access**
+  - Added `ReadRawLines` method to `Subscription` for direct raw byte stream access
+  - Enables custom zero-copy processing pipelines outside the built-in deserializer
+- **Benchmarks**
+  - Added `MarketStreamPipelineBenchmarks` for end-to-end stream processing measurement
+  - Added `ChangeMessageReader` benchmark for JSON parsing comparison
+  - Added `QuickTimer` and `SanityCheck` utilities
+  - Added Python benchmark for cross-language performance comparison
+  - Included 8,000+ line `MarketStream.txt` sample data file
+- **Documentation**
+  - New `docs/MarketCache.md` covering the low-latency cache architecture
+  - New `docs/BetfairApiClient.md` with comprehensive API client documentation
+  - Updated `docs/Subscription.md`, `docs/Authentication.md`, and other docs
+- **Test Coverage**
+  - Added `MarketCacheProcessorTests` (504 lines), `MarketCacheTests`, `MarketDefinitionCacheTests`
+  - Added `PriceLadderTests`, `PositionLadderTests`, `RunnerCacheTests`
+  - Added `ClearedOrdersQueryTests`, `BetfairExceptionFactoryTests`, `MarketFilterAdditionalTests`
+  - Increased overall test coverage to 90%
+  - Total test count: 1,684 tests (all passing)
+- **Mutation Testing**
+  - Added Stryker mutation testing workflow with API key integration
+  - Optimized mutation testing to run only on changed files via `--since`
+- **SonarCloud Analyzer Parity**
+  - Added Sonar rule configuration to `.editorconfig` (S3776, S1144, S6602, S6603, S6608, S6610, S6618, S6640, and others)
+  - Local builds now surface the same issues SonarCloud reports
+
+### Changed
+- **Performance Optimizations**
+  - `MarketCacheProcessor` uses `ReadOnlySpan<byte>` property names with `ValueTextEquals` for zero-allocation property matching
+  - Cached UTF-8 bytes in `MarketDefinitionCache` to avoid repeated string allocations on unchanged values
+  - `Pipeline` enhanced to support raw line callbacks via `ReadOnlySpanAction`
+- **Session Token Refresh**
+  - Token refresh now triggers on exception type (`InvalidSessionInformationException`) instead of exact message match
+  - More robust against Betfair API message wording changes
+- **Refactored for Cognitive Complexity**
+  - `IdleWatchdogExtensions.RunWatchdogAsync` decomposed into focused helper methods
+  - `MarketCacheProcessor.Process`, `ReadSingleMarketChange`, `ReadSingleRunnerChange` extracted into dispatch methods
+  - `MarketDefinitionCache.ReadFrom` split into grouped property readers
+- **Code Quality**
+  - Replaced `.Be(typeof(T))` with generic `.Be<T>()` across test files (9 occurrences)
+  - Replaced `.BeAssignableTo(typeof(T))` with generic overload
+  - Used `string.Empty` instead of `""` literal
+  - Extracted repeated inline arrays to `static readonly` fields
+  - Replaced `FirstOrDefault` with `Array.Find` on array types
+  - Removed unused private properties from `MarketCacheProcessor`
+  - Fixed SA1204 member ordering in `MarketCacheProcessor` and `MarketDefinitionCache`
+  - Removed duplicate switch expressions in `BetfairExceptionFactory`
+- **Dependencies Updated**
+  - `SonarAnalyzer.CSharp` 10.21.0 → 10.27.0
+  - `System.IO.Pipelines` 10.0.5 → 10.0.9
+  - `DotNet.ReproducibleBuilds` 2.0.2 → 2.0.5
+  - Test packages updated (xunit, FluentAssertions, coverlet, etc.)
+- **CI/CD**
+  - Optimized mutation testing workflow (Stryker `--since` with branch refs)
+  - Fixed security warnings in quality pipeline
+
+### Fixed
+- **MarketCache img/rc ordering bug** — image flag now correctly clears runners regardless of property order in JSON
+- **Race condition in IdleWatchdog** — missed stall detection when watchdog check and message arrival interleaved
+- **Flaky watchdog test** — widened timing margins for CI reliability
+- **Build warnings** — resolved all warnings without disabling analyzers
+- **`SnakeCaseEnumJsonConverter`** — added to `LadderType` enum for proper serialization
+
 ## [9.0.1-alpha-3] - 2025-08-27
 
 ### Fixed

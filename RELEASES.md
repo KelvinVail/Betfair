@@ -2,6 +2,87 @@
 
 This document provides detailed release notes for the Betfair library.
 
+## 🚀 Version 9.0.1-alpha-5 (2025-07-01)
+
+**Ultra-Low-Latency MarketCache, Raw Stream Access & Code Quality**
+
+A feature-rich release introducing a zero-allocation market cache for stream processing, raw byte-level stream access, comprehensive test coverage improvements (90%+), mutation testing, and full SonarCloud compliance.
+
+### 🎯 **What's New**
+
+#### Ultra-Low-Latency MarketCache
+- **Zero-Allocation Processing**: New `MarketCacheProcessor` reads raw stream bytes directly via `Utf8JsonReader` — no intermediate objects, no GC pressure on steady-state deltas
+- **In-Memory Market State**: `MarketCache`, `RunnerCache`, `PriceLadder`, and `PositionLadder` maintain live market state updated in-place
+- **Market Definitions**: `MarketDefinitionCache` uses cached UTF-8 bytes for zero-allocation string comparison — only allocates when values actually change
+- **First-Byte Dispatch**: Runner property parsing uses single-byte switching for minimal branching on hot paths
+- **Deferred Ladder Updates**: Batches price/size updates into a reusable buffer, applied once the runner is resolved
+
+#### Raw Stream Access
+- **`Subscription.ReadRawLines`**: New method provides direct access to raw byte lines from the stream pipeline
+- **Custom Pipelines**: Enables building zero-copy processing pipelines outside the built-in JSON deserializer
+
+#### Benchmarks
+- Full BenchmarkDotNet suite for stream processing (`MarketStreamPipelineBenchmarks`)
+- JSON parsing comparison benchmarks (`ChangeMessageReader`, `JsonReadBenchmarks`)
+- Python benchmark for cross-language comparison
+- 8,000+ line real market stream sample data included
+
+#### Mutation Testing
+- Stryker.NET integration with `--since` for incremental mutation analysis
+- API key configuration for dashboard reporting
+- Optimized workflow running only against changed files
+
+### 🐛 **Bug Fixes**
+
+- **img/rc ordering bug**: Image flag now correctly clears runners regardless of JSON property order
+- **IdleWatchdog race condition**: Fixed missed stall detection when watchdog poll and message arrival interleaved
+- **Session token refresh**: Now triggers on exception type (`InvalidSessionInformationException`) instead of brittle exact message match
+- **Flaky watchdog test**: Widened timing margins for CI reliability
+
+### 🔧 **Code Quality**
+
+#### SonarCloud — All Issues Resolved
+- Refactored 5 methods exceeding Cognitive Complexity threshold (max was 57 → all now under 15)
+- Replaced non-generic assertion overloads with generic equivalents (9 occurrences)
+- Extracted repeated arrays to `static readonly` fields
+- Replaced `FirstOrDefault` with `Array.Find` on arrays
+- Removed unused private members
+
+#### Local Analyzer Parity
+- Added 20+ Sonar rules to `.editorconfig` — local builds now catch everything SonarCloud would flag
+- Zero SA1204, CA1502, and S-prefixed warnings from all modified files
+
+#### Dependencies Updated
+- `SonarAnalyzer.CSharp` 10.21.0 → 10.27.0
+- `System.IO.Pipelines` 10.0.5 → 10.0.9
+- `DotNet.ReproducibleBuilds` 2.0.2 → 2.0.5
+- Test packages updated (xunit, FluentAssertions, coverlet, etc.)
+
+### 📚 **Documentation**
+
+- New `docs/MarketCache.md` — architecture guide for the low-latency cache
+- New `docs/BetfairApiClient.md` — comprehensive API client reference
+- Updated Subscription, Authentication, and other existing docs
+
+### 🧪 **Testing**
+
+- **1,684 tests** — all passing on net8.0, net9.0, and net10.0
+- **90% coverage** — up from ~75% in alpha-4
+- New test suites: `MarketCacheProcessorTests`, `MarketCacheTests`, `MarketDefinitionCacheTests`, `PriceLadderTests`, `PositionLadderTests`, `RunnerCacheTests`, `ClearedOrdersQueryTests`, `BetfairExceptionFactoryTests`, `MarketFilterAdditionalTests`
+
+### 📦 **Installation**
+
+```bash
+dotnet add package Betfair --version 9.0.1-alpha-5
+```
+
+### 🔗 **Compatibility**
+
+- **Backward Compatible**: No breaking changes from alpha-4
+- **Target Frameworks**: net8.0, net9.0, net10.0
+
+---
+
 ## 🚀 Version 9.0.1-alpha (2025-06-19)
 
 **Multi-Framework Support & NuGet Improvements**
