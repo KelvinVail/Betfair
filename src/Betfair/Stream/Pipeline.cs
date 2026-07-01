@@ -1,23 +1,20 @@
 ﻿namespace Betfair.Stream;
 
-internal class Pipeline : IPipeline
+internal class Pipeline(System.IO.Stream stream)
+    : IPipeline
 {
-    private readonly System.IO.Stream _stream;
     private readonly Pipe _pipe = new ();
-
-    public Pipeline(System.IO.Stream stream) =>
-        _stream = stream;
 
     public async Task WriteLine(object value)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, value.GetInternalContext());
-        await _stream.WriteAsync(bytes);
-        _stream.WriteByte((byte)'\n');
+        await stream.WriteAsync(bytes);
+        stream.WriteByte((byte)'\n');
     }
 
     public async IAsyncEnumerable<byte[]> ReadLines([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        _ = CopyDataFromStreamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
+        _ = CopyDataFromStreamToPipeAsync(stream, _pipe.Writer, cancellationToken);
         await foreach (var line in ReadPipeAsync(_pipe.Reader, cancellationToken))
             yield return line.Slice(0, line.Length).ToArray();
     }
@@ -34,15 +31,13 @@ internal class Pipeline : IPipeline
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1502:Avoid excessive complexity", Justification = "Pipeline read loop with fast-path TryRead — inherent branching for performance.")]
     internal async Task ProcessLines(ReadOnlySpanAction<byte> lineProcessor, CancellationToken cancellationToken)
     {
-        _ = CopyDataFromStreamToPipeAsync(_stream, _pipe.Writer, cancellationToken);
+        _ = CopyDataFromStreamToPipeAsync(stream, _pipe.Writer, cancellationToken);
         var reader = _pipe.Reader;
 
         while (true)
         {
-            ReadResult result;
-
             // Fast path: if data is already buffered, avoid async state machine entirely
-            if (!reader.TryRead(out result))
+            if (!reader.TryRead(out var result))
             {
                 try
                 {

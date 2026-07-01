@@ -542,32 +542,19 @@ public class Subscription : IDisposable
         _requestId = await EnsureSuccess(orderSubscription, cancellationToken).ConfigureAwait(false);
     }
 
-    private sealed class LastMarketSubscription
+    private sealed class LastMarketSubscription(StreamMarketFilter filter, DataFilter? dataFilter, TimeSpan? conflate)
     {
-        public LastMarketSubscription(StreamMarketFilter filter, DataFilter? dataFilter, TimeSpan? conflate)
-        {
-            Filter = filter;
-            DataFilter = dataFilter;
-            Conflate = conflate;
-        }
+        public StreamMarketFilter Filter { get; } = filter;
 
-        public StreamMarketFilter Filter { get; }
+        public DataFilter? DataFilter { get; } = dataFilter;
 
-        public DataFilter? DataFilter { get; }
-
-        public TimeSpan? Conflate { get; }
+        public TimeSpan? Conflate { get; } = conflate;
     }
 
-    private sealed class LastOrderSubscription
+    private sealed class LastOrderSubscription(StreamOrderFilter? filter, TimeSpan? conflate)
     {
-        public LastOrderSubscription(StreamOrderFilter? filter, TimeSpan? conflate)
-        {
-            Filter = filter;
-            Conflate = conflate;
-        }
+        public StreamOrderFilter? Filter { get; } = filter;
 
-        public StreamOrderFilter? Filter { get; }
-
-        public TimeSpan? Conflate { get; }
+        public TimeSpan? Conflate { get; } = conflate;
     }
 }

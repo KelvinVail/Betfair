@@ -124,7 +124,7 @@ public class MarketBookQuery
     {
         if (customerStrategyRefs?.Length > 0)
         {
-            _customerStrategyRefs ??= new HashSet<string>();
+            _customerStrategyRefs ??= [];
             foreach (var strategyRef in customerStrategyRefs.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 _customerStrategyRefs.Add(strategyRef);
@@ -176,7 +176,7 @@ public class MarketBookQuery
     {
         if (betIds?.Length > 0)
         {
-            _betIds ??= new HashSet<string>();
+            _betIds ??= [];
             foreach (var id in betIds.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 _betIds.Add(id);

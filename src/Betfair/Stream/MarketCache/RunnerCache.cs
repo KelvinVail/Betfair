@@ -5,19 +5,13 @@ namespace Betfair.Stream.MarketCache;
 /// All price ladders are updated in-place from stream deltas.
 /// Uses NaN sentinels instead of Nullable&lt;double&gt; to eliminate wrapping overhead.
 /// </summary>
-public sealed class RunnerCache
+public sealed class RunnerCache(long selectionId, double handicap = 0)
 {
-    public RunnerCache(long selectionId, double handicap = 0)
-    {
-        SelectionId = selectionId;
-        Handicap = handicap;
-    }
-
     /// <summary>Gets the selection (runner) ID.</summary>
-    public long SelectionId { get; }
+    public long SelectionId { get; } = selectionId;
 
     /// <summary>Gets the handicap value for this runner.</summary>
-    public double Handicap { get; }
+    public double Handicap { get; } = handicap;
 
     /// <summary>Gets or sets the last traded price. NaN means not set.</summary>
     public double LastTradedPrice { get; set; } = double.NaN;

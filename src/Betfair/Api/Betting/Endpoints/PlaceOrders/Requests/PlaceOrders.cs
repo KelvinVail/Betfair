@@ -4,21 +4,14 @@ namespace Betfair.Api.Betting.Endpoints.PlaceOrders.Requests;
 /// Represents a request to place orders on a market.
 /// </summary>
 #pragma warning disable CA1724 // Type names should not match namespaces
-public class PlaceOrders
+public class PlaceOrders(string marketId)
 #pragma warning restore CA1724
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PlaceOrders"/> class.
-    /// </summary>
-    /// <param name="marketId">The market id these orders are to be placed on.</param>
-    public PlaceOrders(string marketId) =>
-        MarketId = marketId ?? throw new ArgumentNullException(nameof(marketId));
-
     /// <summary>
     /// Gets the market ID.
     /// The market id these orders are to be placed on.
     /// </summary>
-    public string MarketId { get; }
+    public string MarketId { get; } = marketId ?? throw new ArgumentNullException(nameof(marketId));
 
     /// <summary>
     /// Gets the list of instructions for placing orders.

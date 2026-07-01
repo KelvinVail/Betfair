@@ -1,35 +1,26 @@
 ﻿namespace Betfair.Stream.Messages;
 
-internal class MarketSubscription : MessageBase
+internal class MarketSubscription(
+    int id,
+    StreamMarketFilter marketFiler,
+    DataFilter? dataFilter = null,
+    TimeSpan? conflate = null,
+    string? initialClk = null,
+    string? clk = null)
+    : MessageBase("marketSubscription", id)
 {
-    public MarketSubscription(
-        int id,
-        StreamMarketFilter marketFiler,
-        DataFilter? dataFilter = null,
-        TimeSpan? conflate = null,
-        string? initialClk = null,
-        string? clk = null)
-        : base("marketSubscription", id)
-    {
-        MarketFilter = marketFiler;
-        MarketDataFilter = dataFilter ?? new DataFilter().WithBestPrices();
-        ConflateMs = (int)(conflate?.TotalMilliseconds ?? 0);
-        InitialClk = initialClk;
-        Clk = clk;
-    }
-
     [JsonPropertyName("marketFilter")]
-    public StreamMarketFilter MarketFilter { get; }
+    public StreamMarketFilter MarketFilter { get; } = marketFiler;
 
     [JsonPropertyName("marketDataFilter")]
-    public DataFilter MarketDataFilter { get; }
+    public DataFilter MarketDataFilter { get; } = dataFilter ?? new DataFilter().WithBestPrices();
 
     [JsonPropertyName("conflateMs")]
-    public int ConflateMs { get; }
+    public int ConflateMs { get; } = (int)(conflate?.TotalMilliseconds ?? 0);
 
     [JsonPropertyName("initialClk")]
-    public string? InitialClk { get; }
+    public string? InitialClk { get; } = initialClk;
 
     [JsonPropertyName("clk")]
-    public string? Clk { get; }
+    public string? Clk { get; } = clk;
 }

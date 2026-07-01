@@ -188,8 +188,7 @@ public sealed class MarketCacheProcessor
     private static void ReadTotalVolume(ref Utf8JsonReader reader, MarketCache? cache)
     {
         reader.Read();
-        if (cache != null)
-            cache.TotalMatched = reader.GetDouble();
+        cache?.TotalMatched = reader.GetDouble();
     }
 
     private static bool ReadImageFlag(ref Utf8JsonReader reader, MarketCache? cache, bool runnersProcessed)
@@ -269,7 +268,7 @@ public sealed class MarketCacheProcessor
             {
                 reader.Read();
                 cache = ResolveMarket(ref reader);
-                if (cache != null) cache.PublishTime = publishTime;
+                cache?.PublishTime = publishTime;
             }
             else if (reader.ValueTextEquals(PropRc))
             {
@@ -623,7 +622,7 @@ public sealed class MarketCacheProcessor
         public double Spf;
         public int DeferredCount;
 
-        public static RunnerChangeState Create() => new RunnerChangeState
+        public static RunnerChangeState Create() => new ()
         {
             SelectionId = 0,
             Handicap = 0,

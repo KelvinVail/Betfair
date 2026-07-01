@@ -34,7 +34,7 @@ public class MarketCatalogueQuery
     /// <returns>The current <see cref="MarketCatalogueQuery"/> instance.</returns>
     public MarketCatalogueQuery Include(MarketProjection projection)
     {
-        _projection ??= new ();
+        _projection ??= [];
         _projection.Add(projection);
         return this;
     }

@@ -6,7 +6,7 @@ namespace Betfair.Stream.MarketCache;
 /// Uses a flat array indexed by runner ordinal for O(1) lookup.
 /// </summary>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1724:The type name MarketCache conflicts in whole or in part with the namespace name", Justification = "MarketCache is the canonical domain name; renaming would harm API clarity.")]
-public sealed class MarketCache
+public sealed class MarketCache(string marketId)
 {
     // Map selection ID → ordinal index for O(1) lookup after first encounter
     private readonly Dictionary<long, int> _selectionIdToIndex = new (16);
@@ -15,14 +15,8 @@ public sealed class MarketCache
     private RunnerCache[] _runnerArray = new RunnerCache[16];
     private int _runnerCount;
 
-    public MarketCache(string marketId)
-    {
-        MarketId = marketId;
-        MarketIdBytes = System.Text.Encoding.UTF8.GetBytes(marketId);
-    }
-
     /// <summary>Gets the market ID (e.g. "1.241629436").</summary>
-    public string MarketId { get; }
+    public string MarketId { get; } = marketId;
 
     /// <summary>Gets the total matched volume on this market.</summary>
     public double? TotalMatched { get; internal set; }
@@ -58,7 +52,7 @@ public sealed class MarketCache
     }
 
     /// <summary>Gets the pre-computed UTF-8 bytes of the market ID for zero-allocation comparison.</summary>
-    internal byte[] MarketIdBytes { get; }
+    internal byte[] MarketIdBytes { get; } = System.Text.Encoding.UTF8.GetBytes(marketId);
 
     /// <summary>Gets a runner by selection ID.</summary>
     /// <param name="selectionId">The selection (runner) ID to look up.</param>

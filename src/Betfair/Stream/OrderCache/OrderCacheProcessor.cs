@@ -273,17 +273,17 @@ public sealed class OrderCacheProcessor
             {
                 reader.Read();
                 cache = ResolveMarket(ref reader);
-                if (cache != null) cache.PublishTime = publishTime;
+                cache?.PublishTime = publishTime;
             }
             else if (reader.ValueTextEquals(PropAccountId))
             {
                 reader.Read();
-                if (cache != null) cache.AccountId = reader.GetInt64();
+                cache?.AccountId = reader.GetInt64();
             }
             else if (reader.ValueTextEquals(PropClosed))
             {
                 reader.Read();
-                if (cache != null) cache.Closed = reader.GetBoolean();
+                cache?.Closed = reader.GetBoolean();
             }
             else if (reader.ValueTextEquals(PropOrc))
             {
@@ -341,7 +341,6 @@ public sealed class OrderCacheProcessor
     [SuppressMessage("Major Code Smell", "S3776:Cognitive Complexity of methods should not be too high", Justification = "Sequential JSON property dispatch — complexity is inherent to the protocol.")]
     private static void ReadSingleOrderRunnerChange(ref Utf8JsonReader reader, OrderCache? cache)
     {
-        long selectionId = 0;
         double handicap = 0;
         bool fullImage = false;
         OrderRunnerCache? runner = null;
@@ -351,7 +350,7 @@ public sealed class OrderCacheProcessor
             if (reader.ValueTextEquals(PropId))
             {
                 reader.Read();
-                selectionId = reader.GetInt64();
+                var selectionId = reader.GetInt64();
                 if (cache != null)
                 {
                     runner = cache.GetOrAddRunner(selectionId, handicap);
@@ -444,37 +443,37 @@ public sealed class OrderCacheProcessor
             else if (reader.ValueTextEquals(PropP))
             {
                 reader.Read();
-                if (order != null) order.Price = reader.GetDouble();
+                order?.Price = reader.GetDouble();
             }
             else if (reader.ValueTextEquals(PropS))
             {
                 reader.Read();
-                if (order != null) order.Size = reader.GetDouble();
+                order?.Size = reader.GetDouble();
             }
             else if (reader.ValueTextEquals(PropBsp))
             {
                 reader.Read();
-                if (order != null) order.BspLiability = reader.GetDouble();
+                order?.BspLiability = reader.GetDouble();
             }
             else if (reader.ValueTextEquals(PropSide))
             {
                 reader.Read();
-                if (order != null) order.Side = ParseSide(ref reader);
+                order?.Side = ParseSide(ref reader);
             }
             else if (reader.ValueTextEquals(PropStatus))
             {
                 reader.Read();
-                if (order != null) order.Status = ParseStatus(ref reader);
+                order?.Status = ParseStatus(ref reader);
             }
             else if (reader.ValueTextEquals(PropPtOrder))
             {
                 reader.Read();
-                if (order != null) order.PersistenceType = ParsePersistenceType(ref reader);
+                order?.PersistenceType = ParsePersistenceType(ref reader);
             }
             else if (reader.ValueTextEquals(PropOt))
             {
                 reader.Read();
-                if (order != null) order.OrderType = ParseOrderType(ref reader);
+                order?.OrderType = ParseOrderType(ref reader);
             }
             else
             {
@@ -490,77 +489,77 @@ public sealed class OrderCacheProcessor
         if (reader.ValueTextEquals(PropPd))
         {
             reader.Read();
-            if (order != null) order.PlacedDate = reader.GetInt64();
+            order?.PlacedDate = reader.GetInt64();
         }
         else if (reader.ValueTextEquals(PropMd))
         {
             reader.Read();
-            if (order != null) order.MatchedDate = reader.GetInt64();
+            order?.MatchedDate = reader.GetInt64();
         }
         else if (reader.ValueTextEquals(PropCd))
         {
             reader.Read();
-            if (order != null) order.CancelledDate = reader.GetInt64();
+            order?.CancelledDate = reader.GetInt64();
         }
         else if (reader.ValueTextEquals(PropLd))
         {
             reader.Read();
-            if (order != null) order.LapsedDate = reader.GetInt64();
+            order?.LapsedDate = reader.GetInt64();
         }
         else if (reader.ValueTextEquals(PropLsrc))
         {
             reader.Read();
-            if (order != null) order.SetLapsedStatusReasonCode(ref reader);
+            order?.SetLapsedStatusReasonCode(ref reader);
         }
         else if (reader.ValueTextEquals(PropAvp))
         {
             reader.Read();
-            if (order != null) order.AveragePriceMatched = reader.GetDouble();
+            order?.AveragePriceMatched = reader.GetDouble();
         }
         else if (reader.ValueTextEquals(PropSm))
         {
             reader.Read();
-            if (order != null) order.SizeMatched = reader.GetDouble();
+            order?.SizeMatched = reader.GetDouble();
         }
         else if (reader.ValueTextEquals(PropSr))
         {
             reader.Read();
-            if (order != null) order.SizeRemaining = reader.GetDouble();
+            order?.SizeRemaining = reader.GetDouble();
         }
         else if (reader.ValueTextEquals(PropSl))
         {
             reader.Read();
-            if (order != null) order.SizeLapsed = reader.GetDouble();
+            order?.SizeLapsed = reader.GetDouble();
         }
         else if (reader.ValueTextEquals(PropSc))
         {
             reader.Read();
-            if (order != null) order.SizeCancelled = reader.GetDouble();
+            order?.SizeCancelled = reader.GetDouble();
         }
         else if (reader.ValueTextEquals(PropSv))
         {
             reader.Read();
-            if (order != null) order.SizeVoided = reader.GetDouble();
+            order?.SizeVoided = reader.GetDouble();
         }
         else if (reader.ValueTextEquals(PropRac))
         {
             reader.Read();
-            if (order != null) order.SetRegulatorAuthCode(ref reader);
+            order?.SetRegulatorAuthCode(ref reader);
         }
         else if (reader.ValueTextEquals(PropRc))
         {
             reader.Read();
-            if (order != null) order.SetRegulatorCode(ref reader);
+            order?.SetRegulatorCode(ref reader);
         }
         else if (reader.ValueTextEquals(PropRfo))
         {
             reader.Read();
-            if (order != null) order.SetOrderReference(ref reader);
+            order?.SetOrderReference(ref reader);
         }
         else if (reader.ValueTextEquals(PropRfs))
         {
             reader.Read();
-            if (order != null) order.SetStrategyReference(ref reader);
+            order?.SetStrategyReference(ref reader);
         }
         else
         {

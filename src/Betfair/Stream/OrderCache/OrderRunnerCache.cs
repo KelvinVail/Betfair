@@ -8,7 +8,7 @@ namespace Betfair.Stream.OrderCache;
 /// individual orders, as well as per-strategy matched data.
 /// Uses a flat array with byte-based linear scan for zero-allocation order lookup.
 /// </summary>
-public sealed class OrderRunnerCache
+public sealed class OrderRunnerCache(long selectionId, double handicap = 0)
 {
     private UnmatchedOrderCache[] _orderArray = new UnmatchedOrderCache[8];
     private int _orderCount;
@@ -20,17 +20,11 @@ public sealed class OrderRunnerCache
     private StrategyMatchCache[] _strategyArray = new StrategyMatchCache[4];
     private int _strategyCount;
 
-    public OrderRunnerCache(long selectionId, double handicap = 0)
-    {
-        SelectionId = selectionId;
-        Handicap = handicap;
-    }
-
     /// <summary>Gets the selection (runner) ID.</summary>
-    public long SelectionId { get; }
+    public long SelectionId { get; } = selectionId;
 
     /// <summary>Gets the handicap value for this runner.</summary>
-    public double Handicap { get; }
+    public double Handicap { get; } = handicap;
 
     /// <summary>Gets the aggregated matched backs ladder (price → size).</summary>
     public PriceLadder MatchedBacks { get; } = new ();

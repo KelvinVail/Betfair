@@ -1,16 +1,10 @@
 ﻿namespace Betfair.Stream.Messages;
 
-internal abstract class MessageBase
+internal abstract class MessageBase(string op, int id)
 {
-    protected MessageBase(string op, int id)
-    {
-        Op = op;
-        Id = id;
-    }
-
     [JsonPropertyName("op")]
-    public string Op { get; }
+    public string Op { get; } = op;
 
     [JsonPropertyName("id")]
-    public int Id { get; internal set; }
+    public int Id { get; internal set; } = id;
 }

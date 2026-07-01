@@ -9,21 +9,14 @@ namespace Betfair.Api.Betting.Endpoints.ReplaceOrders.Requests;
 /// will not be rolled back.
 /// </summary>
 #pragma warning disable CA1724 // Type names should not match namespaces
-public class ReplaceOrders
+public class ReplaceOrders(string marketId)
 #pragma warning restore CA1724
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ReplaceOrders"/> class.
-    /// </summary>
-    /// <param name="marketId">The market id these orders are to be placed on.</param>
-    public ReplaceOrders(string marketId) =>
-        MarketId = marketId ?? throw new ArgumentNullException(nameof(marketId));
-
     /// <summary>
     /// Gets the market ID.
     /// The market id these orders are to be placed on.
     /// </summary>
-    public string MarketId { get; }
+    public string MarketId { get; } = marketId ?? throw new ArgumentNullException(nameof(marketId));
 
     /// <summary>
     /// Gets the list of instructions for replacing orders.

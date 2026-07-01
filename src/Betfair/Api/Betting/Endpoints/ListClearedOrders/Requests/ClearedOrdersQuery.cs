@@ -128,7 +128,7 @@ public class ClearedOrdersQuery
     {
         if (eventIds?.Length > 0)
         {
-            _eventIds ??= new HashSet<string>();
+            _eventIds ??= [];
             foreach (var id in eventIds.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 _eventIds.Add(id);
@@ -147,7 +147,7 @@ public class ClearedOrdersQuery
     {
         if (marketIds?.Length > 0)
         {
-            _marketIds ??= new HashSet<string>();
+            _marketIds ??= [];
             foreach (var id in marketIds.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 _marketIds.Add(id);
@@ -166,7 +166,7 @@ public class ClearedOrdersQuery
     {
         if (runnerIds?.Length > 0)
         {
-            _runnerIds ??= new HashSet<long>();
+            _runnerIds ??= [];
             foreach (var id in runnerIds)
             {
                 _runnerIds.Add(id);
@@ -185,7 +185,7 @@ public class ClearedOrdersQuery
     {
         if (betIds?.Length > 0)
         {
-            _betIds ??= new HashSet<string>();
+            _betIds ??= [];
             foreach (var id in betIds.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 _betIds.Add(id);
@@ -204,7 +204,7 @@ public class ClearedOrdersQuery
     {
         if (customerOrderRefs?.Length > 0)
         {
-            _customerOrderRefs ??= new HashSet<string>();
+            _customerOrderRefs ??= [];
             foreach (var orderRef in customerOrderRefs.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 _customerOrderRefs.Add(orderRef);
@@ -223,7 +223,7 @@ public class ClearedOrdersQuery
     {
         if (customerStrategyRefs?.Length > 0)
         {
-            _customerStrategyRefs ??= new HashSet<string>();
+            _customerStrategyRefs ??= [];
             foreach (var strategyRef in customerStrategyRefs.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 _customerStrategyRefs.Add(strategyRef);

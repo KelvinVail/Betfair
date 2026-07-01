@@ -5,7 +5,7 @@ namespace Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 /// </summary>
 public class PriceProjectionBuilder
 {
-    private readonly HashSet<string> _priceData = new ();
+    private readonly HashSet<string> _priceData = [];
     private ExBestOffersOverrides? _exBestOffersOverrides;
     private bool? _virtualize;
     private bool? _rolloverStakes;
@@ -192,7 +192,7 @@ public class PriceProjectionBuilder
     {
         return new PriceProjection
         {
-            PriceData = _priceData.Count > 0 ? _priceData.ToList() : null,
+            PriceData = _priceData.Count > 0 ? [.. _priceData] : null,
             ExBestOffersOverrides = _exBestOffersOverrides,
             Virtualise = _virtualize,
             RolloverStakes = _rolloverStakes,
