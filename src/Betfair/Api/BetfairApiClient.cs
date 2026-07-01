@@ -368,7 +368,7 @@ public class BetfairApiClient : IDisposable
         query ??= new MarketBookQuery();
         var request = new MarketBookRequest
         {
-            MarketIds = marketIds.ToList(),
+            MarketIds = [.. marketIds],
             PriceProjection = query.PriceProjection,
             OrderProjection = query.OrderProjection,
             MatchProjection = query.MatchProjection,
