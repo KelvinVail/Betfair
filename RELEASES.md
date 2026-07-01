@@ -2,6 +2,86 @@
 
 This document provides detailed release notes for the Betfair library.
 
+## 🚀 Version 9.0.1-alpha-7 (2026-07-01)
+
+**Zero-Allocation OrderCache, Mutation Testing & Code Quality Enforcement**
+
+A major performance release introducing a zero-allocation order cache for real-time order stream processing, mutation testing improvements, and strict IDE code style enforcement across the codebase.
+
+### 🎯 **What's New**
+
+#### Ultra-Low-Latency OrderCache
+- **Zero-Allocation Processing**: New `OrderCacheProcessor` reads raw OCM stream bytes directly via `Utf8JsonReader` — zero heap allocation on steady-state delta messages
+- **In-Memory Order State**: `OrderCache`, `OrderRunnerCache`, `UnmatchedOrderCache`, and `StrategyMatchCache` maintain live order state updated in-place
+- **Byte-Based Identity**: BetIds and strategy references use raw UTF-8 byte comparison — no string allocation on lookup
+- **Lazy String Decode**: String fields cache UTF-8 bytes and only allocate a `string` on first property access
+- **Object Pooling**: `UnmatchedOrderCache` instances pooled and recycled on full image resets
+- **Combined Caches**: `RunMarketAndOrderCaches` subscribes to both market and order streams on a single TCP connection
+
+#### Performance Numbers
+Benchmarked on AMD Ryzen 7 5800X, .NET 10.0, processing 266 real order stream messages:
+
+| Scenario | Mean | Allocated |
+|----------|------|-----------|
+| System.Text.Json (baseline) | 1,330 μs | 1,175 KB |
+| OrderCache — full stream | 700 μs | 349 KB |
+| **OrderCache — deltas only** | **598 μs** | **0 B** |
+| Zero-copy pipeline — deltas | 731 μs | 3 KB |
+
+**2.2× faster** than System.Text.Json with **zero GC pressure** on steady-state.
+
+#### Mutation Testing
+- 50+ targeted tests killing `MarketCacheProcessor` mutants (score 0% → 91.5%)
+- Rolled back to xUnit v2 for Stryker perTest compatibility
+- Simplified workflow: full mutation analysis on every run
+
+### 🔧 **Code Quality Enforcement**
+
+#### IDE Rules as Build Warnings
+- Enabled 10+ IDE code style rules at warning severity (IDE0018, IDE0028, IDE0059, IDE0090, IDE0270, IDE0290, IDE0300, IDE0305, IDE1006)
+- Bumped null propagation, coalesce expression, collection expressions, primary constructors to warning
+- All violations fixed across the entire codebase
+
+#### Modernized C# Patterns
+- 13+ classes converted to primary constructors
+- Collection expressions replace explicit `new List<T>()` / `new T[]`
+- Null propagation operator applied throughout
+- Zero build warnings
+
+### 🏗️ **Architecture Changes**
+
+#### Enum Reorganization
+- `Side`, `OrderType`, `PersistenceType` moved from `Api.Betting.Enums` → `Core.Enums`
+- Shared between REST API models and OrderCache (no duplication)
+- `OrderStatus` enhanced with byte-sized enum for cache performance
+
+#### MarketCacheProcessor Refactoring
+- Introduced `RunnerChangeState` struct to reduce parameter count on hot dispatch paths
+- Cleaner method signatures with grouped state
+
+### 📚 **Documentation**
+
+- New `docs/OrderCache.md` — comprehensive guide to the zero-allocation order cache architecture
+
+### 🧪 **Testing**
+
+- **~1,850 tests** — all passing on net8.0, net9.0, and net10.0
+- New test suites: `OrderCacheProcessorTests`, `OrderCacheTests`, `OrderRunnerCacheTests`, `StrategyMatchCacheTests`, `UnmatchedOrderCacheTests`
+- MarketCacheProcessor mutation score: **91.5%**
+
+### 📦 **Installation**
+
+```bash
+dotnet add package Betfair --version 9.0.1-alpha-7
+```
+
+### 🔗 **Compatibility**
+
+- **Backward Compatible**: No breaking changes from alpha-6 (enum namespace moves are internal)
+- **Target Frameworks**: net8.0, net9.0, net10.0
+
+---
+
 ## 🚀 Version 9.0.1-alpha-6 (2025-07-01)
 
 **Ultra-Low-Latency MarketCache, Raw Stream Access & Code Quality**

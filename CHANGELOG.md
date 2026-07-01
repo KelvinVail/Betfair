@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.1-alpha-7] - 2026-07-01
+
+### Added
+- **Ultra-Low-Latency OrderCache**
+  - New `OrderCacheProcessor` for zero-allocation order stream processing using `Utf8JsonReader`
+  - `OrderCache`, `OrderRunnerCache`, `UnmatchedOrderCache`, and `StrategyMatchCache` types for in-memory order state
+  - Byte-based identity for BetIds and strategy references (no string allocation on lookup)
+  - Cached UTF-8 bytes with lazy decode for string fields
+  - Byte-sized enums for `Side`, `OrderStatus`, `PersistenceType`, `OrderType` (moved to Core)
+  - Object pooling for `UnmatchedOrderCache` on full image resets
+  - `RunMarketAndOrderCaches` method for combined market+order single-connection usage
+  - `RunOrderCache` method with callback support on `Subscription`
+- **Benchmarks**
+  - Added `OrderStreamPipelineBenchmarks` for end-to-end order stream processing measurement
+  - 266-message real order stream sample data
+- **Documentation**
+  - New `docs/OrderCache.md` covering the zero-allocation order cache architecture
+- **Test Coverage**
+  - Added `OrderCacheProcessorTests` (661 lines), `OrderCacheTests`, `OrderRunnerCacheTests`
+  - Added `StrategyMatchCacheTests`, `UnmatchedOrderCacheTests`
+  - 50+ targeted mutation-killing tests for `MarketCacheProcessor` (mutation score 0% → 91.5%)
+  - Total test count: ~1,850 tests (all passing across net8.0, net9.0, net10.0)
+- **Code Quality Enforcement**
+  - Enabled 10+ IDE code style rules as build warnings (IDE0018, IDE0028, IDE0059, IDE0090, IDE0270, IDE0290, IDE0300, IDE0305, IDE1006)
+  - Bumped null propagation, coalesce expression, collection expression, primary constructors to warning severity
+
+### Changed
+- **Performance Optimizations**
+  - `MarketCacheProcessor` refactored with `RunnerChangeState` struct to reduce method parameter count on hot paths
+- **Code Quality**
+  - Applied primary constructors across stream message types (`Authentication`, `MarketSubscription`, `OrderSubscription`, `MessageBase`)
+  - Used collection expressions and null propagation throughout codebase
+  - Replaced explicit `new List<T>()` / `new T[]` with collection expressions
+  - Converted eligible classes to use primary constructors (13+ classes)
+  - Applied null propagation operator where applicable
+  - Fixed IDE0305 collection expression in `BetfairApiClient`
+- **Enums Reorganized**
+  - `Side`, `OrderType`, `PersistenceType` moved from `Api.Betting.Enums` to `Core.Enums` for shared use by OrderCache
+  - `OrderStatus` enhanced with additional status values
+- **Test Infrastructure**
+  - Rolled back xUnit v3 to v2 for Stryker perTest coverage-analysis compatibility
+  - Added `TestContext` shim for v2 compatibility
+  - Simplified mutation testing workflow (removed `--since`, removed concurrency cap)
+- **Dependencies**
+  - `DotNet.ReproducibleBuilds` 0.1.66 → 2.0.5 (Directory.Build.props updated)
+
+### Fixed
+- **Build Warnings** — resolved all IDE code style warnings and documentation warnings (zero warnings)
+- **Documentation Analysis** — enabled `GenerateDocumentationFile` with proper XML docs on all public API surfaces
+
 ## [9.0.1-alpha-6] - 2025-07-01
 
 ### Added
