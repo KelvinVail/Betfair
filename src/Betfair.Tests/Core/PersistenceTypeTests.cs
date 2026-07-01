@@ -1,4 +1,5 @@
 ﻿using Betfair.Api.Betting.Enums;
+using Betfair.Core.Enums;
 
 namespace Betfair.Tests.Core;
 
@@ -7,9 +8,10 @@ public class PersistenceTypeTests
     [Fact]
     public void EnumOrderTypeHasCorrectValues()
     {
-        ((int)PersistenceType.Lapse).Should().Be(0);
-        ((int)PersistenceType.Persist).Should().Be(1);
-        ((int)PersistenceType.MarketOnClose).Should().Be(2);
+        ((int)PersistenceType.Unknown).Should().Be(0);
+        ((int)PersistenceType.Lapse).Should().Be(1);
+        ((int)PersistenceType.Persist).Should().Be(2);
+        ((int)PersistenceType.MarketOnClose).Should().Be(3);
     }
 
     [Fact]

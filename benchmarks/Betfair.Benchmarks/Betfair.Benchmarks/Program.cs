@@ -14,3 +14,4 @@ if (args.Length > 0 && args[0] == "quick")
 }
 
 BenchmarkRunner.Run<MarketStreamPipelineBenchmarks>();
+BenchmarkRunner.Run<OrderStreamPipelineBenchmarks>();

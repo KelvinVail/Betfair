@@ -3,6 +3,7 @@ using Betfair.Core.Authentication;
 using Betfair.Core.Client;
 using Betfair.Stream.MarketCache;
 using Betfair.Stream.Messages;
+using Betfair.Stream.OrderCache;
 using Betfair.Stream.Responses;
 
 namespace Betfair.Stream;
@@ -69,6 +70,13 @@ public class Subscription : IDisposable
     /// Populated when <see cref="RunMarketCache"/> is active.
     /// </summary>
     public MarketCacheProcessor MarketProcessor { get; } = new ();
+
+    /// <summary>
+    /// Gets the zero-allocation order cache processor that maintains live order state.
+    /// Access this property at any time to read the latest order data.
+    /// Populated when <see cref="RunOrderCache"/> is active.
+    /// </summary>
+    public OrderCacheProcessor OrderProcessor { get; } = new ();
 
     /// <summary>
     /// Subscribe to a market stream.
@@ -206,6 +214,124 @@ public class Subscription : IDisposable
             {
                 MarketProcessor.Process(line);
                 onUpdate?.Invoke(MarketProcessor);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Subscribes to the order stream and processes all messages directly into <see cref="OrderProcessor"/>
+    /// using the zero-copy pipeline. No intermediate ChangeMessage objects are allocated.
+    /// This method blocks until the stream ends or the cancellation token is triggered.
+    /// </summary>
+    /// <param name="orderFilter">Optional: Used to shape and filter the order data returned on the stream.</param>
+    /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
+    /// <param name="onUpdate">Optional: Callback invoked after each message is processed into the cache.
+    /// Use for latency-sensitive consumers that need to react immediately to order changes.</param>
+    /// <param name="cancellationToken">A cancellation token to stop the stream.</param>
+    /// <returns>A task that completes when the stream ends or is cancelled.</returns>
+    public async Task RunOrderCache(
+        StreamOrderFilter? orderFilter = null,
+        TimeSpan? conflate = null,
+        Action<OrderCacheProcessor>? onUpdate = null,
+        CancellationToken cancellationToken = default)
+    {
+        await SubscribeToOrders(orderFilter, conflate, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        if (_pipe is Pipeline pipeline)
+        {
+            if (onUpdate is null)
+            {
+                await pipeline.ProcessLines(OrderProcessor.Process, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var callback = onUpdate;
+                var processor = OrderProcessor;
+                await pipeline.ProcessLines(
+                    span =>
+                    {
+                        processor.Process(span);
+                        callback(processor);
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+        else
+        {
+            // Fallback for test doubles using IPipeline
+            await foreach (var line in _pipe.ReadLines(cancellationToken).ConfigureAwait(false))
+            {
+                OrderProcessor.Process(line);
+                onUpdate?.Invoke(OrderProcessor);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Subscribes to both market and order streams and processes all messages directly into
+    /// <see cref="MarketProcessor"/> and <see cref="OrderProcessor"/> using the zero-copy pipeline.
+    /// Both processors receive every line; each filters on its own operation type.
+    /// This uses a single TCP connection for the lowest possible latency.
+    /// </summary>
+    /// <param name="marketFilter">Used to define which markets to subscribe to.</param>
+    /// <param name="dataFilter">Optional: Used to define what data to include in the market stream.</param>
+    /// <param name="orderFilter">Optional: Used to shape and filter the order data returned on the stream.</param>
+    /// <param name="conflate">Optional: Data will be rolled up and sent on each increment of this time interval.</param>
+    /// <param name="onUpdate">Optional: Callback invoked after each message is processed into both caches.
+    /// Use for latency-sensitive consumers that need correlated market and order state.</param>
+    /// <param name="cancellationToken">A cancellation token to stop the stream.</param>
+    /// <returns>A task that completes when the stream ends or is cancelled.</returns>
+    public async Task RunMarketAndOrderCaches(
+        StreamMarketFilter marketFilter,
+        DataFilter? dataFilter = null,
+        StreamOrderFilter? orderFilter = null,
+        TimeSpan? conflate = null,
+        Action<MarketCacheProcessor, OrderCacheProcessor>? onUpdate = null,
+        CancellationToken cancellationToken = default)
+    {
+        await Subscribe(marketFilter, dataFilter, conflate, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+        await SubscribeToOrders(orderFilter, conflate, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        if (_pipe is Pipeline pipeline)
+        {
+            var mp = MarketProcessor;
+            var op = OrderProcessor;
+
+            if (onUpdate is null)
+            {
+                await pipeline.ProcessLines(
+                    span =>
+                    {
+                        mp.Process(span);
+                        op.Process(span);
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                var callback = onUpdate;
+                await pipeline.ProcessLines(
+                    span =>
+                    {
+                        mp.Process(span);
+                        op.Process(span);
+                        callback(mp, op);
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+        else
+        {
+            // Fallback for test doubles using IPipeline
+            await foreach (var line in _pipe.ReadLines(cancellationToken).ConfigureAwait(false))
+            {
+                MarketProcessor.Process(line);
+                OrderProcessor.Process(line);
+                onUpdate?.Invoke(MarketProcessor, OrderProcessor);
             }
         }
     }

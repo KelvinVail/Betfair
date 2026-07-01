@@ -1,4 +1,5 @@
 ﻿using Betfair.Api.Betting.Enums;
+using Betfair.Core.Enums;
 
 namespace Betfair.Tests.Core.Enums;
 
@@ -7,8 +8,9 @@ public class SideTests
     [Fact]
     public void EnumSideHasCorrectValues()
     {
-        Side.Back.Should().Be(0);
-        ((int)Side.Lay).Should().Be(1);
+        ((int)Side.Unknown).Should().Be(0);
+        ((int)Side.Back).Should().Be(1);
+        ((int)Side.Lay).Should().Be(2);
     }
 
     [Fact]

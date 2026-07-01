@@ -10,3 +10,4 @@
     - [Filter and shape data subscribed to in an order stream](/docs/OrderFilter.md)
     - [Change message reference](/docs/ChangeMessage.md)
     - [Zero-allocation Market Cache](/docs/MarketCache.md)
+    - [Zero-allocation Order Cache](/docs/OrderCache.md)

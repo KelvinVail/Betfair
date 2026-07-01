@@ -331,3 +331,7 @@ ASALocalRun/
 
 #NDepend
 [Nn][Dd]epend[Oo]ut*/
+
+*OrderStream.txt
+
+*.kiro/

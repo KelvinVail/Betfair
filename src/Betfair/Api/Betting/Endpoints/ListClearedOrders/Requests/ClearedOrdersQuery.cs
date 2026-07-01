@@ -1,5 +1,5 @@
 using Betfair.Api.Betting.Endpoints.ListClearedOrders.Enums;
-using Betfair.Api.Betting.Enums;
+using Betfair.Core.Enums;
 
 namespace Betfair.Api.Betting.Endpoints.ListClearedOrders.Requests;
 
@@ -320,7 +320,7 @@ public class ClearedOrdersQuery
     /// <returns>This <see cref="ClearedOrdersQuery"/>.</returns>
     public ClearedOrdersQuery BackBetsOnly()
     {
-        Side = Betting.Enums.Side.Back;
+        Side = Core.Enums.Side.Back;
         return this;
     }
 
@@ -330,7 +330,7 @@ public class ClearedOrdersQuery
     /// <returns>This <see cref="ClearedOrdersQuery"/>.</returns>
     public ClearedOrdersQuery LayBetsOnly()
     {
-        Side = Betting.Enums.Side.Lay;
+        Side = Core.Enums.Side.Lay;
         return this;
     }
 

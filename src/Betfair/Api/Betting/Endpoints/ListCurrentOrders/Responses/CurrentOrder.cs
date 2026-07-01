@@ -1,5 +1,5 @@
 using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
-using Betfair.Api.Betting.Enums;
+using Betfair.Core.Enums;
 
 namespace Betfair.Api.Betting.Endpoints.ListCurrentOrders.Responses;
 

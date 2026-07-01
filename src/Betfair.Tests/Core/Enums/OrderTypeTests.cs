@@ -1,4 +1,5 @@
 using Betfair.Api.Betting.Enums;
+using Betfair.Core.Enums;
 
 namespace Betfair.Tests.Core.Enums;
 
@@ -7,9 +8,10 @@ public class OrderTypeTests
     [Fact]
     public void EnumOrderTypeHasCorrectValues()
     {
-        ((int)OrderType.Limit).Should().Be(0);
-        ((int)OrderType.LimitOnClose).Should().Be(1);
-        ((int)OrderType.MarketOnClose).Should().Be(2);
+        ((int)OrderType.Unknown).Should().Be(0);
+        ((int)OrderType.Limit).Should().Be(1);
+        ((int)OrderType.LimitOnClose).Should().Be(2);
+        ((int)OrderType.MarketOnClose).Should().Be(3);
     }
 
     [Fact]
