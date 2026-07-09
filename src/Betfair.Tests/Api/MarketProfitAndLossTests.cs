@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketProfitAndLoss.Responses;
 using Betfair.Tests.Api.TestDoubles;
@@ -20,7 +20,7 @@ public class MarketProfitAndLossTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.MarketProfitAndLoss(["1.2345"], cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketProfitAndLoss(["1.2345"], cancellationToken: CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketProfitAndLoss/");
@@ -31,7 +31,7 @@ public class MarketProfitAndLossTests : IDisposable
     [InlineData("1.9876")]
     public async Task PostsMarketIsdAndDefaults(string marketId)
     {
-        await _api.MarketProfitAndLoss([marketId], cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketProfitAndLoss([marketId], cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new
@@ -46,7 +46,7 @@ public class MarketProfitAndLossTests : IDisposable
     [Fact]
     public async Task PostsIncludeSettledBets()
     {
-        await _api.MarketProfitAndLoss(["1.2345"], includeSettledBets: true, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketProfitAndLoss(["1.2345"], includeSettledBets: true, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new
@@ -61,7 +61,7 @@ public class MarketProfitAndLossTests : IDisposable
     [Fact]
     public async Task PostsIncludeBspBets()
     {
-        await _api.MarketProfitAndLoss(["1.2345"], includeBspBets: true, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketProfitAndLoss(["1.2345"], includeBspBets: true, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new
@@ -76,7 +76,7 @@ public class MarketProfitAndLossTests : IDisposable
     [Fact]
     public async Task PostsNetOfCommission()
     {
-        await _api.MarketProfitAndLoss(["1.2345"], netOfCommission: true, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketProfitAndLoss(["1.2345"], netOfCommission: true, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new
@@ -91,7 +91,7 @@ public class MarketProfitAndLossTests : IDisposable
     [Fact]
     public async Task RequestBodyShouldBeSerializable()
     {
-        await _api.MarketProfitAndLoss(["1.23456789"], includeSettledBets: true, includeBspBets: true, netOfCommission: true, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketProfitAndLoss(["1.23456789"], includeSettledBets: true, includeBspBets: true, netOfCommission: true, cancellationToken: CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.MarketProfitAndLossRequest);
 
         json.Should().Be("{\"marketIds\":[\"1.23456789\"],\"includeSettledBets\":true,\"includeBspBets\":true,\"netOfCommission\":true}");
@@ -120,7 +120,7 @@ public class MarketProfitAndLossTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.MarketProfitAndLoss(["1.23456789"], cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.MarketProfitAndLoss(["1.23456789"], cancellationToken: CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

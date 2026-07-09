@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting;
 using Betfair.Api.Betting.Endpoints.ListCountries.Requests;
 using Betfair.Api.Betting.Endpoints.ListCountries.Responses;
@@ -21,7 +21,7 @@ public class CountriesTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.Countries(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Countries(cancellationToken: CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listCountries/");
@@ -30,7 +30,7 @@ public class CountriesTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.Countries(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Countries(cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CountriesRequest());
@@ -41,7 +41,7 @@ public class CountriesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.Countries(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Countries(filter, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CountriesRequest { Filter = filter });
@@ -52,7 +52,7 @@ public class CountriesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.Countries(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Countries(filter, cancellationToken: CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CountriesRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
@@ -66,7 +66,7 @@ public class CountriesTests : IDisposable
             new CountryCodeResult { CountryCode = "GB", MarketCount = 2 },
         };
 
-        var response = await _api.Countries(cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.Countries(cancellationToken: CancellationToken.None);
 
         response.Should().HaveCount(1);
         response[0].MarketCount.Should().Be(2);

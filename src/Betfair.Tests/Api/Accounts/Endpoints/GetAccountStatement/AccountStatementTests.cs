@@ -19,7 +19,7 @@ public class AccountStatementTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.AccountStatement().ExecuteAsync(TestContext.Current.CancellationToken);
+        await _api.AccountStatement().ExecuteAsync(CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/getAccountStatement/");
@@ -31,7 +31,7 @@ public class AccountStatementTests : IDisposable
         await _api.AccountStatement()
             .ExchangeOnly()
             .Take(100)
-            .ExecuteAsync(TestContext.Current.CancellationToken);
+            .ExecuteAsync(CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountStatementRequest);
 
@@ -83,7 +83,7 @@ public class AccountStatementTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountStatement().ExecuteAsync(TestContext.Current.CancellationToken);
+        var response = await _api.AccountStatement().ExecuteAsync(CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -94,7 +94,7 @@ public class AccountStatementTests : IDisposable
         await _api.AccountStatement()
             .ExchangeOnly()
             .Take(50)
-            .ExecuteAsync(TestContext.Current.CancellationToken);
+            .ExecuteAsync(CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/getAccountStatement/");
@@ -108,7 +108,7 @@ public class AccountStatementTests : IDisposable
             .Take(100)
             .From(10)
             .WithLocale("en-GB")
-            .ExecuteAsync(TestContext.Current.CancellationToken);
+            .ExecuteAsync(CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountStatementRequest);
 
@@ -142,7 +142,7 @@ public class AccountStatementTests : IDisposable
         await _api.AccountStatement()
             .WithItemDateRange(from, to)
             .DepositsAndWithdrawalsOnly()
-            .ExecuteAsync(TestContext.Current.CancellationToken);
+            .ExecuteAsync(CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountStatementRequest);
 
@@ -162,7 +162,7 @@ public class AccountStatementTests : IDisposable
             .Take(200)
             .WithItemDateRange(from, to)
             .PokerRoomOnly()
-            .ExecuteAsync(TestContext.Current.CancellationToken);
+            .ExecuteAsync(CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountStatementRequest);
 
@@ -178,7 +178,7 @@ public class AccountStatementTests : IDisposable
     {
         await _api.AccountStatement()
             .Take(100)
-            .ExecuteAsync(TestContext.Current.CancellationToken);
+            .ExecuteAsync(CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountStatementRequest);
 
@@ -210,7 +210,7 @@ public class AccountStatementTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountStatement().ExecuteAsync(TestContext.Current.CancellationToken);
+        var response = await _api.AccountStatement().ExecuteAsync(CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
         response.AccountStatement.Should().HaveCount(1);
@@ -268,7 +268,7 @@ public class AccountStatementTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountStatement().ExecuteAsync(TestContext.Current.CancellationToken);
+        var response = await _api.AccountStatement().ExecuteAsync(CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
         var item = response.AccountStatement![0];
@@ -301,7 +301,7 @@ public class AccountStatementTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountStatement().ExecuteAsync(TestContext.Current.CancellationToken);
+        var response = await _api.AccountStatement().ExecuteAsync(CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
         response.AccountStatement.Should().NotBeNull();
@@ -319,7 +319,7 @@ public class AccountStatementTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.AccountStatement().ExecuteAsync(TestContext.Current.CancellationToken);
+        var response = await _api.AccountStatement().ExecuteAsync(CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
         response.AccountStatement.Should().BeNull();

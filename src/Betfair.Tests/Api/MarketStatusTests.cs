@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 using Betfair.Tests.Api.TestDoubles;
@@ -20,7 +20,7 @@ public class MarketStatusTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.MarketStatus("1.23456789", TestContext.Current.CancellationToken);
+        await _api.MarketStatus("1.23456789", CancellationToken.None);
 
         _client.LastUriCalled.Should().Be("https://api.betfair.com/exchange/betting/rest/v1.0/listMarketBook/");
     }
@@ -30,7 +30,7 @@ public class MarketStatusTests : IDisposable
     [InlineData("1.99999999")]
     public async Task MarketIdShouldBeAddedToTheRequestBody(string marketId)
     {
-        await _api.MarketStatus(marketId, TestContext.Current.CancellationToken);
+        await _api.MarketStatus(marketId, CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(new { MarketIds = new List<string> { marketId } });
     }
@@ -40,7 +40,7 @@ public class MarketStatusTests : IDisposable
     {
         _client.RespondsWithBody = Array.Empty<MarketBook>();
 
-        var response = await _api.MarketStatus("1.2345", TestContext.Current.CancellationToken);
+        var response = await _api.MarketStatus("1.2345", CancellationToken.None);
 
         response.Should().Be(MarketStatus.Inactive);
     }
@@ -54,7 +54,7 @@ public class MarketStatusTests : IDisposable
     {
         _client.RespondsWithBody = new MarketBook[] { new () { Status = status } };
 
-        var response = await _api.MarketStatus("1.2345", TestContext.Current.CancellationToken);
+        var response = await _api.MarketStatus("1.2345", CancellationToken.None);
 
         response.Should().Be(status);
     }
@@ -62,7 +62,7 @@ public class MarketStatusTests : IDisposable
     [Fact]
     public async Task RequestBodyShouldBeSerializable()
     {
-        await _api.MarketStatus("1.23456789", TestContext.Current.CancellationToken);
+        await _api.MarketStatus("1.23456789", CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.MarketBookRequest);
 
         json.Should().Be("{\"marketIds\":[\"1.23456789\"]}");
@@ -95,7 +95,7 @@ public class MarketStatusTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.MarketStatus("1.23456789", TestContext.Current.CancellationToken);
+        var response = await _api.MarketStatus("1.23456789", CancellationToken.None);
 
         response.Should().Be(MarketStatus.Open);
     }

@@ -20,7 +20,7 @@ public class CurrencyRatesTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.CurrencyRates(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrencyRates(cancellationToken: CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/listCurrencyRates/");
@@ -29,7 +29,7 @@ public class CurrencyRatesTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFromCurrencyIsNull()
     {
-        await _api.CurrencyRates(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrencyRates(cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrencyRatesRequest());
@@ -38,7 +38,7 @@ public class CurrencyRatesTests : IDisposable
     [Fact]
     public async Task PostsProvidedFromCurrency()
     {
-        await _api.CurrencyRates("USD", cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrencyRates("USD", cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrencyRatesRequest { FromCurrency = "USD" });
@@ -47,7 +47,7 @@ public class CurrencyRatesTests : IDisposable
     [Fact]
     public async Task RequestBodyShouldBeSerializable()
     {
-        await _api.CurrencyRates("USD", cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrencyRates("USD", cancellationToken: CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CurrencyRatesRequest);
 
         json.Should().Be("{\"fromCurrency\":\"USD\"}");
@@ -71,7 +71,7 @@ public class CurrencyRatesTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.CurrencyRates("USD", cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.CurrencyRates("USD", cancellationToken: CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -81,7 +81,7 @@ public class CurrencyRatesTests : IDisposable
     {
         _client.RespondsWithBody = Array.Empty<CurrencyRate>();
 
-        var response = await _api.CurrencyRates(cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.CurrencyRates(cancellationToken: CancellationToken.None);
 
         response.Should().NotBeNull();
         response.Should().BeEmpty();
@@ -102,7 +102,7 @@ public class CurrencyRatesTests : IDisposable
 
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.CurrencyRates("USD", cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.CurrencyRates("USD", cancellationToken: CancellationToken.None);
 
         response.Should().HaveCount(100);
         response.Should().BeEquivalentTo(expectedResponse);
@@ -117,7 +117,7 @@ public class CurrencyRatesTests : IDisposable
     [InlineData(" ")]
     public async Task CanHandleDifferentFromCurrencyValues(string fromCurrency)
     {
-        await _api.CurrencyRates(fromCurrency, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrencyRates(fromCurrency, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrencyRatesRequest { FromCurrency = fromCurrency });

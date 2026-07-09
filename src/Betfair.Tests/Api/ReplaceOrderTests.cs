@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.ReplaceOrders.Requests;
 using Betfair.Api.Betting.Endpoints.ReplaceOrders.Responses;
 using Betfair.Tests.Api.TestDoubles;
@@ -20,7 +20,7 @@ public class ReplaceOrderTests : IDisposable
     [Fact]
     public async Task ReplaceOrdersCallsTheCorrectEndpoint()
     {
-        await _api.ReplaceOrders(new ReplaceOrders("1.23456789"), TestContext.Current.CancellationToken);
+        await _api.ReplaceOrders(new ReplaceOrders("1.23456789"), CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
                        "https://api.betfair.com/exchange/betting/rest/v1.0/replaceOrders/");
@@ -32,7 +32,7 @@ public class ReplaceOrderTests : IDisposable
         var replaceOrders = new ReplaceOrders("1.23456789");
         replaceOrders.Instructions.Add(new ReplaceInstruction { BetId = "12345", NewPrice = 1.01 });
 
-        await _api.ReplaceOrders(replaceOrders, TestContext.Current.CancellationToken);
+        await _api.ReplaceOrders(replaceOrders, CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.ReplaceOrders);
 

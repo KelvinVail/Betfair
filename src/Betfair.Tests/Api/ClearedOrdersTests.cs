@@ -21,7 +21,7 @@ public class ClearedOrdersTests : IDisposable
     public async Task CallsTheCorrectEndpoint()
     {
         var query = new ClearedOrdersQuery();
-        await _api.ClearedOrders(query, TestContext.Current.CancellationToken);
+        await _api.ClearedOrders(query, CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listClearedOrders/");
@@ -35,7 +35,7 @@ public class ClearedOrdersTests : IDisposable
             .BackBetsOnly()
             .SettledOnly();
 
-        await _api.ClearedOrders(query, TestContext.Current.CancellationToken);
+        await _api.ClearedOrders(query, CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.ClearedOrdersRequest);
 
         json.Should().Contain("\"marketIds\":[\"1.23456789\"]");
@@ -78,7 +78,7 @@ public class ClearedOrdersTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.ClearedOrders(new ClearedOrdersQuery(), TestContext.Current.CancellationToken);
+        var response = await _api.ClearedOrders(new ClearedOrdersQuery(), CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.PlaceOrders.Requests;
 using Betfair.Api.Betting.Endpoints.PlaceOrders.Responses;
 using Betfair.Api.Betting.Enums;
@@ -21,7 +21,7 @@ public class PlaceOrdersTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.PlaceOrders(new PlaceOrders("1.2345"), TestContext.Current.CancellationToken);
+        await _api.PlaceOrders(new PlaceOrders("1.2345"), CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/placeOrders/");
@@ -30,7 +30,7 @@ public class PlaceOrdersTests : IDisposable
     [Fact]
     public async Task RequestBodyShouldBeSerializable()
     {
-        await _api.PlaceOrders(new PlaceOrders("1.2345"), TestContext.Current.CancellationToken);
+        await _api.PlaceOrders(new PlaceOrders("1.2345"), CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.PlaceOrders);
 
         json.Should().Be("{\"marketId\":\"1.2345\",\"instructions\":[]}");
@@ -74,7 +74,7 @@ public class PlaceOrdersTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.PlaceOrders(new PlaceOrders("1.23456789"), TestContext.Current.CancellationToken);
+        var response = await _api.PlaceOrders(new PlaceOrders("1.23456789"), CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

@@ -158,7 +158,7 @@ public class AccountStatementBuilderTests : IDisposable
     [Fact]
     public async Task ExecuteAsyncCallsCorrectEndpoint()
     {
-        await _builder.ExecuteAsync(TestContext.Current.CancellationToken);
+        await _builder.ExecuteAsync(CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/account/rest/v1.0/getAccountStatement/");
@@ -172,7 +172,7 @@ public class AccountStatementBuilderTests : IDisposable
             .From(10)
             .Take(50)
             .ExchangeOnly()
-            .ExecuteAsync(TestContext.Current.CancellationToken);
+            .ExecuteAsync(CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.AccountStatementRequest);
 

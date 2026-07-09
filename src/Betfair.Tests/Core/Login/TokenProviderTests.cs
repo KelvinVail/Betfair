@@ -1,4 +1,4 @@
-﻿using Betfair.Core.Authentication;
+using Betfair.Core.Authentication;
 using Betfair.Core.Client;
 using Betfair.Tests.Core.Client.TestDoubles;
 
@@ -22,7 +22,7 @@ public class TokenProviderTests : IDisposable
     [Fact]
     public async Task GetTokenPostsToApiLoginEndpoint()
     {
-        await _provider.GetToken(TestContext.Current.CancellationToken);
+        await _provider.GetToken(CancellationToken.None);
 
         _handler.MethodUsed.Should().Be(HttpMethod.Post);
         _handler.UriCalled.Should().Be(new Uri("https://identitysso.betfair.com/api/login"));
@@ -35,7 +35,7 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", "password", "appKey", cert);
         var provider = new TokenProvider(_client, cred);
 
-        await provider.GetToken(TestContext.Current.CancellationToken);
+        await provider.GetToken(CancellationToken.None);
 
         _handler.UriCalled.Should().Be(
             new Uri("https://identitysso-cert.betfair.com/api/certlogin"));
@@ -44,7 +44,7 @@ public class TokenProviderTests : IDisposable
     [Fact]
     public async Task LoginContentTypeIsFormUrlEncoded()
     {
-        await _provider.GetToken(TestContext.Current.CancellationToken);
+        await _provider.GetToken(CancellationToken.None);
 
         _handler.ContentHeadersSent?.ContentType.Should().Be(
             new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
@@ -58,7 +58,7 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", "password", appKey);
         var provider = new TokenProvider(_client, cred);
 
-        await provider.GetToken(TestContext.Current.CancellationToken);
+        await provider.GetToken(CancellationToken.None);
 
         _handler.HeadersSent.Should().ContainKey("X-Application")
             .WhoseValue.Should().BeEquivalentTo(appKey);
@@ -73,7 +73,7 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", "password", appKey, cert);
         var provider = new TokenProvider(_client, cred);
 
-        await provider.GetToken(TestContext.Current.CancellationToken);
+        await provider.GetToken(CancellationToken.None);
 
         _handler.HeadersSent.Should().ContainKey("X-Application")
             .WhoseValue.Should().BeEquivalentTo(appKey);
@@ -87,11 +87,11 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials(username, "password", "appKey");
         var provider = new TokenProvider(_client, cred);
 
-        await provider.GetToken(TestContext.Current.CancellationToken);
+        await provider.GetToken(CancellationToken.None);
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", username }, { "password", "password" } });
-        var expected = await content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var expected = await content.ReadAsStringAsync(CancellationToken.None);
 
         _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
@@ -105,11 +105,11 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials(username, "password", "appKey", cert);
         var provider = new TokenProvider(_client, cred);
 
-        await provider.GetToken(TestContext.Current.CancellationToken);
+        await provider.GetToken(CancellationToken.None);
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", username }, { "password", "password" } });
-        var expected = await content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var expected = await content.ReadAsStringAsync(CancellationToken.None);
 
         _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
@@ -122,11 +122,11 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", password, "appKey");
         var provider = new TokenProvider(_client, cred);
 
-        await provider.GetToken(TestContext.Current.CancellationToken);
+        await provider.GetToken(CancellationToken.None);
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", "username" }, { "password", password } });
-        var expected = await content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var expected = await content.ReadAsStringAsync(CancellationToken.None);
 
         _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
@@ -140,11 +140,11 @@ public class TokenProviderTests : IDisposable
         var cred = new Credentials("username", password, "appKey", cert);
         var provider = new TokenProvider(_client, cred);
 
-        await provider.GetToken(TestContext.Current.CancellationToken);
+        await provider.GetToken(CancellationToken.None);
 
         using var content = new FormUrlEncodedContent(
             new Dictionary<string, string> { { "username", "username" }, { "password", password } });
-        var expected = await content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var expected = await content.ReadAsStringAsync(CancellationToken.None);
 
         _handler.StringContentSent.Should().BeEquivalentTo(expected);
     }
@@ -156,7 +156,7 @@ public class TokenProviderTests : IDisposable
     {
         _handler.RespondsWithBody = new LoginResponse { Token = token, Status = "SUCCESS", };
 
-        var result = await _provider.GetToken(TestContext.Current.CancellationToken);
+        var result = await _provider.GetToken(CancellationToken.None);
 
         result.Should().Be(token);
     }
@@ -171,7 +171,7 @@ public class TokenProviderTests : IDisposable
         var provider = new TokenProvider(_client, cred);
         _handler.RespondsWithBody = new LoginResponse { SessionToken = token, LoginStatus = "SUCCESS", };
 
-        var result = await provider.GetToken(TestContext.Current.CancellationToken);
+        var result = await provider.GetToken(CancellationToken.None);
 
         result.Should().Be(token);
     }
@@ -184,7 +184,7 @@ public class TokenProviderTests : IDisposable
         _handler.RespondsWithBody = new LoginResponse { Status = "FAIL", Error = error };
 
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
-            _provider.GetToken(TestContext.Current.CancellationToken));
+            _provider.GetToken(CancellationToken.None));
 
         ex.Message.Should().Be(error);
     }
@@ -200,7 +200,7 @@ public class TokenProviderTests : IDisposable
         _handler.RespondsWithBody = new LoginResponse { LoginStatus = error };
 
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
-            provider.GetToken(TestContext.Current.CancellationToken));
+            provider.GetToken(CancellationToken.None));
 
         ex.Message.Should().Be(error);
     }

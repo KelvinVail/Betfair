@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.CancelOrders.Requests;
 using Betfair.Api.Betting.Endpoints.CancelOrders.Responses;
 using Betfair.Tests.Api.TestDoubles;
@@ -20,7 +20,7 @@ public class CancelOrderTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.CancelOrders(new CancelOrders(), TestContext.Current.CancellationToken);
+        await _api.CancelOrders(new CancelOrders(), CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/cancelOrders/");
@@ -42,7 +42,7 @@ public class CancelOrderTests : IDisposable
             },
         };
 
-        await _api.CancelOrders(cancelOrders, TestContext.Current.CancellationToken);
+        await _api.CancelOrders(cancelOrders, CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CancelOrders);
 
         json.Should().Be("{\"marketId\":\"1.2345\",\"instructions\":[{\"betId\":\"12345\",\"sizeReduction\":2}]}");
@@ -75,7 +75,7 @@ public class CancelOrderTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.CancelOrders(new CancelOrders(), TestContext.Current.CancellationToken);
+        var response = await _api.CancelOrders(new CancelOrders(), CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

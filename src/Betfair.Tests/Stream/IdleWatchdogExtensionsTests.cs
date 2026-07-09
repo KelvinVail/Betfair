@@ -27,7 +27,7 @@ public class IdleWatchdogExtensionsTests
             }, defaultHeartbeat: TimeSpan.FromMilliseconds(500),
             thresholdMultiplier: 2.5,
             pollInterval: TimeSpan.FromMilliseconds(25),
-            token: TestContext.Current.CancellationToken))
+            token: CancellationToken.None))
         {
             list.Add(m);
         }
@@ -59,17 +59,17 @@ public class IdleWatchdogExtensionsTests
             defaultHeartbeat: TimeSpan.FromMilliseconds(100),
             thresholdMultiplier: 2.0, // 2x hb => 200ms
             pollInterval: TimeSpan.FromMilliseconds(25),
-            token: TestContext.Current.CancellationToken))
+            token: CancellationToken.None))
         {
             list.Add(m);
             if (list.Count == 2)
             {
                 // wait long enough to pass threshold so watchdog cancels
-                await Task.Delay(300, TestContext.Current.CancellationToken);
+                await Task.Delay(300, CancellationToken.None);
             }
         }
 
-        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(2), CancellationToken.None);
         list.Should().HaveCount(2);
     }
 
@@ -89,10 +89,10 @@ public class IdleWatchdogExtensionsTests
             defaultHeartbeat: defaultHb,
             thresholdMultiplier: 1.5, // 150ms
             pollInterval: TimeSpan.FromMilliseconds(25),
-            token: TestContext.Current.CancellationToken))
+            token: CancellationToken.None))
         {
             list.Add(m);
-            await Task.Delay(200, TestContext.Current.CancellationToken); // exceed threshold to cause stall
+            await Task.Delay(200, CancellationToken.None); // exceed threshold to cause stall
         }
 
         triggered.Should().BeTrue();
@@ -114,9 +114,9 @@ public class IdleWatchdogExtensionsTests
             defaultHeartbeat: TimeSpan.FromMilliseconds(50),
             thresholdMultiplier: 1.0,
             pollInterval: TimeSpan.FromMilliseconds(10),
-            token: TestContext.Current.CancellationToken))
+            token: CancellationToken.None))
         {
-            await Task.Delay(100, TestContext.Current.CancellationToken); // exceed 1x hb
+            await Task.Delay(100, CancellationToken.None); // exceed 1x hb
             _ = msg; // ensure msg is used
         }
 
@@ -139,7 +139,7 @@ public class IdleWatchdogExtensionsTests
             thresholdMultiplier: 2.0,
             pollInterval: TimeSpan.FromMilliseconds(25),
             token: cts.Token)
-            .GetAsyncEnumerator(TestContext.Current.CancellationToken);
+            .GetAsyncEnumerator(CancellationToken.None);
 
         // Move once then cancel
         await enumerator.MoveNextAsync();

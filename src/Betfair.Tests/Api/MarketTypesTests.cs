@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting;
 using Betfair.Api.Betting.Endpoints.ListMarketTypes.Requests;
 using Betfair.Api.Betting.Endpoints.ListMarketTypes.Responses;
@@ -21,7 +21,7 @@ public class MarketTypesTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.MarketTypes(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketTypes(cancellationToken: CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketTypes/");
@@ -30,7 +30,7 @@ public class MarketTypesTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.MarketTypes(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketTypes(cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new MarketTypesRequest());
@@ -41,7 +41,7 @@ public class MarketTypesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.MarketTypes(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.MarketTypes(filter, cancellationToken: CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.MarketTypesRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
@@ -59,7 +59,7 @@ public class MarketTypesTests : IDisposable
             },
         };
 
-        var response = await _api.MarketTypes(cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.MarketTypes(cancellationToken: CancellationToken.None);
 
         response.Should().HaveCount(1);
         response[0].MarketType.Should().Be("Soccer");

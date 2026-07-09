@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting;
 using Betfair.Api.Betting.Endpoints.ListEvents.Requests;
 using Betfair.Api.Betting.Endpoints.ListEvents.Responses;
@@ -23,7 +23,7 @@ public class BetfairEventTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.Events(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Events(cancellationToken: CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listEvents/");
@@ -32,7 +32,7 @@ public class BetfairEventTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.Events(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Events(cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new EventsRequest());
@@ -43,7 +43,7 @@ public class BetfairEventTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithMarketIds("1.23456789");
 
-        await _api.Events(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Events(filter, cancellationToken: CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.EventsRequest);
 
         json.Should().Be("{\"filter\":{\"marketIds\":[\"1.23456789\"]}}");
@@ -66,7 +66,7 @@ public class BetfairEventTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Events(cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.Events(cancellationToken: CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }

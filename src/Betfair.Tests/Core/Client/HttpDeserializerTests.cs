@@ -1,4 +1,4 @@
-﻿using Betfair.Api.Accounts.Exceptions;
+using Betfair.Api.Accounts.Exceptions;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Enums;
 using Betfair.Api.Betting.Endpoints.ListMarketBook.Responses;
 using Betfair.Api.Betting.Exceptions;
@@ -28,7 +28,7 @@ public class HttpDeserializerTests : IDisposable
         var expectedResponse = new MarketBook[] { new () { Status = MarketStatus.Open } };
         _handler.RespondsWithBody = expectedResponse;
 
-        var response = await _client.PostAsync<MarketBook[]>(_uri, _content, TestContext.Current.CancellationToken);
+        var response = await _client.PostAsync<MarketBook[]>(_uri, _content, CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
@@ -54,7 +54,7 @@ public class HttpDeserializerTests : IDisposable
         };
         _handler.RespondsWithBody = response;
 
-        var act = async () => { await _client.PostAsync<MarketBook>(_uri, _content, TestContext.Current.CancellationToken); };
+        var act = async () => { await _client.PostAsync<MarketBook>(_uri, _content, CancellationToken.None); };
 
         var exception = await act.Should().ThrowAsync<BettingInvalidSessionInformationException>();
         exception.Which.Message.Should().StartWith("The session token hasn't been provided, is invalid or has expired. You must login again to create a new session token.");

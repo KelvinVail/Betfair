@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.PlaceOrders.Responses;
 using Betfair.Api.Betting.Endpoints.UpdateOrders.Requests;
 using Betfair.Api.Betting.Endpoints.UpdateOrders.Responses;
@@ -22,7 +22,7 @@ public class UpdateOrderTests : IDisposable
     [Fact]
     public async Task UpdateOrdersCallsTheCorrectEndpoint()
     {
-        await _api.UpdateOrders(new UpdateOrders("1.23456789"), TestContext.Current.CancellationToken);
+        await _api.UpdateOrders(new UpdateOrders("1.23456789"), CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
                        "https://api.betfair.com/exchange/betting/rest/v1.0/updateOrders/");
@@ -43,7 +43,7 @@ public class UpdateOrderTests : IDisposable
             },
         };
 
-        await _api.UpdateOrders(updateOrders, TestContext.Current.CancellationToken);
+        await _api.UpdateOrders(updateOrders, CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.UpdateOrders);
 

@@ -1,4 +1,4 @@
-﻿using System.Security.AccessControl;
+using System.Security.AccessControl;
 using Betfair.Api.Accounts.Exceptions;
 using Betfair.Api.Betting.Exceptions;
 using Betfair.Core.Client;
@@ -26,7 +26,7 @@ public class HttpTokenInjectorTests : IDisposable
     {
         var client = new HttpTokenInjector(_httpClient, _tokenProvider, appKey);
 
-        await client.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+        await client.PostAsync<dynamic>(_uri, _content, CancellationToken.None);
 
         _httpClient.HttpContentSent?.Headers.Should().ContainKey("X-Application")
             .WhoseValue.Should().Contain(appKey);
@@ -39,7 +39,7 @@ public class HttpTokenInjectorTests : IDisposable
     {
         _tokenProvider.RespondsWithToken.Add(token);
 
-        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, CancellationToken.None);
 
         _httpClient.HttpContentSent?.Headers.Should().ContainKey("X-Authentication")
             .WhoseValue.Should().Contain(token);
@@ -48,8 +48,8 @@ public class HttpTokenInjectorTests : IDisposable
     [Fact]
     public async Task TokenIsReusedIfValid()
     {
-        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
-        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, CancellationToken.None);
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, CancellationToken.None);
 
         _tokenProvider.TokensUsed.Should().Be(1);
     }
@@ -59,7 +59,7 @@ public class HttpTokenInjectorTests : IDisposable
     {
         _httpClient.ThrowsException = new BettingInvalidSessionInformationException();
 
-        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, CancellationToken.None);
 
         _tokenProvider.TokensUsed.Should().Be(2);
     }
@@ -69,7 +69,7 @@ public class HttpTokenInjectorTests : IDisposable
     {
         _httpClient.ThrowsException = new InvalidSessionInformationException();
 
-        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, CancellationToken.None);
 
         _tokenProvider.TokensUsed.Should().Be(2);
     }
@@ -83,7 +83,7 @@ public class HttpTokenInjectorTests : IDisposable
         _tokenProvider.RespondsWithToken.Add(second);
         _httpClient.ThrowsException = new BettingInvalidSessionInformationException();
 
-        await _tokenInjector.PostAsync<dynamic>(_uri, _content, TestContext.Current.CancellationToken);
+        await _tokenInjector.PostAsync<dynamic>(_uri, _content, CancellationToken.None);
 
         _httpClient.HttpContentSent?.Headers.Should().ContainKey("X-Authentication")
             .WhoseValue.Should().NotContain(first);

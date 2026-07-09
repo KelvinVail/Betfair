@@ -1,4 +1,4 @@
-﻿using Betfair.Api;
+using Betfair.Api;
 using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Enums;
 using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Requests;
 using Betfair.Api.Betting.Endpoints.ListCurrentOrders.Responses;
@@ -22,7 +22,7 @@ public class CurrentOrdersTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.CurrentOrders(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrentOrders(cancellationToken: CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listCurrentOrders/");
@@ -31,7 +31,7 @@ public class CurrentOrdersTests : IDisposable
     [Fact]
     public async Task PostsDefaultParameters()
     {
-        await _api.CurrentOrders(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrentOrders(cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrentOrdersRequest());
@@ -50,7 +50,7 @@ public class CurrentOrdersTests : IDisposable
             .From(10)
             .Take(50);
 
-        await _api.CurrentOrders(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrentOrders(filter, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrentOrdersRequest
@@ -71,7 +71,7 @@ public class CurrentOrdersTests : IDisposable
             .MostRecentFirst()
             .Take(100);
 
-        await _api.CurrentOrders(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrentOrders(filter, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrentOrdersRequest
@@ -93,7 +93,7 @@ public class CurrentOrdersTests : IDisposable
             .WithCustomerStrategyRefs(customerStrategyRefs)
             .ExecutionCompleteOnly();
 
-        await _api.CurrentOrders(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrentOrders(filter, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new CurrentOrdersRequest
@@ -112,7 +112,7 @@ public class CurrentOrdersTests : IDisposable
             .WithCustomerOrderRefs(customerOrderRefs)
             .ExecutionCompleteOnly();
 
-        await _api.CurrentOrders(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.CurrentOrders(filter, cancellationToken: CancellationToken.None);
 
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.CurrentOrdersRequest);
         json.Should().Be("{\"orderProjection\":\"EXECUTION_COMPLETE\",\"customerOrderRefs\":[\"ref1\",\"ref2\"],\"fromRecord\":0,\"recordCount\":1000}");
@@ -158,7 +158,7 @@ public class CurrentOrdersTests : IDisposable
             MoreAvailable = true,
         };
 
-        var response = await _api.CurrentOrders(cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.CurrentOrders(cancellationToken: CancellationToken.None);
         response.CurrentOrders.Should().HaveCount(1);
 
         var order = response.CurrentOrders[0];

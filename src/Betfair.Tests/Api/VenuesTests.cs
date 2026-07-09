@@ -21,7 +21,7 @@ public class VenuesTests : IDisposable
     [Fact]
     public async Task CallsTheCorrectEndpoint()
     {
-        await _api.Venues(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Venues(cancellationToken: CancellationToken.None);
 
         _client.LastUriCalled.Should().Be(
             "https://api.betfair.com/exchange/betting/rest/v1.0/listVenues/");
@@ -30,7 +30,7 @@ public class VenuesTests : IDisposable
     [Fact]
     public async Task PostsDefaultBodyIfFilterIsNull()
     {
-        await _api.Venues(cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Venues(cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new VenuesRequest());
@@ -41,7 +41,7 @@ public class VenuesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithEventTypes(Betfair.Core.EventType.Of(1));
 
-        await _api.Venues(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Venues(filter, cancellationToken: CancellationToken.None);
 
         _client.LastContentSent.Should().BeEquivalentTo(
             new VenuesRequest
@@ -55,7 +55,7 @@ public class VenuesTests : IDisposable
     {
         var filter = new ApiMarketFilter().WithEventTypes(Betfair.Core.EventType.Of(1));
 
-        await _api.Venues(filter, cancellationToken: TestContext.Current.CancellationToken);
+        await _api.Venues(filter, cancellationToken: CancellationToken.None);
         var json = JsonSerializer.Serialize(_client.LastContentSent, SerializerContext.Default.VenuesRequest);
 
         json.Should().Be("{\"filter\":{\"eventTypeIds\":[\"1\"]}}");
@@ -74,7 +74,7 @@ public class VenuesTests : IDisposable
         };
         _client.RespondsWithBody = expectedResponse;
 
-        var response = await _api.Venues(cancellationToken: TestContext.Current.CancellationToken);
+        var response = await _api.Venues(cancellationToken: CancellationToken.None);
 
         response.Should().BeEquivalentTo(expectedResponse);
     }
